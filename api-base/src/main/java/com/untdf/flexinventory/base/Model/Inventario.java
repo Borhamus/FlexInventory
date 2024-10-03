@@ -1,0 +1,31 @@
+package com.untdf.flexinventory.base.Model;
+
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "inventario")
+public class Inventario {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Integer id;
+
+    private String nombre;
+
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
+    }
+
+    public String getNombre() {
+        return nombre;
+    }
+
+    public void setNombre(String nombre) {
+        this.nombre = nombre;
+    }
+}

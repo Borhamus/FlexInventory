@@ -1,0 +1,9 @@
+comando para generar el SQL de la base de datos:
+
+docker exec -t <nombre_del_contenedor> pg_dump -U username default_database > backup.sql
+
+
+comando para restaurar el SQL de la base de datos:
+
+docker exec -i <nombre_del_contenedor> psql -U username -d default_database < backup.sql
+
