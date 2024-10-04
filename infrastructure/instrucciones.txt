@@ -7,3 +7,20 @@ comando para restaurar el SQL de la base de datos:
 
 docker exec -i <nombre_del_contenedor> psql -U username -d default_database < backup.sql
 
+
+Instrucciones para levantar la base datos:
+	Dentro de la carpeta "infrastructure" ejecutar:
+		sudo docker compose up -d (en windows es: docker-compose up -d)
+		
+Instrucciones para bajar la base datos:
+	Dentro de la carpeta "infrastrcture" ejecutrar:
+		sudo docker compose down (en windows es: docker-compose down)
+		
+		
+Crear un buckup de la base de datos:
+	Dentro de la carpeta "infrastructure" y con el docker corriendo (paso anterior):
+		docker exec -t FlexInventory pg_dump -U flexinventory flexinventory > backup.sql
+		
+Recuperar un backup de la base de datos:
+	Dentro de la carpeta "infrastructure" y con el docker corriendo (paso anterior):
+		docker exec -t FlexInventory pg_dump -U flexinventory flexinventory < backup.sql
