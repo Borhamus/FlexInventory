@@ -23,4 +23,4 @@ Crear un buckup de la base de datos:
 		
 Recuperar un backup de la base de datos:
 	Dentro de la carpeta "infrastructure" y con el docker corriendo (paso anterior):
-		docker exec -t FlexInventory pg_dump -U flexinventory flexinventory < backup.sql
+		docker exec -i FlexInventory psql -U flexinventory flexinventory < backup.sql

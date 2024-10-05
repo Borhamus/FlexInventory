@@ -7,9 +7,6 @@ services:
     container_name: "FlexInventory"
     ports:
       - 5432:5432
-      
-    volumes:
-    - ./db-data/:/var/lib/postgresql/data/
 
     environment:
       POSTGRES_USER: flexinventory # The PostgreSQL user (useful to connect to the database)
