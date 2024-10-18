@@ -35,7 +35,11 @@ SET default_table_access_method = heap;
 
 CREATE TABLE "api-base".inventory (
     id smallint NOT NULL,
-    name character varying NOT NULL
+    name character varying NOT NULL,
+    "user" character varying NOT NULL,
+    description character varying,
+    revision_date date,
+    creation_date date NOT NULL
 );
 
 
@@ -59,11 +63,11 @@ ALTER TABLE "api-base".inventory ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTIT
 -- Data for Name: inventory; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
 --
 
-COPY "api-base".inventory (id, name) FROM stdin;
-1	Test1
-2	Test2
-3	Test3
-4	Test4
+COPY "api-base".inventory (id, name, "user", description, revision_date, creation_date) FROM stdin;
+5	Inventario 1	Milton Gómez	Test de Spring 1	\N	2024-10-18
+6	Inventario 2	Milton Gómez	Test de Spring 2	\N	2024-10-18
+7	Inventario 3	Milton Gómez	Test de Spring 3	\N	2024-10-18
+8	Inventario 4	Milton Gómez	Test de Spring 4	\N	2024-10-18
 \.
 
 
@@ -71,7 +75,7 @@ COPY "api-base".inventory (id, name) FROM stdin;
 -- Name: inventory_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
 --
 
-SELECT pg_catalog.setval('"api-base".inventory_id_seq', 4, true);
+SELECT pg_catalog.setval('"api-base".inventory_id_seq', 8, true);
 
 
 --
