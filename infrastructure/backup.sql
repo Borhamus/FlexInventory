@@ -25,9 +25,48 @@ CREATE SCHEMA "api-base";
 
 ALTER SCHEMA "api-base" OWNER TO flexinventory;
 
+--
+-- Name: users; Type: SCHEMA; Schema: -; Owner: flexinventory
+--
+
+CREATE SCHEMA users;
+
+
+ALTER SCHEMA users OWNER TO flexinventory;
+
 SET default_tablespace = '';
 
 SET default_table_access_method = heap;
+
+--
+-- Name: catalog; Type: TABLE; Schema: api-base; Owner: flexinventory
+--
+
+CREATE TABLE "api-base".catalog (
+    name character varying,
+    "user" character varying,
+    description character varying,
+    revision_date date,
+    creation_date date,
+    id smallint NOT NULL
+);
+
+
+ALTER TABLE "api-base".catalog OWNER TO flexinventory;
+
+--
+-- Name: catalog_id_seq; Type: SEQUENCE; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE "api-base".catalog ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTITY (
+    SEQUENCE NAME "api-base".catalog_id_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1
+);
+
 
 --
 -- Name: inventory; Type: TABLE; Schema: api-base; Owner: flexinventory
@@ -60,6 +99,14 @@ ALTER TABLE "api-base".inventory ALTER COLUMN id ADD GENERATED ALWAYS AS IDENTIT
 
 
 --
+-- Data for Name: catalog; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
+--
+
+COPY "api-base".catalog (name, "user", description, revision_date, creation_date, id) FROM stdin;
+\.
+
+
+--
 -- Data for Name: inventory; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
 --
 
@@ -72,10 +119,25 @@ COPY "api-base".inventory (id, name, "user", description, revision_date, creatio
 
 
 --
+-- Name: catalog_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
+--
+
+SELECT pg_catalog.setval('"api-base".catalog_id_seq', 1, false);
+
+
+--
 -- Name: inventory_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
 --
 
 SELECT pg_catalog.setval('"api-base".inventory_id_seq', 8, true);
+
+
+--
+-- Name: catalog catalog_pk; Type: CONSTRAINT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".catalog
+    ADD CONSTRAINT catalog_pk PRIMARY KEY (id);
 
 
 --
