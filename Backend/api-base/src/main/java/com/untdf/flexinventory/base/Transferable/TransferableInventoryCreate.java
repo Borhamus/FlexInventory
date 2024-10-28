@@ -1,22 +1,13 @@
 package com.untdf.flexinventory.base.Transferable;
+
 import java.sql.Date;
 
-public class TransferableInventory {
+public class TransferableInventoryCreate {
 
-    private Integer id;
     private String name;
     private String description;
     private Date revision_date;
     private Date creation_date;
-    /* ------------------- Getters y Setters -------------------*/
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
-    }
 
     public String getName() {
         return name;

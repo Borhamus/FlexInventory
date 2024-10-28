@@ -20,7 +20,7 @@ import java.sql.Date;
 
 @Entity
 @Table(name = "inventory", schema = "api-base")
-public class inventory {
+public class Inventory {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -28,9 +28,6 @@ public class inventory {
 
     @Column
     private String name;
-
-    @Column
-    private String user;
 
     @Column
     private String description;
@@ -57,14 +54,6 @@ public class inventory {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getUser() {
-        return user;
-    }
-
-    public void setUser(String user) {
-        this.user = user;
     }
 
     public String getDescription() {

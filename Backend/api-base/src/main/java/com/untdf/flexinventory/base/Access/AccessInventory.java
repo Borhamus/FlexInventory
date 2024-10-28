@@ -1,6 +1,6 @@
 package com.untdf.flexinventory.base.Access;
 
-import com.untdf.flexinventory.base.Model.inventory;
+import com.untdf.flexinventory.base.Model.Inventory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,6 +12,6 @@ import org.springframework.stereotype.Repository;
  */
 
 @Repository
-public interface AccessInventory extends JpaRepository<inventory, Integer> {
+public interface AccessInventory extends JpaRepository<Inventory, Integer> {
 
 }
