@@ -1,8 +1,6 @@
 package com.untdf.flexinventory.base.Transformer;
 
 import com.untdf.flexinventory.base.Model.Tag;
-import com.untdf.flexinventory.base.Model.inventory;
-import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableTag;
 import org.mapstruct.Mapper;
 
