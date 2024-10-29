@@ -54,7 +54,7 @@ public class ServiceInventory {
         /* Si no se encuentra una entidad con el id correspondiente arroja un 404 - NOT FOUND */
         if (access.findById(transferable.getId()).isEmpty()){
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Inventory with id: "+ transferable.getId() + " was not found."
+                    HttpStatus.NOT_FOUND, "Inventory with id: "+ transferable.getId() + " was not found for edit."
             );
         }
 
@@ -73,6 +73,14 @@ public class ServiceInventory {
 
     /* Elimina un inventario por el id */
     public void deleteInventoryById(Integer id){
+
+        /* Si no se encuentra una entidad con el id correspondiente arroja un 404 - NOT FOUND */
+        if (access.findById(id).isEmpty()){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Inventory with id: "+ id + " was not found for delete."
+            );
+        }
+
         access.deleteById(id);
     }
 
