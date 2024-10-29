@@ -7,7 +7,9 @@ import com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate;
 import com.untdf.flexinventory.base.Transformer.TransformerInventory;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 
@@ -35,17 +37,27 @@ public class ServiceInventory {
 
     /* Obtiene un inventario según su ID, en caso de que no exista, arroja una excepción */
     public TransferableInventory getInventoryById(Integer id){
+
+        /* Si no se encuentra una entidad con el id correspondiente arroja un 404 - NOT FOUND */
         if (access.findById(id).isEmpty()){
-            throw new EntityNotFoundException("Inventory with id: "+ id + " was not found.");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Inventory with id: "+ id + " was not found."
+            );
         }
+
         return transformer.toDTO(access.findById(id).get());
     }
 
     /* Busca una entidad por el id del transferible y la edita, si no encuentra la entidad, arroja una excepción */
     public TransferableInventory editInventory(TransferableInventory transferable){
+
+        /* Si no se encuentra una entidad con el id correspondiente arroja un 404 - NOT FOUND */
         if (access.findById(transferable.getId()).isEmpty()){
-            throw new EntityNotFoundException("Inventory with id: "+ transferable.getId() + " was not found.");
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Inventory with id: "+ transferable.getId() + " was not found."
+            );
         }
+
         Inventory inventory = access.findById(transferable.getId()).get();
 
         inventory.setId(transferable.getId());
