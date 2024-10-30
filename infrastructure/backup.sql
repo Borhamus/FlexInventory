@@ -74,14 +74,48 @@ ALTER SEQUENCE "api-base".attribute_id_seq OWNED BY "api-base".attribute.id;
 
 
 --
+-- Name: attribute_inventory; Type: TABLE; Schema: api-base; Owner: flexinventory
+--
+
+CREATE TABLE "api-base".attribute_inventory (
+    id integer NOT NULL,
+    inventory_id smallint,
+    attribute_id smallint NOT NULL
+);
+
+
+ALTER TABLE "api-base".attribute_inventory OWNER TO flexinventory;
+
+--
+-- Name: attribute_inventory_id_seq; Type: SEQUENCE; Schema: api-base; Owner: flexinventory
+--
+
+CREATE SEQUENCE "api-base".attribute_inventory_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE "api-base".attribute_inventory_id_seq OWNER TO flexinventory;
+
+--
+-- Name: attribute_inventory_id_seq; Type: SEQUENCE OWNED BY; Schema: api-base; Owner: flexinventory
+--
+
+ALTER SEQUENCE "api-base".attribute_inventory_id_seq OWNED BY "api-base".attribute_inventory.id;
+
+
+--
 -- Name: attribute_item; Type: TABLE; Schema: api-base; Owner: flexinventory
 --
 
 CREATE TABLE "api-base".attribute_item (
     id integer NOT NULL,
-    attribute_id smallint,
     item_id integer,
-    inventory_id smallint,
+    attribute_inventory_id smallint,
     value text NOT NULL
 );
 
@@ -119,7 +153,7 @@ CREATE TABLE "api-base".catalog (
     name text NOT NULL,
     description text,
     revision_date date,
-    creation_date date NOT NULL
+    creation_date date DEFAULT CURRENT_DATE NOT NULL
 );
 
 
@@ -148,6 +182,42 @@ ALTER SEQUENCE "api-base".catalog_id_seq OWNED BY "api-base".catalog.id;
 
 
 --
+-- Name: catalog_item; Type: TABLE; Schema: api-base; Owner: flexinventory
+--
+
+CREATE TABLE "api-base".catalog_item (
+    id integer NOT NULL,
+    organisation integer,
+    item_id integer,
+    catalog_id smallint
+);
+
+
+ALTER TABLE "api-base".catalog_item OWNER TO flexinventory;
+
+--
+-- Name: catalog_item_id_seq; Type: SEQUENCE; Schema: api-base; Owner: flexinventory
+--
+
+CREATE SEQUENCE "api-base".catalog_item_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE "api-base".catalog_item_id_seq OWNER TO flexinventory;
+
+--
+-- Name: catalog_item_id_seq; Type: SEQUENCE OWNED BY; Schema: api-base; Owner: flexinventory
+--
+
+ALTER SEQUENCE "api-base".catalog_item_id_seq OWNED BY "api-base".catalog_item.id;
+
+
+--
 -- Name: inventory; Type: TABLE; Schema: api-base; Owner: flexinventory
 --
 
@@ -156,7 +226,7 @@ CREATE TABLE "api-base".inventory (
     name text NOT NULL,
     description text NOT NULL,
     revision_date date,
-    creation_date date NOT NULL
+    creation_date date DEFAULT CURRENT_DATE NOT NULL
 );
 
 
@@ -191,8 +261,8 @@ ALTER SEQUENCE "api-base".inventory_id_seq OWNED BY "api-base".inventory.id;
 CREATE TABLE "api-base".item (
     id integer NOT NULL,
     name text NOT NULL,
-    creation_date date NOT NULL,
-    catalog_id smallint
+    creation_date date DEFAULT CURRENT_DATE NOT NULL,
+    inventory_id smallint
 );
 
 
@@ -221,24 +291,24 @@ ALTER SEQUENCE "api-base".item_id_seq OWNED BY "api-base".item.id;
 
 
 --
--- Name: item_tag; Type: TABLE; Schema: api-base; Owner: flexinventory
+-- Name: privilege; Type: TABLE; Schema: api-users; Owner: flexinventory
 --
 
-CREATE TABLE "api-base".item_tag (
-    id integer NOT NULL,
-    item_id integer,
-    tag_id smallint
+CREATE TABLE "api-users".privilege (
+    id smallint NOT NULL,
+    name text NOT NULL,
+    description text
 );
 
 
-ALTER TABLE "api-base".item_tag OWNER TO flexinventory;
+ALTER TABLE "api-users".privilege OWNER TO flexinventory;
 
 --
--- Name: item_tag_id_seq; Type: SEQUENCE; Schema: api-base; Owner: flexinventory
+-- Name: privilege_id_seq; Type: SEQUENCE; Schema: api-users; Owner: flexinventory
 --
 
-CREATE SEQUENCE "api-base".item_tag_id_seq
-    AS integer
+CREATE SEQUENCE "api-users".privilege_id_seq
+    AS smallint
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -246,34 +316,68 @@ CREATE SEQUENCE "api-base".item_tag_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE "api-base".item_tag_id_seq OWNER TO flexinventory;
+ALTER SEQUENCE "api-users".privilege_id_seq OWNER TO flexinventory;
 
 --
--- Name: item_tag_id_seq; Type: SEQUENCE OWNED BY; Schema: api-base; Owner: flexinventory
+-- Name: privilege_id_seq; Type: SEQUENCE OWNED BY; Schema: api-users; Owner: flexinventory
 --
 
-ALTER SEQUENCE "api-base".item_tag_id_seq OWNED BY "api-base".item_tag.id;
+ALTER SEQUENCE "api-users".privilege_id_seq OWNED BY "api-users".privilege.id;
 
 
 --
--- Name: tag; Type: TABLE; Schema: api-base; Owner: flexinventory
+-- Name: privilege_role; Type: TABLE; Schema: api-users; Owner: flexinventory
 --
 
-CREATE TABLE "api-base".tag (
-    id integer NOT NULL,
-    color text,
+CREATE TABLE "api-users".privilege_role (
+    id smallint NOT NULL,
+    id_privilege smallint NOT NULL,
+    id_role smallint NOT NULL
+);
+
+
+ALTER TABLE "api-users".privilege_role OWNER TO flexinventory;
+
+--
+-- Name: privilege_role_id_seq; Type: SEQUENCE; Schema: api-users; Owner: flexinventory
+--
+
+CREATE SEQUENCE "api-users".privilege_role_id_seq
+    AS smallint
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE "api-users".privilege_role_id_seq OWNER TO flexinventory;
+
+--
+-- Name: privilege_role_id_seq; Type: SEQUENCE OWNED BY; Schema: api-users; Owner: flexinventory
+--
+
+ALTER SEQUENCE "api-users".privilege_role_id_seq OWNED BY "api-users".privilege_role.id;
+
+
+--
+-- Name: role; Type: TABLE; Schema: api-users; Owner: flexinventory
+--
+
+CREATE TABLE "api-users".role (
+    id smallint NOT NULL,
     name text NOT NULL
 );
 
 
-ALTER TABLE "api-base".tag OWNER TO flexinventory;
+ALTER TABLE "api-users".role OWNER TO flexinventory;
 
 --
--- Name: tag_id_seq; Type: SEQUENCE; Schema: api-base; Owner: flexinventory
+-- Name: role_id_seq; Type: SEQUENCE; Schema: api-users; Owner: flexinventory
 --
 
-CREATE SEQUENCE "api-base".tag_id_seq
-    AS integer
+CREATE SEQUENCE "api-users".role_id_seq
+    AS smallint
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -281,13 +385,85 @@ CREATE SEQUENCE "api-base".tag_id_seq
     CACHE 1;
 
 
-ALTER SEQUENCE "api-base".tag_id_seq OWNER TO flexinventory;
+ALTER SEQUENCE "api-users".role_id_seq OWNER TO flexinventory;
 
 --
--- Name: tag_id_seq; Type: SEQUENCE OWNED BY; Schema: api-base; Owner: flexinventory
+-- Name: role_id_seq; Type: SEQUENCE OWNED BY; Schema: api-users; Owner: flexinventory
 --
 
-ALTER SEQUENCE "api-base".tag_id_seq OWNED BY "api-base".tag.id;
+ALTER SEQUENCE "api-users".role_id_seq OWNED BY "api-users".role.id;
+
+
+--
+-- Name: user; Type: TABLE; Schema: api-users; Owner: flexinventory
+--
+
+CREATE TABLE "api-users"."user" (
+    id smallint NOT NULL,
+    name text NOT NULL,
+    password text NOT NULL,
+    state boolean NOT NULL,
+    creation_date date NOT NULL
+);
+
+
+ALTER TABLE "api-users"."user" OWNER TO flexinventory;
+
+--
+-- Name: user_id_seq; Type: SEQUENCE; Schema: api-users; Owner: flexinventory
+--
+
+CREATE SEQUENCE "api-users".user_id_seq
+    AS smallint
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE "api-users".user_id_seq OWNER TO flexinventory;
+
+--
+-- Name: user_id_seq; Type: SEQUENCE OWNED BY; Schema: api-users; Owner: flexinventory
+--
+
+ALTER SEQUENCE "api-users".user_id_seq OWNED BY "api-users"."user".id;
+
+
+--
+-- Name: user_role; Type: TABLE; Schema: api-users; Owner: flexinventory
+--
+
+CREATE TABLE "api-users".user_role (
+    id smallint NOT NULL,
+    id_role smallint NOT NULL,
+    id_user smallint NOT NULL
+);
+
+
+ALTER TABLE "api-users".user_role OWNER TO flexinventory;
+
+--
+-- Name: user_role_id_seq; Type: SEQUENCE; Schema: api-users; Owner: flexinventory
+--
+
+CREATE SEQUENCE "api-users".user_role_id_seq
+    AS smallint
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE "api-users".user_role_id_seq OWNER TO flexinventory;
+
+--
+-- Name: user_role_id_seq; Type: SEQUENCE OWNED BY; Schema: api-users; Owner: flexinventory
+--
+
+ALTER SEQUENCE "api-users".user_role_id_seq OWNED BY "api-users".user_role.id;
 
 
 --
@@ -295,6 +471,13 @@ ALTER SEQUENCE "api-base".tag_id_seq OWNED BY "api-base".tag.id;
 --
 
 ALTER TABLE ONLY "api-base".attribute ALTER COLUMN id SET DEFAULT nextval('"api-base".attribute_id_seq'::regclass);
+
+
+--
+-- Name: attribute_inventory id; Type: DEFAULT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".attribute_inventory ALTER COLUMN id SET DEFAULT nextval('"api-base".attribute_inventory_id_seq'::regclass);
 
 
 --
@@ -312,6 +495,13 @@ ALTER TABLE ONLY "api-base".catalog ALTER COLUMN id SET DEFAULT nextval('"api-ba
 
 
 --
+-- Name: catalog_item id; Type: DEFAULT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".catalog_item ALTER COLUMN id SET DEFAULT nextval('"api-base".catalog_item_id_seq'::regclass);
+
+
+--
 -- Name: inventory id; Type: DEFAULT; Schema: api-base; Owner: flexinventory
 --
 
@@ -326,17 +516,38 @@ ALTER TABLE ONLY "api-base".item ALTER COLUMN id SET DEFAULT nextval('"api-base"
 
 
 --
--- Name: item_tag id; Type: DEFAULT; Schema: api-base; Owner: flexinventory
+-- Name: privilege id; Type: DEFAULT; Schema: api-users; Owner: flexinventory
 --
 
-ALTER TABLE ONLY "api-base".item_tag ALTER COLUMN id SET DEFAULT nextval('"api-base".item_tag_id_seq'::regclass);
+ALTER TABLE ONLY "api-users".privilege ALTER COLUMN id SET DEFAULT nextval('"api-users".privilege_id_seq'::regclass);
 
 
 --
--- Name: tag id; Type: DEFAULT; Schema: api-base; Owner: flexinventory
+-- Name: privilege_role id; Type: DEFAULT; Schema: api-users; Owner: flexinventory
 --
 
-ALTER TABLE ONLY "api-base".tag ALTER COLUMN id SET DEFAULT nextval('"api-base".tag_id_seq'::regclass);
+ALTER TABLE ONLY "api-users".privilege_role ALTER COLUMN id SET DEFAULT nextval('"api-users".privilege_role_id_seq'::regclass);
+
+
+--
+-- Name: role id; Type: DEFAULT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users".role ALTER COLUMN id SET DEFAULT nextval('"api-users".role_id_seq'::regclass);
+
+
+--
+-- Name: user id; Type: DEFAULT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users"."user" ALTER COLUMN id SET DEFAULT nextval('"api-users".user_id_seq'::regclass);
+
+
+--
+-- Name: user_role id; Type: DEFAULT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users".user_role ALTER COLUMN id SET DEFAULT nextval('"api-users".user_role_id_seq'::regclass);
 
 
 --
@@ -344,12 +555,26 @@ ALTER TABLE ONLY "api-base".tag ALTER COLUMN id SET DEFAULT nextval('"api-base".
 --
 
 COPY "api-base".attribute (id, type, name) FROM stdin;
-1	INTEGER	Unidades
-2	REAL	Precio
-3	STRING	Descripcion
-4	DATE	Vencimiento
-5	STRING	Marca
-6	STRING	Tipo
+1	INTEGER	cantidad
+2	REAL	gramos
+3	STRING	descripcion
+4	DATE	vencimiento
+5	REAL	precio
+6	STRING	material
+\.
+
+
+--
+-- Data for Name: attribute_inventory; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
+--
+
+COPY "api-base".attribute_inventory (id, inventory_id, attribute_id) FROM stdin;
+1	3	1
+2	\N	2
+3	3	3
+4	\N	4
+5	3	5
+6	3	6
 \.
 
 
@@ -357,13 +582,13 @@ COPY "api-base".attribute (id, type, name) FROM stdin;
 -- Data for Name: attribute_item; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
 --
 
-COPY "api-base".attribute_item (id, attribute_id, item_id, inventory_id, value) FROM stdin;
-1	1	2	3	200
-2	2	2	3	2900
-3	3	2	3	Gaseosa de la marca Coca-Cola
-4	4	2	3	2027-01-01
-5	5	2	3	Coca-Cola
-7	6	2	3	Bebida-Carbonatada
+COPY "api-base".attribute_item (id, item_id, attribute_inventory_id, value) FROM stdin;
+2	1	1	2000
+3	1	3	Clavos de hierro
+4	1	5	$5
+5	1	6	hierro
+6	5	2	234
+7	5	3	zanahorias chiquitas
 \.
 
 
@@ -372,9 +597,22 @@ COPY "api-base".attribute_item (id, attribute_id, item_id, inventory_id, value) 
 --
 
 COPY "api-base".catalog (id, name, description, revision_date, creation_date) FROM stdin;
-1	Catalogo 1	Test de Catalogos!	\N	2024-10-25
-2	Catalogo 2	Test de Catalogos! Soy otro!	\N	2024-10-25
-3	Mis cosas	Mis cosas diversas!!	\N	2024-10-25
+1	Catalog 1	test catalog 1 	\N	2024-10-30
+2	Catalog 2	test catalog 2	\N	2024-10-30
+3	Almacen	Guardo cualquier cosa	\N	2024-10-30
+\.
+
+
+--
+-- Data for Name: catalog_item; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
+--
+
+COPY "api-base".catalog_item (id, organisation, item_id, catalog_id) FROM stdin;
+1	4	1	3
+2	1	2	3
+3	2	3	3
+4	5	4	3
+5	3	5	3
 \.
 
 
@@ -383,9 +621,9 @@ COPY "api-base".catalog (id, name, description, revision_date, creation_date) FR
 --
 
 COPY "api-base".inventory (id, name, description, revision_date, creation_date) FROM stdin;
-1	Inventario 1	test de inventario!!!	\N	2024-10-25
-2	Inventario 2	soy otro inventario!!	\N	2024-10-25
-3	Kiosco	Solo almaceno alimentos	\N	2024-10-25
+1	Test 1	Test 1	\N	2024-10-30
+2	Test 2	Test 2	\N	2024-10-30
+3	Ferreteria	Solo almaceno cosas de ferreteria	\N	2024-10-30
 \.
 
 
@@ -393,38 +631,52 @@ COPY "api-base".inventory (id, name, description, revision_date, creation_date) 
 -- Data for Name: item; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
 --
 
-COPY "api-base".item (id, name, creation_date, catalog_id) FROM stdin;
-6	Transformer	2024-10-25	\N
-7	Miel	2024-10-25	\N
-8	VIaje al centro de la tierra	2024-10-25	\N
-1	Gundam	2024-10-25	3
-3	El señor de los Anillos	2024-10-25	3
-5	Doritos	2024-10-25	3
-9	Berserk	2024-10-25	3
-2	Coca-Cola	2024-10-25	3
-4	Pepsi	2024-10-25	\N
+COPY "api-base".item (id, name, creation_date, inventory_id) FROM stdin;
+2	Martillo	2024-10-30	\N
+3	Papa	2024-10-30	\N
+4	Clavo de olor	2024-10-30	\N
+5	Zanahoria	2024-10-30	\N
+1	Clavo	2024-10-30	3
 \.
 
 
 --
--- Data for Name: item_tag; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
+-- Data for Name: privilege; Type: TABLE DATA; Schema: api-users; Owner: flexinventory
 --
 
-COPY "api-base".item_tag (id, item_id, tag_id) FROM stdin;
-1	1	4
-2	3	3
-3	2	2
+COPY "api-users".privilege (id, name, description) FROM stdin;
 \.
 
 
 --
--- Data for Name: tag; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
+-- Data for Name: privilege_role; Type: TABLE DATA; Schema: api-users; Owner: flexinventory
 --
 
-COPY "api-base".tag (id, color, name) FROM stdin;
-2	\N	Comestibles
-3	\N	No comestibles
-4	\N	Juguetería
+COPY "api-users".privilege_role (id, id_privilege, id_role) FROM stdin;
+\.
+
+
+--
+-- Data for Name: role; Type: TABLE DATA; Schema: api-users; Owner: flexinventory
+--
+
+COPY "api-users".role (id, name) FROM stdin;
+\.
+
+
+--
+-- Data for Name: user; Type: TABLE DATA; Schema: api-users; Owner: flexinventory
+--
+
+COPY "api-users"."user" (id, name, password, state, creation_date) FROM stdin;
+\.
+
+
+--
+-- Data for Name: user_role; Type: TABLE DATA; Schema: api-users; Owner: flexinventory
+--
+
+COPY "api-users".user_role (id, id_role, id_user) FROM stdin;
 \.
 
 
@@ -433,6 +685,13 @@ COPY "api-base".tag (id, color, name) FROM stdin;
 --
 
 SELECT pg_catalog.setval('"api-base".attribute_id_seq', 6, true);
+
+
+--
+-- Name: attribute_inventory_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
+--
+
+SELECT pg_catalog.setval('"api-base".attribute_inventory_id_seq', 6, true);
 
 
 --
@@ -446,7 +705,14 @@ SELECT pg_catalog.setval('"api-base".attribute_item_id_seq', 7, true);
 -- Name: catalog_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
 --
 
-SELECT pg_catalog.setval('"api-base".catalog_id_seq', 4, true);
+SELECT pg_catalog.setval('"api-base".catalog_id_seq', 3, true);
+
+
+--
+-- Name: catalog_item_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
+--
+
+SELECT pg_catalog.setval('"api-base".catalog_item_id_seq', 5, true);
 
 
 --
@@ -460,21 +726,50 @@ SELECT pg_catalog.setval('"api-base".inventory_id_seq', 3, true);
 -- Name: item_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
 --
 
-SELECT pg_catalog.setval('"api-base".item_id_seq', 9, true);
+SELECT pg_catalog.setval('"api-base".item_id_seq', 5, true);
 
 
 --
--- Name: item_tag_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
+-- Name: privilege_id_seq; Type: SEQUENCE SET; Schema: api-users; Owner: flexinventory
 --
 
-SELECT pg_catalog.setval('"api-base".item_tag_id_seq', 3, true);
+SELECT pg_catalog.setval('"api-users".privilege_id_seq', 1, false);
 
 
 --
--- Name: tag_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
+-- Name: privilege_role_id_seq; Type: SEQUENCE SET; Schema: api-users; Owner: flexinventory
 --
 
-SELECT pg_catalog.setval('"api-base".tag_id_seq', 4, true);
+SELECT pg_catalog.setval('"api-users".privilege_role_id_seq', 1, false);
+
+
+--
+-- Name: role_id_seq; Type: SEQUENCE SET; Schema: api-users; Owner: flexinventory
+--
+
+SELECT pg_catalog.setval('"api-users".role_id_seq', 1, false);
+
+
+--
+-- Name: user_id_seq; Type: SEQUENCE SET; Schema: api-users; Owner: flexinventory
+--
+
+SELECT pg_catalog.setval('"api-users".user_id_seq', 1, false);
+
+
+--
+-- Name: user_role_id_seq; Type: SEQUENCE SET; Schema: api-users; Owner: flexinventory
+--
+
+SELECT pg_catalog.setval('"api-users".user_role_id_seq', 1, false);
+
+
+--
+-- Name: attribute_inventory attribute_inventory_pkey; Type: CONSTRAINT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".attribute_inventory
+    ADD CONSTRAINT attribute_inventory_pkey PRIMARY KEY (id);
 
 
 --
@@ -491,6 +786,14 @@ ALTER TABLE ONLY "api-base".attribute_item
 
 ALTER TABLE ONLY "api-base".attribute
     ADD CONSTRAINT attribute_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: catalog_item catalog_item_pkey; Type: CONSTRAINT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".catalog_item
+    ADD CONSTRAINT catalog_item_pkey PRIMARY KEY (id);
 
 
 --
@@ -518,35 +821,83 @@ ALTER TABLE ONLY "api-base".item
 
 
 --
--- Name: item_tag item_tag_pkey; Type: CONSTRAINT; Schema: api-base; Owner: flexinventory
+-- Name: privilege privilege_name_key; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
 --
 
-ALTER TABLE ONLY "api-base".item_tag
-    ADD CONSTRAINT item_tag_pkey PRIMARY KEY (id);
-
-
---
--- Name: tag tag_pkey; Type: CONSTRAINT; Schema: api-base; Owner: flexinventory
---
-
-ALTER TABLE ONLY "api-base".tag
-    ADD CONSTRAINT tag_pkey PRIMARY KEY (id);
+ALTER TABLE ONLY "api-users".privilege
+    ADD CONSTRAINT privilege_name_key UNIQUE (name);
 
 
 --
--- Name: attribute_item attribute_item_attribute_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
+-- Name: privilege privilege_pkey; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users".privilege
+    ADD CONSTRAINT privilege_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: privilege_role privilege_role_pkey; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users".privilege_role
+    ADD CONSTRAINT privilege_role_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: role role_name_key; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users".role
+    ADD CONSTRAINT role_name_key UNIQUE (name);
+
+
+--
+-- Name: role role_pkey; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users".role
+    ADD CONSTRAINT role_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user user_pkey; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users"."user"
+    ADD CONSTRAINT user_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user_role user_role_pkey; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users".user_role
+    ADD CONSTRAINT user_role_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: attribute_inventory attribute_inventory_attribute_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".attribute_inventory
+    ADD CONSTRAINT attribute_inventory_attribute_id_fkey FOREIGN KEY (attribute_id) REFERENCES "api-base".attribute(id) ON DELETE RESTRICT;
+
+
+--
+-- Name: attribute_inventory attribute_inventory_inventory_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".attribute_inventory
+    ADD CONSTRAINT attribute_inventory_inventory_id_fkey FOREIGN KEY (inventory_id) REFERENCES "api-base".inventory(id) ON DELETE SET NULL;
+
+
+--
+-- Name: attribute_item attribute_item_attribute_inventory_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
 --
 
 ALTER TABLE ONLY "api-base".attribute_item
-    ADD CONSTRAINT attribute_item_attribute_id_fkey FOREIGN KEY (attribute_id) REFERENCES "api-base".attribute(id) ON DELETE CASCADE;
-
-
---
--- Name: attribute_item attribute_item_inventory_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
---
-
-ALTER TABLE ONLY "api-base".attribute_item
-    ADD CONSTRAINT attribute_item_inventory_id_fkey FOREIGN KEY (inventory_id) REFERENCES "api-base".inventory(id) ON DELETE CASCADE;
+    ADD CONSTRAINT attribute_item_attribute_inventory_id_fkey FOREIGN KEY (attribute_inventory_id) REFERENCES "api-base".attribute_inventory(id) ON DELETE RESTRICT;
 
 
 --
@@ -558,27 +909,59 @@ ALTER TABLE ONLY "api-base".attribute_item
 
 
 --
--- Name: item item_catalog_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
+-- Name: catalog_item catalog_item_catalog_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".catalog_item
+    ADD CONSTRAINT catalog_item_catalog_id_fkey FOREIGN KEY (catalog_id) REFERENCES "api-base".catalog(id) ON DELETE CASCADE;
+
+
+--
+-- Name: catalog_item catalog_item_item_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".catalog_item
+    ADD CONSTRAINT catalog_item_item_id_fkey FOREIGN KEY (item_id) REFERENCES "api-base".item(id) ON DELETE CASCADE;
+
+
+--
+-- Name: item item_inventory_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
 --
 
 ALTER TABLE ONLY "api-base".item
-    ADD CONSTRAINT item_catalog_id_fkey FOREIGN KEY (catalog_id) REFERENCES "api-base".catalog(id) ON DELETE RESTRICT;
+    ADD CONSTRAINT item_inventory_id_fkey FOREIGN KEY (inventory_id) REFERENCES "api-base".inventory(id) ON DELETE RESTRICT;
 
 
 --
--- Name: item_tag item_tag_item_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
+-- Name: privilege_role privilege_role_id_privilege_fkey; Type: FK CONSTRAINT; Schema: api-users; Owner: flexinventory
 --
 
-ALTER TABLE ONLY "api-base".item_tag
-    ADD CONSTRAINT item_tag_item_id_fkey FOREIGN KEY (item_id) REFERENCES "api-base".item(id) ON DELETE CASCADE;
+ALTER TABLE ONLY "api-users".privilege_role
+    ADD CONSTRAINT privilege_role_id_privilege_fkey FOREIGN KEY (id_privilege) REFERENCES "api-users".privilege(id) ON DELETE CASCADE;
 
 
 --
--- Name: item_tag item_tag_tag_id_fkey; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
+-- Name: privilege_role privilege_role_id_role_fkey; Type: FK CONSTRAINT; Schema: api-users; Owner: flexinventory
 --
 
-ALTER TABLE ONLY "api-base".item_tag
-    ADD CONSTRAINT item_tag_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES "api-base".tag(id) ON DELETE CASCADE;
+ALTER TABLE ONLY "api-users".privilege_role
+    ADD CONSTRAINT privilege_role_id_role_fkey FOREIGN KEY (id_role) REFERENCES "api-users".role(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_role user_role_id_role_fkey; Type: FK CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users".user_role
+    ADD CONSTRAINT user_role_id_role_fkey FOREIGN KEY (id_role) REFERENCES "api-users".role(id) ON DELETE CASCADE;
+
+
+--
+-- Name: user_role user_role_id_user_fkey; Type: FK CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users".user_role
+    ADD CONSTRAINT user_role_id_user_fkey FOREIGN KEY (id_user) REFERENCES "api-users"."user"(id) ON DELETE CASCADE;
 
 
 --
