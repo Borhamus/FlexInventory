@@ -60,7 +60,6 @@ public class ServiceInventory {
 
         Inventory inventory = access.findById(transferable.getId()).get();
 
-        inventory.setId(transferable.getId());
         inventory.setName(transferable.getName());
         inventory.setDescription(transferable.getDescription());
         inventory.setRevision_date(transferable.getRevision_date());

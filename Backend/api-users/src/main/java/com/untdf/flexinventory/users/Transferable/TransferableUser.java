@@ -1,38 +1,29 @@
-package com.untdf.flexinventory.users.Model;
+package com.untdf.flexinventory.users.Transferable;
 
-import jakarta.persistence.*;
+import com.untdf.flexinventory.users.Model.Role;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 
 import java.util.Date;
 import java.util.List;
 
-@Entity
-@Table(name = "user", schema = "api-users")
-public class User {
+public class TransferableUser {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column
     private Integer id;
-
-    @Column
     private String name;
-
-    @Column
     private String password;
-
-    @Column
     private Boolean state;
-
-    @ManyToMany
-    @JoinTable(
-        name = "user_role",
-        schema = "api-users",
-        joinColumns = @JoinColumn(name = "id_user"),
-        inverseJoinColumns = @JoinColumn(name = "id_role")
-    )
     private List<Role> roleList;
 
-    /* getters and setters */
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 
     public Integer getId() {
         return id;
@@ -48,14 +39,6 @@ public class User {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public Boolean getState() {
