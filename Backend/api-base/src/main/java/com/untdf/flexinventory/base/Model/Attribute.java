@@ -2,6 +2,8 @@ package com.untdf.flexinventory.base.Model;
 
 import jakarta.persistence.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "Attribute", schema = "api-base")
 public class Attribute {
@@ -15,6 +17,9 @@ public class Attribute {
 
     @Column
     private String name;
+
+    @OneToMany(mappedBy = "attribute")
+    private List<AttributeInventory> inventoryAtributes;
 
     /* getters and setters */
 

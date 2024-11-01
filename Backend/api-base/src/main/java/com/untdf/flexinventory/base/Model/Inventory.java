@@ -1,8 +1,8 @@
 package com.untdf.flexinventory.base.Model;
 
 import jakarta.persistence.*;
-
 import java.sql.Date;
+import java.util.List;
 
 /**
  * En este ejemplo podemos ver como se mapea una entidad ya existente y persistida
@@ -38,6 +38,20 @@ public class Inventory {
     @Column
     private Date creation_date;
 
+    @ManyToMany
+    @JoinTable (
+            name = "attribute_inventory",
+            schema = "api-base",
+            joinColumns = @JoinColumn (
+                    name = "attribute_id",
+                    referencedColumnName = "attribute_id"
+            ),
+            inverseJoinColumns = @JoinColumn (
+                    name = "inventory_id",
+                    referencedColumnName = "inventory_id"
+            )
+    )
+    private List<Attribute> attributes;
 
     /* ------------------- Getters y Setters -------------------*/
     public Integer getId() {
