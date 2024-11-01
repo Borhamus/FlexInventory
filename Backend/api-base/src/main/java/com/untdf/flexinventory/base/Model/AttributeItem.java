@@ -12,15 +12,14 @@ public class AttributeItem {
 
     @ManyToOne
     @JoinColumn (name = "item_id")
-    Item item;
+    private Item item;
 
     @ManyToOne
-    @JoinColumn (name = "attribute_iventory_id")
-    AttributeInventory attribute_inventory_id;
+    @JoinColumn (name = "attribute_inventory_id")
+    private AttributeInventory attribute_inventory_id;
 
     @Column
     private String value;
-
 
     // Setters & Getters
 
@@ -32,6 +31,22 @@ public class AttributeItem {
         this.id = id;
     }
 
+    public Item getItem() {
+        return item;
+    }
+
+    public void setItem(Item item) {
+        this.item = item;
+    }
+
+    public AttributeInventory getAttribute_inventory_id() {
+        return attribute_inventory_id;
+    }
+
+    public void setAttribute_inventory_id(AttributeInventory attribute_inventory_id) {
+        this.attribute_inventory_id = attribute_inventory_id;
+    }
+
     public String getValue() {
         return value;
     }
@@ -40,11 +55,4 @@ public class AttributeItem {
         this.value = value;
     }
 
-    public Item getItem() {
-        return item;
-    }
-
-    public void setItem(Item item) {
-        this.item = item;
-    }
 }

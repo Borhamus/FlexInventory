@@ -1,5 +1,6 @@
 package com.untdf.flexinventory.base.Transferable;
 import java.sql.Date;
+import java.util.List;
 
 public class TransferableInventory {
 
@@ -8,6 +9,7 @@ public class TransferableInventory {
     private String description;
     private Date revision_date;
     private Date creation_date;
+    private List<TransferableAttribute> attributes;
     /* ------------------- Getters y Setters -------------------*/
 
     public Integer getId() {
@@ -48,5 +50,13 @@ public class TransferableInventory {
 
     public void setCreation_date(Date creation_date) {
         this.creation_date = creation_date;
+    }
+
+    public List<TransferableAttribute> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(List<TransferableAttribute> attributes) {
+        this.attributes = attributes;
     }
 }

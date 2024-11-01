@@ -38,20 +38,11 @@ public class Inventory {
     @Column
     private Date creation_date;
 
-    @ManyToMany
-    @JoinTable (
-            name = "attribute_inventory",
-            schema = "api-base",
-            joinColumns = @JoinColumn (
-                    name = "attribute_id",
-                    referencedColumnName = "attribute_id"
-            ),
-            inverseJoinColumns = @JoinColumn (
-                    name = "inventory_id",
-                    referencedColumnName = "inventory_id"
-            )
-    )
-    private List<Attribute> attributes;
+    @OneToMany(mappedBy = "inventory")
+    private List<AttributeInventory> attributes;
+
+    @OneToMany()
+    private List<Item> items;
 
     /* ------------------- Getters y Setters -------------------*/
     public Integer getId() {
@@ -92,5 +83,21 @@ public class Inventory {
 
     public void setCreation_date(Date creation_date) {
         this.creation_date = creation_date;
+    }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
+    public void setItems(List<Item> items) {
+        this.items = items;
+    }
+
+    public List<AttributeInventory> getAttributes() {
+        return attributes;
+    }
+
+    public void setAttributes(List<AttributeInventory> attributes) {
+        this.attributes = attributes;
     }
 }

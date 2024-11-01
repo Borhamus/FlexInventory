@@ -18,28 +18,15 @@ public class Item{
     @Column
     private Date creation_date ;
 
-    @Column
-    private ForeignKey inventory_id;
-
-    @ManyToMany
-    @JoinTable (
-            name = "attribute_item",
-            schema = "api-base",
-            joinColumns = @JoinColumn(
-                    name = "attribute_id",
-                    referencedColumnName = "attribute_id"
-            ),
-            inverseJoinColumns = @JoinColumn(
-                    name = "attribute_inventory_id",
-                    referencedColumnName = "attribute_inventory_id"
-
-            )
-    )
-
     @OneToMany(mappedBy = "item")
     private List<AttributeItem> attributeItems;
 
+    @ManyToOne
+    @JoinColumn(name = "inventory_id")
+    private Inventory inventory;
 
+    @OneToMany(mappedBy = "item")
+    private List<CatalogItem> catalogs;
 
     // Setters & Getters
 
@@ -67,11 +54,27 @@ public class Item{
         this.creation_date = creation_date;
     }
 
-    public ForeignKey getInventory_id() {
-        return inventory_id;
+    public Inventory getInventory() {
+        return inventory;
     }
 
-    public void setInventory_id(ForeignKey inventory_id) {
-        this.inventory_id = inventory_id;
+    public void setInventory(Inventory inventory) {
+        this.inventory = inventory;
+    }
+
+    public List<AttributeItem> getAttributeItems() {
+        return attributeItems;
+    }
+
+    public void setAttributeItems(List<AttributeItem> attributeItems) {
+        this.attributeItems = attributeItems;
+    }
+
+    public List<CatalogItem> getCatalogs() {
+        return catalogs;
+    }
+
+    public void setCatalogs(List<CatalogItem> catalogs) {
+        this.catalogs = catalogs;
     }
 }

@@ -3,32 +3,29 @@ import InventoryService from "../services/InventoryService";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 
-function InventoryTable(){
+function InventoryTable() {
+    // Estado para almacenar el inventario
+    const [inventory, setInventory] = useState(null);
 
-    // Se usa useState para crear el estado que almacena la lista 
-    // de inventarios obtenida por la api.
-    const [inventories, setInventories] = useState([]);
-
-    // Cuando el componente es montado se utiliza useEffect para
-    // ejecutar codigo, en este caso se llama a getAllInventories
-    // y actualiza el estado con los datos obtenidos.
+    // Cuando el componente se monta, se llama a la API para obtener el inventario por ID
     useEffect(() => {
-        //Consumo de api.
-        InventoryService.getAllInventories().then(data => setInventories(data));
+        InventoryService.getInventoryById(3).then(data => setInventory(data));
     }, []);
 
-    return(
+    // Renderizar loading mientras se obtiene el inventario
+    if (!inventory) return <p>Cargando...</p>;
+
+    return (
         <div>
-            <DataTable header = "Inventarios existentes." value={inventories} style={{maxWidth: "80%", margin: "0 auto"}}>
-                <Column field="id" header = "ID" />
-                <Column field="name" header = "Name" />
-                <Column field="description" header = "Description" />
-                <Column field="revision_date" header= "Revision Date" />
-                <Column field="creation_date" header= "Creation Date" />
+            <h2>Detalles del Inventario</h2>
+            <DataTable header={inventory.name} value={[inventory]} style={{ maxWidth: "80%", margin: "0 auto" }}>
+                {/* Generar columnas dinámicas basadas en los atributos sin valores */}
+                {inventory.attributes.map(attribute => (
+                    <Column key={attribute.id} header={attribute.name} />
+                ))}
             </DataTable>
         </div>
     );
-
 }
 
 export default InventoryTable;

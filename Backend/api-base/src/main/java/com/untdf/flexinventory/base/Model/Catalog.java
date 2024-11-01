@@ -4,6 +4,7 @@ package com.untdf.flexinventory.base.Model;
 import jakarta.persistence.*;
 
 import java.util.Date;
+import java.util.List;
 
 @Entity
 @Table(name = "catalog", schema = "api-base")
@@ -24,6 +25,9 @@ public class Catalog {
 
     @Column
     private Date creation_date;
+
+    @OneToMany(mappedBy = "catalog")
+    private List<CatalogItem> items;
 
     /* ------------------- Getters y Setters -------------------*/
     public Integer getId() {
@@ -57,4 +61,12 @@ public class Catalog {
     public Date getCreation_date() {return creation_date;}
 
     public void setCreation_date(Date creation_date) {this.creation_date = creation_date;}
+
+    public List<CatalogItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<CatalogItem> items) {
+        this.items = items;
+    }
 }
