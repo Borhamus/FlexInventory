@@ -1,5 +1,6 @@
 package com.untdf.flexinventory.base.Service;
 
+
 import com.untdf.flexinventory.base.Access.AccessInventory;
 import com.untdf.flexinventory.base.Model.Inventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventory;

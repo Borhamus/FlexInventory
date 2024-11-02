@@ -3,6 +3,7 @@ package com.untdf.flexinventory.base.Transformer;
 import com.untdf.flexinventory.base.Model.Attribute;
 import com.untdf.flexinventory.base.Model.AttributeInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableAttribute;
+import com.untdf.flexinventory.base.Transferable.TransferableAttributeCreate;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 
@@ -13,6 +14,7 @@ public interface TransformerAttribute {
 
     TransferableAttribute toDTO (Attribute Attribute);
     Attribute toEntity (TransferableAttribute transferableAttribute);
+    Attribute toEntity (TransferableAttributeCreate transferableAttributeCreate);
 
     @Mapping(target = "id", source = "attribute.id")
     @Mapping(target = "type", source = "attribute.type")
