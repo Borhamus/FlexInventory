@@ -62,6 +62,8 @@ public class Catalog {
 
     public void setCreation_date(Date creation_date) {this.creation_date = creation_date;}
 
+
+
     public List<CatalogItem> getItems() {
         return items;
     }
@@ -69,4 +71,8 @@ public class Catalog {
     public void setItems(List<CatalogItem> items) {
         this.items = items;
     }
+
+    /* ------------------- CRUD -------------------*/
+
+
 }
