@@ -13,7 +13,13 @@ function InventoryTable() {
     }, []);
 
     // Renderizar loading mientras se obtiene el inventario
-    if (!inventory) return <p>Cargando...</p>;
+    if (!inventory){
+        return(
+            <div>
+                <i className="pi pi-spin pi-spinner" style={{ fontSize: '2rem' }}></i>
+            </div>
+        ) 
+    } 
 
     return (
         <div>
