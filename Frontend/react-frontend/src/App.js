@@ -6,6 +6,7 @@ import "primereact/resources/primereact.min.css"
 import "primeicons/primeicons.css"
 import Navbar from './api-base/components/Navbar';
 import InventoryTable from './api-base/components/InventoryTable';
+import MenuLateral from './api-base/components/MenuLateral';
 
 // App.js es la APP principal y central de react.
 function App(){
@@ -14,6 +15,7 @@ function App(){
       <div className='App'>
         <Navbar></Navbar>
         <InventoryTable></InventoryTable>
+        <MenuLateral></MenuLateral>
       </div>
     </>
   );
