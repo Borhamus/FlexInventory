@@ -14,6 +14,8 @@ Crear un buckup de la base de datos:
 Recuperar un backup de la base de datos:
 	Dentro de la carpeta "infrastructure" y con el docker corriendo (paso anterior):
 		docker exec -i FlexInventory psql -U flexinventory flexinventory < backup.sql
+
+		(para Windows: type .\backup.sql | docker exec -i FlexInventory psql -U flexinventory -d flexinventory )
 		
 Conectarse a la base de datos:
 	URL: jdbc:postgresql://localhost:5432/flexinventory
