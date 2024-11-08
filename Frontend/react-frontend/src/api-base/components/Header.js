@@ -1,9 +1,9 @@
 import React, { useState } from 'react'
 import { Panel } from 'primereact/panel';
 
-function Footter() {
+function Header() {
   return (
-<Panel headerTemplate={"Pie de Pagina"} toggleable>
+<Panel headerTemplate={"Flex Inventory"} toggleable>
     <p className="m-0">
     </p>
 </Panel>
@@ -11,4 +11,4 @@ function Footter() {
 }
 
 
-export default Footter;
+export default Header;
