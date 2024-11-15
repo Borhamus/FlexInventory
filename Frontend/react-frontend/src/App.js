@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react';
 import './App.css';
 
 import "primereact/resources/themes/nova/theme.css";
@@ -11,42 +10,16 @@ import MenuLateral from './api-base/components/MenuLateral';
 import Header from './api-base/components/Header';
 import Footter from './api-base/components/Footter';
 
-import InventoryService from './api-base/services/InventoryService';
-
 function App(){
-<<<<<<< HEAD
-  const [menuSeleccionado, setMenuSeleccionado] = useState('');
-
-  const inventarios = InventoryService.getAllInventories();
-
-
   return (
     <div className='App'>
-      {/* Navbar con función para actualizar el estado */}
-      <Navbar onMenuClick={setMenuSeleccionado} />
-
-      {/* Mostrar InventoryTable solo si 'Inventarios' está seleccionado */}
-      {menuSeleccionado === 'Inventarios' && <InventoryTable />}
-
-      {/* MenuLateral con el menú actual y los datos de inventarios y catálogos */}
-      <MenuLateral 
-        menuSeleccionado={menuSeleccionado} 
-        inventarios={inventarios} 
-      />
+      <Header></Header>
+      <Navbar />
+      <InventoryTable />
+      <MenuLateral />
+      <Footter></Footter>
     </div>
-=======
-  return(
-    <>
-      <div className='App'>
-        <Header></Header>
-        <Navbar></Navbar>
-        <InventoryTable></InventoryTable>
-        <MenuLateral></MenuLateral>
-        <Footter></Footter>
-      </div>
-    </>
->>>>>>> 7946fdcfbad9df8768d1669a087b84312ad45f19
-  );
+  )
 }
 
 export default App;
