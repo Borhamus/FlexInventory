@@ -3,14 +3,18 @@ import InventoryService from "../services/InventoryService";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 
-function InventoryTable() {
+function InventoryTable({num}) {
     // Estado para almacenar el inventario
     const [inventory, setInventory] = useState(null);
 
-    // Cuando el componente se monta, se llama a la API para obtener el inventario por ID
     useEffect(() => {
-        InventoryService.getInventoryById(3).then(data => setInventory(data));
-    }, []);
+        if (num) {
+            // Llamar a la API solo si num tiene un valor
+            InventoryService.getInventoryById(num)
+                .then(data => setInventory(data))
+                .catch(error => console.error("Error al cargar inventario:", error));
+        }
+    }, [num]); // Aquí agregamos 'num' como dependencia
 
     // Renderizar loading mientras se obtiene el inventario
     if (!inventory){
