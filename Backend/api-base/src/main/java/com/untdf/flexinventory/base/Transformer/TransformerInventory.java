@@ -15,8 +15,6 @@ import java.util.stream.Collectors;
 
 @Mapper(componentModel = "spring", uses = TransformerAttribute.class)
 public interface TransformerInventory {
-
-    @Mapping(target = "attributes", source = "attributes")
     TransferableInventory toDTO (Inventory inventory);
 
     Inventory toEntity (TransferableInventory transferableInventory);

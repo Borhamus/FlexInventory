@@ -11,8 +11,7 @@ import "primeicons/primeicons.css";
 import Navbar from './components/Navbar';
 import InventoryTable from './components/InventoryTable';
 import MenuLateral from './components/MenuLateral';
-import Header from './components/Header';
-import Footter from './components/Footter';
+import Panel from './components/Panel';
 
 function App(){
   const [elementos, setElementos] = useState([]); // Estado para los inventarios
@@ -33,14 +32,28 @@ function App(){
 
   return (
     <div className='App'>
-      <Header></Header>
-      <Navbar />
-      {selectedId && <InventoryTable num={selectedId} />}
-      <MenuLateral
+      <div className='container-fluid bg-secondary pt-5'>
+        <div className='row'>
+          <Panel></Panel>
+        </div>
+        <div className='row'>
+          <Navbar />
+        </div>
+        <div className='row'>
+          <div className='col-2'>
+            <MenuLateral
                 elementos={elementos}
                 onElementoSeleccionado={handleSeleccionarElemento}
             />
-      <Footter></Footter>
+          </div>
+          <div className='col'>
+            {selectedId && <InventoryTable num={selectedId} />}
+          </div>
+        </div>
+        <div className='row'>
+          <Panel></Panel>
+        </div>
+      </div>
     </div>
   )
 }
