@@ -32,7 +32,7 @@ function App(){
 
   return (
     <div className='App'>
-      <div className='container-fluid bg-secondary pt-5'>
+      <div className='container-fluid bg-secondary pt-0'>
         <div className='row'>
           <Panel></Panel>
         </div>
