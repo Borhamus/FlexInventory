@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
-import '../styles/UserSession.css'; // Asegúrate de que esté bien referenciado
+import '../styles/UserSession.css';
+import useImagePreloader from "../hooks/useImagePreloader";
 
 function UserSession({ userName, userAvatar, onLogout }) {
+    const fallbackAvatar = "/avatar(1).png";
+    const avatar = useImagePreloader(userAvatar, fallbackAvatar); // Precargar imagen
+
     const [startTime] = useState(new Date()); // Hora de inicio de sesión
     const [elapsedTime, setElapsedTime] = useState("00:00");
-    const [currentAvatar, setCurrentAvatar] = useState(
-        userAvatar || process.env.PUBLIC_URL + "/avatar(1).png"
-    );
 
     useEffect(() => {
         const timer = setInterval(() => {
@@ -22,28 +23,19 @@ function UserSession({ userName, userAvatar, onLogout }) {
         return () => clearInterval(timer); // Limpiar intervalo al desmontar
     }, [startTime]);
 
-    const handleAvatarChange = () => {
-        // Cambiar entre avatares de ejemplo (puedes extender esto para incluir más)
-        setCurrentAvatar(
-            currentAvatar === process.env.PUBLIC_URL + "/avatar(1).png"
-                ? process.env.PUBLIC_URL + "/avatar(2).png"
-                : process.env.PUBLIC_URL + "/avatar(3).png"
-        );
-    };
-
     return (
         <div className="user-session">
             <div className="avatar-container">
-                <img src={currentAvatar} alt="Avatar" className="user-avatar" />
-                <button className="edit-avatar-button" onClick={handleAvatarChange}>
+                <img src={avatar} alt="Avatar" className="user-avatar" />
+                <a href="#" className="edit-avatar-link">
                     Editar Foto
-                </button>
+                </a>
             </div>
             <div className="user-details">
                 <div className="user-info">
                     <p className="user-name">{userName}</p>
                     <p className="session-timer">
-                        <strong>Contador de log-in:</strong> {elapsedTime}
+                        <strong>Log-in Timer:</strong> {elapsedTime}
                     </p>
                 </div>
                 <div className="user-actions">

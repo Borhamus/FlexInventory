@@ -18,8 +18,8 @@ public class Attribute {
     @Column
     private String name;
 
-    @OneToMany(mappedBy = "attribute")
-    private List<AttributeInventory> inventories;
+    @ManyToMany(mappedBy = "attributes")
+    private List<Inventory> inventories;
 
     /* getters and setters */
 
@@ -47,11 +47,11 @@ public class Attribute {
         this.name = name;
     }
 
-    public List<AttributeInventory> getInventories() {
+    public List<Inventory> getInventories() {
         return inventories;
     }
 
-    public void setInventories(List<AttributeInventory> inventories) {
+    public void setInventories(List<Inventory> inventories) {
         this.inventories = inventories;
     }
 }
