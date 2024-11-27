@@ -1,0 +1,93 @@
+.user-session {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 2px solid #ccc;
+    border-radius: 15px;
+    padding: 1rem;
+    max-width: 400px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    font-family: Arial, sans-serif;
+}
+
+.user-avatar {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ddd;
+    margin-right: 1rem;
+}
+
+.user-details {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.user-info {
+    margin-bottom: 0.5rem;
+}
+
+.user-name {
+    font-size: 1rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.session-timer {
+    font-size: 0.9rem;
+    margin: 0;
+    color: #555;
+}
+
+.user-actions {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.current-time {
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.logout-button {
+    background: #e74c3c;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+}
+
+.logout-button:hover {
+    background: #c0392b;
+}
+
+.user-session .avatar-container {
+    text-align: center;
+    margin-bottom: 1rem;
+}
+
+.user-session .user-avatar {
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+    margin-bottom: 0.5rem;
+}
+
+.user-session .edit-avatar-link {
+    color: #007bff; /* Azul estándar */
+    text-decoration: none;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.user-session .edit-avatar-link:hover {
+    text-decoration: underline;
+}
