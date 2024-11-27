@@ -13,9 +13,6 @@ import MenuLateral from './components/MenuLateral';
 import Panel from './components/Panel';
 import UserSession from "./components/UserSession"; 
 
-
-
-
 function App() {
     const [elementos, setElementos] = useState([]); // Estado para los inventarios
     const [selectedId, setSelectedId] = useState(null);
@@ -41,20 +38,29 @@ function App() {
 
     return (
         <div className='App'>
+            {/* Panel superior */}
             <Panel />
+
             {/* Componente de sesión de usuario */}
             <UserSession 
                 userName="Rambo Gracioso" 
                 userAvatar="https://via.placeholder.com/80" 
                 onLogout={handleLogout} 
             />
+
+            {/* Contenedor principal */}
             <div className='container-fluid bg-secondary pt-5'>
                 <div className='row'>
+                    {/* Panel superior (opcional, puede omitirse si ya está arriba) */}
                     <Panel />
                 </div>
+
+                {/* Barra de navegación */}
                 <div className='row'>
                     <Navbar />
                 </div>
+
+                {/* Menú lateral e inventario */}
                 <div className='row'>
                     <div className='col-2'>
                         <MenuLateral
@@ -63,13 +69,16 @@ function App() {
                         />
                     </div>
                     <div className='col'>
-                        {selectedId && <InventoryTable num={selectedId} />}
+                        {selectedId ? (
+                            <InventoryTable num={selectedId} />
+                        ) : (
+                            <p>Selecciona un elemento del menú para verlo.</p>
+                        )}
                     </div>
                 </div>
-                <div className='row'>
-                    
-                </div>
             </div>
+
+            {/* Panel inferior */}
             <Panel />
         </div>
     );
