@@ -10,12 +10,7 @@ import com.untdf.flexinventory.base.Transferable.TransferableItem;
 import com.untdf.flexinventory.base.Transferable.TransferableItemCreate;
 import com.untdf.flexinventory.base.Transformer.TransformerItem;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @Service
 public class ServiceItem {
@@ -23,7 +18,6 @@ public class ServiceItem {
     AccessItem access;
     @Autowired
     TransformerItem transformer;
-
     @Autowired
     AccessAttribute accessAttribute;
     @Autowired
@@ -32,9 +26,11 @@ public class ServiceItem {
     AccessInventory accessInventory;
 
 
-    public TransferableItem createItem(TransferableItemCreate transferable){
-        return null;
-
+    public TransferableItem createItem(TransferableItemCreate transferableItem){
+        // Convierte el objeto de transferencia (DTO) "transferable" en una entidad "Item" utilizando el metodo toEntity del transformer y lo almacena en la BDD.
+        Item itemCreated = access.save(transformer.toEntity(transferableItem));
+        // Una vez que la entidad ha sido guardada en la base de datos, se convierte nuevamente en un DTO y este es retornado
+        return transformer.toDTO(itemCreated);
     }
 
 
