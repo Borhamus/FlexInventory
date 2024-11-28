@@ -38,18 +38,8 @@ function App() {
 
     return (
         <div className='App'>
-            {/* Panel superior */}
-            <Panel />
-
-            {/* Componente de sesión de usuario */}
-            <UserSession 
-                userName="Rambo Gracioso" 
-                userAvatar="https://via.placeholder.com/80" 
-                onLogout={handleLogout} 
-            />
-
             {/* Contenedor principal */}
-            <div className='container-fluid bg-secondary pt-5'>
+            <div className='container-fluid bg-secondary pt-0'>
                 <div className='row'>
                     {/* Panel superior (opcional, puede omitirse si ya está arriba) */}
                     <Panel />
@@ -57,7 +47,14 @@ function App() {
 
                 {/* Barra de navegación */}
                 <div className='row'>
-                    <Navbar />
+                    <div className='col-10'>
+                    <Navbar></Navbar>
+
+                    </div>
+                    <div className='col-2'>
+                    <UserSession></UserSession>
+
+                    </div>
                 </div>
 
                 {/* Menú lateral e inventario */}

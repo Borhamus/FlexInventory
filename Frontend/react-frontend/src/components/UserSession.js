@@ -25,26 +25,37 @@ function UserSession({ userName, userAvatar, onLogout }) {
 
     return (
         <div className="user-session">
-            <div className="avatar-container">
-                <img src={avatar} alt="Avatar" className="user-avatar" />
-                <a href="#" className="edit-avatar-link">
-                    Editar Foto
-                </a>
-            </div>
-            <div className="user-details">
-                <div className="user-info">
-                    <p className="user-name">{userName}</p>
-                    <p className="session-timer">
-                        <strong>Log-in Timer:</strong> {elapsedTime}
-                    </p>
-                </div>
-                <div className="user-actions">
-                    <p className="current-time">
-                        <strong>Hora:</strong> {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                    </p>
-                    <button className="logout-button" onClick={onLogout}>
-                        Log-out
-                    </button>
+            <div className="container-fluid"> 
+                <div className="row">
+                    <div className='col-6'>
+                        
+                            <div className="avatar-container">
+                                <img src={avatar} alt="Avatar" className="user-avatar" />
+                                <a href="#" className="edit-avatar-link">
+                                    Editar Foto
+                                </a>
+                            </div>
+                        
+                    </div>
+                    
+                    <div className='col-6'>
+                        <div className="user-details">
+                            <div className="user-info">
+                                <p className="user-name">{userName}</p>
+                                <p className="session-timer">
+                                    <strong>Log-in Timer:</strong> {elapsedTime}
+                            </p>
+                            </div>
+                            <div className="user-actions">
+                                <p className="current-time">
+                                    <strong>Hora:</strong> {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </p>
+                                <button className="logout-button" onClick={onLogout}>
+                                    Log-out
+                                </button>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
