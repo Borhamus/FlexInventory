@@ -21,6 +21,9 @@ public class Attribute {
     @OneToMany(mappedBy = "attribute")
     private List<AttributeInventory> inventories;
 
+    @OneToMany(mappedBy =  "attribute")
+    private List<ItemAttributeValue>itemAttributeValuelist;
+
     /* getters and setters */
 
     public Integer getId() {
