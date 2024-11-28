@@ -28,7 +28,7 @@ function InventoryTable({num}) {
     return (
         <div>
             <h2>Detalles del Inventario</h2>
-            <DataTable header={inventory.name} value={[inventory]} style={{ maxWidth: "80%", margin: "0 auto" }}>
+            <DataTable header={inventory.name} value={[inventory]}>
                 {/* Generar columnas dinámicas basadas en los atributos sin valores */}
                 {inventory.attributes.map(attribute => (
                     <Column key={attribute.id} header={attribute.name} />
