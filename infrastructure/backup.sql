@@ -41,22 +41,22 @@ ALTER SCHEMA "api-users" OWNER TO flexinventory;
 
 CREATE FUNCTION public.enforce_inventory_consistency() RETURNS trigger
     LANGUAGE plpgsql
-    AS $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM "api-base".inventory_attribute ia
-        WHERE ia.inventory_id = NEW.inventory_id
-          AND ia.attribute_id IN (
-              SELECT attribute_id 
-              FROM "api-base".item_attribute_value 
-              WHERE item_id = NEW.id
-          )
-    ) THEN
-        RAISE EXCEPTION 'Item attribute does not match inventory attribute definition';
-    END IF;
-    RETURN NEW;
-END;
+    AS $$
+BEGIN
+    IF NOT EXISTS (
+        SELECT 1
+        FROM "api-base".inventory_attribute ia
+        WHERE ia.inventory_id = NEW.inventory_id
+          AND ia.attribute_id IN (
+              SELECT attribute_id 
+              FROM "api-base".item_attribute_value 
+              WHERE item_id = NEW.id
+          )
+    ) THEN
+        RAISE EXCEPTION 'Item attribute does not match inventory attribute definition';
+    END IF;
+    RETURN NEW;
+END;
 $$;
 
 
@@ -145,11 +145,35 @@ ALTER SEQUENCE "api-base".catalog_id_seq OWNED BY "api-base".catalog.id;
 
 CREATE TABLE "api-base".catalog_item (
     catalog_id integer NOT NULL,
-    item_id integer NOT NULL
+    item_id integer NOT NULL,
+    organisation integer,
+    id integer NOT NULL
 );
 
 
 ALTER TABLE "api-base".catalog_item OWNER TO flexinventory;
+
+--
+-- Name: catalog_item_id_seq; Type: SEQUENCE; Schema: api-base; Owner: flexinventory
+--
+
+CREATE SEQUENCE "api-base".catalog_item_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE "api-base".catalog_item_id_seq OWNER TO flexinventory;
+
+--
+-- Name: catalog_item_id_seq; Type: SEQUENCE OWNED BY; Schema: api-base; Owner: flexinventory
+--
+
+ALTER SEQUENCE "api-base".catalog_item_id_seq OWNED BY "api-base".catalog_item.id;
+
 
 --
 -- Name: inventory; Type: TABLE; Schema: api-base; Owner: flexinventory
@@ -486,6 +510,13 @@ ALTER TABLE ONLY "api-base".catalog ALTER COLUMN id SET DEFAULT nextval('"api-ba
 
 
 --
+-- Name: catalog_item id; Type: DEFAULT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".catalog_item ALTER COLUMN id SET DEFAULT nextval('"api-base".catalog_item_id_seq'::regclass);
+
+
+--
 -- Name: inventory id; Type: DEFAULT; Schema: api-base; Owner: flexinventory
 --
 
@@ -575,11 +606,19 @@ COPY "api-base".catalog (id, name, description, revision_date, creation_date) FR
 -- Data for Name: catalog_item; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
 --
 
-COPY "api-base".catalog_item (catalog_id, item_id) FROM stdin;
-1	1
-1	4
-2	2
-3	3
+COPY "api-base".catalog_item (catalog_id, item_id, organisation, id) FROM stdin;
+1	1	\N	1
+1	4	\N	2
+2	2	\N	3
+3	3	\N	4
+1	1	\N	5
+1	4	\N	6
+2	2	\N	7
+3	3	\N	8
+1	1	\N	9
+1	4	\N	10
+2	2	\N	11
+3	3	\N	12
 \.
 
 
@@ -689,6 +728,13 @@ SELECT pg_catalog.setval('"api-base".catalog_id_seq', 3, true);
 
 
 --
+-- Name: catalog_item_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
+--
+
+SELECT pg_catalog.setval('"api-base".catalog_item_id_seq', 12, true);
+
+
+--
 -- Name: inventory_attribute_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
 --
 
@@ -760,11 +806,11 @@ ALTER TABLE ONLY "api-base".attribute
 
 
 --
--- Name: catalog_item catalog_item_pkey; Type: CONSTRAINT; Schema: api-base; Owner: flexinventory
+-- Name: catalog_item catalog_item_pk; Type: CONSTRAINT; Schema: api-base; Owner: flexinventory
 --
 
 ALTER TABLE ONLY "api-base".catalog_item
-    ADD CONSTRAINT catalog_item_pkey PRIMARY KEY (catalog_id, item_id);
+    ADD CONSTRAINT catalog_item_pk PRIMARY KEY (id);
 
 
 --
