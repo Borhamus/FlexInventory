@@ -14,8 +14,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Provider;
-
 
 @RestController
 @RequestMapping("/item")
@@ -41,10 +39,11 @@ public class ResourceItem {
                     description = "Internal server error, check header response.",
                     content = @Content() /* No content for 500 */)
     })
+
     //--------------------------| CREATES ITEM BY ID AND BODY |--------------------------
     @PostMapping(value = "create/")
-    public ResponseEntity<TransferableItem> createItem(@RequestBody TransferableItemCreate transferableItemCreate){
-        TransferableItem transferable = service.createItem(transferableItemCreate);
+    public ResponseEntity<TransferableItem> createItem(@RequestBody TransferableItemCreate transferableItem){
+        TransferableItem transferable = service.createItem(transferableItem);
         return ResponseEntity.status(HttpStatus.CREATED).body(transferable);
     }
 

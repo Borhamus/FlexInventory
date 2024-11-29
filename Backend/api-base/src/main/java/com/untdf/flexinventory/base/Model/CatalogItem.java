@@ -19,7 +19,7 @@ public class CatalogItem {
     @JoinColumn (name = "catalog_id")
     private Catalog catalog;
 
-    @Column
+    @Column (name = "order criterion")
     private Integer organisation;
 
     public Catalog getCatalog() {

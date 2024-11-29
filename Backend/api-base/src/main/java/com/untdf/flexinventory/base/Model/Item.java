@@ -18,12 +18,12 @@ public class Item{
     @Column
     private Date creation_date ;
 
-    @OneToMany(mappedBy = "item")
-    private List<AttributeItem> attributeItems;
-
     @ManyToOne
     @JoinColumn(name = "inventory_id")
     private Inventory inventory;
+
+    @OneToMany(mappedBy = "item")
+    private List<ItemAttributeValue> items_attribute_values;
 
     @OneToMany(mappedBy = "item")
     private List<CatalogItem> catalogs;
@@ -62,12 +62,12 @@ public class Item{
         this.inventory = inventory;
     }
 
-    public List<AttributeItem> getAttributeItems() {
-        return attributeItems;
+    public List<ItemAttributeValue> getAttributeItems() {
+        return items_attribute_values;
     }
 
-    public void setAttributeItems(List<AttributeItem> attributeItems) {
-        this.attributeItems = attributeItems;
+    public void setAttributeItems(List<ItemAttributeValue> items_attribute_values) {
+        this.items_attribute_values = items_attribute_values;
     }
 
     public List<CatalogItem> getCatalogs() {

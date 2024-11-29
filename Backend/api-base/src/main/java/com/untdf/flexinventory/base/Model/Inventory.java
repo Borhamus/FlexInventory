@@ -22,6 +22,8 @@ import java.util.List;
 @Table(name = "inventory", schema = "api-base")
 public class Inventory {
 
+    // columnas
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
@@ -38,6 +40,11 @@ public class Inventory {
     @Column
     private Date creation_date;
 
+    // Tablas y Relaciones
+
+    @OneToMany
+    private List<Item> items;
+
     @ManyToMany
     @JoinTable(
             name = "inventory_attribute",
@@ -48,6 +55,7 @@ public class Inventory {
     private List<Attribute> attributes;
 
     /* ------------------- Getters y Setters -------------------*/
+
     public Integer getId() {
         return id;
     }
@@ -86,6 +94,14 @@ public class Inventory {
 
     public void setCreation_date(Date creation_date) {
         this.creation_date = creation_date;
+    }
+
+    public List<Item> getItems() {
+        return items;
+    }
+
+    public void setItems(List<Item> items) {
+        this.items = items;
     }
 
     public List<Attribute> getAttributes() {
