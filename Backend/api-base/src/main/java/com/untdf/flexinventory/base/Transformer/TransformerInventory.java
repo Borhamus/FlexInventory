@@ -1,19 +1,14 @@
 package com.untdf.flexinventory.base.Transformer;
 
-import com.untdf.flexinventory.base.Model.Attribute;
-import com.untdf.flexinventory.base.Model.AttributeInventory;
 import com.untdf.flexinventory.base.Model.Inventory;
-import com.untdf.flexinventory.base.Transferable.TransferableAttribute;
 import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate;
+import com.untdf.flexinventory.base.Transferable.TransferableItem;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.Named;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Mapper(componentModel = "spring", uses = TransformerAttribute.class)
+@Mapper(componentModel = "spring", uses = {TransformerAttribute.class, TransformerItem.class})
 public interface TransformerInventory {
     TransferableInventory toDTO (Inventory inventory);
 

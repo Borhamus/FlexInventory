@@ -10,6 +10,8 @@ public class TransferableInventory {
     private Date revision_date;
     private Date creation_date;
     private List<TransferableAttribute> attributes;
+    private List<TransferableItemInventory> items;
+
     /* ------------------- Getters y Setters -------------------*/
 
     public Integer getId() {
@@ -58,5 +60,13 @@ public class TransferableInventory {
 
     public void setAttributes(List<TransferableAttribute> attributes) {
         this.attributes = attributes;
+    }
+
+    public List<TransferableItemInventory> getItems() {
+        return items;
+    }
+
+    public void setItems(List<TransferableItemInventory> items) {
+        this.items = items;
     }
 }

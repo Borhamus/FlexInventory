@@ -1,9 +1,5 @@
 package com.untdf.flexinventory.base.Transferable;
 
-import com.untdf.flexinventory.base.Model.AttributeItem;
-import com.untdf.flexinventory.base.Model.Inventory;
-
-import java.util.Date;
 import java.util.List;
 
 public class TransferableItemCreate

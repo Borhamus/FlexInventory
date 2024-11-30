@@ -22,7 +22,7 @@ public class Attribute {
     private List<Inventory> inventories;
 
     @OneToMany(mappedBy =  "attribute")
-    private List<ItemAttributeValue>itemAttributeValuelist;
+    private List<ItemAttributeValue> itemAttributeValuelist;
 
     /* getters and setters */
 
@@ -56,5 +56,13 @@ public class Attribute {
 
     public void setInventories(List<Inventory> inventories) {
         this.inventories = inventories;
+    }
+
+    public List<ItemAttributeValue> getItemAttributeValuelist() {
+        return itemAttributeValuelist;
+    }
+
+    public void setItemAttributeValuelist(List<ItemAttributeValue> itemAttributeValuelist) {
+        this.itemAttributeValuelist = itemAttributeValuelist;
     }
 }

@@ -42,7 +42,7 @@ public class Inventory {
 
     // Tablas y Relaciones
 
-    @OneToMany
+    @OneToMany(mappedBy = "inventory")
     private List<Item> items;
 
     @ManyToMany

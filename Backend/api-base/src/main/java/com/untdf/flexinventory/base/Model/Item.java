@@ -23,7 +23,7 @@ public class Item{
     private Inventory inventory;
 
     @OneToMany(mappedBy = "item")
-    private List<ItemAttributeValue> items_attribute_values;
+    private List<ItemAttributeValue> itemsAttributeValues;
 
     @OneToMany(mappedBy = "item")
     private List<CatalogItem> catalogs;
@@ -62,19 +62,19 @@ public class Item{
         this.inventory = inventory;
     }
 
-    public List<ItemAttributeValue> getAttributeItems() {
-        return items_attribute_values;
-    }
-
-    public void setAttributeItems(List<ItemAttributeValue> items_attribute_values) {
-        this.items_attribute_values = items_attribute_values;
-    }
-
     public List<CatalogItem> getCatalogs() {
         return catalogs;
     }
 
     public void setCatalogs(List<CatalogItem> catalogs) {
         this.catalogs = catalogs;
+    }
+
+    public List<ItemAttributeValue> getItemsAttributeValues() {
+        return itemsAttributeValues;
+    }
+
+    public void setItemsAttributeValues(List<ItemAttributeValue> itemsAttributeValues) {
+        this.itemsAttributeValues = itemsAttributeValues;
     }
 }
