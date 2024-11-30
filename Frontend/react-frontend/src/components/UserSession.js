@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import '../styles/UserSession.css';
-import useImagePreloader from "../hooks/useImagePreloader";
+import useImagePreloader from "../utils/useImagePreloader";
 
 function UserSession({ userName, userAvatar, onLogout }) {
     const fallbackAvatar = "/avatar(1).png";

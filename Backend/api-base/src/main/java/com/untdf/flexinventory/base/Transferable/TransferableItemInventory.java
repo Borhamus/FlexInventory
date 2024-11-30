@@ -34,11 +34,11 @@ public class TransferableItemInventory {
         this.creation_date = creation_date;
     }
 
-    public List<TransferableAttributeValue> getItems_attribute_values() {
+    public List<TransferableAttributeValue> getItemsAttributeValues() {
         return itemsAttributeValues;
     }
 
-    public void setItems_attribute_values(List<TransferableAttributeValue> items_attribute_values) {
-        this.itemsAttributeValues = items_attribute_values;
+    public void setItemsAttributeValues(List<TransferableAttributeValue> itemsAttributeValues) {
+        this.itemsAttributeValues = itemsAttributeValues;
     }
 }
