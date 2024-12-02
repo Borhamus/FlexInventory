@@ -49,4 +49,28 @@ public class ResourceItem {
         return ResponseEntity.status(HttpStatus.CREATED).body(transferable);
     }
 
+    //--------------------------| Documentación API |--------------------------
+    @Operation(summary = "Deletes an inventory by id.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Inventory deleted successfully."),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "The inventory was not found.",
+                    content = @Content() /* No content for 404 */),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error, check header response.",
+                    content = @Content() /* No content for 500 */
+            )
+    })
+    //--------------------------| DELETE INVENTORY BY ID |--------------------------
+    @DeleteMapping(value = "{id}")
+    public ResponseEntity<Void> deleteInventory(@PathVariable("id") Integer id){
+        service.deleteItemById(id);
+        return ResponseEntity.ok().build();
+    }
+
+
 }
