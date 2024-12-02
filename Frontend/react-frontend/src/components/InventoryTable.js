@@ -4,9 +4,12 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 
 function InventoryTable({ num }) {
-    
     // Estado para almacenar el inventario
     const [inventory, setInventory] = useState(null);
+
+    // Estado para controlar la paginación
+    const [first, setFirst] = useState(0); // Página actual
+    const [rows, setRows] = useState(5); // Filas por página
 
     useEffect(() => {
         if (num) {
@@ -47,10 +50,11 @@ function InventoryTable({ num }) {
             key={attribute.id}
             field={attribute.name} // Vinculamos el campo dinámico
             header={attribute.name}
+            sortable={true} // Habilitar el ordenamiento
         />
     ));
 
-    // Header de la talba
+    // Header de la tabla
     const header = inventory.name;
 
     // Footer de la tabla
@@ -62,9 +66,22 @@ function InventoryTable({ num }) {
                 <h2>Detalles del Inventario</h2>
             </div>
             <div className="row">
-                <DataTable value={processedItems} footer={footer} header={header} showGridlines stripedRows tableStyle={{ minWidth: '50rem' }}>
-                    {/* Aquí también agregamos la columna del nombre del item dentro del mapeo dinámico */}
-                    <Column field="name" header="Name" />
+                <DataTable
+                    value={processedItems} 
+                    footer={footer}
+                    header={header} 
+                    showGridlines 
+                    stripedRows
+                    tableStyle={{ minWidth: '50rem' }}
+                    paginator
+                    rows={rows} // Número de filas por página
+                    first={first} // Página actual
+                    rowsPerPageOptions={[5, 10, 25, 50]} // Opciones de filas por página
+                    onPage={(e) => { // Actualizar la página y las filas por página
+                        setFirst(e.first);
+                        setRows(e.rows);
+                    }}
+                >
                     {/* Generar columnas dinámicas basadas en los atributos */}
                     {dynamicColumns}
                 </DataTable>
