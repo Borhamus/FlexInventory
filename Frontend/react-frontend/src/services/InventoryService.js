@@ -13,7 +13,6 @@ export class InventoryService{
     getInventoryById(id){
         return axios.get(this.baseUrl + id).then(res => res.data);
     }
-    
 }
 
 export default new InventoryService();
