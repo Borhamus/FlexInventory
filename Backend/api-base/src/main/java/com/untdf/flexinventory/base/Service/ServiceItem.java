@@ -72,6 +72,14 @@ public class ServiceItem {
         return transformer.toDTO(item);
     }
 
-
+    // Obtener un item por ID
+    public TransferableItemCreate getItemById(Integer id){
+        if (access.findById(id).isEmpty()){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Item with id: "+ id + " was not found."
+            );
+        }
+        return transformer.toDTOcreate(access.findById(id).get());
+    }
 
 }

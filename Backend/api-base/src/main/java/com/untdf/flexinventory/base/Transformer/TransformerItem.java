@@ -27,4 +27,8 @@ public interface TransformerItem {
     @Mapping(target = "inventory", ignore = true)
     List<TransferableItem> toDTOList (List<Item> ItemList);
     List<Item> toEntityList (List<TransferableItem> transferableItemList);
+
+    @Mapping(target = "inventory", ignore = true)
+    @Mapping(target = "catalogs", ignore = true)
+    TransferableItemCreate toDTOcreate (Item item);
 }

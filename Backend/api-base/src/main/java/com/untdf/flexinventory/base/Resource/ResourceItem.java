@@ -90,8 +90,14 @@ public class ResourceItem {
     })
     //--------------------------| GET ALL Item |--------------------------
     @GetMapping(value = "/all")
-    public ResponseEntity<List<TransferableItem>> getAllItem(){
+    public ResponseEntity<List<TransferableItem>> getAllItem() {
         return ResponseEntity.ok(service.getAllItem());
+    }
+
+    // GET ITEM BY ID
+    @GetMapping(value = "{id}")
+    public ResponseEntity<TransferableItemCreate> getItem(@PathVariable("id") Integer id){
+        return ResponseEntity.ok(service.getItemById(id));
     }
 
 }
