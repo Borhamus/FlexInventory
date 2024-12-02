@@ -11,9 +11,9 @@ public class TransferableItem
 {
     private Integer id;
     private String name;
-    private Date creation_date ;
-    private List<ItemAttributeValue> attributeItems;
+    private Date creation_date;
     private TransferableInventory inventory;
+    private List<ItemAttributeValue> attributeItems;
     private List<TransferableCatalog> catalogs;
 
     // Setters & Getters

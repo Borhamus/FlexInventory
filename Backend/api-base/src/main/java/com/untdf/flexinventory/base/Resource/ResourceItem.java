@@ -25,7 +25,7 @@ public class ResourceItem {
     @Autowired
     ServiceItem service;
 
-    //--------------------------| DOCUMENTATION API |--------------------------
+    // DOCUMENTATION API
     @Operation(summary = "Creates an Item")
     @ApiResponses({
             @ApiResponse(
@@ -40,10 +40,12 @@ public class ResourceItem {
                     content = @Content() /* No content for 500 */)
     })
 
-    //--------------------------| CREATES ITEM BY ID AND BODY |--------------------------
+    // CREATES ITEM BY ID AND BODY
     @PostMapping(value = "create/")
-    public ResponseEntity<TransferableItem> createItem(@RequestBody TransferableItemCreate transferableItem){
+    public ResponseEntity<TransferableItem> createItem(@RequestBody TransferableItemCreate transferableItem){ // recibe un transferible item create
+        // se pasan los datos del transferibleItem al transferable
         TransferableItem transferable = service.createItem(transferableItem);
+        // convierte el transferable y lo retorna al cliente
         return ResponseEntity.status(HttpStatus.CREATED).body(transferable);
     }
 
