@@ -4,6 +4,7 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 
 function InventoryTable({ num }) {
+    
     // Estado para almacenar el inventario
     const [inventory, setInventory] = useState(null);
 
@@ -40,7 +41,7 @@ function InventoryTable({ num }) {
         };
     });
 
-    // Generar columnas dinámicamente para los atributos
+    // Generar las columnas dinámicas para los atributos
     const dynamicColumns = inventory.attributes.map(attribute => (
         <Column
             key={attribute.id}
@@ -49,15 +50,25 @@ function InventoryTable({ num }) {
         />
     ));
 
+    // Header de la talba
+    const header = inventory.name;
+
+    // Footer de la tabla
+    const footer = `En total hay ${processedItems ? processedItems.length : 0} productos.`;
+
     return (
-        <div>
-            <h2>Detalles del Inventario</h2>
-            <DataTable value={processedItems}>
-                {/* Columna para el nombre del item */}
-                <Column field="name" header="Nombre del Item" />
-                {/* Generar columnas dinámicas basadas en los atributos */}
-                {dynamicColumns}
-            </DataTable>
+        <div className='container-fluid p-0'>
+            <div className="row">
+                <h2>Detalles del Inventario</h2>
+            </div>
+            <div className="row">
+                <DataTable value={processedItems} footer={footer} header={header} showGridlines stripedRows tableStyle={{ minWidth: '50rem' }}>
+                    {/* Aquí también agregamos la columna del nombre del item dentro del mapeo dinámico */}
+                    <Column field="name" header="Name" />
+                    {/* Generar columnas dinámicas basadas en los atributos */}
+                    {dynamicColumns}
+                </DataTable>
+            </div>
         </div>
     );
 }
