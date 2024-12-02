@@ -28,6 +28,19 @@ public class ServiceItem {
     AccessInventory accessInventory;
 
 
+    /* Elimina un Item por el id */
+    public void deleteItemById(Integer id){
+
+        /* Si no se encuentra una entidad con el id correspondiente arroja un 404 - NOT FOUND */
+        if (access.findById(id).isEmpty()){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Inventory with id: "+ id + " was not found for delete."
+            );
+        }
+
+        access.deleteById(id);
+    }
+
     public TransferableItem createItem(TransferableItemCreate transferableItem){
 
         //Creo una instancia de una nueva entidad
@@ -51,6 +64,7 @@ public class ServiceItem {
         // Una vez que la entidad ha sido guardada en la base de datos, se convierte nuevamente en un DTO y este es retornado
         return transformer.toDTO(item);
     }
+
 
 
 }
