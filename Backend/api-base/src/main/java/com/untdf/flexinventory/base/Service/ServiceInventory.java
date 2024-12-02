@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.sql.Date;
+import java.time.LocalDate;
 import java.util.List;
 
 /**
@@ -86,7 +88,13 @@ public class ServiceInventory {
 
     /* Crea un inventario */
     public TransferableInventory createInventory(TransferableInventoryCreate transferable){
-        Inventory inventoryCreated = access.save(transformer.toEntity(transferable));
+
+        Inventory inventory=transformer.toEntity(transferable);
+
+        //Obtengo la fecha actual
+        inventory.setCreation_date(new Date(System.currentTimeMillis()));
+
+        Inventory inventoryCreated = access.save(inventory);
         return transformer.toDTO(inventoryCreated);
     }
 
