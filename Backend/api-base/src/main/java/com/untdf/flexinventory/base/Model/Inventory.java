@@ -45,9 +45,6 @@ public class Inventory {
     @OneToMany(mappedBy = "inventory")
     private List<Item> items;
 
-    @OneToMany(mappedBy = "inventory_attributes")
-    private List<InventoryAttribute> inventory_attributes;
-
     @ManyToMany
     @JoinTable(
             name = "inventory_attribute",
@@ -113,13 +110,5 @@ public class Inventory {
 
     public void setAttributes(List<Attribute> attributes) {
         this.attributes = attributes;
-    }
-
-    public List<InventoryAttribute> getInventoryAttributes() {
-        return inventory_attributes;
-    }
-
-    public void setInventoryAttributes(List<InventoryAttribute> inventory_attributes) {
-        this.inventory_attributes = inventory_attributes;
     }
 }
