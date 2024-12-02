@@ -24,9 +24,6 @@ public class Attribute {
     @OneToMany(mappedBy =  "attribute")
     private List<ItemAttributeValue> itemAttributeValuelist;
 
-    @OneToMany(mappedBy = "inventory")
-    private List<InventoryAttribute> inventoryAttributes;
-
     /* getters and setters */
 
     public Integer getId() {
@@ -67,13 +64,5 @@ public class Attribute {
 
     public void setItemAttributeValuelist(List<ItemAttributeValue> itemAttributeValuelist) {
         this.itemAttributeValuelist = itemAttributeValuelist;
-    }
-
-    public List<InventoryAttribute> getInventoryAttributes() {
-        return inventoryAttributes;
-    }
-
-    public void setInventoryAttributes(List<InventoryAttribute> inventoryAttributes) {
-        this.inventoryAttributes = inventoryAttributes;
     }
 }
