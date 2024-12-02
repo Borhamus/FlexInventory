@@ -10,7 +10,9 @@ import com.untdf.flexinventory.base.Transferable.TransferableItem;
 import com.untdf.flexinventory.base.Transferable.TransferableItemCreate;
 import com.untdf.flexinventory.base.Transformer.TransformerItem;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 @Service
 public class ServiceItem {
@@ -27,10 +29,27 @@ public class ServiceItem {
 
 
     public TransferableItem createItem(TransferableItemCreate transferableItem){
-        // Convierte el objeto de transferencia (DTO) "transferable" en una entidad "Item" utilizando el metodo toEntity del transformer y lo almacena en la BDD.
-        Item itemCreated = access.save(transformer.toEntity(transferableItem));
+
+        //Creo una instancia de una nueva entidad
+        Item item = new Item();
+
+        //Le inserto los datos de creación
+        item = transformer.toEntity(transferableItem);
+
+        if(transferableItem.getInventory() != null && transferableItem.getInventory() > 0){
+
+            if (accessInventory.findById(transferableItem.getInventory()).isEmpty()){
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Inventory with id: "+ transferableItem.getInventory() + " was not found."
+                );
+            }
+
+            Inventory inventory = accessInventory.findById(transferableItem.getInventory()).get();
+            item.setInventory(inventory);
+        }
+
         // Una vez que la entidad ha sido guardada en la base de datos, se convierte nuevamente en un DTO y este es retornado
-        return transformer.toDTO(itemCreated);
+        return transformer.toDTO(item);
     }
 
 
