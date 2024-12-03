@@ -2,34 +2,33 @@ import React, { useState, useEffect } from 'react';
 import InventoryService from '../services/InventoryService';
 import InventoryTable from '../components/InventoryTable';
 import MenuLateral from '../components/MenuLateral';
-import ConfirmDelInv from '../components/ConfirmDelInv';
-import { ConfirmDialog } from 'primereact/confirmdialog';  // Importa ConfirmDialog
+import CrearInventario from '../components/CrearInventario'; // Importamos el componente de crear inventario
 
 function Inventories() {
     const [elementos, setElementos] = useState([]); // Estado para los inventarios
     const [selectedId, setSelectedId] = useState(null);
+    const [showCrearModal, setShowCrearModal] = useState(false); // Estado para mostrar el modal de crear inventario
+    const [showInventoryTable, setShowInventoryTable] = useState(true); // Estado para controlar la visualización de las tablas
 
-    // Función para manejar selección de inventario
+    // Función para manejar la apertura del modal de crear inventario
+    const handleCrearInventario = () => {
+        setShowCrearModal(true);
+        setShowInventoryTable(false); // Ocultar las tablas cuando se abre el modal
+    };
+
+    // Función para manejar la creación de inventarios (pasada desde el modal)
+    const handleInventoryCreated = (newInventory) => {
+        setElementos((prevElementos) => [...prevElementos, newInventory]);
+        setShowCrearModal(false); // Cerrar el modal después de crear el inventario
+        setShowInventoryTable(true); // Mostrar nuevamente las tablas de inventario
+    };
+
+    // Función para manejar la selección de un inventario
     const handleSeleccionarElemento = (id) => {
         console.log('Elemento seleccionado con ID:', id);
         setSelectedId(id);
     };
 
-    const eliminarInventario = (id) => {
-        console.log(`Eliminando inventario con ID: ${id}`);
-        InventoryService.deleteInventoryById(id) // Llamada a la API para eliminar el inventario
-            .then(() => {
-                // Después de eliminar el inventario, actualizamos el estado
-                setElementos(elementos.filter(inventory => inventory.id !== id));
-                setSelectedId(null); // Limpiamos la selección del inventario
-                console.log('Inventario eliminado');
-            })
-            .catch(error => {
-                console.error('Error al eliminar inventario:', error);
-            });
-    };
-
-    // Efecto para cargar los inventarios al montar el componente
     useEffect(() => {
         InventoryService.getAllInventories()
             .then(data => setElementos(data)) // Guardamos los datos en el estado
@@ -38,34 +37,32 @@ function Inventories() {
     
     return (
         <div className="App">
-            {/* Contenedor principal */}
             <div className="container-fluid bg-primary pb-5">
-                {/* Menú lateral e inventario */}
                 <div className="row">
                     <div className="col-2 p-0">
                         <MenuLateral
                             elementos={elementos}
-                            onElementoSeleccionado={handleSeleccionarElemento} // Pasamos la función para seleccionar el inventario
+                            onElementoSeleccionado={handleSeleccionarElemento}
+                            onCrearInventario={handleCrearInventario} // Pasamos la función para mostrar el modal
                         />
                     </div>
                     <div className="col">
-                        {selectedId ? (
+                        {showInventoryTable && selectedId && (
                             <div>
-                                <InventoryTable num={selectedId} /> {/* Mostramos la tabla del inventario seleccionado */}
-                                <ConfirmDelInv
-                                    inventoryId={selectedId} // Pasamos el ID del inventario
-                                    onConfirm={eliminarInventario} // Pasamos la función de eliminación
-                                />
+                                <InventoryTable num={selectedId} />
                             </div>
-                        ) : (
-                            <p>Selecciona un elemento del menú para verlo.</p>
                         )}
                     </div>
                 </div>
             </div>
 
-            {/* Aquí renderizamos el ConfirmDialog para que funcione correctamente */}
-            <ConfirmDialog />
+            {/* Mostrar modal si showCrearModal es true */}
+            {showCrearModal && (
+                <CrearInventario 
+                    onClose={() => setShowCrearModal(false)} // Cerrar el modal
+                    onInventoryCreated={handleInventoryCreated} // Pasar función para agregar inventario
+                />
+            )}
         </div>
     );
 }

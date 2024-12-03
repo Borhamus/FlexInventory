@@ -1,36 +1,41 @@
+.user-session-container {
+    position: fixed; /* Cambiamos a fixed para asegurar la posición */
+    top: 70px; /* Ajustamos justo debajo del Navbar */
+    right: 20px; /* Margen desde el borde derecho */
+    z-index: 9999; /* Aseguramos que esté encima de otros elementos */
+}
+
 .user-session {
     display: flex;
-    flex-direction: column; /* Cambiar la orientación principal del componente */
-    align-items: flex-end; /* Alinear todo el contenido hacia la derecha */
+    align-items: center;
     background: #ffffff;
-    border: 2px solid #ccc;
-    border-radius: 15px;
-    padding: 0.5rem; /* Reducir el padding para hacer el componente más compacto */
-    max-width: 300px; /* Reducir el tamaño máximo del componente */
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border: 1px solid #ddd; /* Reducción del grosor */
+    border-radius: 10px;
+    padding: 0.5rem; /* Reducimos el padding */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     font-family: Arial, sans-serif;
+    max-width: 180px; /* Tamaño máximo compacto */
+    overflow: hidden; /* Elimina contenido que sobresalga */
 }
 
 .avatar-container {
     text-align: center;
-    width: 100%; /* Centrar el contenido dentro del contenedor */
-    margin-bottom: 0.5rem;
+    margin-right: 0.5rem;
 }
 
 .user-avatar {
-    width: 60px; /* Reducir tamaño de la imagen */
-    height: 60px;
+    width: 40px; /* Reducimos el tamaño del avatar */
+    height: 40px;
     border-radius: 50%;
     object-fit: cover;
-    border: 2px solid #ddd;
-    margin-bottom: 0.3rem; /* Espacio entre imagen y enlace */
+    border: 1px solid #ddd;
 }
 
 .edit-avatar-link {
-    color: #007bff; /* Azul estándar */
+    color: #007bff;
     text-decoration: none;
-    font-size: 0.8rem; /* Reducir tamaño del texto */
-    display: block; /* Asegurar que el enlace esté debajo de la imagen */
+    font-size: 0.65rem;
+    margin-top: 0.2rem;
 }
 
 .edit-avatar-link:hover {
@@ -38,50 +43,32 @@
 }
 
 .user-details {
-    flex: 1;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    text-align: right; /* Alinear el texto hacia la derecha */
-    font-size: 0.8rem; /* Reducir el tamaño del texto */
-}
-
-.user-info {
-    margin-bottom: 0.3rem; /* Ajustar espacio */
+    text-align: right;
+    font-size: 0.7rem;
 }
 
 .user-name {
-    font-size: 0.9rem;
-    font-weight: bold;
-    margin: 0;
-}
-
-.session-timer {
     font-size: 0.8rem;
-    margin: 0;
-    color: #555;
+    font-weight: bold;
 }
 
-.user-actions {
-    display: flex;
-    flex-direction: column; /* Cambiar orientación para ser más compacto */
-    align-items: flex-end; /* Alinear botones a la derecha */
-}
-
+.session-timer,
 .current-time {
-    font-size: 0.8rem; /* Reducir tamaño del texto */
+    font-size: 0.65rem;
     color: #555;
-    margin-bottom: 0.3rem; /* Espacio entre texto y botón */
 }
 
 .logout-button {
     background: #e74c3c;
     color: white;
     border: none;
-    padding: 0.4rem 0.8rem; /* Reducir tamaño del botón */
-    border-radius: 8px;
+    padding: 0.3rem 0.5rem;
+    border-radius: 5px;
+    font-size: 0.65rem;
     cursor: pointer;
-    font-size: 0.8rem; /* Reducir tamaño del texto */
     transition: background 0.3s;
 }
 
