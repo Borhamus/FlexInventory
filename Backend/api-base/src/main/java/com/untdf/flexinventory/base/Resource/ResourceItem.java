@@ -1,6 +1,7 @@
 package com.untdf.flexinventory.base.Resource;
 
 import com.untdf.flexinventory.base.Service.ServiceItem;
+import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableItem;
 import com.untdf.flexinventory.base.Transferable.TransferableItemCreate;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 
 @RestController
@@ -50,14 +53,14 @@ public class ResourceItem {
     }
 
     //--------------------------| Documentación API |--------------------------
-    @Operation(summary = "Deletes an inventory by id.")
+    @Operation(summary = "Deletes an Item by id.")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "Inventory deleted successfully."),
+                    description = "Item deleted successfully."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "The inventory was not found.",
+                    description = "The item was not found.",
                     content = @Content() /* No content for 404 */),
             @ApiResponse(
                     responseCode = "500",
@@ -65,12 +68,36 @@ public class ResourceItem {
                     content = @Content() /* No content for 500 */
             )
     })
-    //--------------------------| DELETE INVENTORY BY ID |--------------------------
+    //--------------------------| DELETE Item BY ID |--------------------------
     @DeleteMapping(value = "{id}")
-    public ResponseEntity<Void> deleteInventory(@PathVariable("id") Integer id){
+    public ResponseEntity<Void> deleteItem(@PathVariable("id") Integer id){
         service.deleteItemById(id);
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Gets all item in the database.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "items retrieved successfully.",
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = TransferableItem.class))),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error, check header response.",
+                    content = @Content() /* No content for 500 */
+            )
+    })
+    //--------------------------| GET ALL Item |--------------------------
+    @GetMapping(value = "/all")
+    public ResponseEntity<List<TransferableItem>> getAllItem() {
+        return ResponseEntity.ok(service.getAllItem());
+    }
+
+    // GET ITEM BY ID
+    @GetMapping(value = "{id}")
+    public ResponseEntity<TransferableItemCreate> getItem(@PathVariable("id") Integer id){
+        return ResponseEntity.ok(service.getItemById(id));
+    }
 
 }
