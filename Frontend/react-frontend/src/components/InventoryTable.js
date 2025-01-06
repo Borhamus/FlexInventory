@@ -45,14 +45,25 @@ function InventoryTable({ num }) {
     });
 
     // Generar las columnas dinámicas para los atributos
-    const dynamicColumns = inventory.attributes.map(attribute => (
+    const dynamicColumns = [
+        // Agregar manualmente la columna para el nombre del item
         <Column
-            key={attribute.id}
-            field={attribute.name} // Vinculamos el campo dinámico
-            header={attribute.name}
+            key="name"
+            field="name" // Vinculamos al campo 'name'
+            header="Name" // Etiqueta de encabezado
             sortable={true} // Habilitar el ordenamiento
-        />
-    ));
+        />,
+        // Generar las columnas para los atributos dinámicos
+        ...inventory.attributes.map(attribute => (
+            <Column
+                key={attribute.id}
+                field={attribute.name} // Vinculamos el campo dinámico
+                header={attribute.name}
+                sortable={true} // Habilitar el ordenamiento
+            />
+        ))
+    ];
+
 
     // Header de la tabla
     const header = inventory.name;

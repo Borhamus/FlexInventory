@@ -14,6 +14,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,7 +25,9 @@ public class ServiceCatalog {
     @Autowired
     TransformerCatalog transformer;
     /* Obtiene todos los Catalogos */
-    public List<TransferableCatalog> getAllCatalog(){return transformer.toDTOList(access.findAll());}
+    public List<TransferableCatalog> getAllCatalog(){
+        return transformer.toDTOList(access.findAll());
+    }
 
     /* OBTIENE UN CATALOGO POR ID */
 
@@ -48,6 +51,7 @@ public class ServiceCatalog {
             );
         }
 
+        access.deleteById(id);
     }
 
     /* BUSCA UNA IDENTIDAD Y LA ACTULIZA */
@@ -74,7 +78,14 @@ public class ServiceCatalog {
 
     /* CREA UN CATALOGO */
     public TransferableCatalog createCatalog(TransferableCatalogCreate transferable){
-        Catalog catalogCreated = access.save(transformer.toEntity(transferable));
+
+        Catalog catalog = transformer.toEntity(transferable);
+
+        // asigno la fecha de creación a la fecha de hoy.
+        catalog.setCreation_date(new Date());
+
+
+        Catalog catalogCreated = access.save(catalog);
         return transformer.toDTO(catalogCreated);
     }
 }

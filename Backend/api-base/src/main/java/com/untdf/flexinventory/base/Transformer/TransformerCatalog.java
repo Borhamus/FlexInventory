@@ -10,10 +10,10 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface TransformerCatalog {
 
-    TransferableCatalog toDTO (Catalog Catalog );
+    TransferableCatalog toDTO (Catalog Catalog);
     Catalog toEntity (TransferableCatalog transferableCatalog);
     Catalog toEntity (TransferableCatalogCreate transferableCatalogCreate);
-    List<TransferableCatalog> toDTOList (List<Catalog> inventoryCatalog);
+    List<TransferableCatalog> toDTOList (List<Catalog> catalogList);
     List<Catalog> toEntityList (List<TransferableCatalog> transferableCatalogList);
 }
 
