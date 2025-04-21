@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.0 (Debian 17.0-1.pgdg120+1)
--- Dumped by pg_dump version 17.0 (Debian 17.0-1.pgdg120+1)
+-- Dumped from database version 17.4 (Debian 17.4-1.pgdg120+2)
+-- Dumped by pg_dump version 17.4 (Debian 17.4-1.pgdg120+2)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -34,33 +34,6 @@ CREATE SCHEMA "api-users";
 
 
 ALTER SCHEMA "api-users" OWNER TO flexinventory;
-
---
--- Name: enforce_inventory_consistency(); Type: FUNCTION; Schema: public; Owner: flexinventory
---
-
-CREATE FUNCTION public.enforce_inventory_consistency() RETURNS trigger
-    LANGUAGE plpgsql
-    AS $$
-BEGIN
-    IF NOT EXISTS (
-        SELECT 1
-        FROM "api-base".inventory_attribute ia
-        WHERE ia.inventory_id = NEW.inventory_id
-          AND ia.attribute_id IN (
-              SELECT attribute_id 
-              FROM "api-base".item_attribute_value 
-              WHERE item_id = NEW.id
-          )
-    ) THEN
-        RAISE EXCEPTION 'Item attribute does not match inventory attribute definition';
-    END IF;
-    RETURN NEW;
-END;
-$$;
-
-
-ALTER FUNCTION public.enforce_inventory_consistency() OWNER TO flexinventory;
 
 SET default_tablespace = '';
 
@@ -923,13 +896,6 @@ ALTER TABLE ONLY "api-users"."user"
 
 ALTER TABLE ONLY "api-users".user_role
     ADD CONSTRAINT user_role_pkey PRIMARY KEY (id);
-
-
---
--- Name: item enforce_inventory_consistency_trigger; Type: TRIGGER; Schema: api-base; Owner: flexinventory
---
-
-CREATE TRIGGER enforce_inventory_consistency_trigger AFTER INSERT OR UPDATE ON "api-base".item FOR EACH ROW WHEN ((new.inventory_id IS NOT NULL)) EXECUTE FUNCTION public.enforce_inventory_consistency();
 
 
 --

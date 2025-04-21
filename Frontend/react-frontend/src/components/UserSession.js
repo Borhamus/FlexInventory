@@ -25,35 +25,32 @@ function UserSession({ userName, userAvatar, onLogout }) {
 
     return (
         <div className="user-session">
-            <div className="container-fluid"> 
-                <div className="row">
-                    <div className='col-6'>
-                        
-                            <div className="avatar-container">
-                                <img src={avatar} alt="Avatar" className="user-avatar" />
-                                <a href="#" className="edit-avatar-link">
-                                    Editar Foto
-                                </a>
-                            </div>
-                        
-                    </div>
-                    
-                    <div className='col-6'>
-                        <div className="user-details">
-                            <div className="user-info">
-                                <p className="user-name">{userName}</p>
-                                <p className="session-timer">
-                                    <strong>Log-in Timer:</strong> {elapsedTime}
-                            </p>
-                            </div>
-                            <div className="user-actions">
-                                <p className="current-time">
-                                    <strong>Hora:</strong> {startTime.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            <div class="grid nested-grid">
+                <div class = "col-8">
+                    <div class='col-12'>
+                            <div className="user-details">
+                                <div className="user-info">
+                                    <p className="user-name" class = "">{userName}</p>
+                                    <p className="session-timer">
+                                        <strong>Log-in Timer:</strong> {elapsedTime}
                                 </p>
-                                <button className="logout-button" onClick={onLogout}>
-                                    Log-out
-                                </button>
+                                </div>
                             </div>
+                        </div>
+
+                        <div className="user-actions" class = "col-12">
+                            <button className="logout-button" onClick={onLogout}>
+                                Log-out
+                            </button>
+                        </div>
+                </div>
+                <div class = "col-4">
+                    <div class='col-12'>
+                        <div className="avatar-container">
+                            <img src={avatar} alt="Avatar" className="user-avatar" />
+                            <a href="#" className="edit-avatar-link">
+                                Editar Foto
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -3,6 +3,7 @@
     import "primereact/resources/themes/rhea/theme.css";
     import "primereact/resources/primereact.min.css";
     import "primeicons/primeicons.css";
+    import "/node_modules/primeflex/primeflex.css";
 
     import React from 'react';
     import AppRoutes from './routes/AppRoutes';
@@ -12,20 +13,19 @@
     function App() {
         return (
             <div className="App">
-                <div className="container-fluid bg-secondary pt-0 pb-5">
-                    <div className="row">
+                <div class= "grid">
+                    <div class = "col-10">
                         <Navbar />
                         <AppRoutes />
                     </div>
-                </div>
-
-                {/* Coloca UserSession aquí, en el flujo normal de la página */}
-                <div className="user-session-container">
-                    <UserSession 
-                        userName="Usuario Ejemplo"
-                        userAvatar="/path/to/avatar.jpg"
-                        onLogout={() => alert("Logout")}
-                    />
+                    {/* Coloca UserSession aquí, en el flujo normal de la página */}
+                    <div class="col">
+                        <UserSession 
+                            userName="Usuario Ejemplo"
+                            userAvatar="/path/to/avatar.jpg"
+                            onLogout={() => alert("Logout")}
+                        />
+                    </div>
                 </div>
             </div>
         );
