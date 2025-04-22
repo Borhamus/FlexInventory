@@ -5,6 +5,7 @@ import MenuLateral from '../components/MenuLateral';
 import CrearInventario from '../components/CrearInventario';
 import ConfirmDelInv from '../components/ConfirmDelInv'; // Importamos el componente de confirmación
 import { ConfirmDialog } from 'primereact/confirmdialog'; // Importa ConfirmDialog
+import "/node_modules/primeflex/primeflex.css";
 
 function Inventories() {
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
@@ -48,20 +49,19 @@ function Inventories() {
     };
 
     return (
-        <div className="App">
+        <div className="inventory">
             {/* Esto asegura que el popup funcione */}
             <ConfirmDialog />
 
-            <div className="container-fluid bg-primary pb-5">
-                <div className="row">
-                    <div className="col-2 p-0">
+            <div class="grid">
+                    <div class="col-2">
                         <MenuLateral
                             elementos={elementos}
                             onElementoSeleccionado={handleSeleccionarElemento}
                             onCrearInventario={handleCrearInventario}
                         />
                     </div>
-                    <div className="col">
+                    <div class="col">
                         {showInventoryTable && selectedId && (
                             <div>
                                 <InventoryTable num={selectedId} />
@@ -75,7 +75,6 @@ function Inventories() {
                             </div>
                         )}
                     </div>
-                </div>
             </div>
 
             {/* Modal para crear inventario */}

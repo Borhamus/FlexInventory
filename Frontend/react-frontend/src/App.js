@@ -13,19 +13,27 @@
     function App() {
         return (
             <div className="App">
+                
+                {/* ------| GRID SUPERIOR - NAVBAR Y USER SESSION |------ */}
                 <div class= "grid">
                     <div class = "col-10">
                         <Navbar />
-                        <AppRoutes />
                     </div>
-                    {/* Coloca UserSession aquí, en el flujo normal de la página */}
-                    <div class="col">
+                    {/* Coloca UserSession aquí, en el flujo normal de la página */}    
+                    <div class="col-2">
                         <UserSession 
                             userName="Usuario Ejemplo"
                             userAvatar="/path/to/avatar.jpg"
                             onLogout={() => alert("Logout")}
                         />
                     </div>
+                </div>
+
+                {/* ------| GRID DE CONTENIDO - SE CARGA SEGÚN EL APPROUTES |------ */}
+                <div class = "grid">
+                        <div class = "col">
+                            <AppRoutes />
+                        </div>
                 </div>
             </div>
         );

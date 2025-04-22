@@ -23,7 +23,7 @@ function MenuLateral({ elementos, onElementoSeleccionado, onCrearInventario }) {
     ];
 
     return (
-        <div class="col-4">
+        <div>
                 <Menu model={items} className="w-full md:w-15rem" />
         </div>
     );

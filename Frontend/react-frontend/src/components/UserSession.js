@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import '../styles/UserSession.css';
 import useImagePreloader from "../utils/useImagePreloader";
+import "/node_modules/primeflex/primeflex.css";
 
 function UserSession({ userName, userAvatar, onLogout }) {
     const fallbackAvatar = "/avatar(1).png";
@@ -25,36 +26,48 @@ function UserSession({ userName, userAvatar, onLogout }) {
 
     return (
         <div className="user-session">
-            <div class="grid nested-grid">
-                <div class = "col-8">
-                    <div class='col-12'>
-                            <div className="user-details">
-                                <div className="user-info">
-                                    <p className="user-name" class = "">{userName}</p>
-                                    <p className="session-timer">
-                                        <strong>Log-in Timer:</strong> {elapsedTime}
-                                </p>
-                                </div>
-                            </div>
-                        </div>
+            {/* GRID SUPERIOR - NOMBRE, TIMER Y FOTO */}
+            <div class="grid">
 
-                        <div className="user-actions" class = "col-12">
-                            <button className="logout-button" onClick={onLogout}>
-                                Log-out
-                            </button>
-                        </div>
-                </div>
-                <div class = "col-4">
-                    <div class='col-12'>
-                        <div className="avatar-container">
-                            <img src={avatar} alt="Avatar" className="user-avatar" />
-                            <a href="#" className="edit-avatar-link">
-                                Editar Foto
+                {/* COLUMNA - NOMBRE DE USHUARIO */}
+                <div class='col-8'>
+                    <div className="user-details">
+                        <div className="user-info">
+
+                            {/* Nombre de Usuario */}
+                            <p className="user-name" class = ""><strong>{userName}</strong></p>
+
+                            {/* Timer */}
+                            <p className="session-timer">
+                                <strong>Log-in Timer:</strong> {elapsedTime}
+                            </p>
+
+                            {/* Boton */}
+                            <a href="#" className="logout-button">
+                                Log out
                             </a>
+                            
                         </div>
                     </div>
                 </div>
+
+                <div class='col-4'>
+                    <div className="avatar-container">
+                        <img src={avatar} alt="Avatar" className="user-avatar" />
+                        
+                        {/* Editar foto */}
+                        <a href="#" className="edit-avatar-link">
+                            Editar Foto
+                        </a>
+                    </div>
+                </div>
             </div>
+            
+            {/* GRID INFERIOR - BOTONES */}
+                <div class = "col">
+                    
+                </div>
+            
         </div>
     );
 }

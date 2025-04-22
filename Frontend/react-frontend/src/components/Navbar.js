@@ -1,5 +1,6 @@
 import React from 'react';
 import { Menubar } from 'primereact/menubar';
+import "/node_modules/primeflex/primeflex.css";
 
 function Navbar() {
     const items = [
