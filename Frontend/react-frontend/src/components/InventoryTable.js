@@ -72,11 +72,8 @@ function InventoryTable({ num }) {
     const footer = `En total hay ${processedItems ? processedItems.length : 0} productos.`;
 
     return (
-        <div className='container-fluid p-0'>
-            <div className="row">
-                <h2>Detalles del Inventario</h2>
-            </div>
-            <div className="row">
+        <div className=''>
+            <div className="">
                 <DataTable
                     value={processedItems} 
                     footer={footer}

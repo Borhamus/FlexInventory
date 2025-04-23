@@ -17,6 +17,14 @@ function MenuLateral({ elementos, onElementoSeleccionado, onCrearInventario }) {
                     command: onCrearInventario, // Llamamos la función pasada para abrir el modal
                     style: { backgroundColor: '#28a745', color: 'white' },
                     disabled: false
+                },
+
+                {
+                    label: 'Borrar Inventario',
+                    icon: 'pi pi-minus',
+                    command: onCrearInventario, // Llamamos la función pasada para abrir el modal
+                    style: { backgroundColor: 'red', color: "white" },
+                    disabled: false
                 }
             ]
         }

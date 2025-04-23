@@ -22,7 +22,7 @@ public class Item{
     @JoinColumn(name = "inventory_id")
     private Inventory inventory;
 
-    @OneToMany(mappedBy = "item")
+    @OneToMany(mappedBy = "item", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ItemAttributeValue> itemsAttributeValues;
 
     @OneToMany(mappedBy = "item")

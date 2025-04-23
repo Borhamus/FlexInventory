@@ -15,6 +15,6 @@ public interface TransformerAttribute {
     Attribute toEntity (TransferableAttribute transferableAttribute);
     Attribute toEntity (TransferableAttributeCreate transferableAttributeCreate);
     List<TransferableAttribute> toDTOList (List<Attribute> attributeList);
-    List<Attribute> toEntity (List<TransferableAttribute> transferableAttributes);
+    List<Attribute> toEntityList (List<TransferableAttribute> transferableAttributes);
 
 }

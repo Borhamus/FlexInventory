@@ -9,7 +9,7 @@ import "/node_modules/primeflex/primeflex.css";
 
 function Inventories() {
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
-    const [selectedId, setSelectedId] = useState(null); // ID del inventario seleccionado
+    const [selectedId, setSelectedId] = useState(1); // ID del inventario seleccionado, por ahora toma el primero, proximamente deberia comprobar si existe
     const [showCrearModal, setShowCrearModal] = useState(false);
     const [showInventoryTable, setShowInventoryTable] = useState(true);
 
@@ -48,6 +48,7 @@ function Inventories() {
         setSelectedId(id);
     };
 
+    
     return (
         <div className="inventory">
             {/* Esto asegura que el popup funcione */}

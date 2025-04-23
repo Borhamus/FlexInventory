@@ -1,7 +1,6 @@
 package com.untdf.flexinventory.base.Resource;
 
 import com.untdf.flexinventory.base.Service.ServiceItem;
-import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableItem;
 import com.untdf.flexinventory.base.Transferable.TransferableItemCreate;
 import io.swagger.v3.oas.annotations.Operation;
@@ -10,6 +9,8 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -28,6 +29,9 @@ public class ResourceItem {
     @Autowired
     ServiceItem service;
 
+
+    Logger auditor = LoggerFactory.getLogger(ResourceItem.class);
+
     // DOCUMENTATION API
     @Operation(summary = "Creates an Item")
     @ApiResponses({
@@ -35,7 +39,12 @@ public class ResourceItem {
                     responseCode = "200",
                     description = "Item created successfully.",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = TransferableItemCreate.class))
+                            schema = @Schema(implementation = TransferableItem.class))
+            ),
+            @ApiResponse(
+                    responseCode = "409",
+                    description = "Item creation has a Conflict.",
+                    content = @Content()
             ),
             @ApiResponse(
                     responseCode = "500",
@@ -46,8 +55,13 @@ public class ResourceItem {
     // CREATES ITEM BY ID AND BODY
     @PostMapping(value = "create/")
     public ResponseEntity<TransferableItem> createItem(@RequestBody TransferableItemCreate transferableItem){ // recibe un transferible item create
+
+        auditor.info("------------| Inicio de Nueva Request - Crear ítem (inventario) |------------");
+        auditor.info("Transferible info: Inventory = " + transferableItem.getInventory() + " | Atributos: " + transferableItem.getItemAtributeValue());
+
         // se pasan los datos del transferibleItem al transferable
-        TransferableItem transferable = service.createItem(transferableItem);
+        TransferableItem transferable = service.createItemIventory(transferableItem);
+
         // convierte el transferable y lo retorna al cliente
         return ResponseEntity.status(HttpStatus.CREATED).body(transferable);
     }

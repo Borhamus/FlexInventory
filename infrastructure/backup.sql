@@ -627,6 +627,12 @@ COPY "api-base".item (id, name, creation_date, inventory_id) FROM stdin;
 1	Laptop	2024-05-01	1
 2	Refrigerator	2024-05-10	1
 4	Microwave	2024-07-20	2
+5	Motor 2HP	2025-04-23	1
+6	Set de herramientas Stanley	2025-04-23	1
+7	Extintor de polvo químico	2025-04-23	1
+8	Caja de bombones	2025-04-23	1
+9	Taladro Makita	2025-04-23	1
+10	Smartphone Xiaomi	2025-04-23	1
 \.
 
 
@@ -643,6 +649,24 @@ COPY "api-base".item_attribute_value (id, item_id, attribute_id, value) FROM std
 14	2	3	800.00
 15	4	1	Panasonic
 16	4	3	150.00
+17	5	1	ABB
+18	5	2	2HP
+19	5	3	1599.00
+20	6	1	Stanley
+21	6	2	145 piezas
+22	6	3	980.75
+23	7	1	PQS
+24	7	2	5kg
+25	7	3	450.00
+26	8	1	Ferrero
+27	8	2	24
+28	8	3	280.00
+29	9	1	Makita
+30	9	2	750
+31	9	3	1299.50
+32	10	1	Xiaomi
+33	10	2	128
+34	10	3	899.99
 \.
 
 
@@ -725,14 +749,14 @@ SELECT pg_catalog.setval('"api-base".inventory_id_seq', 2, true);
 -- Name: item_attribute_value_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
 --
 
-SELECT pg_catalog.setval('"api-base".item_attribute_value_id_seq', 16, true);
+SELECT pg_catalog.setval('"api-base".item_attribute_value_id_seq', 34, true);
 
 
 --
 -- Name: item_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
 --
 
-SELECT pg_catalog.setval('"api-base".item_id_seq', 4, true);
+SELECT pg_catalog.setval('"api-base".item_id_seq', 10, true);
 
 
 --

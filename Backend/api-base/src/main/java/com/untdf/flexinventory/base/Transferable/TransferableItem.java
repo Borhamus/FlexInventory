@@ -13,7 +13,7 @@ public class TransferableItem
     private String name;
     private Date creation_date;
     private TransferableInventory inventory;
-    private List<ItemAttributeValue> attributeItems;
+    private List<TransferableAttributeValue> itemsAttributeValues;
     private List<TransferableCatalog> catalogs;
 
     // Setters & Getters
@@ -43,14 +43,6 @@ public class TransferableItem
         this.creation_date = creation_date;
     }
 
-    public List<ItemAttributeValue> getAttributeItems() {
-        return attributeItems;
-    }
-
-    public void setAttributeItems(List<ItemAttributeValue> attributeItems) {
-        this.attributeItems = attributeItems;
-    }
-
     public List<TransferableCatalog> getCatalogs() {
         return catalogs;
     }
@@ -65,6 +57,14 @@ public class TransferableItem
 
     public void setInventory(TransferableInventory inventory) {
         this.inventory = inventory;
+    }
+
+    public List<TransferableAttributeValue> getItemsAttributeValues() {
+        return itemsAttributeValues;
+    }
+
+    public void setItemsAttributeValues(List<TransferableAttributeValue> itemsAttributeValues) {
+        this.itemsAttributeValues = itemsAttributeValues;
     }
 }
 

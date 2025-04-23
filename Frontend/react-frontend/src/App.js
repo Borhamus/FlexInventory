@@ -16,10 +16,10 @@
                 
                 {/* ------| GRID SUPERIOR - NAVBAR Y USER SESSION |------ */}
                 <div class= "grid">
-                    <div class = "col-10">
+                    <div class = "col-12">
                         <Navbar />
                     </div>
-                    {/* Coloca UserSession aquí, en el flujo normal de la página */}    
+                    {/* Coloca UserSession aquí, en el flujo normal de la página   
                     <div class="col-2">
                         <UserSession 
                             userName="Usuario Ejemplo"
@@ -27,6 +27,7 @@
                             onLogout={() => alert("Logout")}
                         />
                     </div>
+                    */}  
                 </div>
 
                 {/* ------| GRID DE CONTENIDO - SE CARGA SEGÚN EL APPROUTES |------ */}

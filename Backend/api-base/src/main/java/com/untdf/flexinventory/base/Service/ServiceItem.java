@@ -6,30 +6,52 @@ import com.untdf.flexinventory.base.Access.AccessCatalog;
 import com.untdf.flexinventory.base.Access.AccessInventory;
 import com.untdf.flexinventory.base.Access.AccessItem;
 import com.untdf.flexinventory.base.Model.*;
-import com.untdf.flexinventory.base.Transferable.TransferableInventory;
+import com.untdf.flexinventory.base.Resource.ResourceItem;
 import com.untdf.flexinventory.base.Transferable.TransferableItem;
 import com.untdf.flexinventory.base.Transferable.TransferableItemCreate;
+import com.untdf.flexinventory.base.Transformer.TransformerAttribute;
+import com.untdf.flexinventory.base.Transformer.TransformerInventory;
 import com.untdf.flexinventory.base.Transformer.TransformerItem;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 public class ServiceItem {
     @Autowired
     AccessItem access;
+
     @Autowired
     TransformerItem transformer;
+
     @Autowired
     AccessAttribute accessAttribute;
+
     @Autowired
     AccessCatalog accessCatalog;
+
     @Autowired
     AccessInventory accessInventory;
 
+    @Autowired
+    ServiceInventory serviceInventory;
+
+    @Autowired
+    TransformerInventory transformerInventory;
+
+    @Autowired
+    ServiceAttribute serviceAttribute;
+
+    @Autowired
+    TransformerAttribute transformerAttribute;
+
+    Logger auditor = LoggerFactory.getLogger(ResourceItem.class);
 
     public List<TransferableItem> getAllItem(){
         return transformer.toDTOList(access.findAll());
@@ -48,29 +70,83 @@ public class ServiceItem {
         access.deleteById(id);
     }
 
-    public TransferableItem createItem(TransferableItemCreate transferableItem){
+    public TransferableItem createItemIventory(TransferableItemCreate transferableItem){
 
-        //Creo una instancia de una nueva entidad
         Item item = new Item();
 
-        //Le inserto los datos de creación
-        item = transformer.toEntity(transferableItem);
+        Inventory inventory = transformerInventory.toEntity(serviceInventory.getInventoryById(transferableItem.getInventory()));
+        item.setInventory(inventory);
+        item.setCreation_date(new Date());
+        item.setName(transferableItem.getName());
 
-        if(transferableItem.getInventory() != null && transferableItem.getInventory() > 0){
+        List<ItemAttributeValue> values = new ArrayList<>();
+        List<Attribute> itemAttributes = new ArrayList<>();
 
-            if (accessInventory.findById(transferableItem.getInventory()).isEmpty()){
-                throw new ResponseStatusException(
-                        HttpStatus.NOT_FOUND, "Inventory with id: "+ transferableItem.getInventory() + " was not found."
-                );
-            }
+        for (Map.Entry<Integer, String> entry : transferableItem.getItemAtributeValue().entrySet()) { // Por cada elemento dentro del Map
 
-            Inventory inventory = accessInventory.findById(transferableItem.getInventory()).get();
-            item.setInventory(inventory);
+            // Obtengo el attribute id
+            Integer attributeId = entry.getKey();
+
+            // Obtengo el Value
+            String value = entry.getValue();
+
+            // Creo un nuevo ItemAttribute
+            ItemAttributeValue itemAttributeValue = new ItemAttributeValue();
+
+            // Seteo el value
+            itemAttributeValue.setValue(value);
+
+            // Obtengo el atributo de la bd y lo seteo al itemAttribute
+            Attribute attribute = transformerAttribute.toEntity(serviceAttribute.getAttributeById(attributeId));
+            itemAttributeValue.setAttribute(attribute);
+            // Establecer la relación con item
+            itemAttributeValue.setItem(item);
+
+            // Almaceno el attributo encontrado
+            itemAttributes.add(attribute);
+
+            // Añado el itemAttribute creado a la lista
+            values.add(itemAttributeValue);
         }
 
-        // Una vez que la entidad ha sido guardada en la base de datos, se convierte nuevamente en un DTO y este es retornado
-        return transformer.toDTO(item);
+        // Establecer los valores antes de guardar
+        item.setItemsAttributeValues(values);
+
+        Set<Integer> expectedAttributeIds = inventory.getAttributes().stream()
+                .map(Attribute::getId)
+                .collect(Collectors.toSet());
+
+        Set<Integer> receivedAttributeIds = itemAttributes.stream()
+                .map(Attribute::getId)
+                .collect(Collectors.toSet());
+
+        if (!expectedAttributeIds.equals(receivedAttributeIds)) {
+            auditor.error("Guardado item con ID: " + item.getId());
+            auditor.error("Cantidad de atributos: " + item.getItemsAttributeValues().size());
+            item.getItemsAttributeValues().forEach(val -> {
+                auditor.error("→ " + val.getAttribute().getName() + " = " + val.getValue());
+            });
+
+            auditor.error("Inventario con ID: " + inventory.getId());
+            auditor.error("Cantidad de atributos: " + inventory.getAttributes().size());
+            inventory.getAttributes().forEach(val -> {
+                auditor.error("→ " + val.getName());
+            });
+
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "El item no tiene los mismos atributos que el inventario");
+        }
+
+        Item newItem = access.saveAndFlush(item);
+
+        auditor.trace("Guardado item con ID: " + newItem.getId());
+        auditor.trace("Cantidad de atributos: " + newItem.getItemsAttributeValues().size());
+        newItem.getItemsAttributeValues().forEach(val -> {
+            auditor.trace("→ " + val.getAttribute().getName() + " = " + val.getValue());
+        });
+
+        return transformer.toDTO(newItem);
     }
+
 
     // Obtener un item por ID
     public TransferableItemCreate getItemById(Integer id){

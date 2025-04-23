@@ -14,6 +14,8 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {TransformerAttribute.class, TransformerAttributeValue.class})
 public interface TransformerItem {
 
+    @Mapping(target = "inventory", ignore = true)
+    @Mapping(target = "itemsAttributeValues", source = "itemsAttributeValues")
     TransferableItem toDTO (Item item);
 
     @Mapping(target = "itemsAttributeValues", source = "itemsAttributeValues")
@@ -22,6 +24,7 @@ public interface TransformerItem {
     @Mapping(target = "inventory", ignore = true)
     @Mapping(target = "catalogs", ignore = true)
     Item toEntity(TransferableItemCreate transferableItemCreate);
+
     Item toEntity (TransferableItem transferableItem);
 
     @Mapping(target = "inventory", ignore = true)
@@ -29,6 +32,5 @@ public interface TransformerItem {
     List<Item> toEntityList (List<TransferableItem> transferableItemList);
 
     @Mapping(target = "inventory", ignore = true)
-    @Mapping(target = "catalogs", ignore = true)
     TransferableItemCreate toDTOcreate (Item item);
 }

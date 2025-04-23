@@ -2,14 +2,14 @@ package com.untdf.flexinventory.base.Transferable;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 public class TransferableItemCreate
 {
     private String name;
     private Integer inventory;
-    private Date creation_date;
-    private List<Integer> attributes;
-    private List<Integer> catalogs;
+    private Map<Integer, String> itemAtributeValue;
 
     //<--- Setter y getters--->
 
@@ -30,27 +30,11 @@ public class TransferableItemCreate
         this.inventory = inventory;
     }
 
-    public Date getCreation_date() {
-        return creation_date;
+    public Map<Integer, String> getItemAtributeValue() {
+        return itemAtributeValue;
     }
 
-    public void setCreation_date(Date creation_date) {
-        this.creation_date = creation_date;
-    }
-
-    public List<Integer> getAttributes() {
-        return attributes;
-    }
-
-    public void setAttributes(List<Integer> attributes) {
-        this.attributes = attributes;
-    }
-
-    public List<Integer> getCatalogs() {
-        return catalogs;
-    }
-
-    public void setCatalogs(List<Integer> catalogs) {
-        this.catalogs = catalogs;
+    public void setItemAtributeValue(Map<Integer, String> itemAtributeValue) {
+        this.itemAtributeValue = itemAtributeValue;
     }
 }
