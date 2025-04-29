@@ -27,7 +27,7 @@ function MenuLateral({ elementos, onElementoSeleccionado, onCrearInventario }) {
                     label: elemento.name,
                     icon: 'pi pi-table',
                     command: () => onElementoSeleccionado(elemento.id),
-                    template: itemRenderer
+
                 })),
 
                 {
@@ -36,16 +36,16 @@ function MenuLateral({ elementos, onElementoSeleccionado, onCrearInventario }) {
                     command: onCrearInventario, // Llamamos la función pasada para abrir el modal
                     style: { backgroundColor: '#28a745'},
                     disabled: false,
-                    template: itemRenderer
+
                 },
 
                 {
                     label: 'Borrar Inventario',
                     icon: 'pi pi-minus',
                     command: onCrearInventario, // Llamamos la función pasada para abrir el modal
-                    style: { backgroundColor: 'red', $textColor: "white" },
+                    style: { backgroundColor: 'red',  },
                     disabled: false,
-                    template: itemRenderer
+
                 }
             ]
         }
