@@ -53,23 +53,43 @@ public class ServiceItem {
 
     Logger auditor = LoggerFactory.getLogger(ResourceItem.class);
 
+    /**
+     * Recupera y transforma todos los ítems almacenados en el sistema.
+     *
+     * @return una lista de objetos {@code TransferableItem} que representan los ítems disponibles.
+     */
     public List<TransferableItem> getAllItem(){
         return transformer.toDTOList(access.findAll());
     }
 
-    /* Elimina un Item por el id */
+    /**
+     * Elimina un ítem del sistema según su identificador único.
+     *
+     * @param id el identificador del ítem a eliminar.
+     * @throws ResponseStatusException si el ítem con el ID proporcionado no existe (HTTP 409).
+     */
     public void deleteItemById(Integer id){
 
         /* Si no se encuentra una entidad con el id correspondiente arroja un 404 - NOT FOUND */
         if (access.findById(id).isEmpty()){
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Item with id: "+ id + " was not found for delete."
+                    HttpStatus.CONFLICT, "Item with id: "+ id + " was not found for delete."
             );
         }
 
         access.deleteById(id);
     }
 
+    /**
+     * Crea un nuevo ítem en un inventario específico, validando que los atributos provistos coincidan
+     * con los definidos por el inventario.
+     *
+     * También establece relaciones entre el ítem y sus atributos, aplicando validaciones de integridad lógica.
+     *
+     * @param transferableItem objeto DTO con los datos necesarios para la creación del ítem.
+     * @return el ítem creado, representado como un {@code TransferableItem}.
+     * @throws ResponseStatusException si los atributos provistos no coinciden con los del inventario (HTTP 409).
+     */
     public TransferableItem createItemIventory(TransferableItemCreate transferableItem){
 
         Item item = new Item();
@@ -148,7 +168,13 @@ public class ServiceItem {
     }
 
 
-    // Obtener un item por ID
+    /**
+     * Obtiene los datos de un ítem específico a partir de su identificador único.
+     *
+     * @param id el identificador del ítem que se desea recuperar.
+     * @return un objeto {@code TransferableItemCreate} con la información del ítem encontrado.
+     * @throws ResponseStatusException si el ítem no existe en el sistema (HTTP 404).
+     */
     public TransferableItemCreate getItemById(Integer id){
         if (access.findById(id).isEmpty()){
             throw new ResponseStatusException(

@@ -232,3 +232,6 @@
 2025-04-29T13:45:27.154-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
 2025-04-29T13:45:27.154-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@2d7d2fd6]
 2025-04-29T13:45:27.155-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-04-29T13:53:18.182-03:00  INFO 17517 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-04-29T13:53:18.189-03:00  INFO 17517 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-04-29T13:53:18.195-03:00  INFO 17517 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
