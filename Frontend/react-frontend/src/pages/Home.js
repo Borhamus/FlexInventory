@@ -1,22 +1,23 @@
 import React from 'react';
 import { Skeleton } from 'primereact/skeleton';
+import '../styles/Home.css';
 
 function Home() {
   return (
-      <div className='home' class = "grid nested-grid">
+      <div className='home' class = "home grid nested-grid">
 
         <div className="col-9">
 
           <div class = "grid nested-grid">
 
             <div className="col-4">
-              <Skeleton height="180px"/>
+              <Skeleton height="185px"/>
             </div>
             <div className="col-4">
-              <Skeleton height="180px"/>
+              <Skeleton height="185px"/>
             </div>
             <div className="col-4">
-              <Skeleton height="180px"/>
+              <Skeleton height="185px"/>
             </div>
 
             <div className="col-12">
@@ -37,7 +38,7 @@ function Home() {
         </div>
 
         <div class="col-3">
-          <Skeleton height="825px"/>
+          <Skeleton height="830px"/>
         </div>
 
       </div>

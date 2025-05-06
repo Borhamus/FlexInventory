@@ -1,237 +1,525 @@
-2025-04-29T13:11:53.365-03:00  INFO 17517 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 17517 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
-2025-04-29T13:11:53.369-03:00 DEBUG 17517 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
-2025-04-29T13:11:53.370-03:00  INFO 17517 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
-2025-04-29T13:11:53.406-03:00  INFO 17517 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-04-29T13:11:53.407-03:00  INFO 17517 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-04-29T13:11:53.978-03:00  INFO 17517 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-04-29T13:11:54.029-03:00  INFO 17517 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 43 ms. Found 4 JPA repository interfaces.
-2025-04-29T13:11:54.426-03:00  INFO 17517 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-04-29T13:11:54.437-03:00  INFO 17517 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-04-29T13:11:54.437-03:00  INFO 17517 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
-2025-04-29T13:11:54.473-03:00  INFO 17517 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-04-29T13:11:54.473-03:00  INFO 17517 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1065 ms
-2025-04-29T13:11:54.500-03:00  INFO 17517 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-04-29T13:11:54.633-03:00  INFO 17517 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@42f63302
-2025-04-29T13:11:54.634-03:00  INFO 17517 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-04-29T13:11:54.641-03:00  INFO 17517 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
-2025-04-29T13:11:55.063-03:00  INFO 17517 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-04-29T13:11:55.784-03:00  INFO 17517 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-04-29T13:11:56.191-03:00 DEBUG 17517 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
-2025-04-29T13:11:56.245-03:00 DEBUG 17517 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
-2025-04-29T13:11:56.272-03:00 DEBUG 17517 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2025-04-29T13:11:56.296-03:00 DEBUG 17517 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
-2025-04-29T13:11:56.447-03:00  INFO 17517 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-04-29T13:11:56.516-03:00  INFO 17517 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-04-29T13:11:56.529-03:00  INFO 17517 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 3.466 seconds (process running for 3.783)
-2025-04-29T13:12:00.734-03:00  INFO 17517 --- [api-base] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-04-29T13:12:00.734-03:00  INFO 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-04-29T13:12:00.734-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
-2025-04-29T13:12:00.734-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
-2025-04-29T13:12:00.735-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
-2025-04-29T13:12:00.735-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@59863765
-2025-04-29T13:12:00.736-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@59ad70b4
-2025-04-29T13:12:00.736-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
-2025-04-29T13:12:00.736-03:00  INFO 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
-2025-04-29T13:12:00.742-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:12:00.742-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:12:00.749-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:12:00.749-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:12:00.859-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:12:00.860-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@2be4208d, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:12:00.877-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:12:00.878-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@7f24e416]
-2025-04-29T13:12:00.887-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:12:00.887-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:12:41.096-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:12:41.097-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:12:41.096-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:12:41.100-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:12:41.115-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:12:41.116-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@536e4736]
-2025-04-29T13:12:41.118-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:12:41.119-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:12:41.119-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@44099f53, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:12:41.121-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:13:08.057-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:13:08.057-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:13:08.059-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:13:08.060-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:13:08.078-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:13:08.078-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@1a50d0b4]
-2025-04-29T13:13:08.080-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:13:08.081-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:13:08.082-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@c223a9e, com.untdf.flexinventory.ba (truncated)...]
-2025-04-29T13:13:08.084-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:18:39.029-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:18:39.029-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:18:39.030-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:18:39.030-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:18:39.047-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:18:39.047-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:18:39.047-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@6231c41f]
-2025-04-29T13:18:39.047-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@362268ad, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:18:39.049-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:18:39.050-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:19:03.041-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:19:03.041-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:19:03.042-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:19:03.042-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:19:03.054-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:19:03.054-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@520177f5]
-2025-04-29T13:19:03.055-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:19:03.056-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:19:03.056-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@7af28d1e, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:19:03.057-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:19:03.675-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:19:03.675-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:19:03.676-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:19:03.676-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:19:03.692-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:19:03.692-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:19:03.692-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@44187de2, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:19:03.693-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@45c9aafa]
-2025-04-29T13:19:03.694-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:19:03.694-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:19:30.760-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:19:30.760-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:19:30.761-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:19:30.761-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:19:30.773-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:19:30.773-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@56b6e499]
-2025-04-29T13:19:30.774-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:19:30.775-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@190037e, com.untdf.flexinventory.ba (truncated)...]
-2025-04-29T13:19:30.776-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:19:30.776-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:19:31.839-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:19:31.839-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:19:31.839-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:19:31.839-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:19:31.849-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:19:31.850-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@1890936f]
-2025-04-29T13:19:31.851-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:19:31.853-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:19:31.853-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@49f1c107, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:19:31.854-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:21:46.257-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:21:46.258-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:21:46.258-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:21:46.258-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:21:46.267-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:21:46.267-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@3545cdd1]
-2025-04-29T13:21:46.268-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:21:46.268-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@2022fc97, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:21:46.268-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:21:46.269-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:22:03.465-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:22:03.465-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:22:03.465-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:22:03.465-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:22:03.474-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:22:03.474-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@1d403d7d]
-2025-04-29T13:22:03.475-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:22:03.475-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:22:03.480-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@7806d775, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:22:03.481-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:22:05.091-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:22:05.091-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:22:05.091-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:22:05.091-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:22:05.101-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:22:05.101-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@6fc5a499]
-2025-04-29T13:22:05.101-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:22:05.101-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@e70dc91, com.untdf.flexinventory.ba (truncated)...]
-2025-04-29T13:22:05.102-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:22:05.105-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:22:26.857-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:22:26.857-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:22:26.857-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:22:26.857-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:22:26.868-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:22:26.869-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@94e3d4d]
-2025-04-29T13:22:26.869-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:22:26.869-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@6084eda9, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:22:26.869-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:22:26.870-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:22:32.194-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:22:32.194-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:22:32.194-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:22:32.194-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:22:32.203-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:22:32.204-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@65d2dde9]
-2025-04-29T13:22:32.205-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:22:32.205-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:22:32.205-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@7c64b6a6, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:22:32.206-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:22:32.879-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:22:32.879-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:22:32.880-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:22:32.880-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:22:32.886-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:22:32.887-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:22:32.887-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@3eb8d96c]
-2025-04-29T13:22:32.887-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@708b187c, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:22:32.888-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:22:32.888-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:23:16.631-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/inventory/2", parameters={}
-2025-04-29T13:23:16.631-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:23:16.634-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:23:16.634-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@508142c6]
-2025-04-29T13:23:16.635-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:23:17.281-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:23:17.282-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:23:17.288-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:23:17.289-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@101b51b]
-2025-04-29T13:23:17.290-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:23:17.801-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/inventory/2", parameters={}
-2025-04-29T13:23:17.801-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:23:17.806-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:23:17.806-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@6a8247eb]
-2025-04-29T13:23:17.807-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:23:18.523-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:23:18.524-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:23:18.533-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:23:18.533-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@75a0696d]
-2025-04-29T13:23:18.534-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:23:19.143-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/inventory/2", parameters={}
-2025-04-29T13:23:19.144-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:23:19.148-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:23:19.148-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@1f4906ce]
-2025-04-29T13:23:19.149-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:23:20.149-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:23:20.150-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:23:20.158-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:23:20.158-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@2c73ac35]
-2025-04-29T13:23:20.159-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:23:30.545-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/inventory/2", parameters={}
-2025-04-29T13:23:30.545-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:23:30.549-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:23:30.549-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@58801620]
-2025-04-29T13:23:30.549-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:23:36.305-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:23:36.306-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:23:36.314-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:23:36.314-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@3e228920]
-2025-04-29T13:23:36.315-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:45:13.904-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:45:13.905-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:45:13.905-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
-2025-04-29T13:45:13.905-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
-2025-04-29T13:45:13.913-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:45:13.913-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@69dac62b]
-2025-04-29T13:45:13.914-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:45:13.916-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:45:13.916-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@6697c8dc, com.untdf.flexinventory.b (truncated)...]
-2025-04-29T13:45:13.917-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:45:26.334-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/inventory/2", parameters={}
-2025-04-29T13:45:26.334-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:45:26.338-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:45:26.338-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@4186decd]
-2025-04-29T13:45:26.339-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:45:27.146-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
-2025-04-29T13:45:27.147-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-04-29T13:45:27.154-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
-2025-04-29T13:45:27.154-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@2d7d2fd6]
-2025-04-29T13:45:27.155-03:00 DEBUG 17517 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-04-29T13:53:18.182-03:00  INFO 17517 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-04-29T13:53:18.189-03:00  INFO 17517 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-04-29T13:53:18.195-03:00  INFO 17517 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-05-06T09:19:55.162-03:00  INFO 8351 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 8351 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
+2025-05-06T09:19:55.166-03:00 DEBUG 8351 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
+2025-05-06T09:19:55.167-03:00  INFO 8351 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
+2025-05-06T09:19:55.208-03:00  INFO 8351 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-05-06T09:19:55.208-03:00  INFO 8351 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-05-06T09:19:55.818-03:00  INFO 8351 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-06T09:19:55.869-03:00  INFO 8351 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 44 ms. Found 4 JPA repository interfaces.
+2025-05-06T09:19:56.283-03:00  INFO 8351 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-05-06T09:19:56.294-03:00  INFO 8351 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-06T09:19:56.294-03:00  INFO 8351 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
+2025-05-06T09:19:56.332-03:00  INFO 8351 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-05-06T09:19:56.333-03:00  INFO 8351 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1124 ms
+2025-05-06T09:19:56.361-03:00  INFO 8351 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-06T09:19:56.501-03:00  INFO 8351 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@1677a6f
+2025-05-06T09:19:56.502-03:00  INFO 8351 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-06T09:19:56.510-03:00  INFO 8351 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
+2025-05-06T09:19:56.931-03:00  INFO 8351 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-06T09:19:57.735-03:00  INFO 8351 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-06T09:19:58.208-03:00 DEBUG 8351 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
+2025-05-06T09:19:58.269-03:00 DEBUG 8351 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
+2025-05-06T09:19:58.293-03:00 DEBUG 8351 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-05-06T09:19:58.317-03:00 DEBUG 8351 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-05-06T09:19:58.423-03:00  INFO 8351 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-05-06T09:19:58.454-03:00  INFO 8351 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-05-06T09:19:58.470-03:00  INFO 8351 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 3.625 seconds (process running for 3.966)
+2025-05-06T09:21:57.877-03:00  INFO 8351 --- [api-base] [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-06T09:21:57.877-03:00  INFO 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-05-06T09:21:57.877-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2025-05-06T09:21:57.878-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2025-05-06T09:21:57.878-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
+2025-05-06T09:21:57.879-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@2f449e4f
+2025-05-06T09:21:57.880-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@bcb69fe
+2025-05-06T09:21:57.881-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-05-06T09:21:57.881-03:00  INFO 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 4 ms
+2025-05-06T09:21:57.889-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
+2025-05-06T09:21:57.889-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T09:21:57.899-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
+2025-05-06T09:21:57.899-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T09:21:57.981-03:00 ERROR 8351 --- [api-base] [http-nio-8080-exec-2] o.h.engine.jdbc.spi.SqlExceptionHelper   : ERROR: relation "api-base.inventory" does not exist
+  Position: 86
+2025-05-06T09:21:57.990-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Failed to complete request: org.springframework.dao.InvalidDataAccessResourceUsageException: JDBC exception executing SQL [select i1_0.id,i1_0.creation_date,i1_0.description,i1_0.name,i1_0.revision_date from "api-base".inventory i1_0 where i1_0.id=?] [ERROR: relation "api-base.inventory" does not exist
+  Position: 86] [n/a]; SQL [n/a]
+2025-05-06T09:21:57.990-03:00 ERROR 8351 --- [api-base] [http-nio-8080-exec-2] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: org.springframework.dao.InvalidDataAccessResourceUsageException: JDBC exception executing SQL [select i1_0.id,i1_0.creation_date,i1_0.description,i1_0.name,i1_0.revision_date from "api-base".inventory i1_0 where i1_0.id=?] [ERROR: relation "api-base.inventory" does not exist
+  Position: 86] [n/a]; SQL [n/a]] with root cause
+
+org.postgresql.util.PSQLException: ERROR: relation "api-base.inventory" does not exist
+  Position: 86
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:194) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.jdbc.PgPreparedStatement.executeQuery(PgPreparedStatement.java:137) ~[postgresql-42.7.4.jar:42.7.4]
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeQuery(ProxyPreparedStatement.java:52) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeQuery(HikariProxyPreparedStatement.java) ~[HikariCP-5.1.0.jar:na]
+	at org.hibernate.sql.results.jdbc.internal.DeferredResultSetAccess.executeQuery(DeferredResultSetAccess.java:246) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.jdbc.internal.DeferredResultSetAccess.getResultSet(DeferredResultSetAccess.java:167) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.jdbc.internal.JdbcValuesResultSetImpl.advanceNext(JdbcValuesResultSetImpl.java:265) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.jdbc.internal.JdbcValuesResultSetImpl.processNext(JdbcValuesResultSetImpl.java:145) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.jdbc.internal.AbstractJdbcValues.next(AbstractJdbcValues.java:19) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.internal.RowProcessingStateStandardImpl.next(RowProcessingStateStandardImpl.java:67) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.spi.ListResultsConsumer.consume(ListResultsConsumer.java:182) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.spi.ListResultsConsumer.consume(ListResultsConsumer.java:33) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.exec.internal.JdbcSelectExecutorStandardImpl.doExecuteQuery(JdbcSelectExecutorStandardImpl.java:211) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.exec.internal.JdbcSelectExecutorStandardImpl.executeQuery(JdbcSelectExecutorStandardImpl.java:83) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.exec.spi.JdbcSelectExecutor.list(JdbcSelectExecutor.java:76) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.exec.spi.JdbcSelectExecutor.list(JdbcSelectExecutor.java:65) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.loader.ast.internal.SingleIdLoadPlan.load(SingleIdLoadPlan.java:145) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.loader.ast.internal.SingleIdLoadPlan.load(SingleIdLoadPlan.java:117) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.loader.ast.internal.SingleIdEntityLoaderStandardImpl.load(SingleIdEntityLoaderStandardImpl.java:75) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.persister.entity.AbstractEntityPersister.doLoad(AbstractEntityPersister.java:3740) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.persister.entity.AbstractEntityPersister.load(AbstractEntityPersister.java:3729) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.event.internal.DefaultLoadEventListener.loadFromDatasource(DefaultLoadEventListener.java:604) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.event.internal.DefaultLoadEventListener.loadFromCacheOrDatasource(DefaultLoadEventListener.java:590) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.event.internal.DefaultLoadEventListener.load(DefaultLoadEventListener.java:560) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.event.internal.DefaultLoadEventListener.doLoad(DefaultLoadEventListener.java:544) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.event.internal.DefaultLoadEventListener.load(DefaultLoadEventListener.java:207) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.event.internal.DefaultLoadEventListener.loadWithRegularProxy(DefaultLoadEventListener.java:290) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.event.internal.DefaultLoadEventListener.proxyOrLoad(DefaultLoadEventListener.java:242) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.event.internal.DefaultLoadEventListener.doOnLoad(DefaultLoadEventListener.java:111) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.event.internal.DefaultLoadEventListener.onLoad(DefaultLoadEventListener.java:68) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.event.service.internal.EventListenerGroupImpl.fireEventOnEachListener(EventListenerGroupImpl.java:138) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.internal.SessionImpl.fireLoadNoChecks(SessionImpl.java:1225) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.internal.SessionImpl.fireLoad(SessionImpl.java:1213) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.loader.internal.IdentifierLoadAccessImpl.load(IdentifierLoadAccessImpl.java:209) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.loader.internal.IdentifierLoadAccessImpl.doLoad(IdentifierLoadAccessImpl.java:160) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.loader.internal.IdentifierLoadAccessImpl.lambda$load$1(IdentifierLoadAccessImpl.java:149) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.loader.internal.IdentifierLoadAccessImpl.perform(IdentifierLoadAccessImpl.java:112) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.loader.internal.IdentifierLoadAccessImpl.load(IdentifierLoadAccessImpl.java:149) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.internal.SessionImpl.find(SessionImpl.java:2429) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.internal.SessionImpl.find(SessionImpl.java:2400) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.orm.jpa.ExtendedEntityManagerCreator$ExtendedEntityManagerInvocationHandler.invoke(ExtendedEntityManagerCreator.java:364) ~[spring-orm-6.1.13.jar:6.1.13]
+	at jdk.proxy4/jdk.proxy4.$Proxy141.find(Unknown Source) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.orm.jpa.SharedEntityManagerCreator$SharedEntityManagerInvocationHandler.invoke(SharedEntityManagerCreator.java:319) ~[spring-orm-6.1.13.jar:6.1.13]
+	at jdk.proxy4/jdk.proxy4.$Proxy141.find(Unknown Source) ~[na:na]
+	at org.springframework.data.jpa.repository.support.SimpleJpaRepository.findById(SimpleJpaRepository.java:317) ~[spring-data-jpa-3.3.4.jar:3.3.4]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:355) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.data.repository.core.support.RepositoryMethodInvoker$RepositoryFragmentMethodInvoker.lambda$new$0(RepositoryMethodInvoker.java:277) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.doInvoke(RepositoryMethodInvoker.java:170) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke(RepositoryMethodInvoker.java:158) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.RepositoryComposition$RepositoryFragments.invoke(RepositoryComposition.java:516) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.RepositoryComposition.invoke(RepositoryComposition.java:285) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.RepositoryFactorySupport$ImplementationMethodExecutionInterceptor.invoke(RepositoryFactorySupport.java:628) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.doInvoke(QueryExecutorMethodInterceptor.java:173) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.invoke(QueryExecutorMethodInterceptor.java:148) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.data.projection.DefaultMethodInvokingMethodInterceptor.invoke(DefaultMethodInvokingMethodInterceptor.java:70) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:379) ~[spring-tx-6.1.13.jar:6.1.13]
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:138) ~[spring-tx-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.data.jpa.repository.support.CrudMethodMetadataPostProcessor$CrudMethodMetadataPopulatingMethodInterceptor.invoke(CrudMethodMetadataPostProcessor.java:165) ~[spring-data-jpa-3.3.4.jar:3.3.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:223) ~[spring-aop-6.1.13.jar:6.1.13]
+	at jdk.proxy4/jdk.proxy4.$Proxy147.findById(Unknown Source) ~[na:na]
+	at com.untdf.flexinventory.base.Service.ServiceInventory.getInventoryById(ServiceInventory.java:45) ~[classes/:na]
+	at com.untdf.flexinventory.base.Resource.ResourceInventory.getInventory(ResourceInventory.java:68) ~[classes/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at java.base/java.lang.Thread.run(Thread.java:842) ~[na:na]
+
+2025-05-06T09:21:58.003-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : "ERROR" dispatch for GET "/error", parameters={}
+2025-05-06T09:21:58.004-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController#error(HttpServletRequest)
+2025-05-06T09:21:58.021-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T09:21:58.022-03:00 ERROR 8351 --- [api-base] [http-nio-8080-exec-1] o.h.engine.jdbc.spi.SqlExceptionHelper   : ERROR: relation "api-base.inventory" does not exist
+  Position: 86
+2025-05-06T09:21:58.023-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Failed to complete request: org.springframework.dao.InvalidDataAccessResourceUsageException: JDBC exception executing SQL [select i1_0.id,i1_0.creation_date,i1_0.description,i1_0.name,i1_0.revision_date from "api-base".inventory i1_0] [ERROR: relation "api-base.inventory" does not exist
+  Position: 86] [n/a]; SQL [n/a]
+2025-05-06T09:21:58.023-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [{timestamp=Tue May 06 09:21:58 ART 2025, status=500, error=Internal Server Error, trace=org.springfr (truncated)...]
+2025-05-06T09:21:58.023-03:00 ERROR 8351 --- [api-base] [http-nio-8080-exec-1] o.a.c.c.C.[.[.[/].[dispatcherServlet]    : Servlet.service() for servlet [dispatcherServlet] in context with path [] threw exception [Request processing failed: org.springframework.dao.InvalidDataAccessResourceUsageException: JDBC exception executing SQL [select i1_0.id,i1_0.creation_date,i1_0.description,i1_0.name,i1_0.revision_date from "api-base".inventory i1_0] [ERROR: relation "api-base.inventory" does not exist
+  Position: 86] [n/a]; SQL [n/a]] with root cause
+
+org.postgresql.util.PSQLException: ERROR: relation "api-base.inventory" does not exist
+  Position: 86
+	at org.postgresql.core.v3.QueryExecutorImpl.receiveErrorResponse(QueryExecutorImpl.java:2733) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.core.v3.QueryExecutorImpl.processResults(QueryExecutorImpl.java:2420) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.core.v3.QueryExecutorImpl.execute(QueryExecutorImpl.java:372) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.jdbc.PgStatement.executeInternal(PgStatement.java:517) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.jdbc.PgStatement.execute(PgStatement.java:434) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.jdbc.PgPreparedStatement.executeWithFlags(PgPreparedStatement.java:194) ~[postgresql-42.7.4.jar:42.7.4]
+	at org.postgresql.jdbc.PgPreparedStatement.executeQuery(PgPreparedStatement.java:137) ~[postgresql-42.7.4.jar:42.7.4]
+	at com.zaxxer.hikari.pool.ProxyPreparedStatement.executeQuery(ProxyPreparedStatement.java:52) ~[HikariCP-5.1.0.jar:na]
+	at com.zaxxer.hikari.pool.HikariProxyPreparedStatement.executeQuery(HikariProxyPreparedStatement.java) ~[HikariCP-5.1.0.jar:na]
+	at org.hibernate.sql.results.jdbc.internal.DeferredResultSetAccess.executeQuery(DeferredResultSetAccess.java:246) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.jdbc.internal.DeferredResultSetAccess.getResultSet(DeferredResultSetAccess.java:167) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.jdbc.internal.JdbcValuesResultSetImpl.advanceNext(JdbcValuesResultSetImpl.java:265) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.jdbc.internal.JdbcValuesResultSetImpl.processNext(JdbcValuesResultSetImpl.java:145) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.jdbc.internal.AbstractJdbcValues.next(AbstractJdbcValues.java:19) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.internal.RowProcessingStateStandardImpl.next(RowProcessingStateStandardImpl.java:67) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.spi.ListResultsConsumer.consume(ListResultsConsumer.java:204) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.results.spi.ListResultsConsumer.consume(ListResultsConsumer.java:33) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.exec.internal.JdbcSelectExecutorStandardImpl.doExecuteQuery(JdbcSelectExecutorStandardImpl.java:211) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.exec.internal.JdbcSelectExecutorStandardImpl.executeQuery(JdbcSelectExecutorStandardImpl.java:83) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.exec.spi.JdbcSelectExecutor.list(JdbcSelectExecutor.java:76) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.sql.exec.spi.JdbcSelectExecutor.list(JdbcSelectExecutor.java:65) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.query.sqm.internal.ConcreteSqmSelectQueryPlan.lambda$new$2(ConcreteSqmSelectQueryPlan.java:139) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.query.sqm.internal.ConcreteSqmSelectQueryPlan.withCacheableSqmInterpretation(ConcreteSqmSelectQueryPlan.java:382) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.query.sqm.internal.ConcreteSqmSelectQueryPlan.performList(ConcreteSqmSelectQueryPlan.java:302) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.query.sqm.internal.QuerySqmImpl.doList(QuerySqmImpl.java:526) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.query.spi.AbstractSelectionQuery.list(AbstractSelectionQuery.java:423) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.hibernate.query.Query.getResultList(Query.java:120) ~[hibernate-core-6.5.3.Final.jar:6.5.3.Final]
+	at org.springframework.data.jpa.repository.support.SimpleJpaRepository.findAll(SimpleJpaRepository.java:387) ~[spring-data-jpa-3.3.4.jar:3.3.4]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.aop.support.AopUtils.invokeJoinpointUsingReflection(AopUtils.java:355) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.data.repository.core.support.RepositoryMethodInvoker$RepositoryFragmentMethodInvoker.lambda$new$0(RepositoryMethodInvoker.java:277) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.doInvoke(RepositoryMethodInvoker.java:170) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.RepositoryMethodInvoker.invoke(RepositoryMethodInvoker.java:158) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.RepositoryComposition$RepositoryFragments.invoke(RepositoryComposition.java:516) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.RepositoryComposition.invoke(RepositoryComposition.java:285) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.RepositoryFactorySupport$ImplementationMethodExecutionInterceptor.invoke(RepositoryFactorySupport.java:628) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.doInvoke(QueryExecutorMethodInterceptor.java:173) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.data.repository.core.support.QueryExecutorMethodInterceptor.invoke(QueryExecutorMethodInterceptor.java:148) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.data.projection.DefaultMethodInvokingMethodInterceptor.invoke(DefaultMethodInvokingMethodInterceptor.java:70) ~[spring-data-commons-3.3.4.jar:3.3.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.transaction.interceptor.TransactionAspectSupport.invokeWithinTransaction(TransactionAspectSupport.java:379) ~[spring-tx-6.1.13.jar:6.1.13]
+	at org.springframework.transaction.interceptor.TransactionInterceptor.invoke(TransactionInterceptor.java:119) ~[spring-tx-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.dao.support.PersistenceExceptionTranslationInterceptor.invoke(PersistenceExceptionTranslationInterceptor.java:138) ~[spring-tx-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.data.jpa.repository.support.CrudMethodMetadataPostProcessor$CrudMethodMetadataPopulatingMethodInterceptor.invoke(CrudMethodMetadataPostProcessor.java:165) ~[spring-data-jpa-3.3.4.jar:3.3.4]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.aop.interceptor.ExposeInvocationInterceptor.invoke(ExposeInvocationInterceptor.java:97) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.ReflectiveMethodInvocation.proceed(ReflectiveMethodInvocation.java:184) ~[spring-aop-6.1.13.jar:6.1.13]
+	at org.springframework.aop.framework.JdkDynamicAopProxy.invoke(JdkDynamicAopProxy.java:223) ~[spring-aop-6.1.13.jar:6.1.13]
+	at jdk.proxy4/jdk.proxy4.$Proxy147.findAll(Unknown Source) ~[na:na]
+	at com.untdf.flexinventory.base.Service.ServiceInventory.getAllInventories(ServiceInventory.java:38) ~[classes/:na]
+	at com.untdf.flexinventory.base.Resource.ResourceInventory.getAllInventories(ResourceInventory.java:45) ~[classes/:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke0(Native Method) ~[na:na]
+	at java.base/jdk.internal.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:77) ~[na:na]
+	at java.base/jdk.internal.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43) ~[na:na]
+	at java.base/java.lang.reflect.Method.invoke(Method.java:568) ~[na:na]
+	at org.springframework.web.method.support.InvocableHandlerMethod.doInvoke(InvocableHandlerMethod.java:255) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.method.support.InvocableHandlerMethod.invokeForRequest(InvocableHandlerMethod.java:188) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.ServletInvocableHandlerMethod.invokeAndHandle(ServletInvocableHandlerMethod.java:118) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.invokeHandlerMethod(RequestMappingHandlerAdapter.java:926) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter.handleInternal(RequestMappingHandlerAdapter.java:831) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.mvc.method.AbstractHandlerMethodAdapter.handle(AbstractHandlerMethodAdapter.java:87) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doDispatch(DispatcherServlet.java:1089) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.DispatcherServlet.doService(DispatcherServlet.java:979) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.processRequest(FrameworkServlet.java:1014) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at org.springframework.web.servlet.FrameworkServlet.doGet(FrameworkServlet.java:903) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:564) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.springframework.web.servlet.FrameworkServlet.service(FrameworkServlet.java:885) ~[spring-webmvc-6.1.13.jar:6.1.13]
+	at jakarta.servlet.http.HttpServlet.service(HttpServlet.java:658) ~[tomcat-embed-core-10.1.30.jar:6.0]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:195) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:51) ~[tomcat-embed-websocket-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.RequestContextFilter.doFilterInternal(RequestContextFilter.java:100) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.FormContentFilter.doFilterInternal(FormContentFilter.java:93) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.springframework.web.filter.CharacterEncodingFilter.doFilterInternal(CharacterEncodingFilter.java:201) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.springframework.web.filter.OncePerRequestFilter.doFilter(OncePerRequestFilter.java:116) ~[spring-web-6.1.13.jar:6.1.13]
+	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:164) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:140) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:167) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:90) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:483) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:115) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:93) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:74) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:344) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.http11.Http11Processor.service(Http11Processor.java:384) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProcessorLight.process(AbstractProcessorLight.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.coyote.AbstractProtocol$ConnectionHandler.process(AbstractProtocol.java:905) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.NioEndpoint$SocketProcessor.doRun(NioEndpoint.java:1741) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.net.SocketProcessorBase.run(SocketProcessorBase.java:52) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1190) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:659) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:63) ~[tomcat-embed-core-10.1.30.jar:10.1.30]
+	at java.base/java.lang.Thread.run(Thread.java:842) ~[na:na]
+
+2025-05-06T09:21:58.026-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : "ERROR" dispatch for GET "/error", parameters={}
+2025-05-06T09:21:58.027-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController#error(HttpServletRequest)
+2025-05-06T09:21:58.029-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T09:21:58.030-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [{timestamp=Tue May 06 09:21:58 ART 2025, status=500, error=Internal Server Error, trace=org.springfr (truncated)...]
+2025-05-06T09:21:58.062-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Exiting from "ERROR" dispatch, status 500
+2025-05-06T09:21:58.064-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Exiting from "ERROR" dispatch, status 500
+2025-05-06T09:22:44.480-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
+2025-05-06T09:22:44.480-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T09:22:44.481-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
+2025-05-06T09:22:44.481-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T09:22:44.524-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T09:22:44.525-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@293d5ca0, com.untdf.flexinventory.b (truncated)...]
+2025-05-06T09:22:44.531-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T09:22:44.532-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@104e8308]
+2025-05-06T09:22:44.537-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T09:22:44.538-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T09:22:53.343-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/inventory/2", parameters={}
+2025-05-06T09:22:53.345-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T09:22:53.365-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T09:22:53.365-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@5ca17cd5]
+2025-05-06T09:22:53.368-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T09:22:54.267-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T09:22:54.268-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T09:22:54.280-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T09:22:54.280-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@4245306b]
+2025-05-06T09:22:54.281-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T09:22:55.307-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/inventory/2", parameters={}
+2025-05-06T09:22:55.308-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T09:22:55.313-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T09:22:55.314-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@23aecbf4]
+2025-05-06T09:22:55.315-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T09:22:57.110-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T09:22:57.110-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T09:22:57.121-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T09:22:57.122-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@71e85e3]
+2025-05-06T09:22:57.123-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T09:23:05.740-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T09:23:05.740-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
+2025-05-06T09:23:05.740-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-9] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T09:23:05.740-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-10] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
+2025-05-06T09:23:05.758-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T09:23:05.759-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-9] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@73f30b88]
+2025-05-06T09:23:05.761-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T09:23:05.763-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T09:23:05.763-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-10] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@73259148, com.untdf.flexinventory.b (truncated)...]
+2025-05-06T09:23:05.764-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:09:54.913-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
+2025-05-06T10:09:54.913-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T10:09:54.913-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
+2025-05-06T10:09:54.913-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T10:09:54.935-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T10:09:54.936-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@4b7fd748]
+2025-05-06T10:09:54.937-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:09:54.941-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T10:09:54.942-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@26cbf207, com.untdf.flexinventory.b (truncated)...]
+2025-05-06T10:09:54.943-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:09:57.212-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/inventory/2", parameters={}
+2025-05-06T10:09:57.213-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T10:09:57.219-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T10:09:57.219-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@3c9a89fc]
+2025-05-06T10:09:57.220-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:09:57.831-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T10:09:57.832-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T10:09:57.847-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T10:09:57.847-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@50569c05]
+2025-05-06T10:09:57.849-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:10:04.527-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/inventory/2", parameters={}
+2025-05-06T10:10:04.528-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T10:10:04.534-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T10:10:04.534-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@1e7f0403]
+2025-05-06T10:10:04.536-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:10:06.724-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T10:10:06.725-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T10:10:06.736-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T10:10:06.736-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@61632158]
+2025-05-06T10:10:06.737-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:10:21.485-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : GET "/swagger-ui/swagger-ui.css", parameters={}
+2025-05-06T10:10:21.486-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/swagger-ui/swagger-ui-standalone-preset.js", parameters={}
+2025-05-06T10:10:21.486-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/swagger-ui/swagger-initializer.js", parameters={}
+2025-05-06T10:10:21.486-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : GET "/swagger-ui/swagger-ui-bundle.js", parameters={}
+2025-05-06T10:10:21.489-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]
+2025-05-06T10:10:21.489-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-10] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]
+2025-05-06T10:10:21.489-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-9] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]
+2025-05-06T10:10:21.489-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]
+2025-05-06T10:10:21.501-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-9] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:10:21.502-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:10:21.506-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:10:21.521-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-10] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:10:21.662-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/openapi/swagger-config", parameters={}
+2025-05-06T10:10:21.663-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springdoc.webmvc.ui.SwaggerConfigResource#openapiJson(HttpServletRequest)
+2025-05-06T10:10:21.664-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json]
+2025-05-06T10:10:21.664-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [{configUrl=/openapi/swagger-config, oauth2RedirectUrl=http://localhost:8080/swagger-ui/oauth2-redire (truncated)...]
+2025-05-06T10:10:21.665-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T10:10:21.673-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/openapi", parameters={}
+2025-05-06T10:10:21.674-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springdoc.webmvc.api.OpenApiWebMvcResource#openapiJson(HttpServletRequest, String, Locale)
+2025-05-06T10:10:22.021-03:00  INFO 8351 --- [api-base] [http-nio-8080-exec-4] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 341 ms
+2025-05-06T10:10:22.034-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, */*] and supported [application/json]
+2025-05-06T10:10:22.037-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [{123, 34, 111, 112, 101, 110, 97, 112, 105, 34, 58, 34, 51, 46, 48, 46, 49, 34, 44, 34, 105, 110, 10 (truncated)...]
+2025-05-06T10:10:22.037-03:00 DEBUG 8351 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:01:47.374-03:00  INFO 8351 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-06T11:01:47.378-03:00  INFO 8351 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-06T11:01:47.383-03:00  INFO 8351 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-05-06T11:01:52.794-03:00  INFO 22952 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 22952 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
+2025-05-06T11:01:52.795-03:00 DEBUG 22952 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
+2025-05-06T11:01:52.796-03:00  INFO 22952 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
+2025-05-06T11:01:52.826-03:00  INFO 22952 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-05-06T11:01:52.827-03:00  INFO 22952 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-05-06T11:01:53.314-03:00  INFO 22952 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-06T11:01:53.357-03:00  INFO 22952 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 38 ms. Found 4 JPA repository interfaces.
+2025-05-06T11:01:53.685-03:00  INFO 22952 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-05-06T11:01:53.695-03:00  INFO 22952 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-06T11:01:53.695-03:00  INFO 22952 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
+2025-05-06T11:01:53.728-03:00  INFO 22952 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-05-06T11:01:53.729-03:00  INFO 22952 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 902 ms
+2025-05-06T11:01:53.760-03:00  INFO 22952 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-06T11:01:53.857-03:00  INFO 22952 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@40570c7
+2025-05-06T11:01:53.865-03:00  INFO 22952 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-06T11:01:53.872-03:00  INFO 22952 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
+2025-05-06T11:01:54.173-03:00  INFO 22952 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-06T11:01:54.812-03:00  INFO 22952 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-06T11:01:55.135-03:00 DEBUG 22952 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
+2025-05-06T11:01:55.193-03:00 DEBUG 22952 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
+2025-05-06T11:01:55.215-03:00 DEBUG 22952 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-05-06T11:01:55.240-03:00 DEBUG 22952 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-05-06T11:01:55.339-03:00  INFO 22952 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-05-06T11:01:55.359-03:00  INFO 22952 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-05-06T11:01:55.368-03:00  INFO 22952 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 2.831 seconds (process running for 3.06)
+2025-05-06T11:07:21.298-03:00  INFO 22952 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-06T11:07:21.300-03:00  INFO 22952 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-06T11:07:21.302-03:00  INFO 22952 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-05-06T11:07:26.980-03:00  INFO 23168 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 23168 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
+2025-05-06T11:07:26.982-03:00 DEBUG 23168 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
+2025-05-06T11:07:26.982-03:00  INFO 23168 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
+2025-05-06T11:07:27.015-03:00  INFO 23168 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-05-06T11:07:27.015-03:00  INFO 23168 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-05-06T11:07:27.527-03:00  INFO 23168 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-06T11:07:27.574-03:00  INFO 23168 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42 ms. Found 4 JPA repository interfaces.
+2025-05-06T11:07:27.922-03:00  INFO 23168 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-05-06T11:07:27.932-03:00  INFO 23168 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-06T11:07:27.932-03:00  INFO 23168 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
+2025-05-06T11:07:27.965-03:00  INFO 23168 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-05-06T11:07:27.966-03:00  INFO 23168 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 951 ms
+2025-05-06T11:07:27.993-03:00  INFO 23168 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-06T11:07:28.094-03:00  INFO 23168 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4c8d7e3f
+2025-05-06T11:07:28.095-03:00  INFO 23168 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-06T11:07:28.102-03:00  INFO 23168 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
+2025-05-06T11:07:28.415-03:00  INFO 23168 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-06T11:07:29.069-03:00  INFO 23168 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-06T11:07:29.451-03:00 DEBUG 23168 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
+2025-05-06T11:07:29.507-03:00 DEBUG 23168 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
+2025-05-06T11:07:29.533-03:00 DEBUG 23168 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-05-06T11:07:29.557-03:00 DEBUG 23168 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-05-06T11:07:29.656-03:00  INFO 23168 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-05-06T11:07:29.675-03:00  INFO 23168 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-05-06T11:07:29.683-03:00  INFO 23168 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 2.974 seconds (process running for 3.238)
+2025-05-06T11:23:23.610-03:00  INFO 23168 --- [api-base] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-06T11:23:23.610-03:00  INFO 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-05-06T11:23:23.611-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2025-05-06T11:23:23.611-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2025-05-06T11:23:23.611-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
+2025-05-06T11:23:23.612-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@2311a614
+2025-05-06T11:23:23.612-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@1a0a77b6
+2025-05-06T11:23:23.612-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-05-06T11:23:23.613-03:00  INFO 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-05-06T11:23:23.619-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
+2025-05-06T11:23:23.619-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T11:23:23.626-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
+2025-05-06T11:23:23.626-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T11:23:23.747-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T11:23:23.748-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@53cfb5ff, com.untdf.flexinventory.b (truncated)...]
+2025-05-06T11:23:23.753-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T11:23:23.754-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@5fbc0232]
+2025-05-06T11:23:23.767-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:23:23.769-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:33:20.632-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
+2025-05-06T11:33:20.632-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T11:33:20.632-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
+2025-05-06T11:33:20.632-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T11:33:20.656-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T11:33:20.656-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@c19460f]
+2025-05-06T11:33:20.657-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T11:33:20.658-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@86a6486, com.untdf.flexinventory.ba (truncated)...]
+2025-05-06T11:33:20.661-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:33:20.661-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:33:25.275-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T11:33:25.275-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
+2025-05-06T11:33:25.276-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-8] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
+2025-05-06T11:33:25.276-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T11:33:25.297-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T11:33:25.298-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@7c93d234]
+2025-05-06T11:33:25.299-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:33:25.301-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T11:33:25.301-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-8] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@4a7737d9, com.untdf.flexinventory.b (truncated)...]
+2025-05-06T11:33:25.303-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-8] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:42:25.349-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T11:42:25.350-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
+2025-05-06T11:42:25.350-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T11:42:25.350-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
+2025-05-06T11:42:25.371-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T11:42:25.372-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@3f0009cb]
+2025-05-06T11:42:25.373-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T11:42:25.373-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@31f35d19, com.untdf.flexinventory.b (truncated)...]
+2025-05-06T11:42:25.374-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:42:25.375-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:45:41.173-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
+2025-05-06T11:45:41.173-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-06T11:45:41.173-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
+2025-05-06T11:45:41.174-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-06T11:45:41.188-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T11:45:41.189-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@2dd5f792]
+2025-05-06T11:45:41.190-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:45:41.195-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-06T11:45:41.196-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-6] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@4317fcc9, com.untdf.flexinventory.b (truncated)...]
+2025-05-06T11:45:41.197-03:00 DEBUG 23168 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-06T11:46:15.464-03:00  INFO 23168 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-06T11:46:15.471-03:00  INFO 23168 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-06T11:46:15.477-03:00  INFO 23168 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

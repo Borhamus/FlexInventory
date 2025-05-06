@@ -47,7 +47,8 @@ CREATE TABLE "api-base".attribute (
     id integer NOT NULL,
     type text NOT NULL,
     name text NOT NULL,
-    CONSTRAINT attribute_type_check CHECK ((type = ANY (ARRAY['INTEGER'::text, 'REAL'::text, 'STRING'::text, 'BOOLEAN'::text])))
+    target_inventory_id integer,
+    target_inventory_item_id integer
 );
 
 
@@ -556,11 +557,12 @@ ALTER TABLE ONLY "api-users".user_role ALTER COLUMN id SET DEFAULT nextval('"api
 -- Data for Name: attribute; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
 --
 
-COPY "api-base".attribute (id, type, name) FROM stdin;
-1	STRING	Brand
-2	INTEGER	Stock
-3	REAL	Price
-4	BOOLEAN	Available
+COPY "api-base".attribute (id, type, name, target_inventory_id, target_inventory_item_id) FROM stdin;
+1	STRING	Brand	\N	\N
+2	INTEGER	Stock	\N	\N
+3	REAL	Price	\N	\N
+4	BOOLEAN	Available	\N	\N
+6	PROVEEDOR	Proveedor	\N	\N
 \.
 
 
@@ -714,7 +716,7 @@ COPY "api-users".user_role (id, id_role, id_user) FROM stdin;
 -- Name: attribute_id_seq; Type: SEQUENCE SET; Schema: api-base; Owner: flexinventory
 --
 
-SELECT pg_catalog.setval('"api-base".attribute_id_seq', 4, true);
+SELECT pg_catalog.setval('"api-base".attribute_id_seq', 6, true);
 
 
 --
@@ -936,6 +938,22 @@ ALTER TABLE ONLY "api-base".catalog_item
 
 ALTER TABLE ONLY "api-base".catalog_item
     ADD CONSTRAINT catalog_item_item_id_fkey FOREIGN KEY (item_id) REFERENCES "api-base".item(id) ON DELETE CASCADE;
+
+
+--
+-- Name: attribute fk_attribute_inventory; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".attribute
+    ADD CONSTRAINT fk_attribute_inventory FOREIGN KEY (target_inventory_id) REFERENCES "api-base".inventory(id);
+
+
+--
+-- Name: attribute fk_attribute_item; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-base".attribute
+    ADD CONSTRAINT fk_attribute_item FOREIGN KEY (target_inventory_item_id) REFERENCES "api-base".item(id);
 
 
 --

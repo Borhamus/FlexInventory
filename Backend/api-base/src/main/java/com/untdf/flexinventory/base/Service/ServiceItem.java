@@ -5,6 +5,8 @@ import com.untdf.flexinventory.base.Access.AccessAttribute;
 import com.untdf.flexinventory.base.Access.AccessCatalog;
 import com.untdf.flexinventory.base.Access.AccessInventory;
 import com.untdf.flexinventory.base.Access.AccessItem;
+import com.untdf.flexinventory.base.Handler.AttributeTypeHandler;
+import com.untdf.flexinventory.base.Handler.AttributeTypeHandlerRegistry;
 import com.untdf.flexinventory.base.Model.*;
 import com.untdf.flexinventory.base.Resource.ResourceItem;
 import com.untdf.flexinventory.base.Transferable.TransferableItem;
@@ -51,6 +53,9 @@ public class ServiceItem {
     @Autowired
     TransformerAttribute transformerAttribute;
 
+    @Autowired
+    AttributeTypeHandlerRegistry registry;
+
     Logger auditor = LoggerFactory.getLogger(ResourceItem.class);
 
     /**
@@ -92,16 +97,22 @@ public class ServiceItem {
      */
     public TransferableItem createItemIventory(TransferableItemCreate transferableItem){
 
+        // Creo una nueva instancia de la entidad de Item
         Item item = new Item();
 
+        // Obtengo la entidad Inventario desde el transferible del item
         Inventory inventory = transformerInventory.toEntity(serviceInventory.getInventoryById(transferableItem.getInventory()));
+
+        // Le asigno el inventario, la fecha y el nombre a la instancia nueva del Item
         item.setInventory(inventory);
         item.setCreation_date(new Date());
         item.setName(transferableItem.getName());
 
+        // Creo instancias para los valores y los item-atributes
         List<ItemAttributeValue> values = new ArrayList<>();
         List<Attribute> itemAttributes = new ArrayList<>();
 
+        // Por cada Entrada con <Llave Integer y tipo de Dato String> en el itemAtributeValue del transferible del item...
         for (Map.Entry<Integer, String> entry : transferableItem.getItemAtributeValue().entrySet()) { // Por cada elemento dentro del Map
 
             // Obtengo el attribute id
@@ -110,7 +121,7 @@ public class ServiceItem {
             // Obtengo el Value
             String value = entry.getValue();
 
-            // Creo un nuevo ItemAttribute
+            // Creo una nueva entidad ItemAttribute
             ItemAttributeValue itemAttributeValue = new ItemAttributeValue();
 
             // Seteo el value
@@ -118,7 +129,15 @@ public class ServiceItem {
 
             // Obtengo el atributo de la bd y lo seteo al itemAttribute
             Attribute attribute = transformerAttribute.toEntity(serviceAttribute.getAttributeById(attributeId));
+
+            // Si el Tipo del Atributo posee un handler lo ejecuto.
+            Optional<AttributeTypeHandler> handlerOptional = registry.getHandler(attribute.getType());
+            System.out.println("Atributo del tipo: " + attribute.getType());
+            // Los :: siempre me confunden pero es una forma abreviada de escribir handler -> handler.onItemInserted()
+            handlerOptional.ifPresent(AttributeTypeHandler::onItemInserted);
+
             itemAttributeValue.setAttribute(attribute);
+
             // Establecer la relación con item
             itemAttributeValue.setItem(item);
 

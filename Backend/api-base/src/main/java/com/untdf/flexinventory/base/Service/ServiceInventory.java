@@ -2,6 +2,7 @@ package com.untdf.flexinventory.base.Service;
 
 
 import com.untdf.flexinventory.base.Access.AccessInventory;
+import com.untdf.flexinventory.base.Handler.AttributeTypeHandlerRegistry;
 import com.untdf.flexinventory.base.Model.Inventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate;
@@ -32,6 +33,9 @@ public class ServiceInventory {
 
     @Autowired
     TransformerInventory transformer;
+
+    @Autowired
+    AttributeTypeHandlerRegistry registry;
 
     /* Obtiene todos los inventarios */
     public List<TransferableInventory> getAllInventories(){
