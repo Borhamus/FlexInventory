@@ -1,21 +1,28 @@
 package com.untdf.flexinventory.base.Service;
 
 
+import com.untdf.flexinventory.base.Access.AccessAttribute;
 import com.untdf.flexinventory.base.Access.AccessInventory;
+import com.untdf.flexinventory.base.Handler.AttributeTypeHandler;
 import com.untdf.flexinventory.base.Handler.AttributeTypeHandlerRegistry;
+import com.untdf.flexinventory.base.Model.Attribute;
 import com.untdf.flexinventory.base.Model.Inventory;
+import com.untdf.flexinventory.base.Resource.ResourceItem;
 import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate;
+import com.untdf.flexinventory.base.Transformer.TransformerAttribute;
 import com.untdf.flexinventory.base.Transformer.TransformerInventory;
 import jakarta.persistence.EntityNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.sql.Date;
+
 import java.time.LocalDate;
-import java.util.List;
+import java.util.*;
 
 /**
  * Aqui vemos como a través de la etiqueta @Autowired se relaciona la clase <code>ServiceInventory</code> con <code>AccessInventory</code>
@@ -35,7 +42,15 @@ public class ServiceInventory {
     TransformerInventory transformer;
 
     @Autowired
+    ServiceAttribute serviceAttribute;
+
+    @Autowired
+    TransformerAttribute transformerAttribute;
+
+    @Autowired
     AttributeTypeHandlerRegistry registry;
+
+    Logger auditor = LoggerFactory.getLogger(ResourceItem.class);
 
     /* Obtiene todos los inventarios */
     public List<TransferableInventory> getAllInventories(){
@@ -90,14 +105,42 @@ public class ServiceInventory {
         access.deleteById(id);
     }
 
-    /* Crea un inventario */
+    /**
+     * Crea un nuevo Inventario vinculando este y sus atributos.
+     * En caso de que uno de sus atributos posea un Handler, lo ejecuta utilizando onAttributeAdded().
+     *
+     * @param transferable objeto DTO con los datos necesarios para la creación del Inventario.
+     * @return el Inventario creado, representado como un {@code TransferableInventory}.
+     */
     public TransferableInventory createInventory(TransferableInventoryCreate transferable){
 
         Inventory inventory=transformer.toEntity(transferable);
 
         //Obtengo la fecha actual
-        inventory.setCreation_date(new Date(System.currentTimeMillis()));
+        inventory.setCreation_date(new Date());
 
+        List<Attribute> atributeList = new ArrayList<>();
+        for(Integer id : transferable.getAttributesIds()){
+
+            // Obtengo el atributo de la BD
+            Attribute attribute = transformerAttribute.toEntity(serviceAttribute.getAttributeById(id));
+
+            // Si el Tipo del Atributo posee un handler lo ejecuto.
+            Optional<AttributeTypeHandler> handlerOptional = registry.getHandler(attribute.getType());
+            auditor.info("Atributo del tipo: {}", attribute.getType());
+
+            // Los :: siempre me confunden pero es una forma abreviada de escribir handler -> handler.onItemInserted()
+            // Si tiene un Handler, ejecuta la acción onAttributeAdded
+            handlerOptional.ifPresent(AttributeTypeHandler::onAttributeAdded);
+
+            // Añado el atributo a la Lista
+            atributeList.add(attribute);
+        }
+
+        // Seteo la lista de atributos al Inventario
+        inventory.setAttributes(atributeList);
+
+        // Persisto el inventario
         Inventory inventoryCreated = access.save(inventory);
         return transformer.toDTO(inventoryCreated);
     }

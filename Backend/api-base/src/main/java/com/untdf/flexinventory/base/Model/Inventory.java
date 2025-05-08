@@ -1,7 +1,8 @@
 package com.untdf.flexinventory.base.Model;
 
 import jakarta.persistence.*;
-import java.sql.Date;
+
+import java.util.Date;
 import java.util.List;
 
 /**

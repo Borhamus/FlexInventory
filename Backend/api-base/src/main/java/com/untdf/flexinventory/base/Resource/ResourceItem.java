@@ -28,8 +28,6 @@ public class ResourceItem {
 
     @Autowired
     ServiceItem service;
-
-
     Logger auditor = LoggerFactory.getLogger(ResourceItem.class);
 
     // DOCUMENTATION API
@@ -39,7 +37,7 @@ public class ResourceItem {
                     responseCode = "200",
                     description = "Item created successfully.",
                     content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = TransferableItem.class))
+                            schema = @Schema(implementation = TransferableItemCreate.class))
             ),
             @ApiResponse(
                     responseCode = "409",
