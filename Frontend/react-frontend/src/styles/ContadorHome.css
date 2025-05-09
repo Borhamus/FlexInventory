@@ -1,0 +1,23 @@
+.contadorNumero{
+    width: 100%;
+    height: 50%;
+    text-align:center;
+    font-size:xx-large;
+    font-weight: bolder;
+    color: white;
+    padding-bottom: 24%;
+}
+
+.contadorTitulo{
+    width: 100%;
+    height: 50%;
+    color: white;
+}
+
+.contadorHome{
+    width: 100%;
+    height: 185px;
+    border-radius: var(--border-radius);
+    background-color: var(--indigo-400);
+
+}
