@@ -108,7 +108,7 @@ public class ResourceItem {
 
     // GET ITEM BY ID
     @GetMapping(value = "{id}")
-    public ResponseEntity<TransferableItemCreate> getItem(@PathVariable("id") Integer id){
+    public ResponseEntity<TransferableItem> getItem(@PathVariable("id") Integer id){
         return ResponseEntity.ok(service.getItemById(id));
     }
 

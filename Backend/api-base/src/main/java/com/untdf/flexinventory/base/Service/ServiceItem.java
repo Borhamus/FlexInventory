@@ -121,7 +121,7 @@ public class ServiceItem {
             // Obtengo el Value
             String value = entry.getValue();
 
-            // Creo una nueva entidad ItemAttribute
+            // Creo un nuevo ItemAttribute
             ItemAttributeValue itemAttributeValue = new ItemAttributeValue();
 
             // Seteo el value
@@ -194,13 +194,13 @@ public class ServiceItem {
      * @return un objeto {@code TransferableItemCreate} con la información del ítem encontrado.
      * @throws ResponseStatusException si el ítem no existe en el sistema (HTTP 404).
      */
-    public TransferableItemCreate getItemById(Integer id){
+    public TransferableItem getItemById(Integer id){
         if (access.findById(id).isEmpty()){
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Item with id: "+ id + " was not found."
             );
         }
-        return transformer.toDTOcreate(access.findById(id).get());
+        return transformer.toDTO(access.findById(id).get());
     }
 
 }

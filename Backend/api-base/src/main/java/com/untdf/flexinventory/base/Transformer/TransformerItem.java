@@ -14,7 +14,7 @@ import java.util.List;
 @Mapper(componentModel = "spring", uses = {TransformerAttribute.class, TransformerAttributeValue.class})
 public interface TransformerItem {
 
-    @Mapping(target = "inventory", ignore = true)
+    @Mapping(target = "inventory", ignore = false)
     @Mapping(target = "itemsAttributeValues", source = "itemsAttributeValues")
     TransferableItem toDTO (Item item);
 
