@@ -7,9 +7,12 @@ import "../styles/ContadorHome.css"
 */
 function ContadorHome ({titulo, numero}){
 
+    /* 
+        FUNCIONALIDAD
+    */
 
     return(
-        <div className="contadorHome" class = "contadorHome col-12 shadow-6 hover:shadow-8" >
+        <div className="contadorHome" class = "contadorHome shadow-6 hover:shadow-8" >
             {/* Numero */}
             <div className="contadorNumero" class = "contadorNumero col-12">
                 <p>

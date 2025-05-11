@@ -3,6 +3,7 @@ import { Skeleton } from 'primereact/skeleton';
 import '../styles/Home.css';
 import ContadorHome from '../components/ContadorHome';
 import Movimiento from '../components/Movimiento';
+import UltimosMovimientosHome from '../components/UltimosMovimientosHome';
 
 function Home() {
 
@@ -16,17 +17,17 @@ function Home() {
   const apiContadores = [
     {
       id: 1,
-      numero: 40,
+      numero: 25,
       titulo: "Articulos Registrados"
     },
     {
       id: 2,
-      numero: 40,
+      numero: 7,
       titulo: "Nuevos articulos esta semana"
     },
     {
       id: 3,
-      numero: 40,
+      numero: 4,
       titulo: "Articulos sin Stock"
     }
   ];
@@ -39,7 +40,7 @@ function Home() {
 
           <div class = "grid nested-grid" >
 
-            {/* Linea de contadores */}
+            {/* ---------------| CONTADORES |--------------- */}
             {/* En vez de escribir contador a contador, recorremos la "respuesta" del endpoint, por
             ahora está harcodeado jaja */}
 
@@ -50,16 +51,18 @@ function Home() {
               </div>
             ))}
             
+            {/* 
             <div className="col">
                 <Movimiento />
             </div>
             
-            {/* Linea de movimientos y chart */}
+            
+            {/* ---------------| MOVIMIENTOS - CHARTA |--------------- */}
             <div className="col-12">
               <div className="grid">
 
                 <div className="col-4">
-                  <Skeleton height="630px"/>
+                  <UltimosMovimientosHome />
                 </div>
 
                 <div className="col-8">

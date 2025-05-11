@@ -5,6 +5,7 @@
     font-size:xx-large;
     font-weight: bolder;
     color: white;
+    padding-bottom: 24%;
 }
 
 .contadorTitulo{
@@ -13,9 +14,9 @@
     color: white;
 }
 
-.contadorHome{
+.UltimosMovimientosHome{
     width: 100%;
-    height: 185px;
+    height: 630px;
     border-radius: var(--border-radius);
     background-color: var(--indigo-400);
 
