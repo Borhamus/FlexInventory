@@ -1,22 +1,6 @@
-.contadorNumero{
-    width: 100%;
-    height: 50%;
-    text-align:center;
-    font-size:xx-large;
-    font-weight: bolder;
-    color: white;
-    padding-bottom: 24%;
-}
-
-.contadorTitulo{
-    width: 100%;
-    height: 50%;
-    color: white;
-}
-
 .UltimosMovimientosHome{
     width: 100%;
-    height: 630px;
+    height: 100%;
     border-radius: var(--border-radius);
     background-color: var(--indigo-400);
 

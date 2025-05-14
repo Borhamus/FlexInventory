@@ -32,7 +32,47 @@ function Home() {
     }
   ];
 
+  return (
+    /* grid nested-grid es un tipo de contenedor */
+    <div class = "home-body grid nested-grid">
 
+      {/* Columna izquierda - requiere grid ya que tendrá una estructura dentro*/}
+      <div class = "left-container col-9">
+
+        {/* Contenedor Izquierdo Superior */}
+        <div class = "contadores grid pb-2"   >
+          {/* forEach((contador) -> ContadorHome(contador.numero, contador.titulo)) */}
+          {apiContadores.map((contador) => (
+              <div className="col" key={contador.id}>
+                <ContadorHome numero={contador.numero} titulo={contador.titulo} />
+              </div>
+          ))}
+        </div>
+
+        {/* Contenedor Izquierdo Inerior*/}
+        <div class = "estadisticas grid" >
+        
+          {/* Movimientos del Usuario */}
+          <div class = "col-4">
+            <UltimosMovimientosHome />
+          </div>
+
+          {/* Tablas, diagramas, Estadisticas */}
+          <div class = "col-8">
+            <Skeleton height='100%' />
+          </div>
+        </div>
+      </div>
+
+      {/* Columna Derecha - No requiere grid porque ocupa todo el espacio*/}
+      <div class = "right-container col-3" >
+        <Skeleton height='100%'/>
+      </div>
+
+    </div>
+  )
+
+  /*
   return (
       <div className='home' class = "home grid nested-grid">
 
@@ -40,11 +80,11 @@ function Home() {
 
           <div class = "grid nested-grid" >
 
-            {/* ---------------| CONTADORES |--------------- */}
+            {/* ---------------| CONTADORES |--------------- }
             {/* En vez de escribir contador a contador, recorremos la "respuesta" del endpoint, por
-            ahora está harcodeado jaja */}
+            ahora está harcodeado jaja }
 
-            {/* forEach((contador) -> ContadorHome(contador.numero, contador.titulo)) */}
+            {/* forEach((contador) -> ContadorHome(contador.numero, contador.titulo)) }
             {apiContadores.map((contador) => (
               <div className="col" key={contador.id}>
                 <ContadorHome numero={contador.numero} titulo={contador.titulo} />
@@ -57,7 +97,7 @@ function Home() {
             </div>
             
             
-            {/* ---------------| MOVIMIENTOS - CHARTA |--------------- */}
+            {/* ---------------| MOVIMIENTOS - CHARTA |--------------- }
             <div className="col-12">
               <div className="grid">
 
@@ -75,13 +115,14 @@ function Home() {
 
         </div>
 
-        {/* columna de movimientos de otros usuarios */}
+        {/* columna de movimientos de otros usuarios }
         <div class="col-3">
           <Skeleton height="830px"/>
         </div>
 
       </div>
   )
+  */
 }
 
 export default Home;

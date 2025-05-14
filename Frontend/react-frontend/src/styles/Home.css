@@ -1,0 +1,17 @@
+.contadores {
+    height: 20vh;
+    min-height: 125px;
+}
+
+.col {
+    width: 100%;
+    height: 100%;
+}
+
+.right-container{
+    height: 90.1vh;
+}
+
+.estadisticas{
+    height: 71vh;
+}
