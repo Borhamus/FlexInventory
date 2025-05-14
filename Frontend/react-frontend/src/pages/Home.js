@@ -4,6 +4,8 @@ import '../styles/Home.css';
 import ContadorHome from '../components/ContadorHome';
 import Movimiento from '../components/Movimiento';
 import UltimosMovimientosHome from '../components/UltimosMovimientosHome';
+import UsuariosActivos from '../components/UsuariosActivos';
+import Estadisticas from '../components/Estadisticas';
 
 function Home() {
 
@@ -40,7 +42,7 @@ function Home() {
       <div class = "left-container col-9">
 
         {/* Contenedor Izquierdo Superior */}
-        <div class = "contadores grid pb-2"   >
+        <div class = "contadores grid pb-2" >
           {/* forEach((contador) -> ContadorHome(contador.numero, contador.titulo)) */}
           {apiContadores.map((contador) => (
               <div className="col" key={contador.id}>
@@ -54,19 +56,19 @@ function Home() {
         
           {/* Movimientos del Usuario */}
           <div class = "col-4">
-            <UltimosMovimientosHome />
+            <UltimosMovimientosHome titulo={"Ultimos Movimientos"} />
           </div>
 
           {/* Tablas, diagramas, Estadisticas */}
           <div class = "col-8">
-            <Skeleton height='100%' />
+            <Estadisticas titulo={"Estadisticas"} />
           </div>
         </div>
       </div>
 
       {/* Columna Derecha - No requiere grid porque ocupa todo el espacio*/}
       <div class = "right-container col-3" >
-        <Skeleton height='100%'/>
+        <UsuariosActivos titulo = "Usuarios Activos"/>
       </div>
 
     </div>

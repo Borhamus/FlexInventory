@@ -1,4 +1,4 @@
-.UltimosMovimientosHome{
+.usuariosActivos{
     width: 100%;
     height: 100%;
     display: flex;
@@ -8,8 +8,8 @@
     overflow: hidden;
 }
 
-.ultimosMovimientosMovimientos {
-    flex: 9;
+.usuariosActivosMovimientos {
+    flex: 9.3;
     display: flex;
     justify-content: center;
     align-items: center;
@@ -19,8 +19,8 @@
     height: 100%;
 }
 
-.ultimosMovimientosTitulo {
-    flex: 1;
+.usuariosActivosTitulo {
+    flex: 0.7;
     display: flex;              /* Hace que su contenido sea centrable */
     justify-content: center;    /* Centra horizontalmente */
     align-items: center;        /* Centra verticalmente */
