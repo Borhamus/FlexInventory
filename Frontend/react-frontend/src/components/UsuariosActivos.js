@@ -7,31 +7,19 @@ function UsuariosActivos({titulo}){
         <div className="usuariosActivos shadow-6 hover:shadow-8">
             <div className="usuariosActivosTitulo">{titulo}</div>
             <div className="usuariosActivosMovimientos">
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />  
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" /> 
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" /> 
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" /> 
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" /> 
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" />
-                <Movimiento className="col-12" /> 
-
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>
+                
             </div>
         </div>
     );

@@ -2,29 +2,44 @@ import React from "react";
 import { Avatar } from 'primereact/avatar';
 import "../styles/Movimiento.css"
 
-function Movimiento({showProfilePicture, showName, showMovement}){
+function Movimiento({showProfilePicture, showName, nombre, movimiento}){
+    let profilePicture;
+    let userName;
+
+    // mostrar foto de perfil
+    if (showProfilePicture) {
+        profilePicture = (
+            <div className="movimientoFotoPerfil">
+                    <Avatar label="P" size="xlarge" shape="circle" />
+            </div>
+        )
+    }
+
+    // mostrar el nombre
+    if (showName) {
+        userName = (
+            <div  className="movimientoDatosNombre">
+                {nombre} 
+            </div>
+        )
+    }
+    
     return(
-        <div className="movimiento grid nested-grid shadow-6 hover:shadow-8">
+        <div className="movimiento">
 
             {/* Imagen de perfil */}
-            <div className="movimientoFotoPerfil col-4">
-                <Avatar label="P" size="xlarge" shape="circle" />
-            </div>
+            {profilePicture}
 
             {/* Nombre y movimiento */}
-            <div className="movimientoDatos col-8 ">
-                <div class = "grid">
+            <div className="movimientoDatos shadow-6 hover:shadow-8">
 
-                    {/* Nombre */}
-                    <div  class="col-12">
-                        Nombre Usuario  
-                    </div>
+                {/* Nombre */}
+                {userName}
 
-                    {/* Movimiento */}
-                    <div class="col-12">
-                        Acción que realizó  
-                    </div>
-                    
+                {/* Movimiento */}
+                <div className="movimientoDatosMovimiento">
+                    <p> Ultimo movimiento: </p>
+                    <p># {movimiento}</p>
                 </div>
             </div>
         </div>

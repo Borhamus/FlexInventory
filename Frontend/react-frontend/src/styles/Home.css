@@ -13,5 +13,5 @@
 }
 
 .estadisticasHome{
-    height: 71vh;
+    max-height: 20vh;
 }

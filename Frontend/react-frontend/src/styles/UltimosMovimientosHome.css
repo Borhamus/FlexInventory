@@ -11,12 +11,15 @@
 .ultimosMovimientosMovimientos {
     flex: 9;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
     font-size: 1rem;
     color: white;
     width: 100%;
     height: 100%;
+    gap: 1em;
+    padding-block: 1em;
+    overflow-y: auto;
 }
 
 .ultimosMovimientosTitulo {
@@ -30,5 +33,33 @@
     width: 100%;
     height: 100%;
     border-bottom: 2px solid var(--indigo-200);
+    border-radius: var(--border-radius);
+}
+
+/* -------------| Scroll bar |--------------- */
+
+/* width */
+::-webkit-scrollbar {
+    width: .7em;
+}
+  
+/* Track */
+::-webkit-scrollbar-track {
+    border-radius: var(--border-radius);
+
+    /* Crea margenes arriba y abajo del elemento */
+    margin-block: 0.5em;
+}
+
+/* Thumb */
+::-webkit-scrollbar-thumb {
+    background: var(--indigo-200);
+    border-radius: var(--border-radius);
+    border: .1em solid var(--indigo-500);
+}
+
+/* Thumb Hover*/
+::-webkit-scrollbar-thumb:hover {
+    background: var(--indigo-300);
     border-radius: var(--border-radius);
 }

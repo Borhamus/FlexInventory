@@ -8,15 +8,26 @@
     overflow: hidden;
 }
 
+/* 
+    Nota: 
+    en este caso no me sirve utilizar justify-content: space-evenly
+    ya que eso da un espaciado definido entre el contenedor y los elementos
+    al haber muchos elementos estos se aplastan entre si sin dejar espaciado
+
+    la solucion está en usar un gap para dar un espaciado definido y un 
+    paddin-block para setear paddings arriba y abajo del contenedor
+*/
 .usuariosActivosMovimientos {
     flex: 9.3;
-    display: grid;
-    justify-content:center;
-    align-items:start;
+    display:flex;
+    flex-direction: column;
+    align-items:center;
     color: white;
     width: 100%;
     height: 100%;
-    overflow-y: scroll;
+    overflow-y: auto;
+    gap: 1em;
+    padding-block: 1em;
 }
 
 .usuariosActivosTitulo {
