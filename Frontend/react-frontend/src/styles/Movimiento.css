@@ -3,11 +3,11 @@
 }
 
 .movimientoDatos{
-    background-color: var(--indigo-400);
-    border-radius: var(--border-radius);
 }
 
 .movimiento{
-    
-    
+    background-color: var(--indigo-400);
+    border-radius: var(--border-radius);
+    margin-top: 10px;
+    margin-bottom: 10px;
 }

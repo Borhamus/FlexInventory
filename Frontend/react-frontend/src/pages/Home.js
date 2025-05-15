@@ -42,7 +42,7 @@ function Home() {
       <div class = "left-container col-9">
 
         {/* Contenedor Izquierdo Superior */}
-        <div class = "contadores grid pb-2" >
+        <div class = "contadoresHome grid pb-2" >
           {/* forEach((contador) -> ContadorHome(contador.numero, contador.titulo)) */}
           {apiContadores.map((contador) => (
               <div className="col" key={contador.id}>
@@ -52,7 +52,7 @@ function Home() {
         </div>
 
         {/* Contenedor Izquierdo Inerior*/}
-        <div class = "estadisticas grid" >
+        <div class = "estadisticasHome grid" >
         
           {/* Movimientos del Usuario */}
           <div class = "col-4">
@@ -67,64 +67,12 @@ function Home() {
       </div>
 
       {/* Columna Derecha - No requiere grid porque ocupa todo el espacio*/}
-      <div class = "right-container col-3" >
+      <div class = "right-containerHome col-3" >
         <UsuariosActivos titulo = "Usuarios Activos"/>
       </div>
 
     </div>
   )
-
-  /*
-  return (
-      <div className='home' class = "home grid nested-grid">
-
-        <div className="col-9">
-
-          <div class = "grid nested-grid" >
-
-            {/* ---------------| CONTADORES |--------------- }
-            {/* En vez de escribir contador a contador, recorremos la "respuesta" del endpoint, por
-            ahora está harcodeado jaja }
-
-            {/* forEach((contador) -> ContadorHome(contador.numero, contador.titulo)) }
-            {apiContadores.map((contador) => (
-              <div className="col" key={contador.id}>
-                <ContadorHome numero={contador.numero} titulo={contador.titulo} />
-              </div>
-            ))}
-            
-            {/* 
-            <div className="col">
-                <Movimiento />
-            </div>
-            
-            
-            {/* ---------------| MOVIMIENTOS - CHARTA |--------------- }
-            <div className="col-12">
-              <div className="grid">
-
-                <div className="col-4">
-                  <UltimosMovimientosHome />
-                </div>
-
-                <div className="col-8">
-                  <Skeleton height="630px"/>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-        </div>
-
-        {/* columna de movimientos de otros usuarios }
-        <div class="col-3">
-          <Skeleton height="830px"/>
-        </div>
-
-      </div>
-  )
-  */
 }
 
 export default Home;

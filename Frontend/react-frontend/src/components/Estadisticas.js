@@ -5,7 +5,7 @@ function Estadisticas({titulo}){
     return (
         <div className="estadisticas shadow-6 hover:shadow-8">
             <div className="estadisticasTitulo">{titulo}</div>
-            <div className="estadisticasGraficos">Movimientos</div>
+            <div className="estadisticasGraficos">Estadisticas</div>
         </div>
     );
 }
