@@ -3,15 +3,15 @@
     box-shadow: desplazamiento-x desplazamiento-y desenfoque expansión color;
 */
 .movimientoFotoPerfil{
-    width: 4rem;     /* Tamaño fijo que coincide con el Avatar */
-    height: 4rem;    /* Tamaño fijo que coincide con el Avatar */
+    width: 2em;     /* Tamaño fijo que coincide con el Avatar */
+    height: 2em;    /* Tamaño fijo que coincide con el Avatar */
     border-radius: 50%;
     box-shadow: 0 8px 8px 2px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
     display: flex;
     justify-content: center;   
     align-items: center;
     flex-shrink: 0;   
-    margin-right: .7rem;
+    margin-right: .7vw;
 }
 
 .movimientoFotoPerfil:hover{
@@ -32,22 +32,22 @@
 }
 
 .movimientoDatosMovimiento{
-    font-size: .9rem;
-    margin-block: .3rem; /* Margenes superiores */
-    margin-inline: .2rem; /* Margenes laterales */
+    font-size: .9vw;
+    margin-block: .3vw; /* Margenes superiores */
+    margin-inline: .2vw; /* Margenes laterales */
 }
 
 .movimientoDatosNombre{
-    font-size: 1.3rem;
-    margin: .3rem;
+    font-size: 1.3vw;
+    margin: .3vw;
 }
 
 .movimiento{
     display: flex;
-    gap: .5em;
+    gap: .5vw;
 }
 
 p{
-    padding: 0px;
-    margin: 0px;
+    padding: 0vw;
+    margin: 0vw;
 }
