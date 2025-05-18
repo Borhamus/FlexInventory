@@ -9,9 +9,18 @@
 }
 
 .right-containerHome{
-    height: 90.1vh;
+    height: 90vh;
 }
 
 .estadisticasHome{
-    max-height: 20vh;
+    height: 71vh;
+}
+
+.estadisticasHome .col-4{
+    height: 100%;
+}
+
+
+.estadisticasHome .col-8{
+    height: 100%;
 }

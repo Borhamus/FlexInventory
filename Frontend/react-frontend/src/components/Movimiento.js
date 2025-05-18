@@ -10,7 +10,7 @@ function Movimiento({showProfilePicture, showName, nombre, movimiento}){
     if (showProfilePicture) {
         profilePicture = (
             <div className="movimientoFotoPerfil">
-                    <Avatar label="P" shape="circle" />
+                    <Avatar label="P" size="xlarge" shape="circle" />
             </div>
         )
     }

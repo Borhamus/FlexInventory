@@ -1,394 +1,48 @@
-2025-05-07T08:56:54.844-03:00  INFO 10029 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 10029 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
-2025-05-07T08:56:54.849-03:00 DEBUG 10029 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
-2025-05-07T08:56:54.850-03:00  INFO 10029 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
-2025-05-07T08:56:54.891-03:00  INFO 10029 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-05-07T08:56:54.892-03:00  INFO 10029 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-05-07T08:56:55.462-03:00  INFO 10029 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-05-07T08:56:55.512-03:00  INFO 10029 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 42 ms. Found 4 JPA repository interfaces.
-2025-05-07T08:56:55.902-03:00  INFO 10029 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-05-07T08:56:55.913-03:00  INFO 10029 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-05-07T08:56:55.914-03:00  INFO 10029 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
-2025-05-07T08:56:55.947-03:00  INFO 10029 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-05-07T08:56:55.947-03:00  INFO 10029 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1055 ms
-2025-05-07T08:56:55.974-03:00  INFO 10029 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-05-07T08:56:56.097-03:00  INFO 10029 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@65c8a501
-2025-05-07T08:56:56.105-03:00  INFO 10029 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-05-07T08:56:56.112-03:00  INFO 10029 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
-2025-05-07T08:56:56.522-03:00  INFO 10029 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-05-07T08:56:57.235-03:00  INFO 10029 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T08:56:57.241-03:00  INFO 10029 --- [api-base] [restartedMain] c.u.f.base.Resource.ResourceItem         : Handler Registry - Se añade el atributo: PROVEEDOR
-2025-05-07T08:56:57.587-03:00 DEBUG 10029 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
-2025-05-07T08:56:57.671-03:00 DEBUG 10029 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
-2025-05-07T08:56:57.708-03:00 DEBUG 10029 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2025-05-07T08:56:57.740-03:00 DEBUG 10029 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
-2025-05-07T08:56:57.868-03:00  INFO 10029 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-05-07T08:56:57.938-03:00  INFO 10029 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-05-07T08:56:57.959-03:00  INFO 10029 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 3.491 seconds (process running for 3.772)
-2025-05-07T08:59:26.306-03:00  INFO 10029 --- [api-base] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-05-07T08:59:26.307-03:00  INFO 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-05-07T08:59:26.307-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
-2025-05-07T08:59:26.307-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
-2025-05-07T08:59:26.307-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
-2025-05-07T08:59:26.308-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@c1f8461
-2025-05-07T08:59:26.308-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@6c409bc6
-2025-05-07T08:59:26.308-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
-2025-05-07T08:59:26.309-03:00  INFO 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
-2025-05-07T08:59:26.314-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/q/swagger-ui/", parameters={}
-2025-05-07T08:59:26.319-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
-2025-05-07T08:59:26.325-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
-2025-05-07T08:59:26.329-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource q/swagger-ui.]
-2025-05-07T08:59:26.330-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 404 NOT_FOUND
-2025-05-07T08:59:26.335-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : "ERROR" dispatch for GET "/error", parameters={}
-2025-05-07T08:59:26.337-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController#errorHtml(HttpServletRequest, HttpServletResponse)
-2025-05-07T08:59:26.352-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.v.ContentNegotiatingViewResolver : Selected 'text/html' given [text/html, text/html;q=0.8]
-2025-05-07T08:59:26.357-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Exiting from "ERROR" dispatch, status 404
-2025-05-07T08:59:26.380-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/favicon.ico", parameters={}
-2025-05-07T08:59:26.381-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/], classpath [resources/], classpath [static/], classpath [public/], ServletContext [/]]
-2025-05-07T08:59:26.382-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.r.ResourceHttpRequestHandler     : Resource not found
-2025-05-07T08:59:26.383-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-2] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.web.servlet.resource.NoResourceFoundException: No static resource favicon.ico.]
-2025-05-07T08:59:26.383-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 404 NOT_FOUND
-2025-05-07T08:59:26.384-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : "ERROR" dispatch for GET "/error", parameters={}
-2025-05-07T08:59:26.384-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController#error(HttpServletRequest)
-2025-05-07T08:59:26.396-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json;q=0.8', given [image/avif, image/webp, image/apng, image/svg+xml, image/*, */*;q=0.8] and supported [application/json, application/*+json]
-2025-05-07T08:59:26.398-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [{timestamp=Wed May 07 08:59:26 ART 2025, status=404, error=Not Found, trace=org.springframework.web. (truncated)...]
-2025-05-07T08:59:26.429-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Exiting from "ERROR" dispatch, status 404
-2025-05-07T08:59:33.344-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/swagger-ui/swagger-initializer.js", parameters={}
-2025-05-07T08:59:33.344-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/swagger-ui/swagger-ui-bundle.js", parameters={}
-2025-05-07T08:59:33.345-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]
-2025-05-07T08:59:33.345-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]
-2025-05-07T08:59:33.362-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T08:59:33.370-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T08:59:33.505-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : GET "/openapi/swagger-config", parameters={}
-2025-05-07T08:59:33.506-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springdoc.webmvc.ui.SwaggerConfigResource#openapiJson(HttpServletRequest)
-2025-05-07T08:59:33.509-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json]
-2025-05-07T08:59:33.509-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Writing [{configUrl=/openapi/swagger-config, oauth2RedirectUrl=http://localhost:8080/swagger-ui/oauth2-redire (truncated)...]
-2025-05-07T08:59:33.510-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T08:59:33.517-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : GET "/openapi", parameters={}
-2025-05-07T08:59:33.518-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-6] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springdoc.webmvc.api.OpenApiWebMvcResource#openapiJson(HttpServletRequest, String, Locale)
-2025-05-07T08:59:33.891-03:00  INFO 10029 --- [api-base] [http-nio-8080-exec-6] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 365 ms
-2025-05-07T08:59:33.904-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, */*] and supported [application/json]
-2025-05-07T08:59:33.906-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-6] m.m.a.RequestResponseBodyMethodProcessor : Writing [{123, 34, 111, 112, 101, 110, 97, 112, 105, 34, 58, 34, 51, 46, 48, 46, 49, 34, 44, 34, 105, 110, 10 (truncated)...]
-2025-05-07T08:59:33.907-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-6] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T08:59:45.453-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : GET "/inventory/4", parameters={}
-2025-05-07T08:59:45.454-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-7] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
-2025-05-07T08:59:45.508-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json] and supported [application/json, application/*+json]
-2025-05-07T08:59:45.508-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-7] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@645339b2]
-2025-05-07T08:59:45.510-03:00 DEBUG 10029 --- [api-base] [http-nio-8080-exec-7] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T09:00:38.690-03:00  INFO 10029 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T09:00:38.692-03:00  INFO 10029 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-05-07T09:00:38.696-03:00  INFO 10029 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-05-07T09:00:44.166-03:00  INFO 10339 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 10339 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
-2025-05-07T09:00:44.168-03:00 DEBUG 10339 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
-2025-05-07T09:00:44.168-03:00  INFO 10339 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
-2025-05-07T09:00:44.201-03:00  INFO 10339 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-05-07T09:00:44.202-03:00  INFO 10339 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-05-07T09:00:44.693-03:00  INFO 10339 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-05-07T09:00:44.737-03:00  INFO 10339 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 39 ms. Found 4 JPA repository interfaces.
-2025-05-07T09:00:45.069-03:00  INFO 10339 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-05-07T09:00:45.078-03:00  INFO 10339 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-05-07T09:00:45.078-03:00  INFO 10339 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
-2025-05-07T09:00:45.111-03:00  INFO 10339 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-05-07T09:00:45.111-03:00  INFO 10339 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 909 ms
-2025-05-07T09:00:45.136-03:00  INFO 10339 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-05-07T09:00:45.236-03:00  INFO 10339 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@ed98f26
-2025-05-07T09:00:45.244-03:00  INFO 10339 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-05-07T09:00:45.252-03:00  INFO 10339 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
-2025-05-07T09:00:45.545-03:00  INFO 10339 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-05-07T09:00:46.166-03:00  INFO 10339 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T09:00:46.171-03:00 ERROR 10339 --- [api-base] [restartedMain] c.u.f.base.Resource.ResourceItem         : Handler Registry - Se añade el atributo: PROVEEDOR
-2025-05-07T09:00:46.483-03:00 DEBUG 10339 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
-2025-05-07T09:00:46.539-03:00 DEBUG 10339 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
-2025-05-07T09:00:46.560-03:00 DEBUG 10339 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2025-05-07T09:00:46.585-03:00 DEBUG 10339 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
-2025-05-07T09:00:46.672-03:00  INFO 10339 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-05-07T09:00:46.691-03:00  INFO 10339 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-05-07T09:00:46.699-03:00  INFO 10339 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 2.77 seconds (process running for 3.021)
-2025-05-07T09:01:21.159-03:00  INFO 10339 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T09:01:21.162-03:00  INFO 10339 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-05-07T09:01:21.165-03:00  INFO 10339 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-05-07T09:01:27.052-03:00  INFO 10487 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 10487 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
-2025-05-07T09:01:27.053-03:00 DEBUG 10487 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
-2025-05-07T09:01:27.054-03:00  INFO 10487 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
-2025-05-07T09:01:27.085-03:00  INFO 10487 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-05-07T09:01:27.085-03:00  INFO 10487 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-05-07T09:01:27.538-03:00  INFO 10487 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-05-07T09:01:27.582-03:00  INFO 10487 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 39 ms. Found 4 JPA repository interfaces.
-2025-05-07T09:01:27.905-03:00  INFO 10487 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-05-07T09:01:27.914-03:00  INFO 10487 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-05-07T09:01:27.914-03:00  INFO 10487 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
-2025-05-07T09:01:27.949-03:00  INFO 10487 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-05-07T09:01:27.949-03:00  INFO 10487 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 863 ms
-2025-05-07T09:01:27.974-03:00  INFO 10487 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-05-07T09:01:28.076-03:00  INFO 10487 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4316b2f9
-2025-05-07T09:01:28.077-03:00  INFO 10487 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-05-07T09:01:28.084-03:00  INFO 10487 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
-2025-05-07T09:01:28.390-03:00  INFO 10487 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-05-07T09:01:29.018-03:00  INFO 10487 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T09:01:29.023-03:00  INFO 10487 --- [api-base] [restartedMain] c.u.f.base.Resource.ResourceItem         : --------------------| Handler Registry - Se añade el atributo: PROVEEDOR |--------------------
-2025-05-07T09:01:29.333-03:00 DEBUG 10487 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
-2025-05-07T09:01:29.386-03:00 DEBUG 10487 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
-2025-05-07T09:01:29.406-03:00 DEBUG 10487 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2025-05-07T09:01:29.428-03:00 DEBUG 10487 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
-2025-05-07T09:01:29.519-03:00  INFO 10487 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-05-07T09:01:29.541-03:00  INFO 10487 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-05-07T09:01:29.554-03:00  INFO 10487 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 2.746 seconds (process running for 2.985)
-2025-05-07T09:02:38.046-03:00  INFO 10487 --- [api-base] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-05-07T09:02:38.046-03:00  INFO 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-05-07T09:02:38.046-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
-2025-05-07T09:02:38.047-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
-2025-05-07T09:02:38.047-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
-2025-05-07T09:02:38.048-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@238bf9ed
-2025-05-07T09:02:38.048-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@21c2b62
-2025-05-07T09:02:38.049-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
-2025-05-07T09:02:38.049-03:00  INFO 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
-2025-05-07T09:02:38.054-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : POST "/item/create/", parameters={}
-2025-05-07T09:02:38.060-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceItem#createItem(TransferableItemCreate)
-2025-05-07T09:02:38.115-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.method.HandlerMethod             : Could not resolve parameter [0] in public org.springframework.http.ResponseEntity<com.untdf.flexinventory.base.Transferable.TransferableItem> com.untdf.flexinventory.base.Resource.ResourceItem.createItem(com.untdf.flexinventory.base.Transferable.TransferableItemCreate): JSON parse error: Cannot deserialize Map key of type `java.lang.Integer` from String "Proveedor": not a valid representation, problem: (java.lang.NumberFormatException) For input string: "Proveedor"
-2025-05-07T09:02:38.116-03:00  WARN 10487 --- [api-base] [http-nio-8080-exec-1] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Cannot deserialize Map key of type `java.lang.Integer` from String "Proveedor": not a valid representation, problem: (java.lang.NumberFormatException) For input string: "Proveedor"]
-2025-05-07T09:02:38.117-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 400 BAD_REQUEST
-2025-05-07T09:02:38.120-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : "ERROR" dispatch for POST "/error", parameters={}
-2025-05-07T09:02:38.120-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController#error(HttpServletRequest)
-2025-05-07T09:02:38.129-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json] and supported [application/json, application/*+json]
-2025-05-07T09:02:38.130-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [{timestamp=Wed May 07 09:02:38 ART 2025, status=400, error=Bad Request, trace=org.springframework.ht (truncated)...]
-2025-05-07T09:02:38.143-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Exiting from "ERROR" dispatch, status 400
-2025-05-07T09:02:39.678-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : POST "/item/create/", parameters={}
-2025-05-07T09:02:39.678-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceItem#createItem(TransferableItemCreate)
-2025-05-07T09:02:39.680-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-2] o.s.web.method.HandlerMethod             : Could not resolve parameter [0] in public org.springframework.http.ResponseEntity<com.untdf.flexinventory.base.Transferable.TransferableItem> com.untdf.flexinventory.base.Resource.ResourceItem.createItem(com.untdf.flexinventory.base.Transferable.TransferableItemCreate): JSON parse error: Cannot deserialize Map key of type `java.lang.Integer` from String "Proveedor": not a valid representation, problem: (java.lang.NumberFormatException) For input string: "Proveedor"
-2025-05-07T09:02:39.680-03:00  WARN 10487 --- [api-base] [http-nio-8080-exec-2] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Cannot deserialize Map key of type `java.lang.Integer` from String "Proveedor": not a valid representation, problem: (java.lang.NumberFormatException) For input string: "Proveedor"]
-2025-05-07T09:02:39.680-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 400 BAD_REQUEST
-2025-05-07T09:02:39.681-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : "ERROR" dispatch for POST "/error", parameters={}
-2025-05-07T09:02:39.681-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController#error(HttpServletRequest)
-2025-05-07T09:02:39.682-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json] and supported [application/json, application/*+json]
-2025-05-07T09:02:39.682-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [{timestamp=Wed May 07 09:02:39 ART 2025, status=400, error=Bad Request, trace=org.springframework.ht (truncated)...]
-2025-05-07T09:02:39.683-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Exiting from "ERROR" dispatch, status 400
-2025-05-07T09:02:42.474-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : POST "/item/create/", parameters={}
-2025-05-07T09:02:42.474-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceItem#createItem(TransferableItemCreate)
-2025-05-07T09:02:42.476-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-3] o.s.web.method.HandlerMethod             : Could not resolve parameter [0] in public org.springframework.http.ResponseEntity<com.untdf.flexinventory.base.Transferable.TransferableItem> com.untdf.flexinventory.base.Resource.ResourceItem.createItem(com.untdf.flexinventory.base.Transferable.TransferableItemCreate): JSON parse error: Cannot deserialize Map key of type `java.lang.Integer` from String "Proveedor": not a valid representation, problem: (java.lang.NumberFormatException) For input string: "Proveedor"
-2025-05-07T09:02:42.476-03:00  WARN 10487 --- [api-base] [http-nio-8080-exec-3] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Cannot deserialize Map key of type `java.lang.Integer` from String "Proveedor": not a valid representation, problem: (java.lang.NumberFormatException) For input string: "Proveedor"]
-2025-05-07T09:02:42.476-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 400 BAD_REQUEST
-2025-05-07T09:02:42.477-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : "ERROR" dispatch for POST "/error", parameters={}
-2025-05-07T09:02:42.477-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController#error(HttpServletRequest)
-2025-05-07T09:02:42.478-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json] and supported [application/json, application/*+json]
-2025-05-07T09:02:42.479-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-3] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [{timestamp=Wed May 07 09:02:42 ART 2025, status=400, error=Bad Request, trace=org.springframework.ht (truncated)...]
-2025-05-07T09:02:42.481-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Exiting from "ERROR" dispatch, status 400
-2025-05-07T09:03:17.509-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : POST "/item/create/", parameters={}
-2025-05-07T09:03:17.510-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceItem#createItem(TransferableItemCreate)
-2025-05-07T09:03:17.511-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-4] o.s.web.method.HandlerMethod             : Could not resolve parameter [0] in public org.springframework.http.ResponseEntity<com.untdf.flexinventory.base.Transferable.TransferableItem> com.untdf.flexinventory.base.Resource.ResourceItem.createItem(com.untdf.flexinventory.base.Transferable.TransferableItemCreate): JSON parse error: Unexpected character ('}' (code 125)): was expecting double-quote to start field name
-2025-05-07T09:03:17.511-03:00  WARN 10487 --- [api-base] [http-nio-8080-exec-4] .w.s.m.s.DefaultHandlerExceptionResolver : Resolved [org.springframework.http.converter.HttpMessageNotReadableException: JSON parse error: Unexpected character ('}' (code 125)): was expecting double-quote to start field name]
-2025-05-07T09:03:17.512-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 400 BAD_REQUEST
-2025-05-07T09:03:17.512-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : "ERROR" dispatch for POST "/error", parameters={}
-2025-05-07T09:03:17.512-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springframework.boot.autoconfigure.web.servlet.error.BasicErrorController#error(HttpServletRequest)
-2025-05-07T09:03:17.513-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json] and supported [application/json, application/*+json]
-2025-05-07T09:03:17.513-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-4] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [{timestamp=Wed May 07 09:03:17 ART 2025, status=400, error=Bad Request, trace=org.springframework.ht (truncated)...]
-2025-05-07T09:03:17.514-03:00 DEBUG 10487 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Exiting from "ERROR" dispatch, status 400
-2025-05-07T09:03:46.703-03:00  INFO 10487 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T09:03:46.705-03:00  INFO 10487 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-05-07T09:03:46.708-03:00  INFO 10487 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-05-07T09:03:52.167-03:00  INFO 10666 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 10666 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
-2025-05-07T09:03:52.168-03:00 DEBUG 10666 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
-2025-05-07T09:03:52.169-03:00  INFO 10666 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
-2025-05-07T09:03:52.204-03:00  INFO 10666 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-05-07T09:03:52.204-03:00  INFO 10666 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-05-07T09:03:52.717-03:00  INFO 10666 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-05-07T09:03:52.759-03:00  INFO 10666 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 38 ms. Found 4 JPA repository interfaces.
-2025-05-07T09:03:53.086-03:00  INFO 10666 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-05-07T09:03:53.096-03:00  INFO 10666 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-05-07T09:03:53.096-03:00  INFO 10666 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
-2025-05-07T09:03:53.130-03:00  INFO 10666 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-05-07T09:03:53.130-03:00  INFO 10666 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 925 ms
-2025-05-07T09:03:53.156-03:00  INFO 10666 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-05-07T09:03:53.286-03:00  INFO 10666 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@4a143bbf
-2025-05-07T09:03:53.287-03:00  INFO 10666 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-05-07T09:03:53.294-03:00  INFO 10666 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
-2025-05-07T09:03:53.597-03:00  INFO 10666 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-05-07T09:03:54.291-03:00  INFO 10666 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T09:03:54.297-03:00  INFO 10666 --- [api-base] [restartedMain] c.u.f.base.Resource.ResourceItem         : --------------------| Handler Registry - Se añade el atributo: PROVEEDOR |--------------------
-2025-05-07T09:03:54.610-03:00 DEBUG 10666 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
-2025-05-07T09:03:54.664-03:00 DEBUG 10666 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
-2025-05-07T09:03:54.688-03:00 DEBUG 10666 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2025-05-07T09:03:54.709-03:00 DEBUG 10666 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
-2025-05-07T09:03:54.801-03:00  INFO 10666 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-05-07T09:03:54.823-03:00  INFO 10666 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-05-07T09:03:54.835-03:00  INFO 10666 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 2.956 seconds (process running for 3.211)
-2025-05-07T09:04:25.497-03:00  INFO 10666 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T09:04:25.506-03:00  INFO 10666 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-05-07T09:04:25.516-03:00  INFO 10666 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-05-07T09:04:30.914-03:00  INFO 10798 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 10798 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
-2025-05-07T09:04:30.915-03:00 DEBUG 10798 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
-2025-05-07T09:04:30.916-03:00  INFO 10798 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
-2025-05-07T09:04:30.946-03:00  INFO 10798 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-05-07T09:04:30.947-03:00  INFO 10798 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-05-07T09:04:31.460-03:00  INFO 10798 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-05-07T09:04:31.504-03:00  INFO 10798 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 40 ms. Found 4 JPA repository interfaces.
-2025-05-07T09:04:31.842-03:00  INFO 10798 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-05-07T09:04:31.851-03:00  INFO 10798 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-05-07T09:04:31.852-03:00  INFO 10798 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
-2025-05-07T09:04:31.884-03:00  INFO 10798 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-05-07T09:04:31.885-03:00  INFO 10798 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 938 ms
-2025-05-07T09:04:31.911-03:00  INFO 10798 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-05-07T09:04:32.008-03:00  INFO 10798 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@3ededdcf
-2025-05-07T09:04:32.016-03:00  INFO 10798 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-05-07T09:04:32.025-03:00  INFO 10798 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
-2025-05-07T09:04:32.338-03:00  INFO 10798 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-05-07T09:04:32.953-03:00  INFO 10798 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T09:04:32.959-03:00  INFO 10798 --- [api-base] [restartedMain] c.u.f.base.Resource.ResourceItem         : --------------------| Handler Registry - Se añade el atributo: PROVEEDOR |--------------------
-2025-05-07T09:04:33.263-03:00 DEBUG 10798 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
-2025-05-07T09:04:33.316-03:00 DEBUG 10798 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
-2025-05-07T09:04:33.336-03:00 DEBUG 10798 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2025-05-07T09:04:33.357-03:00 DEBUG 10798 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
-2025-05-07T09:04:33.459-03:00  INFO 10798 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-05-07T09:04:33.477-03:00  INFO 10798 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-05-07T09:04:33.486-03:00  INFO 10798 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 2.85 seconds (process running for 3.124)
-2025-05-07T09:04:42.892-03:00  INFO 10798 --- [api-base] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-05-07T09:04:42.892-03:00  INFO 10798 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-05-07T09:04:42.892-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
-2025-05-07T09:04:42.893-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
-2025-05-07T09:04:42.893-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
-2025-05-07T09:04:42.894-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@3a5561cc
-2025-05-07T09:04:42.894-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@7b4859ee
-2025-05-07T09:04:42.894-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
-2025-05-07T09:04:42.894-03:00  INFO 10798 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
-2025-05-07T09:04:42.899-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/swagger-ui/index.html", parameters={}
-2025-05-07T09:04:42.904-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]
-2025-05-07T09:04:42.917-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 304 NOT_MODIFIED
-2025-05-07T09:04:42.930-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/swagger-ui/swagger-initializer.js", parameters={}
-2025-05-07T09:04:42.931-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]
-2025-05-07T09:04:42.955-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T09:04:43.030-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/openapi/swagger-config", parameters={}
-2025-05-07T09:04:43.031-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springdoc.webmvc.ui.SwaggerConfigResource#openapiJson(HttpServletRequest)
-2025-05-07T09:04:43.043-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json]
-2025-05-07T09:04:43.044-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [{configUrl=/openapi/swagger-config, oauth2RedirectUrl=http://localhost:8080/swagger-ui/oauth2-redire (truncated)...]
-2025-05-07T09:04:43.047-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T09:04:43.059-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/openapi", parameters={}
-2025-05-07T09:04:43.060-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springdoc.webmvc.api.OpenApiWebMvcResource#openapiJson(HttpServletRequest, String, Locale)
-2025-05-07T09:04:43.414-03:00  INFO 10798 --- [api-base] [http-nio-8080-exec-4] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 344 ms
-2025-05-07T09:04:43.426-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, */*] and supported [application/json]
-2025-05-07T09:04:43.429-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [{123, 34, 111, 112, 101, 110, 97, 112, 105, 34, 58, 34, 51, 46, 48, 46, 49, 34, 44, 34, 105, 110, 10 (truncated)...]
-2025-05-07T09:04:43.430-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T09:05:18.888-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : POST "/item/create/", parameters={}
-2025-05-07T09:05:18.889-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceItem#createItem(TransferableItemCreate)
-2025-05-07T09:05:18.898-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [com.untdf.flexinventory.base.Transferable.TransferableItemCreate@74d02b7c]
-2025-05-07T09:05:18.899-03:00  INFO 10798 --- [api-base] [http-nio-8080-exec-5] c.u.f.base.Resource.ResourceItem         : ------------| Inicio de Nueva Request - Crear ítem (inventario) |------------
-2025-05-07T09:05:18.900-03:00  INFO 10798 --- [api-base] [http-nio-8080-exec-5] c.u.f.base.Resource.ResourceItem         : Transferible info: Inventory = 4 | Atributos: {6=test}
-2025-05-07T09:05:18.979-03:00 TRACE 10798 --- [api-base] [http-nio-8080-exec-5] c.u.f.base.Resource.ResourceItem         : Guardado item con ID: 11
-2025-05-07T09:05:18.979-03:00 TRACE 10798 --- [api-base] [http-nio-8080-exec-5] c.u.f.base.Resource.ResourceItem         : Cantidad de atributos: 1
-2025-05-07T09:05:18.979-03:00 TRACE 10798 --- [api-base] [http-nio-8080-exec-5] c.u.f.base.Resource.ResourceItem         : → Proveedor = test
-2025-05-07T09:05:18.981-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json] and supported [application/json, application/*+json]
-2025-05-07T09:05:18.982-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableItem@6c59d978]
-2025-05-07T09:05:18.984-03:00 DEBUG 10798 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 201 CREATED
-2025-05-07T12:41:55.359-03:00  INFO 10798 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T12:41:55.367-03:00  INFO 10798 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-05-07T12:41:55.375-03:00  INFO 10798 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-05-07T12:42:01.878-03:00  INFO 17259 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 17259 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
-2025-05-07T12:42:01.879-03:00 DEBUG 17259 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
-2025-05-07T12:42:01.880-03:00  INFO 17259 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
-2025-05-07T12:42:01.911-03:00  INFO 17259 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-05-07T12:42:01.911-03:00  INFO 17259 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-05-07T12:42:02.378-03:00  INFO 17259 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-05-07T12:42:02.419-03:00  INFO 17259 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 37 ms. Found 4 JPA repository interfaces.
-2025-05-07T12:42:02.754-03:00  INFO 17259 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-05-07T12:42:02.763-03:00  INFO 17259 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-05-07T12:42:02.764-03:00  INFO 17259 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
-2025-05-07T12:42:02.796-03:00  INFO 17259 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-05-07T12:42:02.796-03:00  INFO 17259 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 885 ms
-2025-05-07T12:42:02.824-03:00  INFO 17259 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-05-07T12:42:02.919-03:00  INFO 17259 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@28d4f00b
-2025-05-07T12:42:02.927-03:00  INFO 17259 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-05-07T12:42:02.934-03:00  INFO 17259 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
-2025-05-07T12:42:03.229-03:00  INFO 17259 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-05-07T12:42:03.866-03:00  INFO 17259 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T12:42:03.872-03:00  INFO 17259 --- [api-base] [restartedMain] c.u.f.base.Resource.ResourceItem         : --------------------| Handler Registry - Se añade el atributo: PROVEEDOR |--------------------
-2025-05-07T12:42:04.234-03:00 DEBUG 17259 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
-2025-05-07T12:42:04.293-03:00 DEBUG 17259 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
-2025-05-07T12:42:04.315-03:00 DEBUG 17259 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2025-05-07T12:42:04.336-03:00 DEBUG 17259 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
-2025-05-07T12:42:04.439-03:00  INFO 17259 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-05-07T12:42:04.462-03:00  INFO 17259 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-05-07T12:42:04.472-03:00  INFO 17259 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 2.849 seconds (process running for 3.104)
-2025-05-07T12:42:07.717-03:00  INFO 17259 --- [api-base] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-05-07T12:42:07.717-03:00  INFO 17259 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-05-07T12:42:07.717-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
-2025-05-07T12:42:07.717-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
-2025-05-07T12:42:07.718-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
-2025-05-07T12:42:07.719-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@3865fdfe
-2025-05-07T12:42:07.719-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@603eacd3
-2025-05-07T12:42:07.719-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
-2025-05-07T12:42:07.720-03:00  INFO 17259 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 3 ms
-2025-05-07T12:42:07.725-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/swagger-ui/index.html", parameters={}
-2025-05-07T12:42:07.730-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]
-2025-05-07T12:42:07.744-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 304 NOT_MODIFIED
-2025-05-07T12:42:07.761-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/swagger-ui/swagger-initializer.js", parameters={}
-2025-05-07T12:42:07.762-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.handler.SimpleUrlHandlerMapping  : Mapped to ResourceHttpRequestHandler [classpath [META-INF/resources/webjars/]]
-2025-05-07T12:42:07.781-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T12:42:07.855-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : GET "/openapi/swagger-config", parameters={}
-2025-05-07T12:42:07.857-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-3] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springdoc.webmvc.ui.SwaggerConfigResource#openapiJson(HttpServletRequest)
-2025-05-07T12:42:07.869-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [*/*] and supported [application/json]
-2025-05-07T12:42:07.871-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-3] m.m.a.RequestResponseBodyMethodProcessor : Writing [{configUrl=/openapi/swagger-config, oauth2RedirectUrl=http://localhost:8080/swagger-ui/oauth2-redire (truncated)...]
-2025-05-07T12:42:07.874-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-3] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T12:42:07.882-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : GET "/openapi", parameters={}
-2025-05-07T12:42:07.882-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-4] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to org.springdoc.webmvc.api.OpenApiWebMvcResource#openapiJson(HttpServletRequest, String, Locale)
-2025-05-07T12:42:08.270-03:00  INFO 17259 --- [api-base] [http-nio-8080-exec-4] o.springdoc.api.AbstractOpenApiResource  : Init duration for springdoc-openapi is: 377 ms
-2025-05-07T12:42:08.283-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Using 'application/json', given [application/json, */*] and supported [application/json]
-2025-05-07T12:42:08.289-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-4] m.m.a.RequestResponseBodyMethodProcessor : Writing [{123, 34, 111, 112, 101, 110, 97, 112, 105, 34, 58, 34, 51, 46, 48, 46, 49, 34, 44, 34, 105, 110, 10 (truncated)...]
-2025-05-07T12:42:08.290-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-4] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
-2025-05-07T12:42:59.703-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : POST "/inventory/create/", parameters={}
-2025-05-07T12:42:59.703-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-5] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#createInventory(TransferableInventoryCreate)
-2025-05-07T12:42:59.714-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-5] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate@584c1aba]
-2025-05-07T12:42:59.768-03:00  INFO 17259 --- [api-base] [http-nio-8080-exec-5] c.u.f.base.Resource.ResourceItem         : Atributo del tipo: STRING
-2025-05-07T12:42:59.770-03:00  INFO 17259 --- [api-base] [http-nio-8080-exec-5] c.u.f.base.Resource.ResourceItem         : Atributo del tipo: INTEGER
-2025-05-07T12:42:59.772-03:00  INFO 17259 --- [api-base] [http-nio-8080-exec-5] c.u.f.base.Resource.ResourceItem         : Atributo del tipo: REAL
-2025-05-07T12:42:59.773-03:00  INFO 17259 --- [api-base] [http-nio-8080-exec-5] c.u.f.base.Resource.ResourceItem         : Atributo del tipo: PROVEEDOR
-2025-05-07T12:42:59.799-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json] and supported [application/json, application/*+json]
-2025-05-07T12:42:59.800-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-5] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@58574a4f]
-2025-05-07T12:42:59.803-03:00 DEBUG 17259 --- [api-base] [http-nio-8080-exec-5] o.s.web.servlet.DispatcherServlet        : Completed 201 CREATED
-2025-05-07T12:47:40.725-03:00  INFO 17259 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T12:47:40.733-03:00  INFO 17259 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-05-07T12:47:40.739-03:00  INFO 17259 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
-2025-05-07T12:47:45.881-03:00  INFO 17549 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.11 with PID 17549 (/home/miltongomez/Escritorio/FlexInventory/Backend/api-base/target/classes started by miltongomez in /home/miltongomez/Escritorio/FlexInventory/Backend/api-base)
-2025-05-07T12:47:45.882-03:00 DEBUG 17549 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
-2025-05-07T12:47:45.883-03:00  INFO 17549 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
-2025-05-07T12:47:45.914-03:00  INFO 17549 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
-2025-05-07T12:47:45.914-03:00  INFO 17549 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
-2025-05-07T12:47:46.387-03:00  INFO 17549 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
-2025-05-07T12:47:46.430-03:00  INFO 17549 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 38 ms. Found 4 JPA repository interfaces.
-2025-05-07T12:47:46.758-03:00  INFO 17549 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
-2025-05-07T12:47:46.767-03:00  INFO 17549 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
-2025-05-07T12:47:46.768-03:00  INFO 17549 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
-2025-05-07T12:47:46.799-03:00  INFO 17549 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
-2025-05-07T12:47:46.799-03:00  INFO 17549 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 884 ms
-2025-05-07T12:47:46.824-03:00  INFO 17549 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
-2025-05-07T12:47:46.918-03:00  INFO 17549 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@40570c7
-2025-05-07T12:47:46.926-03:00  INFO 17549 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
-2025-05-07T12:47:46.933-03:00  INFO 17549 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
-2025-05-07T12:47:47.230-03:00  INFO 17549 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
-2025-05-07T12:47:47.854-03:00  INFO 17549 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T12:47:47.860-03:00  INFO 17549 --- [api-base] [restartedMain] c.u.f.base.Resource.ResourceItem         : --------------------| Handler Registry - Se añade el atributo: PROVEEDOR |--------------------
-2025-05-07T12:47:48.155-03:00 DEBUG 17549 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
-2025-05-07T12:47:48.207-03:00 DEBUG 17549 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
-2025-05-07T12:47:48.228-03:00 DEBUG 17549 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
-2025-05-07T12:47:48.249-03:00 DEBUG 17549 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
-2025-05-07T12:47:48.341-03:00  INFO 17549 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
-2025-05-07T12:47:48.360-03:00  INFO 17549 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
-2025-05-07T12:47:48.368-03:00  INFO 17549 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 2.722 seconds (process running for 2.947)
-2025-05-07T12:47:53.781-03:00  INFO 17549 --- [api-base] [http-nio-8080-exec-1] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
-2025-05-07T12:47:53.781-03:00  INFO 17549 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
-2025-05-07T12:47:53.781-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
-2025-05-07T12:47:53.781-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
-2025-05-07T12:47:53.781-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
-2025-05-07T12:47:53.782-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@3c476f82
-2025-05-07T12:47:53.783-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@44bccfaf
-2025-05-07T12:47:53.783-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
-2025-05-07T12:47:53.783-03:00  INFO 17549 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed initialization in 2 ms
-2025-05-07T12:47:53.788-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : POST "/inventory/create/", parameters={}
-2025-05-07T12:47:53.795-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#createInventory(TransferableInventoryCreate)
-2025-05-07T12:47:53.848-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] m.m.a.RequestResponseBodyMethodProcessor : Read "application/json;charset=UTF-8" to [com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate@15f9914c]
-2025-05-07T12:47:53.892-03:00  INFO 17549 --- [api-base] [http-nio-8080-exec-1] c.u.f.base.Resource.ResourceItem         : Atributo del tipo: STRING
-2025-05-07T12:47:53.894-03:00  INFO 17549 --- [api-base] [http-nio-8080-exec-1] c.u.f.base.Resource.ResourceItem         : Atributo del tipo: INTEGER
-2025-05-07T12:47:53.896-03:00  INFO 17549 --- [api-base] [http-nio-8080-exec-1] c.u.f.base.Resource.ResourceItem         : Atributo del tipo: REAL
-2025-05-07T12:47:53.897-03:00  INFO 17549 --- [api-base] [http-nio-8080-exec-1] c.u.f.base.Resource.ResourceItem         : Atributo del tipo: PROVEEDOR
-2025-05-07T12:47:53.935-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json] and supported [application/json, application/*+json]
-2025-05-07T12:47:53.936-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@bd0acad]
-2025-05-07T12:47:53.947-03:00 DEBUG 17549 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 201 CREATED
-2025-05-07T13:47:25.890-03:00  INFO 17549 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
-2025-05-07T13:47:25.892-03:00  INFO 17549 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
-2025-05-07T13:47:25.898-03:00  INFO 17549 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.
+2025-05-18T01:33:19.666-03:00  INFO 10822 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Starting BaseApplication using Java 17.0.13 with PID 10822 (/home/milton-gomez/Desktop/Proyectos/FlexInventory/Backend/api-base/target/classes started by milton-gomez in /home/milton-gomez/Desktop/Proyectos/FlexInventory/Backend/api-base)
+2025-05-18T01:33:19.680-03:00 DEBUG 10822 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Running with Spring Boot v3.3.4, Spring v6.1.13
+2025-05-18T01:33:19.682-03:00  INFO 10822 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : No active profile set, falling back to 1 default profile: "default"
+2025-05-18T01:33:19.802-03:00  INFO 10822 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : Devtools property defaults active! Set 'spring.devtools.add-properties' to 'false' to disable
+2025-05-18T01:33:19.803-03:00  INFO 10822 --- [api-base] [restartedMain] .e.DevToolsPropertyDefaultsPostProcessor : For additional web related logging consider setting the 'logging.level.web' property to 'DEBUG'
+2025-05-18T01:33:21.270-03:00  INFO 10822 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Bootstrapping Spring Data JPA repositories in DEFAULT mode.
+2025-05-18T01:33:21.320-03:00  INFO 10822 --- [api-base] [restartedMain] .s.d.r.c.RepositoryConfigurationDelegate : Finished Spring Data repository scanning in 43 ms. Found 4 JPA repository interfaces.
+2025-05-18T01:33:21.642-03:00  INFO 10822 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat initialized with port 8080 (http)
+2025-05-18T01:33:21.654-03:00  INFO 10822 --- [api-base] [restartedMain] o.apache.catalina.core.StandardService   : Starting service [Tomcat]
+2025-05-18T01:33:21.654-03:00  INFO 10822 --- [api-base] [restartedMain] o.apache.catalina.core.StandardEngine    : Starting Servlet engine: [Apache Tomcat/10.1.30]
+2025-05-18T01:33:21.685-03:00  INFO 10822 --- [api-base] [restartedMain] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring embedded WebApplicationContext
+2025-05-18T01:33:21.686-03:00  INFO 10822 --- [api-base] [restartedMain] w.s.c.ServletWebServerApplicationContext : Root WebApplicationContext: initialization completed in 1882 ms
+2025-05-18T01:33:21.704-03:00  INFO 10822 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Starting...
+2025-05-18T01:33:21.867-03:00  INFO 10822 --- [api-base] [restartedMain] com.zaxxer.hikari.pool.HikariPool        : HikariPool-1 - Added connection org.postgresql.jdbc.PgConnection@69ee15b8
+2025-05-18T01:33:21.871-03:00  INFO 10822 --- [api-base] [restartedMain] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Start completed.
+2025-05-18T01:33:21.892-03:00  INFO 10822 --- [api-base] [restartedMain] o.s.b.a.h2.H2ConsoleAutoConfiguration    : H2 console available at '/h2-console'. Database available at 'jdbc:postgresql://localhost:5432/flexinventory'
+2025-05-18T01:33:22.885-03:00  INFO 10822 --- [api-base] [restartedMain] o.s.o.j.p.SpringPersistenceUnitInfo      : No LoadTimeWeaver setup: ignoring JPA class transformer
+2025-05-18T01:33:24.034-03:00  INFO 10822 --- [api-base] [restartedMain] j.LocalContainerEntityManagerFactoryBean : Initialized JPA EntityManagerFactory for persistence unit 'default'
+2025-05-18T01:33:24.039-03:00  INFO 10822 --- [api-base] [restartedMain] c.u.f.base.Resource.ResourceItem         : --------------------| Handler Registry - Se añade el atributo: PROVEEDOR |--------------------
+2025-05-18T01:33:24.266-03:00 DEBUG 10822 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerMapping : 25 mappings in 'requestMappingHandlerMapping'
+2025-05-18T01:33:24.300-03:00 DEBUG 10822 --- [api-base] [restartedMain] o.s.w.s.handler.SimpleUrlHandlerMapping  : Patterns [/webjars/**, /**, /swagger-ui*/*swagger-initializer.js, /swagger-ui*/**] in 'resourceHandlerMapping'
+2025-05-18T01:33:24.315-03:00 DEBUG 10822 --- [api-base] [restartedMain] s.w.s.m.m.a.RequestMappingHandlerAdapter : ControllerAdvice beans: 0 @ModelAttribute, 0 @InitBinder, 1 RequestBodyAdvice, 1 ResponseBodyAdvice
+2025-05-18T01:33:24.331-03:00 DEBUG 10822 --- [api-base] [restartedMain] .m.m.a.ExceptionHandlerExceptionResolver : ControllerAdvice beans: 1 @ExceptionHandler, 1 ResponseBodyAdvice
+2025-05-18T01:33:24.422-03:00  INFO 10822 --- [api-base] [restartedMain] o.s.b.d.a.OptionalLiveReloadServer       : LiveReload server is running on port 35729
+2025-05-18T01:33:24.496-03:00  INFO 10822 --- [api-base] [restartedMain] o.s.b.w.embedded.tomcat.TomcatWebServer  : Tomcat started on port 8080 (http) with context path '/'
+2025-05-18T01:33:24.530-03:00  INFO 10822 --- [api-base] [restartedMain] c.u.flexinventory.base.BaseApplication   : Started BaseApplication in 5.659 seconds (process running for 6.533)
+2025-05-18T01:34:08.753-03:00  INFO 10822 --- [api-base] [http-nio-8080-exec-2] o.a.c.c.C.[Tomcat].[localhost].[/]       : Initializing Spring DispatcherServlet 'dispatcherServlet'
+2025-05-18T01:34:08.753-03:00  INFO 10822 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Initializing Servlet 'dispatcherServlet'
+2025-05-18T01:34:08.753-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Detected StandardServletMultipartResolver
+2025-05-18T01:34:08.753-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Detected AcceptHeaderLocaleResolver
+2025-05-18T01:34:08.753-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Detected FixedThemeResolver
+2025-05-18T01:34:08.754-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.view.DefaultRequestToViewNameTranslator@5366ef6a
+2025-05-18T01:34:08.754-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Detected org.springframework.web.servlet.support.SessionFlashMapManager@28c82e11
+2025-05-18T01:34:08.754-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : enableLoggingRequestDetails='false': request parameters and headers will be masked to prevent unsafe logging of potentially sensitive data
+2025-05-18T01:34:08.754-03:00  INFO 10822 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed initialization in 1 ms
+2025-05-18T01:34:08.758-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : GET "/inventory/all", parameters={}
+2025-05-18T01:34:08.758-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : GET "/inventory/1", parameters={}
+2025-05-18T01:34:08.763-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getAllInventories()
+2025-05-18T01:34:08.763-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-1] s.w.s.m.m.a.RequestMappingHandlerMapping : Mapped to com.untdf.flexinventory.base.Resource.ResourceInventory#getInventory(Integer)
+2025-05-18T01:34:08.844-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-18T01:34:08.845-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [[com.untdf.flexinventory.base.Transferable.TransferableInventory@23a2c1a9, com.untdf.flexinventory.b (truncated)...]
+2025-05-18T01:34:08.857-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Using 'application/json', given [application/json, text/plain, */*] and supported [application/json, application/*+json]
+2025-05-18T01:34:08.857-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-1] o.s.w.s.m.m.a.HttpEntityMethodProcessor  : Writing [com.untdf.flexinventory.base.Transferable.TransferableInventory@3646fdc2]
+2025-05-18T01:34:08.865-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-1] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-18T01:34:08.865-03:00 DEBUG 10822 --- [api-base] [http-nio-8080-exec-2] o.s.web.servlet.DispatcherServlet        : Completed 200 OK
+2025-05-18T01:34:56.807-03:00  INFO 10822 --- [api-base] [SpringApplicationShutdownHook] j.LocalContainerEntityManagerFactoryBean : Closing JPA EntityManagerFactory for persistence unit 'default'
+2025-05-18T01:34:56.815-03:00  INFO 10822 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown initiated...
+2025-05-18T01:34:56.821-03:00  INFO 10822 --- [api-base] [SpringApplicationShutdownHook] com.zaxxer.hikari.HikariDataSource       : HikariPool-1 - Shutdown completed.

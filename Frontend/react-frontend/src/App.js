@@ -17,8 +17,8 @@
                 <div className="App">
                     
                     {/* ------| GRID SUPERIOR - NAVBAR Y USER SESSION |------ */}
-                    <div class= "grid">
-                        <div class = "col-12">
+                    <div className= "grid">
+                        <div className = "col-12">
                             <Navbar />
                         </div>
                         {/* Coloca UserSession aquí, en el flujo normal de la página   
@@ -33,8 +33,8 @@
                     </div>
 
                     {/* ------| GRID DE CONTENIDO - SE CARGA SEGÚN EL APPROUTES |------ */}
-                    <div class = "grid">
-                            <div class = "col">
+                    <div className = "grid">
+                            <div className = "col">
                                 <AppRoutes />
                             </div>
                     </div>
