@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.4 (Debian 17.4-1.pgdg120+2)
--- Dumped by pg_dump version 17.4 (Debian 17.4-1.pgdg120+2)
+-- Dumped from database version 17.2 (Debian 17.2-1.pgdg120+1)
+-- Dumped by pg_dump version 17.2 (Debian 17.2-1.pgdg120+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -46,9 +46,7 @@ SET default_table_access_method = heap;
 CREATE TABLE "api-base".attribute (
     id integer NOT NULL,
     type text NOT NULL,
-    name text NOT NULL,
-    target_inventory_id integer,
-    target_inventory_item_id integer
+    name text NOT NULL
 );
 
 
@@ -557,12 +555,12 @@ ALTER TABLE ONLY "api-users".user_role ALTER COLUMN id SET DEFAULT nextval('"api
 -- Data for Name: attribute; Type: TABLE DATA; Schema: api-base; Owner: flexinventory
 --
 
-COPY "api-base".attribute (id, type, name, target_inventory_id, target_inventory_item_id) FROM stdin;
-1	STRING	Brand	\N	\N
-2	INTEGER	Stock	\N	\N
-3	REAL	Price	\N	\N
-4	BOOLEAN	Available	\N	\N
-6	PROVEEDOR	Proveedor	\N	\N
+COPY "api-base".attribute (id, type, name) FROM stdin;
+1	STRING	Brand
+2	INTEGER	Stock
+3	REAL	Price
+4	BOOLEAN	Available
+6	PROVEEDOR	Proveedor
 \.
 
 
@@ -938,22 +936,6 @@ ALTER TABLE ONLY "api-base".catalog_item
 
 ALTER TABLE ONLY "api-base".catalog_item
     ADD CONSTRAINT catalog_item_item_id_fkey FOREIGN KEY (item_id) REFERENCES "api-base".item(id) ON DELETE CASCADE;
-
-
---
--- Name: attribute fk_attribute_inventory; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
---
-
-ALTER TABLE ONLY "api-base".attribute
-    ADD CONSTRAINT fk_attribute_inventory FOREIGN KEY (target_inventory_id) REFERENCES "api-base".inventory(id);
-
-
---
--- Name: attribute fk_attribute_item; Type: FK CONSTRAINT; Schema: api-base; Owner: flexinventory
---
-
-ALTER TABLE ONLY "api-base".attribute
-    ADD CONSTRAINT fk_attribute_item FOREIGN KEY (target_inventory_item_id) REFERENCES "api-base".item(id);
 
 
 --

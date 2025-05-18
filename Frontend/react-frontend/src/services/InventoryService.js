@@ -2,7 +2,7 @@ import axios from 'axios';
 
 // Este servicio centraliza el consumo de las apis relacionadas con Inventario.
 export class InventoryService {
-    baseUrl = "http://localhost:8080/inventory/";
+    baseUrl = "http://localhost:8081/inventory/";
 
     // Método para obtener todos los inventarios.
     getAllInventories() {

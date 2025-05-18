@@ -14,6 +14,7 @@ public class TransferableUser {
     private Integer id;
     private String name;
     private String password;
+    private String email;
     private Boolean state;
     private List<Role> roleList;
 
@@ -55,5 +56,13 @@ public class TransferableUser {
 
     public void setRoleList(List<Role> roleList) {
         this.roleList = roleList;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

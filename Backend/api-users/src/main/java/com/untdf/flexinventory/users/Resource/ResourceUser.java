@@ -20,12 +20,17 @@ public class ResourceUser {
     ServiceUser service;
     
 
-    @GetMapping(value = "{id}")
+    @GetMapping(value = "/{id}")
     public ResponseEntity<TransferableUser> getUser(@PathVariable("id") Integer id){
         //logger.info("Trying to get the user with id =" + id);
         TransferableUser user = service.getUserById(id);
 
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping(value = "/test")
+    public String testeo(){
+        return "TESTEO";
     }
 
 }

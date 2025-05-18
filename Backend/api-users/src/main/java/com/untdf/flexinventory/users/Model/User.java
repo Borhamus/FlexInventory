@@ -21,7 +21,13 @@ public class User {
     private String password;
 
     @Column
+    private String email;
+
+    @Column
     private Boolean state;
+
+    @Column
+    private Date creation_date;
 
     @ManyToMany
     @JoinTable(
@@ -72,5 +78,21 @@ public class User {
 
     public void setRoleList(List<Role> roleList) {
         this.roleList = roleList;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public Date getCreation_date() {
+        return creation_date;
+    }
+
+    public void setCreation_date(Date creation_date) {
+        this.creation_date = creation_date;
     }
 }
