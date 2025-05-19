@@ -26,7 +26,7 @@ public class JwtUtil {
     public String generarToken(String email) {
         long expMillis = Long.parseLong(expiration);
         Date now = new Date();
-        Date expiryDate = new Date(now.getTime() + expMillis);
+        Date expiryDate = new Date(now.getTime() + 1000 * 60 * 60);
 
         return Jwts.builder()
                 .setSubject(email)
@@ -37,12 +37,21 @@ public class JwtUtil {
     }
 
     public String extraerUsername(String token) {
-        return Jwts.parser().setSigningKey(secret).parseClaimsJws(token).getBody().getSubject();
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
     public boolean validarToken(String token) {
         try {
-            Jwts.parser().setSigningKey(secret).parseClaimsJws(token);
+            System.out.println("Secret: " + secret);
+            Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token);
             return true;
         } catch (JwtException e) {
             return false;

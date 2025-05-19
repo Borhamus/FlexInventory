@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.2 (Debian 17.2-1.pgdg120+1)
--- Dumped by pg_dump version 17.2 (Debian 17.2-1.pgdg120+1)
+-- Dumped from database version 17.0 (Debian 17.0-1.pgdg120+1)
+-- Dumped by pg_dump version 17.0 (Debian 17.0-1.pgdg120+1)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -404,7 +404,8 @@ CREATE TABLE "api-users"."user" (
     name text NOT NULL,
     password text NOT NULL,
     state boolean NOT NULL,
-    creation_date date NOT NULL
+    creation_date date NOT NULL,
+    email character varying NOT NULL
 );
 
 
@@ -698,7 +699,7 @@ COPY "api-users".role (id, name) FROM stdin;
 -- Data for Name: user; Type: TABLE DATA; Schema: api-users; Owner: flexinventory
 --
 
-COPY "api-users"."user" (id, name, password, state, creation_date) FROM stdin;
+COPY "api-users"."user" (id, name, password, state, creation_date, email) FROM stdin;
 \.
 
 
@@ -920,6 +921,14 @@ ALTER TABLE ONLY "api-users"."user"
 
 ALTER TABLE ONLY "api-users".user_role
     ADD CONSTRAINT user_role_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: user user_unique; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users"."user"
+    ADD CONSTRAINT user_unique UNIQUE (email);
 
 
 --

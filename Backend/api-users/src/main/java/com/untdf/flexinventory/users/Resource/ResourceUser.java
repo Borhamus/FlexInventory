@@ -18,7 +18,6 @@ public class ResourceUser {
 
     @Autowired
     ServiceUser service;
-    
 
     @GetMapping(value = "/{id}")
     public ResponseEntity<TransferableUser> getUser(@PathVariable("id") Integer id){
