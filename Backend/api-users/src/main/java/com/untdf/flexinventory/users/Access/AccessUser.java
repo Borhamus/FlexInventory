@@ -11,4 +11,6 @@ public interface AccessUser extends JpaRepository<User, Integer> {
 
     // Spring automaticamente implementa esta funcionalidad
     Optional<User> findByEmail(String email);
+
+    Optional<User> findByName(String username);
 }

@@ -1,6 +1,5 @@
-package com.untdf.flexinventory.users.Security.Jwt;
+package com.untdf.flexinventory.base.Security.Jwt;
 
-import com.untdf.flexinventory.users.Service.ServiceUserDetail;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -8,21 +7,19 @@ import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.ArrayList;
 
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
     @Autowired
     private JwtUtil jwtUtil;
-
-    @Autowired
-    private ServiceUserDetail serviceUserDetail;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -32,6 +29,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // Obtengo el header de Authorization
         final String authHeader = request.getHeader("Authorization");
 
+
         // Si el token no está vacio y es comienza con Bearer
         if (authHeader != null && authHeader.startsWith("Bearer ")) {
 
@@ -40,7 +38,12 @@ public class JwtFilter extends OncePerRequestFilter {
 
             if (jwtUtil.validarToken(token)) { // Valido si la firma es correcta.
                 String username = jwtUtil.extraerUsername(token);
-                UserDetails userDetails = serviceUserDetail.loadUserByUsername(username);
+
+                UserDetails userDetails = User
+                        .withUsername(username)
+                        .password("") // no importa porque no se usa
+                        .authorities(new ArrayList<>()) // TODO: Cargar los roles desde el token
+                        .build();
 
                 UsernamePasswordAuthenticationToken authToken =
                         new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());

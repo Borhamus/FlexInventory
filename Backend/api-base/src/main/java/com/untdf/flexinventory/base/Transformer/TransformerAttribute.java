@@ -4,7 +4,6 @@ import com.untdf.flexinventory.base.Model.Attribute;
 import com.untdf.flexinventory.base.Transferable.TransferableAttribute;
 import com.untdf.flexinventory.base.Transferable.TransferableAttributeCreate;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 import java.util.List;
 

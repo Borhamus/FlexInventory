@@ -1,10 +1,9 @@
 package com.untdf.flexinventory.base.Resource;
 
 
+import com.untdf.flexinventory.base.Service.ServiceCatalog;
 import com.untdf.flexinventory.base.Transferable.TransferableCatalog;
 import com.untdf.flexinventory.base.Transferable.TransferableCatalogCreate;
-import com.untdf.flexinventory.base.Transferable.TransferableInventory;
-import com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,7 +12,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import com.untdf.flexinventory.base.Service.ServiceCatalog;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;

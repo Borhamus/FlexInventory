@@ -1,12 +1,7 @@
 package com.untdf.flexinventory.users.Transferable;
 
 import com.untdf.flexinventory.users.Model.Role;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.JoinTable;
-import jakarta.persistence.ManyToMany;
 
-import java.util.Date;
 import java.util.List;
 
 public class TransferableUser {

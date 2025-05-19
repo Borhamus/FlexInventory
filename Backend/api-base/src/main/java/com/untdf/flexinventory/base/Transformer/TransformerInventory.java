@@ -3,7 +3,6 @@ package com.untdf.flexinventory.base.Transformer;
 import com.untdf.flexinventory.base.Model.Inventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate;
-import com.untdf.flexinventory.base.Transferable.TransferableItem;
 import org.mapstruct.Mapper;
 
 import java.util.List;

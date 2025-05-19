@@ -1,9 +1,5 @@
 package com.untdf.flexinventory.base.Transferable;
 
-import com.untdf.flexinventory.base.Model.CatalogItem;
-import com.untdf.flexinventory.base.Model.Inventory;
-import com.untdf.flexinventory.base.Model.ItemAttributeValue;
-
 import java.util.Date;
 import java.util.List;
 

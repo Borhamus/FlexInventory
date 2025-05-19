@@ -4,7 +4,6 @@ import com.untdf.flexinventory.base.Access.AccessAttribute;
 import com.untdf.flexinventory.base.Model.Attribute;
 import com.untdf.flexinventory.base.Transferable.TransferableAttribute;
 import com.untdf.flexinventory.base.Transferable.TransferableAttributeCreate;
-import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transformer.TransformerAttribute;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

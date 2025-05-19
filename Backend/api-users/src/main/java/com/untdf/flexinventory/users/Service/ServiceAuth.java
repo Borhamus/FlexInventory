@@ -38,8 +38,8 @@ public class ServiceAuth {
 
     // Valida las credenciales del usuario.
     public boolean validarCredenciales(TransferableLoginForm loginForm) {
-        return accessUser.findByEmail(loginForm.getEmail())
-                .map(u -> passwordEncoder.matches(loginForm.getPassword(), u.getPassword()))
+        return accessUser.findByName(loginForm.getName())// Obtengo el usuario a través de su nombre (unico)
+                .map(u -> passwordEncoder.matches(loginForm.getPassword(), u.getPassword())) // Retorno True si la contraseña coincide.
                 .orElse(false);
     }
 }

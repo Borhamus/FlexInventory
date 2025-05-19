@@ -1,5 +1,6 @@
-package com.untdf.flexinventory.users.Security.Jwt;
+package com.untdf.flexinventory.base.Security.Jwt;
 
+import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -10,6 +11,8 @@ import org.springframework.stereotype.Component;
 import java.nio.charset.StandardCharsets;
 import java.security.Key;
 import java.util.Date;
+
+import static io.jsonwebtoken.Jwts.parserBuilder;
 
 @Component
 public class JwtUtil {
@@ -37,7 +40,7 @@ public class JwtUtil {
     }
 
     public String extraerUsername(String token) {
-        return Jwts.parserBuilder()
+        return parserBuilder()
                 .setSigningKey(getSigningKey())
                 .build()
                 .parseClaimsJws(token)
@@ -45,10 +48,18 @@ public class JwtUtil {
                 .getSubject();
     }
 
+    public Claims extraerRoles(String token){
+        return Jwts.parserBuilder()
+                .setSigningKey(getSigningKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody();
+    }
+
     public boolean validarToken(String token) {
         try {
             System.out.println("Secret: " + secret);
-            Jwts.parserBuilder()
+            parserBuilder()
                     .setSigningKey(getSigningKey())
                     .build()
                     .parseClaimsJws(token);

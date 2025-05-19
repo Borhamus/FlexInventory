@@ -3,12 +3,9 @@ package com.untdf.flexinventory.users.Resource;
 import com.untdf.flexinventory.users.Service.ServiceUser;
 import com.untdf.flexinventory.users.Transferable.TransferableUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.logging.Logger;
 
 @RestController
 @RequestMapping("/user")
@@ -25,11 +22,6 @@ public class ResourceUser {
         TransferableUser user = service.getUserById(id);
 
         return ResponseEntity.ok(user);
-    }
-
-    @GetMapping(value = "/test")
-    public String testeo(){
-        return "TESTEO";
     }
 
 }

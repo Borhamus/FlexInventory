@@ -3,11 +3,8 @@ package com.untdf.flexinventory.base.Service;
 
 import com.untdf.flexinventory.base.Access.AccessCatalog;
 import com.untdf.flexinventory.base.Model.Catalog;
-import com.untdf.flexinventory.base.Model.Inventory;
 import com.untdf.flexinventory.base.Transferable.TransferableCatalog;
 import com.untdf.flexinventory.base.Transferable.TransferableCatalogCreate;
-import com.untdf.flexinventory.base.Transferable.TransferableInventory;
-import com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate;
 import com.untdf.flexinventory.base.Transformer.TransformerCatalog;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;

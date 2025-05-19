@@ -1,7 +1,7 @@
-package com.untdf.flexinventory.users.Security.Configuration;
+package com.untdf.flexinventory.base.Security.Configuration;
 
-import com.untdf.flexinventory.users.Security.Jwt.JwtFilter;
-import com.untdf.flexinventory.users.Service.ServiceUserDetail;
+
+import com.untdf.flexinventory.base.Security.Jwt.JwtFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -23,9 +23,6 @@ public class SecurityConfiguration {
     @Autowired
     private JwtFilter jwtFilter;
 
-    @Autowired
-    private ServiceUserDetail serviceUserDetail;
-
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -43,20 +40,5 @@ public class SecurityConfiguration {
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
-    }
-
-    @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder, UserDetailsService userDetailsService)
-            throws Exception {
-        return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(serviceUserDetail)
-                .passwordEncoder(bCryptPasswordEncoder)
-                .and()
-                .build();
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

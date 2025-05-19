@@ -4,7 +4,6 @@ import com.untdf.flexinventory.users.Model.User;
 import com.untdf.flexinventory.users.Transferable.TransferableUser;
 import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
-import org.mapstruct.MappingTarget;
 
 @Mapper(componentModel = "spring")
 public interface TransformerUser {

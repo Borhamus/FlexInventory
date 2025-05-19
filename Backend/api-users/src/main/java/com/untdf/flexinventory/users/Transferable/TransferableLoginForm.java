@@ -1,7 +1,7 @@
 package com.untdf.flexinventory.users.Transferable;
 
 public class TransferableLoginForm {
-    private String email;
+    private String name;
     private String password;
 
     public String getPassword() {
@@ -12,11 +12,11 @@ public class TransferableLoginForm {
         this.password = password;
     }
 
-    public String getEmail() {
-        return email;
+    public String getName() {
+        return name;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setName(String name) {
+        this.name = name;
     }
 }

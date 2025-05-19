@@ -2,7 +2,6 @@ package com.untdf.flexinventory.base.Transferable;
 
 import java.sql.Date;
 import java.util.List;
-import java.util.Map;
 
 public class TransferableInventoryCreate {
 

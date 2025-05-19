@@ -1,8 +1,6 @@
 package com.untdf.flexinventory.base.Transformer;
 
 import com.untdf.flexinventory.base.Model.Item;
-import com.untdf.flexinventory.base.Model.ItemAttributeValue;
-import com.untdf.flexinventory.base.Transferable.TransferableAttributeValue;
 import com.untdf.flexinventory.base.Transferable.TransferableItem;
 import com.untdf.flexinventory.base.Transferable.TransferableItemCreate;
 import com.untdf.flexinventory.base.Transferable.TransferableItemInventory;
