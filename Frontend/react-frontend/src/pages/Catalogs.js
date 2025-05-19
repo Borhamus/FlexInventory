@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 function Catalogs() {
   return <h1>Catalogs.</h1>;

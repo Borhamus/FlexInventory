@@ -1,46 +1,51 @@
-    import './App.css';
+// App.js
+import './App.css';
 
-    import "primereact/resources/themes/md-light-deeppurple/theme.css";
-    import "primereact/resources/primereact.min.css";
-    import "primeicons/primeicons.css";
-    import "/node_modules/primeflex/primeflex.css";
-    import { PrimeReactProvider, PrimeReactContext } from 'primereact/api';
+import "primereact/resources/themes/md-light-deeppurple/theme.css";
+import "primereact/resources/primereact.min.css";
+import "primeicons/primeicons.css";
+import "/node_modules/primeflex/primeflex.css";
 
-    import React from 'react';
-    import AppRoutes from './routes/AppRoutes';
-    import Navbar from './components/Navbar';
-    import UserSession from './components/UserSession'; // Asegúrate de que la ruta sea correcta
+import { PrimeReactProvider } from 'primereact/api';
+import React from 'react';
 
-    function App() {
-        return (
-            <PrimeReactProvider>
-                <div className="App">
-                    
-                    {/* ------| GRID SUPERIOR - NAVBAR Y USER SESSION |------ */}
-                    <div className= "grid">
-                        <div className = "col-12">
-                            <Navbar />
-                        </div>
-                        {/* Coloca UserSession aquí, en el flujo normal de la página   
-                        <div class="col-2">
-                            <UserSession 
-                                userName="Usuario Ejemplo"
-                                userAvatar="/path/to/avatar.jpg"
-                                onLogout={() => alert("Logout")}
-                            />
-                        </div>
-                        */}  
-                    </div>
+import AppRoutes from './routes/AppRoutes';
+import Navbar from './components/Navbar';
+import { AuthProvider, useAuth } from './context/AuthProvider';
 
-                    {/* ------| GRID DE CONTENIDO - SE CARGA SEGÚN EL APPROUTES |------ */}
-                    <div className = "grid">
-                            <div className = "col">
-                                <AppRoutes />
-                            </div>
+function MainApp() {
+    const { isAuthenticated } = useAuth();
+
+    return (
+        <div className="App">
+
+            {/* ------| NAVBAR SOLO SI ESTÁ AUTENTICADO |------ */}
+            {isAuthenticated && (
+                <div className="grid">
+                    <div className="col-12">
+                        <Navbar />
                     </div>
                 </div>
-            </PrimeReactProvider>
-        );
-    }
+            )}
 
-    export default App;
+            {/* ------| CONTENIDO PRINCIPAL |------ */}
+            <div className="grid">
+                <div className="col">
+                    <AppRoutes />
+                </div>
+            </div>
+        </div>
+    );
+}
+
+function App() {
+    return (
+        <PrimeReactProvider>
+            <AuthProvider>
+                <MainApp />
+            </AuthProvider>
+        </PrimeReactProvider>
+    );
+}
+
+export default App;
