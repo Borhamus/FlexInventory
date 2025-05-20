@@ -73,6 +73,7 @@ public class ResourceAuth {
             auditor.info(" ---------- GENERO EL TOKEN ----------");
             String token = jwtUtil.generarToken(request.getName());
 
+            auditor.info(" ------------ TOKEN GENERADA: {}", token);
             auditor.info(" ---------- DEVUELVO EL TOKEN ----------");
             return ResponseEntity.ok(new TransferableJWT(token));
         }

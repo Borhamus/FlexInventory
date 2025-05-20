@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "./AxiosConfig";
 
 // Este servicio centraliza el consumo de las apis relacionadas con Inventario.
 export class InventoryService {

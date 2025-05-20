@@ -6,7 +6,7 @@ import "/node_modules/primeflex/primeflex.css";
 
 function Navbar() {
     const items = [
-        { label: 'Home', icon: 'pi pi-fw pi-home', url: "/"},
+        { label: 'Home', icon: 'pi pi-fw pi-home', url: "/home"},
         { label: 'Inventories', icon: 'pi pi-fw pi-table', url: "inventories"},
         { label: 'Catalogs', icon: 'pi pi-fw pi-book', url: "catalogs"},
         { label: 'Users', icon: 'pi pi-fw pi-users', url: "users"},

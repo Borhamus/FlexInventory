@@ -1,10 +1,13 @@
 package com.untdf.flexinventory.users.Security.Jwt;
 
+import com.untdf.flexinventory.users.Resource.ResourceAuth;
 import com.untdf.flexinventory.users.Service.ServiceUserDetail;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,6 +27,8 @@ public class JwtFilter extends OncePerRequestFilter {
     @Autowired
     private ServiceUserDetail serviceUserDetail;
 
+    Logger auditor = LoggerFactory.getLogger(JwtFilter.class);
+
     @Override
     protected void doFilterInternal(HttpServletRequest request,
                                     HttpServletResponse response,
@@ -31,6 +36,7 @@ public class JwtFilter extends OncePerRequestFilter {
 
         // Obtengo el header de Authorization
         final String authHeader = request.getHeader("Authorization");
+        auditor.info("------------ Header Authorization: " + authHeader);
 
         // Si el token no está vacio y es comienza con Bearer
         if (authHeader != null && authHeader.startsWith("Bearer ")) {

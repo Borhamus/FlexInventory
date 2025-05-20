@@ -2,72 +2,83 @@ import React, { useState } from 'react';
 import '../styles/LoginPage.css';
 import "primeicons/primeicons.css";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthProvider";
 import axios from "axios";
 
 
 function Login() {
+    // Estados para los campos del formulario
+    // useState actualiza el estado del componente cada vez que el usuario escribe,
+    // lo usamos para guardar lo que escribe 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [error, setError] = useState(null);
 
+    // Para redirigir después del login
     const navigate = useNavigate();
-    const { login } = useAuth();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
 
+    // Función que se ejecuta al enviar el formulario
+    const handleLogin = async (event) => {
+        event.preventDefault(); // Evita que el navegador recargue la página
         try {
+            // Llamamos al backend
             const response = await axios.post("http://localhost:8080/auth/login", {
-                username,
-                password
+                name: username,
+                password: password
             });
+            console.log("Formulario: " + username + " | " + password)
 
+            // Obtenemos el token
             const token = response.data.token;
 
-            // Guardar token en localStorage (o sessionStorage)
+            // Lo guardamos en localStorage
             localStorage.setItem("token", token);
+            console.log("Token: " + localStorage.getItem("token"))
 
-            // Activar el contexto
-            login();
+            // Redirigimos al usuario a la página principal (o donde quieras)
+            navigate("/Home");
 
-            // Redirigir a la página principal
-            navigate("/");
-        } catch (err) {
-            console.error("Error de login:", err);
-            setError("Usuario o contraseña incorrectos");
+        } catch (error) {
+            console.log("Formulario: " + username + " | " + password)
+            console.error("Login fallido:", error);
+            alert("Usuario o contraseña incorrectos");
         }
     };
 
     return (
-        <div className="login-container">
-            <form onSubmit={handleSubmit}>
-                <h2>Iniciar Sesión</h2>
-
-                {error && <p className="error">{error}</p>}
-
-                <div>
-                    <label>Usuario</label>
+        <div className="flex-container">
+            <div className="login">
+                <h4>Login</h4>
+                <form onSubmit={handleLogin}>
+                    <div className="text_area">
+                        <input
+                            type="text"
+                            id="username"
+                            name="username"
+                            className="text_input"
+                            placeholder="Nombre de usuario"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                    </div>
+                    <div className="text_area">
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            className="text_input"
+                            placeholder="Contraseña"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                    </div>
                     <input
-                        type="text"
-                        value={username}
-                        onChange={(e) => setUsername(e.target.value)}
-                        required
+                        type="submit"
+                        value="LOGIN"
+                        className="btn"
                     />
-                </div>
-
-                <div>
-                    <label>Contraseña</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-
-                <button type="submit">Ingresar</button>
-            </form>
+                </form>
+                <a className="link" href="/signup">Sign Up</a>
+            </div>
         </div>
     );
 }
