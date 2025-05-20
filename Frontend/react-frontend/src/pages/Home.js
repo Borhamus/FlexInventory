@@ -1,8 +1,6 @@
 import React from 'react';
-import { Skeleton } from 'primereact/skeleton';
 import '../styles/Home.css';
 import ContadorHome from '../components/ContadorHome';
-import Movimiento from '../components/Movimiento';
 import UltimosMovimientosHome from '../components/UltimosMovimientosHome';
 import UsuariosActivos from '../components/UsuariosActivos';
 import Estadisticas from '../components/Estadisticas';

@@ -3,6 +3,7 @@ import { Menubar } from 'primereact/menubar';
 import { Avatar } from 'primereact/avatar';  
 import { Button } from 'primereact/button';
 import "/node_modules/primeflex/primeflex.css";
+import "../styles/Navbar.css"
 
 function Navbar() {
     const items = [
@@ -28,8 +29,8 @@ function Navbar() {
     );
 
     return (
-        <nav>
-            <Menubar model={items} start = {start} end = {end}/> 
+        <nav className='navbar-container'>
+            
         </nav>
     );
 }

@@ -1,6 +1,7 @@
 import React from "react";
 import "/node_modules/primeflex/primeflex.css";
 import Navbar from "../components/Navbar";
+import "../styles/Base.css"
 
 function Base({page}) {
   return (
