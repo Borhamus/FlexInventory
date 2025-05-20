@@ -1,5 +1,5 @@
 .flex-container{
-    background: linear-gradient(135deg, #1B8AF1, #B58DED);
+    background: linear-gradient(135deg, var(--pink-50), #B58DED);
     width: 100vw;
     height: 100vh;
     display: flex;
@@ -53,7 +53,7 @@ form{
 }
 
 .btn:hover{
-    background: #B58DED;
+    background: #8e5dd1;
 }
 
 .login{
@@ -72,4 +72,9 @@ form{
     cursor: pointer;
     display: block;
     text-decoration: none;
+}
+
+.link:hover{
+    color: #051625;
+    text-decoration:underline;
 }

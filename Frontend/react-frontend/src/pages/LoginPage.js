@@ -3,6 +3,7 @@ import '../styles/LoginPage.css';
 import "primeicons/primeicons.css";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import AuthService from '../services/AuthService';
 
 
 function Login() {
@@ -21,14 +22,17 @@ function Login() {
         event.preventDefault(); // Evita que el navegador recargue la página
         try {
             // Llamamos al backend
-            const response = await axios.post("http://localhost:8080/auth/login", {
+            console.log("Formulario: " + username + " | " + password)
+            const loginForm = {
                 name: username,
                 password: password
-            });
-            console.log("Formulario: " + username + " | " + password)
+            }
 
+            // Bienvenido a concurrencia, el await hace esperar a que el authService responda
+            const response = await AuthService.login(loginForm);
+            
             // Obtenemos el token
-            const token = response.data.token;
+            const token = response.token;
 
             // Lo guardamos en localStorage
             localStorage.setItem("token", token);
