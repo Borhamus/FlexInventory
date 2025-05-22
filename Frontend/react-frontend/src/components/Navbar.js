@@ -30,7 +30,18 @@ function Navbar() {
 
     return (
         <nav className='navbar-container'>
-            
+            <div className='navbarLeft'>
+                <a className='linkNavbar linkNavbar--home' href="/home">FlexInventory</a>
+            </div>
+            <div className='navbarCenter'>
+                <a className='linkNavbar linkNavbar--inventories' href="/inventories" >Inventories</a>
+                <a className='linkNavbar linkNavbar--catalogs' href="/catalogs">Catalogs</a>
+                <a className='linkNavbar linkNavbar--users' href="/users">Users</a>
+            </div>
+            <div className='navbarRight'>
+                <a className='linkNavbar linkNavbar--user' href="/profile">👤</a>
+                <a className='linkNavbar linkNavbar--settings' href="/settings">Config</a>
+            </div>
         </nav>
     );
 }

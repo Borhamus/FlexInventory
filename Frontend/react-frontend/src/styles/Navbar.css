@@ -1,10 +1,86 @@
 .navbar-container{
     display: flex;
     flex-direction: row;
-    justify-content: center;
+    justify-content:center;
     align-items: center;
-    background-color: var(--indigo-400);
+    background-color: var(--indigo-300);
     border-radius: var(--border-radius);
     width: 100%;
     height: 100%;
+}
+
+.navbarLeft{
+    display: flex;
+    flex:2
+}
+
+.navbarCenter{
+    display: flex;
+    flex:6;
+    text-align: center;
+    justify-content: center;
+}
+
+.navbarRight{
+    display: flex;
+    justify-content:end;
+    flex:2
+}
+.linkNavbar {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 10vw;
+    height: 5vh;
+    border-radius: 30px;
+    background: var(--indigo-400);
+    border: none;
+    font-family: 'Montserrat';
+    font-size: 2.2vh;
+    color: #FFFFFF;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.1s;
+}
+.linkNavbar:hover {
+    background: var(--indigo-500);
+}
+
+/* Para Inventories */
+.linkNavbar--inventories {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+}
+
+/* Para Catalogs */
+.linkNavbar--catalogs {
+    margin-inline: 0.2em;
+}
+
+/* Para Users */
+.linkNavbar--users {
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
+}
+
+/* Para Home */
+.linkNavbar--home {
+    width: 10em;
+    height: 1.6em;
+    border-radius: 20px;
+    font-size: 3vh;
+    margin-inline: 0.5em;
+}
+
+/* Para Settings */
+.linkNavbar--settings {
+    width: 5em;
+    height: 2.28em;
+    margin-right: 0.5em;
+}
+
+/* Para User */
+.linkNavbar--user {
+    width: 5em;
+    height: 2.28em;
 }
