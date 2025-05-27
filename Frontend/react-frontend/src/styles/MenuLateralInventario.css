@@ -1,0 +1,6 @@
+.MenuLateralInventario{
+    background-color: var(--indigo-400);
+    width: 100%;
+    height: 100%;
+    border-radius: var(--border-radius);
+}

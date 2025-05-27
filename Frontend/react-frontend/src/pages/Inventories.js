@@ -5,7 +5,8 @@ import MenuLateral from '../components/MenuLateral';
 import CrearInventario from '../components/CrearInventario';
 import ConfirmDelInv from '../components/ConfirmDelInv'; // Importamos el componente de confirmación
 import { ConfirmDialog } from 'primereact/confirmdialog'; // Importa ConfirmDialog
-import "/node_modules/primeflex/primeflex.css";
+import "../styles/Inventories.css"
+import MenuLateralInventario from '../components/MenuLateralnventario';
 
 function Inventories() {
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
@@ -48,43 +49,38 @@ function Inventories() {
         setSelectedId(id);
     };
 
-    
+
     return (
         <div className="inventory">
             {/* Esto asegura que el popup funcione */}
             <ConfirmDialog />
 
-            <div class="grid">
-                    <div class="col-2">
+            <div className="inventarioMenuLateral">
+                <MenuLateralInventario />
+                {/* 
                         <MenuLateral
                             elementos={elementos}
                             onElementoSeleccionado={handleSeleccionarElemento}
                             onCrearInventario={handleCrearInventario}
                         />
+                        */}
+            </div>
+            <div className="inventarioTabla">
+                {showInventoryTable && selectedId && (
+                    <div>
+                        <InventoryTable num={selectedId} />
                     </div>
-                    <div class="col">
-                        {showInventoryTable && selectedId && (
-                            <div>
-                                <InventoryTable num={selectedId} />
-                                <div className="mt-3">
-                                    {/* Botón para eliminar inventario */}
-                                    <ConfirmDelInv
-                                        inventoryId={selectedId}
-                                        onConfirm={handleDeleteInventory}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                    </div>
+                )}
             </div>
 
-            {/* Modal para crear inventario */}
+            {/* Modal para crear inventario 
             {showCrearModal && (
                 <CrearInventario
                     onClose={() => setShowCrearModal(false)}
                     onInventoryCreated={handleInventoryCreated}
                 />
             )}
+                */}
         </div>
     );
 }

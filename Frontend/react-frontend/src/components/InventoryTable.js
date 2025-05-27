@@ -73,14 +73,14 @@ function InventoryTable({ num }) {
 
     return (
         <div className=''>
-            <div className="">
+            <div className="" style={{marginLeft: "0.5em"}}>
                 <DataTable
                     value={processedItems} 
                     footer={footer}
                     header={header} 
                     showGridlines 
                     stripedRows
-                    tableStyle={{ minWidth: '50rem' }}
+                    tableStyle={{}}
                     paginator
                     rows={rows} // Número de filas por página
                     first={first} // Página actual
