@@ -1,0 +1,24 @@
+.botonGenerico{
+    width: 15vw;
+    height: 6vh;
+    border-radius: 30px;
+    background: var(--indigo-300);
+    border: none;
+    font-family: 'Montserrat';
+    font-size: 2.5vh;
+    color: #FFFFFF;
+    cursor: pointer;
+
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: center;
+}
+
+.botonGenerico:hover{
+    background: var(--indigo-400);
+}
+
+.botonGenericoIcon{
+    margin-right: 0.5em;
+}

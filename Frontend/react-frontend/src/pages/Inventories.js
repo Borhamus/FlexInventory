@@ -22,10 +22,10 @@ function Inventories() {
     }, []);
 
     // Manejar la eliminación de inventarios
-    const handleDeleteInventory = (inventoryId) => {
-        InventoryService.deleteInventoryById(inventoryId)
+    const handleDeleteInventory = () => {
+        InventoryService.deleteInventoryById(selectedId)
             .then(() => {
-                setElementos(prev => prev.filter(el => el.id !== inventoryId));
+                setElementos(prev => prev.filter(el => el.id !== selectedId));
                 setSelectedId(null);
             })
             .catch(error => alert('No se pudo eliminar el inventario.'));
@@ -58,15 +58,12 @@ function Inventories() {
             <div className="inventarioMenuLateral">
                 <MenuLateralInventario 
                     titulo = "Inventories"
+                    elementos={elementos}
                     onElementoSeleccionado={handleSeleccionarElemento}
+                    onCrearInventario={handleCrearInventario}
+                    onEliminarInventario={handleDeleteInventory}
                 />
-                {/* 
-                        <MenuLateral
-                            elementos={elementos}
-                            onElementoSeleccionado={handleSeleccionarElemento}
-                            onCrearInventario={handleCrearInventario}
-                        />
-                        */}
+
             </div>
             <div className="inventarioTabla">
                 {showInventoryTable && selectedId && (
@@ -74,6 +71,22 @@ function Inventories() {
                         <InventoryTable num={selectedId} />
                     </div>
                 )}
+
+                {/*
+                    {showInventoryTable && selectedId && (
+                            <div>
+                                <InventoryTable num={selectedId} />
+                                <div className="mt-3">
+
+                                    <ConfirmDelInv
+                                        inventoryId={selectedId}
+                                        onConfirm={handleDeleteInventory}
+                                    />
+                                </div>
+                            </div>
+                        )}
+                */}
+
             </div>
 
             {/* Modal para crear inventario 
