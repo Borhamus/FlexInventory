@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import "../styles/MenuLateralInventario.css"
 import Button from "./Button";
+import Modal from './Modal';
 
 function MenuLateralInventario({ titulo, elementos, onElementoSeleccionado, onCrearInventario, onEliminarInventario }) {
 

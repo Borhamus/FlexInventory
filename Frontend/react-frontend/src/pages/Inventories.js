@@ -7,12 +7,14 @@ import ConfirmDelInv from '../components/ConfirmDelInv'; // Importamos el compon
 import { ConfirmDialog } from 'primereact/confirmdialog'; // Importa ConfirmDialog
 import "../styles/Inventories.css"
 import MenuLateralInventario from '../components/MenuLateralnventario';
+import Modal from '../components/Modal';
 
 function Inventories() {
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
     const [selectedId, setSelectedId] = useState(1); // ID del inventario seleccionado, por ahora toma el primero, proximamente deberia comprobar si existe
     const [showCrearModal, setShowCrearModal] = useState(false);
     const [showInventoryTable, setShowInventoryTable] = useState(true);
+    const [showModal, setShowModal] = useState(false)
 
     // Cargar los inventarios al inicio
     useEffect(() => {
@@ -23,12 +25,13 @@ function Inventories() {
 
     // Manejar la eliminación de inventarios
     const handleDeleteInventory = () => {
-        InventoryService.deleteInventoryById(selectedId)
+        setShowModal(true)
+        /*InventoryService.deleteInventoryById(selectedId)
             .then(() => {
                 setElementos(prev => prev.filter(el => el.id !== selectedId));
                 setSelectedId(null);
             })
-            .catch(error => alert('No se pudo eliminar el inventario.'));
+            .catch(error => alert('No se pudo eliminar el inventario.')); */
     };
 
     // Mostrar modal de crear inventario
@@ -52,8 +55,6 @@ function Inventories() {
 
     return (
         <div className="inventory">
-            {/* Esto asegura que el popup funcione */}
-            <ConfirmDialog />
 
             <div className="inventarioMenuLateral">
                 <MenuLateralInventario 
@@ -88,6 +89,10 @@ function Inventories() {
                 */}
 
             </div>
+
+            {showModal &&(
+                <Modal />
+            )}
 
             {/* Modal para crear inventario 
             {showCrearModal && (

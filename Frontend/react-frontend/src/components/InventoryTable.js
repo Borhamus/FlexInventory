@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import InventoryService from "../services/InventoryService";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
+import "../styles/InventoryTable.css"
 
 function InventoryTable({ num }) {
     // Estado para almacenar el inventario
@@ -52,6 +53,8 @@ function InventoryTable({ num }) {
             field="name" // Vinculamos al campo 'name'
             header="Name" // Etiqueta de encabezado
             sortable={true} // Habilitar el ordenamiento
+            headerStyle={{ width: '10%', minWidth: '8rem' }}
+            style={{fontSize: "0.9vw"}}
         />,
         // Generar las columnas para los atributos dinámicos
         ...inventory.attributes.map(attribute => (
@@ -60,10 +63,32 @@ function InventoryTable({ num }) {
                 field={attribute.name} // Vinculamos el campo dinámico
                 header={attribute.name}
                 sortable={true} // Habilitar el ordenamiento
+                headerStyle={{ width: '10%', minWidth: '8rem' }}
+                style={{fontSize: "0.9vw"}}
             />
         ))
     ];
 
+    const editarBorrarBotones = (item) => {
+        return(
+            <div className="contenedorBotonesEditarBorrar">
+                <div className="botonEditar">
+                    <button className="inventoryButtonDeleteEdit">
+                        <i className="pi pi-fw pi-pencil"></i>
+                    </button>
+                    
+                </div>
+                <div className="separadorEditarEliminar">
+                    
+                </div>
+                <div className="botonEliminar">
+                    <button className="inventoryButtonDeleteEdit">
+                        <i className="pi pi-fw pi-trash"></i>
+                    </button>
+                </div>
+            </div>
+        )
+    };
 
     // Header de la tabla
     const header = inventory.name;
@@ -73,15 +98,17 @@ function InventoryTable({ num }) {
 
     return (
         <div className=''>
-            <div className="" style={{marginLeft: "0.5em"}}>
+            <div className="" style={{ marginLeft: "0.5em"}}>
                 <DataTable
-                    value={processedItems} 
+                    value={processedItems}
                     //footer={footer}
-                    header={header} 
-                    //size={size}
-                    showGridlines 
+                    header={header}
+                    size={"medium"}
+                    removableSort
+                    showGridlines
                     tableStyle={{}}
                     paginator
+                    resizableColumns
                     rows={rows} // Número de filas por página
                     first={first} // Página actual
                     rowsPerPageOptions={[5, 10, 25, 50]} // Opciones de filas por página
@@ -92,6 +119,11 @@ function InventoryTable({ num }) {
                 >
                     {/* Generar columnas dinámicas basadas en los atributos */}
                     {dynamicColumns}
+                    <Column // Columna de borrado y edicion
+                        headerStyle={{ width: '10%', minWidth: '8rem' }}
+                        bodyStyle={{ textAlign: 'center' }}
+                        body={editarBorrarBotones}
+                    />
                 </DataTable>
             </div>
         </div>
