@@ -56,7 +56,10 @@ function Inventories() {
             <ConfirmDialog />
 
             <div className="inventarioMenuLateral">
-                <MenuLateralInventario />
+                <MenuLateralInventario 
+                    titulo = "Inventories"
+                    onElementoSeleccionado={handleSeleccionarElemento}
+                />
                 {/* 
                         <MenuLateral
                             elementos={elementos}

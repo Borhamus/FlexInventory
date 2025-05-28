@@ -3,10 +3,10 @@
     flex-direction: row;
     justify-content:center;
     align-items: center;
-    background-color: var(--indigo-300);
+    background-color: var(--indigo-200);
     border-radius: var(--border-radius);
     width: 100%;
-    height: 7vh;
+    height: 100%;
 }
 
 .navbarLeft{
@@ -55,6 +55,7 @@
 /* Para Catalogs */
 .linkNavbar--catalogs {
     margin-inline: 0.2em;
+    border-radius: 2px;    
 }
 
 /* Para Users */

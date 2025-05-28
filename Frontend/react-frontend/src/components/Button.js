@@ -1,7 +1,7 @@
 import React from "react";
 
-function Button() {
-  return <h1>Catalogs.</h1>;
+function Button(props) {
+  return <button onClick={props.click}>{props.name}</button>;
 }
 
 export default Button;

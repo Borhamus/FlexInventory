@@ -1,6 +1,30 @@
 .MenuLateralInventario{
-    background-color: var(--indigo-400);
+    background-color: var(--indigo-200);
     width: 100%;
     height: 100%;
     border-radius: var(--border-radius);
+    display: flex;
+    flex-direction: column;
+}
+
+.MenuLateralTitulo{
+    font-size: 1.5vw;
+    font-weight: bold;
+    color: whitesmoke;
+    margin: 0.5em;
+}
+
+.listaDeInventarios{
+    flex: 8;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    gap: .5em;
+}
+
+.MenuLateralAcciones{
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+    border-top: 2px solid gray;
 }

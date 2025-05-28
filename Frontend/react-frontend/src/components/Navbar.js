@@ -6,6 +6,7 @@ import "/node_modules/primeflex/primeflex.css";
 import "../styles/Navbar.css"
 
 function Navbar() {
+    /*
     const items = [
         { label: 'Home', icon: 'pi pi-fw pi-home', url: "/home"},
         { label: 'Inventories', icon: 'pi pi-fw pi-table', url: "inventories"},
@@ -27,6 +28,8 @@ function Navbar() {
             </a>
         </div>
     );
+    
+    */
 
     return (
         <nav className='navbar-container'>
@@ -39,8 +42,8 @@ function Navbar() {
                 <a className='linkNavbar linkNavbar--users' href="/users">Users</a>
             </div>
             <div className='navbarRight'>
-                <a className='linkNavbar linkNavbar--user' href="/profile">👤</a>
-                <a className='linkNavbar linkNavbar--settings' href="/settings">Config</a>
+                <a className='linkNavbar linkNavbar--user' href="/profile"><i className="pi pi-fw pi-user"></i></a>
+                <a className='linkNavbar linkNavbar--settings' href="/settings"><i className="pi pi-fw pi-cog"></i></a>
             </div>
         </nav>
     );

@@ -69,17 +69,17 @@ function InventoryTable({ num }) {
     const header = inventory.name;
 
     // Footer de la tabla
-    const footer = `En total hay ${processedItems ? processedItems.length : 0} productos.`;
+    // const footer = `En total hay ${processedItems ? processedItems.length : 0} productos.`;
 
     return (
         <div className=''>
             <div className="" style={{marginLeft: "0.5em"}}>
                 <DataTable
                     value={processedItems} 
-                    footer={footer}
+                    //footer={footer}
                     header={header} 
+                    //size={size}
                     showGridlines 
-                    stripedRows
                     tableStyle={{}}
                     paginator
                     rows={rows} // Número de filas por página

@@ -11,6 +11,7 @@
     flex: 8;
     height: 90vh;
     width: 78vw;
+    overflow-y: auto;
 }
 
 .inventarioMenuLateral{
