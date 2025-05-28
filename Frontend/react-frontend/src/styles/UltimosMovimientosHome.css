@@ -37,31 +37,3 @@
     border-bottom: 2px solid var(--indigo-200);
     border-radius: var(--border-radius);
 }
-
-/* -------------| Scroll bar |--------------- */
-
-/* width */
-::-webkit-scrollbar {
-    width: .7em;
-}
-  
-/* Track */
-::-webkit-scrollbar-track {
-    border-radius: var(--border-radius);
-
-    /* Crea margenes arriba y abajo del elemento */
-    margin-block: 0.5em;
-}
-
-/* Thumb */
-::-webkit-scrollbar-thumb {
-    background: var(--indigo-200);
-    border-radius: var(--border-radius);
-    border: .1em solid var(--indigo-500);
-}
-
-/* Thumb Hover*/
-::-webkit-scrollbar-thumb:hover {
-    background: var(--indigo-300);
-    border-radius: var(--border-radius);
-}
