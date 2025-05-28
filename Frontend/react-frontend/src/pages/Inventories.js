@@ -10,11 +10,21 @@ import MenuLateralInventario from '../components/MenuLateralnventario';
 import Modal from '../components/Modal';
 
 function Inventories() {
+
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
     const [selectedId, setSelectedId] = useState(1); // ID del inventario seleccionado, por ahora toma el primero, proximamente deberia comprobar si existe
     const [showCrearModal, setShowCrearModal] = useState(false);
     const [showInventoryTable, setShowInventoryTable] = useState(true);
     const [showModal, setShowModal] = useState(false)
+
+    const inventories = [
+        ...elementos.map((elemento) => ({
+          label: elemento.name,
+          icon: 'pi pi-table',
+          command: () => handleSeleccionarElemento(elemento.id),
+    
+        }))
+      ]
 
     // Cargar los inventarios al inicio
     useEffect(() => {
@@ -56,13 +66,12 @@ function Inventories() {
     return (
         <div className="inventory">
 
-            <div className="inventarioMenuLateral">
+            <div className="MenuLateral">
                 <MenuLateralInventario 
-                    titulo = "Inventories"
-                    elementos={elementos}
-                    onElementoSeleccionado={handleSeleccionarElemento}
-                    onCrearInventario={handleCrearInventario}
-                    onEliminarInventario={handleDeleteInventory}
+                    titulo = "Inventarios"
+                    elementos={inventories}
+                    onCreate={handleCrearInventario}
+                    onDelete={handleDeleteInventory}
                 />
 
             </div>

@@ -14,7 +14,7 @@
     overflow-y: auto;
 }
 
-.inventarioMenuLateral{
+.MenuLateral{
     flex: 2;
     height: 90vh;
     width: 20vw;
