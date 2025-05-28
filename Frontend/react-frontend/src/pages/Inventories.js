@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import InventoryService from '../services/InventoryService';
 import InventoryTable from '../components/InventoryTable';
-import MenuLateral from '../components/MenuLateral';
 import CrearInventario from '../components/CrearInventario';
 import ConfirmDelInv from '../components/ConfirmDelInv'; // Importamos el componente de confirmación
 import { ConfirmDialog } from 'primereact/confirmdialog'; // Importa ConfirmDialog
