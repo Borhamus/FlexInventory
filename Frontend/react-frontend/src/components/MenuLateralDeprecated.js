@@ -2,7 +2,7 @@ import React from 'react';
 import { Menu } from 'primereact/menu';
 
 
-
+/*
 function MenuLateral({ elementos, onElementoSeleccionado, onCrearInventario }) {
     
     // Template para los Elementos del menu lateral.
@@ -59,3 +59,4 @@ function MenuLateral({ elementos, onElementoSeleccionado, onCrearInventario }) {
 }
 
 export default MenuLateral;
+}*/
