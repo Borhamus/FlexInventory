@@ -2,8 +2,6 @@ import React, { useState, useEffect } from 'react';
 import InventoryService from '../services/InventoryService';
 import InventoryTable from '../components/InventoryTable';
 import CrearInventario from '../components/CrearInventario';
-import ConfirmDelInv from '../components/ConfirmDelInv'; // Importamos el componente de confirmación
-import { ConfirmDialog } from 'primereact/confirmdialog'; // Importa ConfirmDialog
 import "../styles/Inventories.css"
 import MenuLateral from '../components/MenuLateral';
 import Modal from '../components/Modal';
@@ -18,15 +16,6 @@ function Inventories() {
 
     const [showModal, setShowModal] = useState(false)
 
-    const inventories = [
-        ...elementos.map((elemento) => ({
-            label: elemento.name,
-            icon: 'pi pi-table',
-            command: () => handleSeleccionarElemento(elemento.id),
-
-        }))
-    ]
-
     // Cargar los inventarios al inicio
     useEffect(() => {
         InventoryService.getAllInventories()
@@ -34,15 +23,24 @@ function Inventories() {
             .catch(error => console.error('Error al cargar inventarios:', error));
     }, []);
 
+    const inventories = [
+        ...elementos.map((elemento) => ({
+            label: elemento.name,
+            icon: 'pi pi-table',
+            attributes: elemento.attributes,
+            command: () => handleSeleccionarElemento(elemento.id),
+
+        }))
+    ]
+
     // Manejar la eliminación de inventarios
     const handleDeleteInventory = () => {
-        setShowModal(true)
-        /*InventoryService.deleteInventoryById(selectedId)
+        InventoryService.deleteInventoryById(selectedId)
             .then(() => {
                 setElementos(prev => prev.filter(el => el.id !== selectedId));
                 setSelectedId(null);
             })
-            .catch(error => alert('No se pudo eliminar el inventario.')); */
+            .catch(error => alert('No se pudo eliminar el inventario.'));
     };
 
     // Mostrar modal de crear inventario
@@ -74,7 +72,6 @@ function Inventories() {
                     onCreate={handleCrearInventario}
                     onDelete={handleDeleteInventory}
                 />
-
             </div>
             <div className="inventarioTabla">
                 {showInventoryTable && selectedId && (
@@ -82,34 +79,7 @@ function Inventories() {
                         <InventoryTable num={selectedId} />
                     </div>
                 )}
-
-                {/*
-                    {showInventoryTable && selectedId && (
-                            <div>
-                                <InventoryTable num={selectedId} />
-                                <div className="mt-3">
-
-                                    <ConfirmDelInv
-                                        inventoryId={selectedId}
-                                        onConfirm={handleDeleteInventory}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                */}
-
             </div>
-
-            <Modal open={isOpen} onClose={() => setIsOpen(false)} />
-
-            {/* Modal para crear inventario 
-            {showCrearModal && (
-                <CrearInventario
-                    onClose={() => setShowCrearModal(false)}
-                    onInventoryCreated={handleInventoryCreated}
-                />
-            )}
-                */}
         </div>
     );
 }

@@ -1,8 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState} from "react";
 import InventoryService from "../services/InventoryService";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import "../styles/InventoryTable.css"
+import EditarBorrarBotonesInventario from "./EditarBorrarBotonesInventario";
 
 function InventoryTable({ num }) {
     // Estado para almacenar el inventario
@@ -69,27 +70,6 @@ function InventoryTable({ num }) {
         ))
     ];
 
-    const editarBorrarBotones = (item) => {
-        return(
-            <div className="contenedorBotonesEditarBorrar">
-                <div className="botonEditar">
-                    <button className="inventoryButtonDeleteEdit">
-                        <i className="pi pi-fw pi-pencil"></i>
-                    </button>
-                    
-                </div>
-                <div className="separadorEditarEliminar">
-                    
-                </div>
-                <div className="botonEliminar">
-                    <button className="inventoryButtonDeleteEdit">
-                        <i className="pi pi-fw pi-trash"></i>
-                    </button>
-                </div>
-            </div>
-        )
-    };
-
     // Header de la tabla
     const header = inventory.name;
 
@@ -122,7 +102,7 @@ function InventoryTable({ num }) {
                     <Column // Columna de borrado y edicion
                         headerStyle={{ width: '10%', minWidth: '8rem' }}
                         bodyStyle={{ textAlign: 'center' }}
-                        body={editarBorrarBotones}
+                        body={EditarBorrarBotonesInventario}
                     />
                 </DataTable>
             </div>

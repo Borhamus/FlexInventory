@@ -19,3 +19,9 @@ GIT:
 Para evitar romper cosas:
 git status
 
+
+------
+
+launcher en linux:
+ - Para levantarlo ir a una terminal y ejecutar "./launcher.sh"
+
