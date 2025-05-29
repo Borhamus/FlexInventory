@@ -9,6 +9,9 @@ echo "🔧 Levantando contenedores..."
 cd infrastructure || exit
 sudo docker compose up -d
 
+# 1.5. Esperar unos segundos a que docker levante...
+sleep 5 
+
 # 2. Restaurar la base de datos desde backup.sql
 echo "💾 Restaurando base de datos..."
 sudo docker exec -i FlexInventory psql -U flexinventory flexinventory < backup.sql

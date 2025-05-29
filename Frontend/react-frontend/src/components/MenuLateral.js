@@ -4,7 +4,7 @@ import Button from "./Button";
 import Modal from './Modal';
 import CrearInventarioCuerpoModal from './CrearInventarioCuerpoModal';
 
-function MenuLateral({ titulo, elementos, onCreate, onDelete }) {
+function MenuLateral({ titulo, elementoNombre, elementos, onCreate, onDelete }) {
 
   const [showModal, setShowModal] = useState(false);
   const [modalChildren, setModalChildren] = useState(null);
@@ -19,10 +19,10 @@ function MenuLateral({ titulo, elementos, onCreate, onDelete }) {
   // Cuerpo de la modal de eliminar elementos, debería hacerse una distinción entre inventarios y catalogos
   // por ejemplo que el titulo sea Eliminar Inventario/ Eliminar Catalogo respectivamente.
   const modalEliminar = {
-    title: "Eliminar elemento",
+    title: "Eliminar " + elementoNombre,
     body: (
       <div style={{ display: 'flex', flexDirection: "column", gap:"1.5em"}}>
-        ¿Desea eliminar este elemento?
+        ¿Desea eliminar este {elementoNombre}?
         <div style={{display:'flex', gap:"1em", justifyContent:'space-evenly'}}>
           <button onClick={() => setShowModal(false)}>
             <i className=''></i>
@@ -38,20 +38,10 @@ function MenuLateral({ titulo, elementos, onCreate, onDelete }) {
   }
 
   const modalCrear = {
-    title: "Crear elemento",
+    title: "Crear " + elementoNombre,
     body: (
-      <div style={{ display: 'flex', flexDirection: "column", gap:"1.5em"}}>
-        ¿Desea Creaer un Elemento nuevo?
-        <div style={{display:'flex', gap:"1em", justifyContent:'space-evenly'}}>
-          <button onClick={() => setShowModal(false)}>
-            <i className=''></i>
-            Cancel
-          </button>
-          <button onClick={onDelete}>
-            <i className=''></i>
-            Create
-          </button>
-        </div>
+      <div>
+        <CrearInventarioCuerpoModal />
       </div>
     )
   }

@@ -68,6 +68,7 @@ function Inventories() {
             <div className="MenuLateral">
                 <MenuLateral
                     titulo="Inventarios"
+                    elementoNombre = "Inventario"
                     elementos={inventories}
                     onCreate={handleCrearInventario}
                     onDelete={handleDeleteInventory}

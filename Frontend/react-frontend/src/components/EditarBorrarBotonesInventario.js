@@ -10,7 +10,7 @@ export default function EditarBorrarBotonesInventario() {
         title: "Eliminar elemento",
         body: (
             <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
-                ¿Desea eliminar este elemento?
+                ¿Desea eliminar este articulo?
                 <div style={{ display: 'flex', gap: "1em", justifyContent: 'space-evenly' }}>
                     <button onClick={() => setShowModal(false)}>
                         <i className=''></i>
@@ -29,7 +29,7 @@ export default function EditarBorrarBotonesInventario() {
         title: "Editar elemento",
         body: (
             <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
-                ¿Desea Editar Este elemento?
+                ¿Desea editar este Articulo?
                 <div style={{ display: 'flex', gap: "1em", justifyContent: 'space-evenly' }}>
                     <button onClick={() => setShowModal(false)}>
                         <i className=''></i>
