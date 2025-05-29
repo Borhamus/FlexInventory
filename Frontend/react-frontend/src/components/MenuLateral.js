@@ -37,13 +37,32 @@ function MenuLateral({ titulo, elementos, onCreate, onDelete }) {
     )
   }
 
+  const modalCrear = {
+    title: "Crear elemento",
+    body: (
+      <div style={{ display: 'flex', flexDirection: "column", gap:"1.5em"}}>
+        ¿Desea Creaer un Elemento nuevo?
+        <div style={{display:'flex', gap:"1em", justifyContent:'space-evenly'}}>
+          <button onClick={() => setShowModal(false)}>
+            <i className=''></i>
+            Cancel
+          </button>
+          <button onClick={onDelete}>
+            <i className=''></i>
+            Create
+          </button>
+        </div>
+      </div>
+    )
+  }
+
   const handleModalEliminar = () => (
     setModalChildren(modalEliminar),
     setShowModal(true)
   )
 
   const handleModalCrear = () => (
-    setModalChildren(CrearInventarioCuerpoModal),
+    setModalChildren(modalCrear),
     setShowModal(true)
   )
 
