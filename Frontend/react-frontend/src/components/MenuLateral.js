@@ -3,7 +3,7 @@ import "../styles/MenuLateralInventario.css"
 import Button from "./Button";
 import Modal from './Modal';
 
-function MenuLateralInventario({ titulo, elementos, onCreate, onDelete }) {
+function MenuLateral({ titulo, elementos, onCreate, onDelete }) {
 
 
   return (
@@ -25,4 +25,4 @@ function MenuLateralInventario({ titulo, elementos, onCreate, onDelete }) {
 }
 
 
-export default MenuLateralInventario;
+export default MenuLateral;

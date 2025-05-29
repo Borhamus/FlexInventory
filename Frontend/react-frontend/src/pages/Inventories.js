@@ -6,7 +6,7 @@ import CrearInventario from '../components/CrearInventario';
 import ConfirmDelInv from '../components/ConfirmDelInv'; // Importamos el componente de confirmación
 import { ConfirmDialog } from 'primereact/confirmdialog'; // Importa ConfirmDialog
 import "../styles/Inventories.css"
-import MenuLateralInventario from '../components/MenuLateralnventario';
+import MenuLateralInventario from '../components/MenuLateral';
 import Modal from '../components/Modal';
 
 function Inventories() {
@@ -67,7 +67,7 @@ function Inventories() {
         <div className="inventory">
 
             <div className="MenuLateral">
-                <MenuLateralInventario 
+                <MenuLateral 
                     titulo = "Inventarios"
                     elementos={inventories}
                     onCreate={handleCrearInventario}

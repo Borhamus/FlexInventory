@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import MenuLateralInventario from "../components/MenuLateralnventario";
+import MenuLateral from "../components/MenuLateral";
 import Button from "../components/Button";
 import CatalogService from '../services/CatalogService';
+import CatalogItem from '../components/CatalogItem';
+import DescriptionField from '../components/DescriptionField';
 
 
 function Catalogs() {
@@ -60,17 +62,60 @@ function Catalogs() {
   return (
      
     <div className="catalog">
-      <div className="MenuLateral">
-          
-          <MenuLateralInventario 
-                        titulo = "Catalogos"
-                        elementos={catalogs}
-                        onSelect={handleCrearCatalogo}
-                        onCreate={handleCatalogoCreado}
-                        onDelete={handleSeleccionarElemento}>
-          </MenuLateralInventario>
 
-      </div>
+        <div className="MenuLateral">
+            
+            <MenuLateral 
+                          titulo = "Catalogos"
+                          elementos={catalogs}
+                          onSelect={handleCrearCatalogo}
+                          onCreate={handleCatalogoCreado}
+                          onDelete={handleSeleccionarElemento}>
+            </MenuLateral>
+
+        </div>
+
+        <div className="CatalogContainer">
+
+          <div className='items'>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+            <CatalogItem/>
+          </div>
+          
+          <div className='lower_buttons'>
+            <Button icon="pi pi-plus-circle" name="Crear Articulo"/>
+            <Button icon="pi pi-trash" name="Eliminar Articulo"/>
+            <Button icon="pi pi-arrow-right" name="Mover Articulo"/>
+            <Button icon="pi pi-pencil" name="Editar Articulo"/>
+          </div>
+          
+          <div className='description'>
+            <DescriptionField/>
+          </div>
+
+        </div>
+
     </div>
 
   )
