@@ -1,18 +1,11 @@
 import React, { useState } from "react";
+import ReactDom from 'react-dom'
 import "../styles/Modal.css";
 
-function Modal() {
-  const [isOpen, setIsOpen] = useState(true);
+function Modal({ open, children, onClose }) {
+  if(!open) return null;
 
-  const openModal = () => {
-    setIsOpen(true);
-  }
-
-  const closeModal = () => {
-    setIsOpen(false);
-  }
-
-  return (
+  return ReactDOM.createPortal(
     <div className="ModalContainer">
       {isOpen && (
         <>
@@ -20,13 +13,15 @@ function Modal() {
           <div className="modal">
             <header className="modal__header">
               <h2>Modal Title</h2>
-              <button onClick={closeModal} className="close-button">&times;</button>
+              <button onClick={onClose} className="close-button">&times;</button>
             </header>
             <main className="modal__main">
               <p>Some content here!</p>
             </main>
+            {children}
           </div>
-        </>
+        </>,
+        document.getElementById('portal')
       )}
     </div>
   );
