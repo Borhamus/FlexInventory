@@ -1,0 +1,21 @@
+1) Si tu Docker esta viejo, sácalo y metete a la carpeta:
+
+Infrastruture
+ y pega esto en una terminal: docker-compose up -d
+
+2) Cargar los datos a la base de datos, en windows:
+
+type .\backup.sql | docker exec -i FlexInventory psql -U flexinventory -d flexinventory
+
+3) Una vez cargado. abrirlo.
+
+
+
+
+----
+
+GIT:
+
+Para evitar romper cosas:
+git status
+
