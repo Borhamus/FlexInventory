@@ -25,6 +25,7 @@ public class ResourceInventory {
     @Autowired
     ServiceInventory service;
 
+    //--------------------------| GET ALL INVENTORIES |--------------------------
     //--------------------------| Documentación API |--------------------------
     @Operation(summary = "Gets all inventories in the database.")
     @ApiResponses({
@@ -39,12 +40,12 @@ public class ResourceInventory {
                     content = @Content() /* No content for 500 */
             )
     })
-    //--------------------------| GET ALL INVENTORIES |--------------------------
     @GetMapping(value = "/all")
     public ResponseEntity<List<TransferableInventory>> getAllInventories(){
         return ResponseEntity.ok(service.getAllInventories());
     }
 
+    //--------------------------| GET INVENTORY BY ID |--------------------------
     //--------------------------| Documentación API |--------------------------
     @Operation(summary = "Gets an inventory by id.")
     @ApiResponses({
@@ -62,12 +63,12 @@ public class ResourceInventory {
                     description = "Internal server error, check header response.",
                     content = @Content() /* No content for 500 */)
     })
-    //--------------------------| GET INVENTORY BY ID |--------------------------
     @GetMapping(value = "{id}")
     public ResponseEntity<TransferableInventory> getInventory(@PathVariable("id") Integer id){
         return ResponseEntity.ok(service.getInventoryById(id));
     }
 
+    //--------------------------| DELETE INVENTORY BY ID |--------------------------
     //--------------------------| Documentación API |--------------------------
     @Operation(summary = "Deletes an inventory by id.")
     @ApiResponses({
@@ -84,7 +85,6 @@ public class ResourceInventory {
                     content = @Content() /* No content for 500 */
             )
     })
-    //--------------------------| DELETE INVENTORY BY ID |--------------------------
     @DeleteMapping(value = "{id}")
     public ResponseEntity<Void> deleteInventory(@PathVariable("id") Integer id){
         service.deleteInventoryById(id);
@@ -92,6 +92,7 @@ public class ResourceInventory {
     }
 
 
+    //--------------------------| UPDATED INVENTORY BY ID |--------------------------
     //--------------------------| Documentación API |--------------------------
     @Operation(summary = "Updates an inventory by id.")
     @ApiResponses({
@@ -108,12 +109,12 @@ public class ResourceInventory {
                     content = @Content() /* No content for 500 */
             )
     })
-    //--------------------------| UPDATED INVENTORY BY ID |--------------------------
-    @PutMapping(value = "/edit/{id}")
+    @PutMapping(value = "/{id}")
     public ResponseEntity<TransferableInventory> updateInventoy(@PathVariable("id") Integer id, @RequestBody TransferableInventory transferableInventory){
         return ResponseEntity.ok(service.editInventory(transferableInventory));
     }
 
+    //--------------------------| CREATES INVENTORY BY ID AND BODY |--------------------------
     //--------------------------| Documentación API |--------------------------
     @Operation(summary = "Creates an Inventory")
     @ApiResponses({
@@ -128,8 +129,7 @@ public class ResourceInventory {
                     description = "Internal server error, check header response.",
                     content = @Content() /* No content for 500 */)
     })
-    //--------------------------| CREATES INVENTORY BY ID AND BODY |--------------------------
-    @PostMapping(value = "create/")
+    @PostMapping(value = "/")
     public ResponseEntity<TransferableInventory> createInventory(@RequestBody TransferableInventoryCreate transferableInventoryCreate){
         TransferableInventory transferable = service.createInventory(transferableInventoryCreate);
         return ResponseEntity.status(HttpStatus.CREATED).body(transferable);
