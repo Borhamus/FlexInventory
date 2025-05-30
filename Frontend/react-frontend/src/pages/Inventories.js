@@ -1,10 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import InventoryService from '../services/InventoryService';
 import InventoryTable from '../components/InventoryTable';
-import CrearInventario from '../components/CrearInventario';
 import "../styles/Inventories.css"
 import MenuLateral from '../components/MenuLateral';
-import Modal from '../components/Modal';
+import CrearInventarioCuerpoModal from '../components/CrearInventarioCuerpoModal';
 
 function Inventories() {
 
@@ -61,6 +60,36 @@ function Inventories() {
         setSelectedId(id);
     };
 
+    // Cuerpo de la modal de eliminar elementos, debería hacerse una distinción entre inventarios y catalogos
+    // por ejemplo que el titulo sea Eliminar Inventario/ Eliminar Catalogo respectivamente.
+    const modalDeleteInventory = {
+        title: "Eliminar Inventario",
+        body: (
+            <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
+                ¿Desea eliminar este Inventario?
+                <div style={{ display: 'flex', gap: "1em", justifyContent: 'space-evenly' }}>
+                    <button onClick={() => setShowModal(false)}>
+                        <i className=''></i>
+                        Cancel
+                    </button>
+                    <button onClick={handleDeleteInventory}>
+                        <i className='pi pi-trash'></i>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
+    const modalCreateInventory = {
+        title: "Crear Inventario",
+        body: (
+            <div>
+                <CrearInventarioCuerpoModal />
+            </div>
+        )
+    }
+
 
     return (
         <div className="inventory">
@@ -68,10 +97,11 @@ function Inventories() {
             <div className="MenuLateral">
                 <MenuLateral
                     titulo="Inventarios"
-                    elementoNombre = "Inventario"
+                    elementoNombre="Inventario"
                     elementos={inventories}
-                    onCreate={handleCrearInventario}
-                    onDelete={handleDeleteInventory}
+                    showModal={showModal}
+                    modalCreate={modalCreateInventory}
+                    modalDelete={modalDeleteInventory}
                 />
             </div>
             <div className="inventarioTabla">

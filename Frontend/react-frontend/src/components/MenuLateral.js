@@ -2,11 +2,10 @@ import React, { useState } from 'react'
 import "../styles/MenuLateralInventario.css"
 import Button from "./Button";
 import Modal from './Modal';
-import CrearInventarioCuerpoModal from './CrearInventarioCuerpoModal';
 
-function MenuLateral({ titulo, elementoNombre, elementos, onCreate, onDelete }) {
+function MenuLateral({ titulo, showModalParam, elementos, modalCreate, modalDelete }) {
 
-  const [showModal, setShowModal] = useState(false);
+  const [showModal, setShowModal] = useState(showModalParam);
   const [modalChildren, setModalChildren] = useState(null);
 
   // Array de botones con el nombre del inventario o catalogo y con la función de cambiar la tabla
@@ -16,43 +15,13 @@ function MenuLateral({ titulo, elementoNombre, elementos, onCreate, onDelete }) 
     </div>
   ))
 
-  // Cuerpo de la modal de eliminar elementos, debería hacerse una distinción entre inventarios y catalogos
-  // por ejemplo que el titulo sea Eliminar Inventario/ Eliminar Catalogo respectivamente.
-  const modalEliminar = {
-    title: "Eliminar " + elementoNombre,
-    body: (
-      <div style={{ display: 'flex', flexDirection: "column", gap:"1.5em"}}>
-        ¿Desea eliminar este {elementoNombre}?
-        <div style={{display:'flex', gap:"1em", justifyContent:'space-evenly'}}>
-          <button onClick={() => setShowModal(false)}>
-            <i className=''></i>
-            Cancel
-          </button>
-          <button onClick={onDelete}>
-            <i className='pi pi-trash'></i>
-            Delete
-          </button>
-        </div>
-      </div>
-    )
-  }
-
-  const modalCrear = {
-    title: "Crear " + elementoNombre,
-    body: (
-      <div>
-        <CrearInventarioCuerpoModal />
-      </div>
-    )
-  }
-
-  const handleModalEliminar = () => (
-    setModalChildren(modalEliminar),
+  const handleModalDelete = () => (
+    setModalChildren(modalDelete),
     setShowModal(true)
   )
 
-  const handleModalCrear = () => (
-    setModalChildren(modalCrear),
+  const handleModalCreate = () => (
+    setModalChildren(modalCreate),
     setShowModal(true)
   )
 
@@ -63,8 +32,8 @@ function MenuLateral({ titulo, elementoNombre, elementos, onCreate, onDelete }) 
         {botonesPorElemento}
       </div>
       <div className='MenuLateralAcciones'>
-        <Button icon={"pi pi-plus"} name={"New"} click={(handleModalCrear)} bgColor={"green"} />
-        <Button icon={"pi pi-minus"} name={"Delete"} click={(handleModalEliminar)} bgColor={"red"}>
+        <Button icon={"pi pi-plus"} name={"New"} click={(handleModalCreate)} bgColor={"green"} />
+        <Button icon={"pi pi-minus"} name={"Delete"} click={(handleModalDelete)} bgColor={"red"}>
         </Button>
       </div>
       <Modal open={showModal} onClose={() => setShowModal(false)} children={modalChildren} />
