@@ -1,6 +1,6 @@
 import React from 'react';
-import '../styles/registro/registro.css';
-import Registro from '../components/registroo/Registro';
+import '../styles/registro.css';
+import Registro from '../components/Registro';
 
 function SignUp() {
   return( 
