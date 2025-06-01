@@ -8,6 +8,11 @@ export default function CrearInventarioCuerpoModal() {
   const [elements, setElements] = useState([]);
   const [selectedAttributes, setSelectedAttributes] = useState([])
 
+  // Estados del formulario
+  const [inventoryName, setInventoryName] = useState("");
+  const [inventoryDescription, setInventoryDescription] = useState("");
+  const [inventoryRevisionDate, setInventoryRevisionDate] = useState("");
+
   // Cargar los inventarios al inicio
   useEffect(() => {
     AttributeService.getAllAttributes()
@@ -61,11 +66,39 @@ export default function CrearInventarioCuerpoModal() {
       })}
     </ul>
   );
+
+  // Función que se ejecuta al enviar el formulario
+      const handleFormSubmit = async (event) => {
+          event.preventDefault(); // Evita que el navegador recargue la página
+
+          try {
+              // Llamamos al backend
+              console.log("Formulario: " + username + " | " + password)
+              const inventoryForm = {
+                  inventoryName: inventoryName,
+                  inventoryDescription: inventoryDescription,
+                  
+              }
   
-
-  const handleFormSubmit = () => {
-
-  }
+              // Bienvenido a concurrencia, el await hace esperar a que el authService responda
+              const response = await AuthService.login(loginForm);
+              
+              // Obtenemos el token
+              const token = response.token;
+  
+              // Lo guardamos en localStorage
+              localStorage.setItem("token", token);
+              console.log("Token: " + localStorage.getItem("token"))
+  
+              // Redirigimos al usuario a la página principal (o donde quieras)
+              navigate("/Home");
+  
+          } catch (error) {
+              console.log("Formulario: " + username + " | " + password)
+              console.error("Login fallido:", error);
+              alert("Usuario o contraseña incorrectos");
+          }
+      };
 
   return (
     <div className='CrearInventarioModalContainer'>
@@ -78,21 +111,29 @@ export default function CrearInventarioCuerpoModal() {
             <input
               type="text"
               name="inventoryName"
-              placeholder="Nombre del Inventario"
+              placeholder="Inventory name..."
+
+              value={inventoryName}
+              onChange={(e) => setInventoryName(e.target.value)}
             />
           </div>
           <div className="">
             <input
               type="text"
               name="inventoryDescription"
-              placeholder="Descripcion"
+              placeholder="Inventory description..."
+
+              value={inventoryDescription}
+              onChange={(e) => setInventoryDescription(e.target.value)}
             />
           </div>
           <div className="">
             <input
               type="date"
               name="inventoryRevisionDate"
-              placeholder="Descripcion"
+              
+              value={inventoryRevisionDate}
+              onChange={(e) => inventoryRevisionDate(e.target.value)}
             />
           </div>
           <div className="">
