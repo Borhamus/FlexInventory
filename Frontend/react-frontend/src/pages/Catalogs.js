@@ -3,8 +3,6 @@ import MenuLateral from "../components/MenuLateral";
 import Button from "../components/Button";
 import CatalogService from '../services/CatalogService';
 import CatalogItem from '../components/CatalogItem';
-import DescriptionField from '../components/DescriptionField';
-
 
 function Catalogs() {
 
@@ -92,15 +90,6 @@ function Catalogs() {
             <CatalogItem/>
             <CatalogItem/>
             <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
           </div>
           
           <div className='lower_buttons'>
@@ -110,8 +99,8 @@ function Catalogs() {
             <Button icon="pi pi-pencil" name="Editar Articulo"/>
           </div>
           
-          <div className='description'>
-            <DescriptionField/>
+          <div contentEditable suppressContentEditableWarning={true} className='catalog--description'>
+            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
           </div>
 
         </div>

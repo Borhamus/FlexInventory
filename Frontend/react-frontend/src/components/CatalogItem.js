@@ -1,10 +1,12 @@
 import React from "react";
 import "../styles/CatalogItem.css"
 
-function CatalogItem(props) {
+function CatalogItem({image,name,onClick}) {
     return (
-        <button> 
-            foto y nombre del item
+        <button className="catalog-item--button"> 
+            <img scr={image}/>
+            <span>{name}</span>
+            {/* onClick = {el pop up de la modal xd} */}
         </button>
     );
 }
