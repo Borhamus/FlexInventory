@@ -22,13 +22,52 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
+
+
+/**
+ * Configuración principal de seguridad para la API base de FlexInventory.
+ * <p>
+ * Esta clase configura las reglas de seguridad HTTP para la aplicación,
+ * incluyendo:
+ * <ul>
+ *     <li>Desactivación de CSRF (no se usa con JWT).</li>
+ *     <li>Protección de endpoints y definición de rutas públicas.</li>
+ *     <li>Aplicación de filtros JWT para autenticación.</li>
+ *     <li>Política de sesión sin estado (stateless).</li>
+ * </ul>
+ * </p>
+ *
+ * <p>Además, define las reglas de configuración de CORS necesarias
+ * para permitir la comunicación entre el backend y el cliente React.</p>
+ *
+ * @author Milton Gomez
+ */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfiguration {
 
+    /**
+     * Filtro personalizado que intercepta las peticiones para validar el JWT.
+     */
     @Autowired
     private JwtFilter jwtFilter;
 
+    /**
+     * Define la cadena de filtros de seguridad para las peticiones HTTP.
+     * <p>
+     * Se configuran las siguientes reglas:
+     * <ul>
+     *     <li>Se permite acceso sin autenticación a rutas públicas como /auth/** y documentación Swagger.</li>
+     *     <li>Se exige autenticación para el resto de los endpoints.</li>
+     *     <li>Se aplica el filtro JWT antes del filtro de autenticación de Spring Security.</li>
+     *     <li>Se configura el manejo de sesiones como STATELESS (sin sesiones HTTP).</li>
+     * </ul>
+     * </p>
+     *
+     * @param http instancia de configuración de {@link HttpSecurity}
+     * @return {@link SecurityFilterChain} configurado para Spring Security
+     * @throws Exception si ocurre un error en la construcción de la cadena de filtros
+     */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
@@ -49,6 +88,15 @@ public class SecurityConfiguration {
         return http.build();
     }
 
+    /**
+     * Configura las reglas CORS (Cross-Origin Resource Sharing) de la API.
+     * <p>
+     * Permite peticiones desde la aplicación React que corre en <code>http://localhost:3000</code>,
+     * y autoriza métodos y cabeceras típicas necesarias para operaciones seguras.
+     * </p>
+     *
+     * @return {@link CorsConfigurationSource} con la política de CORS aplicada globalmente
+     */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();

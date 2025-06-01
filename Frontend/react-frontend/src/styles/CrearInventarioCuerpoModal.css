@@ -1,0 +1,14 @@
+.CrearInventarioModalContainer{
+    display: flex;
+    flex-direction: row;
+}
+
+.CrearInventarioModalContainer__ListaAtributos{
+    flex: 2;
+    display: flex;
+    flex-direction: column;
+}
+
+.CrearInventarioModalContainer__nuevoInventario{
+    flex:8;
+}

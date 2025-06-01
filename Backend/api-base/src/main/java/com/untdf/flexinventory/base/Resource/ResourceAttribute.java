@@ -131,7 +131,7 @@ public class ResourceAttribute {
 
     // ENDPOINT CREATE DE ATRIBUTO
 
-    @Operation(summary = "Creates an Attributr")
+    @Operation(summary = "Creates an Attribute")
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",

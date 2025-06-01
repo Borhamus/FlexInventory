@@ -47,7 +47,7 @@ public class ResourceAuth {
                     content = @Content(mediaType = "application/json",
                             schema = @Schema(implementation = TransferableJWT.class))),
             @ApiResponse(
-                    responseCode = "403",
+                    responseCode = "401",
                     description = "The authentication failed, no token is returned",
                     content = @Content() /* No content for 401 */
             ),
@@ -81,7 +81,7 @@ public class ResourceAuth {
             auditor.info(" ---------- FALLO EL LOGIN ----------");
             e.printStackTrace();
             throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED, "Login failed, cause: " + e.getClass().getName(), new BadCredentialsException("Incorrect Password or Username")
+                    HttpStatus.UNAUTHORIZED, "Login failed, cause: " + e.getMessage(), new BadCredentialsException("Incorrect Password or Username")
             );
         }
     }

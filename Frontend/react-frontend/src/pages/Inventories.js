@@ -1,29 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import InventoryService from '../services/InventoryService';
 import InventoryTable from '../components/InventoryTable';
-import CrearInventario from '../components/CrearInventario';
-import ConfirmDelInv from '../components/ConfirmDelInv'; // Importamos el componente de confirmación
-import { ConfirmDialog } from 'primereact/confirmdialog'; // Importa ConfirmDialog
 import "../styles/Inventories.css"
 import MenuLateral from '../components/MenuLateral';
-import Modal from '../components/Modal';
+import CrearInventarioCuerpoModal from '../components/CrearInventarioCuerpoModal';
 
 function Inventories() {
 
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
     const [selectedId, setSelectedId] = useState(1); // ID del inventario seleccionado, por ahora toma el primero, proximamente deberia comprobar si existe
-    const [showCrearModal, setShowCrearModal] = useState(false);
     const [showInventoryTable, setShowInventoryTable] = useState(true);
-    const [showModal, setShowModal] = useState(false)
 
-    const inventories = [
-        ...elementos.map((elemento) => ({
-          label: elemento.name,
-          icon: 'pi pi-table',
-          command: () => handleSeleccionarElemento(elemento.id),
-    
-        }))
-      ]
+
+    const [showModal, setShowModal] = useState(false);
 
     // Cargar los inventarios al inicio
     useEffect(() => {
@@ -32,28 +21,26 @@ function Inventories() {
             .catch(error => console.error('Error al cargar inventarios:', error));
     }, []);
 
+    // Mapeo la respuesta del axios...
+    const inventories = [
+        ...elementos.map((elemento) => ({
+            id: elemento.id,
+            label: elemento.name,
+            icon: 'pi pi-table',
+            attributes: elemento.attributes,
+            command: () => handleSeleccionarElemento(elemento.id),
+
+        }))
+    ]
+
     // Manejar la eliminación de inventarios
     const handleDeleteInventory = () => {
-        setShowModal(true)
-        /*InventoryService.deleteInventoryById(selectedId)
+        InventoryService.deleteInventoryById(selectedId)
             .then(() => {
                 setElementos(prev => prev.filter(el => el.id !== selectedId));
                 setSelectedId(null);
             })
-            .catch(error => alert('No se pudo eliminar el inventario.')); */
-    };
-
-    // Mostrar modal de crear inventario
-    const handleCrearInventario = () => {
-        setShowCrearModal(true);
-        setShowInventoryTable(false);
-    };
-
-    // Agregar un nuevo inventario
-    const handleInventoryCreated = (newInventory) => {
-        setElementos(prev => [...prev, newInventory]);
-        setShowCrearModal(false);
-        setShowInventoryTable(true);
+            .catch(error => alert('No se pudo eliminar el inventario.'));
     };
 
     // Seleccionar un inventario
@@ -61,18 +48,48 @@ function Inventories() {
         setSelectedId(id);
     };
 
+    // Cuerpo de la modal de eliminar inventarios
+    const modalDeleteInventory = {
+        title: "Eliminar Inventario",
+        body: (
+            <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
+                ¿Desea eliminar este Inventario?
+                <div style={{ display: 'flex', gap: "1em", justifyContent: 'space-evenly' }}>
+                    <button onClick={() => setShowModal(false)}>
+                        <i className=''></i>
+                        Cancel
+                    </button>
+                    <button onClick={handleDeleteInventory}>
+                        <i className='pi pi-trash'></i>
+                        Delete
+                    </button>
+                </div>
+            </div>
+        )
+    }
+
+    const modalCreateInventory = {
+        title: "Crear Inventario",
+        body: (
+            <div>
+                <CrearInventarioCuerpoModal />
+            </div>
+        )
+    }
+
 
     return (
         <div className="inventory">
 
             <div className="MenuLateral">
-                <MenuLateral 
-                    titulo = "Inventarios"
+                <MenuLateral
+                    titulo="Inventarios"
                     elementos={inventories}
-                    onCreate={handleCrearInventario}
-                    onDelete={handleDeleteInventory}
+                    showModal={showModal}
+                    setShowModal={setShowModal}
+                    modalCreate={modalCreateInventory}
+                    modalDelete={modalDeleteInventory}
                 />
-
             </div>
             <div className="inventarioTabla">
                 {showInventoryTable && selectedId && (
@@ -80,36 +97,7 @@ function Inventories() {
                         <InventoryTable num={selectedId} />
                     </div>
                 )}
-
-                {/*
-                    {showInventoryTable && selectedId && (
-                            <div>
-                                <InventoryTable num={selectedId} />
-                                <div className="mt-3">
-
-                                    <ConfirmDelInv
-                                        inventoryId={selectedId}
-                                        onConfirm={handleDeleteInventory}
-                                    />
-                                </div>
-                            </div>
-                        )}
-                */}
-
             </div>
-
-            {showModal &&(
-                <Modal />
-            )}
-
-            {/* Modal para crear inventario 
-            {showCrearModal && (
-                <CrearInventario
-                    onClose={() => setShowCrearModal(false)}
-                    onInventoryCreated={handleInventoryCreated}
-                />
-            )}
-                */}
         </div>
     );
 }

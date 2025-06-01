@@ -2,8 +2,8 @@
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 17.0 (Debian 17.0-1.pgdg120+1)
--- Dumped by pg_dump version 17.0 (Debian 17.0-1.pgdg120+1)
+-- Dumped from database version 17.4 (Debian 17.4-1.pgdg120+2)
+-- Dumped by pg_dump version 17.4 (Debian 17.4-1.pgdg120+2)
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -34,6 +34,20 @@ CREATE SCHEMA "api-users";
 
 
 ALTER SCHEMA "api-users" OWNER TO flexinventory;
+
+--
+-- Name: uuid-ossp; Type: EXTENSION; Schema: -; Owner: -
+--
+
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp" WITH SCHEMA public;
+
+
+--
+-- Name: EXTENSION "uuid-ossp"; Type: COMMENT; Schema: -; Owner: 
+--
+
+COMMENT ON EXTENSION "uuid-ossp" IS 'generate universally unique identifiers (UUIDs)';
+
 
 SET default_tablespace = '';
 
@@ -405,7 +419,8 @@ CREATE TABLE "api-users"."user" (
     password text NOT NULL,
     state boolean NOT NULL,
     creation_date date NOT NULL,
-    email character varying NOT NULL
+    email character varying NOT NULL,
+    tenant_uuid uuid DEFAULT gen_random_uuid() NOT NULL
 );
 
 
@@ -699,7 +714,9 @@ COPY "api-users".role (id, name) FROM stdin;
 -- Data for Name: user; Type: TABLE DATA; Schema: api-users; Owner: flexinventory
 --
 
-COPY "api-users"."user" (id, name, password, state, creation_date, email) FROM stdin;
+COPY "api-users"."user" (id, name, password, state, creation_date, email, tenant_uuid) FROM stdin;
+3	test	$2a$10$yAkBvnEiRXA4K2jePYr5e.mM3SLfFpKWrjjPbX3k5jSzhlO5XUzYy	t	2025-05-19	test	5686df93-c821-4ee6-98cb-f738c3fd6969
+4	username	$2a$10$ek49uIgcm7ZEyXQeXEes8O1kKn1JU22c3bjfLmxI1VSstQcC0gxou	t	2025-05-19	email	d12e8632-80e4-4fe2-8f63-6c948eb59f37
 \.
 
 
@@ -929,6 +946,30 @@ ALTER TABLE ONLY "api-users".user_role
 
 ALTER TABLE ONLY "api-users"."user"
     ADD CONSTRAINT user_unique UNIQUE (email);
+
+
+--
+-- Name: user user_unique_email; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users"."user"
+    ADD CONSTRAINT user_unique_email UNIQUE (email);
+
+
+--
+-- Name: user user_unique_name; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users"."user"
+    ADD CONSTRAINT user_unique_name UNIQUE (name);
+
+
+--
+-- Name: user user_unique_tenant; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
+--
+
+ALTER TABLE ONLY "api-users"."user"
+    ADD CONSTRAINT user_unique_tenant UNIQUE (tenant_uuid);
 
 
 --

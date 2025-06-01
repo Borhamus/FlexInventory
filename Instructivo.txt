@@ -16,14 +16,26 @@ type .\backup.sql | docker exec -i FlexInventory psql -U flexinventory -d flexin
 
 GIT:
 git pull para bajar.
+
 Para evitar romper cosas:
 git status
+
+------
+
+launcher en linux:
+ - Para levantarlo ir a una terminal y ejecutar "./launcher.sh"
+ 
+=======
 
 git diff: Es para ver los cambios quevos hiciste
 
 git commit -m "Comentario"
 
-Git push: para subirlo.
+git push: para subirlo.
+
+ // Para sacar archivos de la zona de staged
+git reset 
+
 
 ---
 APIS:

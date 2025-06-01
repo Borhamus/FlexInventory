@@ -22,7 +22,7 @@ export class InventoryService {
     // Método para crear un nuevo inventario.
     createInventory(inventoryData) {
         return axios
-            .post(this.baseUrl + "create", inventoryData)
+            .post(this.baseUrl, inventoryData)
             .then((res) => res.data) // Devuelve la respuesta del servidor (puedes usarla si necesitas)
             .catch((error) => {
                 console.error("Error al crear inventario:", error);
