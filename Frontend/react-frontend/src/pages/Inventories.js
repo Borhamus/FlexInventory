@@ -9,11 +9,10 @@ function Inventories() {
 
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
     const [selectedId, setSelectedId] = useState(1); // ID del inventario seleccionado, por ahora toma el primero, proximamente deberia comprobar si existe
-    const [showCrearModal, setShowCrearModal] = useState(false);
     const [showInventoryTable, setShowInventoryTable] = useState(true);
 
 
-    const [showModal, setShowModal] = useState(false)
+    const [showModal, setShowModal] = useState(false);
 
     // Cargar los inventarios al inicio
     useEffect(() => {
@@ -22,8 +21,10 @@ function Inventories() {
             .catch(error => console.error('Error al cargar inventarios:', error));
     }, []);
 
+    // Mapeo la respuesta del axios...
     const inventories = [
         ...elementos.map((elemento) => ({
+            id: elemento.id,
             label: elemento.name,
             icon: 'pi pi-table',
             attributes: elemento.attributes,
@@ -42,26 +43,12 @@ function Inventories() {
             .catch(error => alert('No se pudo eliminar el inventario.'));
     };
 
-    // Mostrar modal de crear inventario
-    const handleCrearInventario = () => {
-        setShowCrearModal(true);
-        setShowInventoryTable(false);
-    };
-
-    // Agregar un nuevo inventario
-    const handleInventoryCreated = (newInventory) => {
-        setElementos(prev => [...prev, newInventory]);
-        setShowCrearModal(false);
-        setShowInventoryTable(true);
-    };
-
     // Seleccionar un inventario
     const handleSeleccionarElemento = (id) => {
         setSelectedId(id);
     };
 
-    // Cuerpo de la modal de eliminar elementos, debería hacerse una distinción entre inventarios y catalogos
-    // por ejemplo que el titulo sea Eliminar Inventario/ Eliminar Catalogo respectivamente.
+    // Cuerpo de la modal de eliminar inventarios
     const modalDeleteInventory = {
         title: "Eliminar Inventario",
         body: (
@@ -97,9 +84,9 @@ function Inventories() {
             <div className="MenuLateral">
                 <MenuLateral
                     titulo="Inventarios"
-                    elementoNombre="Inventario"
                     elementos={inventories}
                     showModal={showModal}
+                    setShowModal={setShowModal}
                     modalCreate={modalCreateInventory}
                     modalDelete={modalDeleteInventory}
                 />
