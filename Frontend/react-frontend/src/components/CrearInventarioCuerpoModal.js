@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react'
 import MenuLateral from './MenuLateral'
 import AttributeService from '../services/AttributeService';
 import "../styles/CrearInventarioCuerpoModal.css"
+import { useNavigate } from "react-router-dom";
+import InventoryService from '../services/InventoryService';
 
 export default function CrearInventarioCuerpoModal() {
 
@@ -19,6 +21,9 @@ export default function CrearInventarioCuerpoModal() {
       .then(data => setElements(data))
       .catch(error => console.error('Error al cargar inventarios:', error));
   }, []);
+
+  // Para redirigir
+  const navigate = useNavigate();
 
   const attributes = [
     ...elements.map((elemento) => ({
@@ -73,30 +78,22 @@ export default function CrearInventarioCuerpoModal() {
 
           try {
               // Llamamos al backend
-              console.log("Formulario: " + username + " | " + password)
               const inventoryForm = {
                   inventoryName: inventoryName,
                   inventoryDescription: inventoryDescription,
+                  inventoryRevisionDate: inventoryRevisionDate,
+                  attributesIds: selectedAttributes
                   
               }
   
               // Bienvenido a concurrencia, el await hace esperar a que el authService responda
-              const response = await AuthService.login(loginForm);
+              const response = await InventoryService.createInventory(inventoryForm);
               
-              // Obtenemos el token
-              const token = response.token;
-  
-              // Lo guardamos en localStorage
-              localStorage.setItem("token", token);
-              console.log("Token: " + localStorage.getItem("token"))
-  
               // Redirigimos al usuario a la página principal (o donde quieras)
               navigate("/Home");
   
           } catch (error) {
-              console.log("Formulario: " + username + " | " + password)
-              console.error("Login fallido:", error);
-              alert("Usuario o contraseña incorrectos");
+              console.error("Failed to create new inventory:", error);
           }
       };
 
@@ -133,7 +130,7 @@ export default function CrearInventarioCuerpoModal() {
               name="inventoryRevisionDate"
               
               value={inventoryRevisionDate}
-              onChange={(e) => inventoryRevisionDate(e.target.value)}
+              onChange={(e) => setInventoryRevisionDate(e.target.value)}
             />
           </div>
           <div className="">
