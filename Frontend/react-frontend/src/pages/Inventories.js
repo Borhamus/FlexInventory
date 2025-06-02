@@ -3,7 +3,7 @@ import InventoryService from '../services/InventoryService';
 import InventoryTable from '../components/InventoryTable';
 import "../styles/Inventories.css"
 import MenuLateral from '../components/MenuLateral';
-import CrearInventarioCuerpoModal from '../components/CrearInventarioCuerpoModal';
+import CrearInventarioCuerpoModal from '../components/NewInventoryDialogBody';
 
 function Inventories() {
 

@@ -5,7 +5,7 @@ import "../styles/CrearInventarioCuerpoModal.css"
 import { useNavigate } from "react-router-dom";
 import InventoryService from '../services/InventoryService';
 
-export default function CrearInventarioCuerpoModal() {
+export default function NewInventoryDialogBody() {
 
   const [elements, setElements] = useState([]);
   const [selectedAttributes, setSelectedAttributes] = useState([])
@@ -72,39 +72,51 @@ export default function CrearInventarioCuerpoModal() {
     </ul>
   );
 
-  // Función que se ejecuta al enviar el formulario
-      const handleFormSubmit = async (event) => {
-          event.preventDefault(); // Evita que el navegador recargue la página
 
-          try {
-              // Llamamos al backend
-              const inventoryForm = {
-                  inventoryName: inventoryName,
-                  inventoryDescription: inventoryDescription,
-                  inventoryRevisionDate: inventoryRevisionDate,
-                  attributesIds: selectedAttributes
-                  
-              }
-  
-              // Bienvenido a concurrencia, el await hace esperar a que el authService responda
-              const response = await InventoryService.createInventory(inventoryForm);
-              
-              // Redirigimos al usuario a la página principal (o donde quieras)
-              navigate("/Home");
-  
-          } catch (error) {
-              console.error("Failed to create new inventory:", error);
-          }
-      };
+  /*
+
+  {
+    "name": "string",
+    "description": "string",
+    "revision_date": "2025-06-02T00:58:32.425Z",
+    "attributesIds": [
+      0
+    ]
+  }
+
+
+  */
+
+  // Función que se ejecuta al enviar el formulario
+  const handleFormSubmit = async (event) => {
+    event.preventDefault(); // Evita que el navegador recargue la página
+
+    try {
+      // Llamamos al backend
+      const inventoryForm = {
+        name: inventoryName,
+        description: inventoryDescription,
+        revision_date: inventoryRevisionDate,
+        attributesIds: selectedAttributes
+
+      }
+
+      // Bienvenido a concurrencia, el await hace esperar a que el authService responda
+      const response = await InventoryService.createInventory(inventoryForm);
+
+    } catch (error) {
+      console.error("Failed to create new inventory:", error);
+    }
+  };
 
   return (
-    <div className='CrearInventarioModalContainer'>
-      <div className='CrearInventarioModalContainer__ListaAtributos'>
+    <div className='dialog-body'>
+      <div className='dialog-body--checkbox-list'>
         {checkBoxList}
       </div>
-      <div className='CrearInventarioModalContainer__nuevoInventario'>
+      <div className='dialog-body--inventory-form'>
         <form onSubmit={handleFormSubmit}>
-          <div className="">
+          <div className="dialog-body--inventory-form--textbox">
             <input
               type="text"
               name="inventoryName"
@@ -128,7 +140,7 @@ export default function CrearInventarioCuerpoModal() {
             <input
               type="date"
               name="inventoryRevisionDate"
-              
+
               value={inventoryRevisionDate}
               onChange={(e) => setInventoryRevisionDate(e.target.value)}
             />

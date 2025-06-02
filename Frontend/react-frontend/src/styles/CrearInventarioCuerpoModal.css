@@ -1,14 +1,25 @@
-.CrearInventarioModalContainer{
+.dialog-body{
     display: flex;
     flex-direction: row;
+    height: 40vh;
+    width: 32vw;
+    border: 2px solid black;
 }
 
-.CrearInventarioModalContainer__ListaAtributos{
-    flex: 2;
+.dialog-body--checkbox-list{
+    flex: 4;
     display: flex;
     flex-direction: column;
+    overflow-y:scroll;
+    max-height: 100%;
+    border: 2px solid red;
 }
 
-.CrearInventarioModalContainer__nuevoInventario{
-    flex:8;
+.dialog-body--inventory-form{
+    flex:6;
+    border: 2px solid purple;
+}
+
+.dialog-body--inventory-form--textbox{
+    
 }
