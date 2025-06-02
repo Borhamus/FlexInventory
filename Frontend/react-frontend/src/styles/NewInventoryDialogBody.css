@@ -1,0 +1,64 @@
+.dialog-body{
+    display: flex;
+    flex-direction: row;
+    height: 40vh;
+    width: 32vw;
+    gap: 1em;
+}
+
+.dialog-body--left-container{
+    flex: 4;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    gap: .4em;
+    height:100%;
+    width: 100%;
+    border-radius: 5px;
+    padding-top: .4em;
+    background-color: var(--md-sys-color-surface-container);
+    color: var(--md-sys-color-on-surface);
+}
+
+.dialog-body--checkbox-list--checkbox-list{
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: start;
+    overflow-y:auto;
+    width: 100%;
+}
+
+/* Item del checkbox list */
+.dialog-body--checkbox-list--checkbox-item{
+    display: flex;
+    align-items: center;
+    justify-content: start;
+    background-color: var(--md-sys-color-secondary);
+    color: var(--md-sys-color-on-secondary);
+    border-radius: 5px;
+    width: 60%;
+    height: 3vh;
+    padding: .5em;
+}
+
+.dialog-body--checkbox-list--search-bar{
+    width: 100%;
+}
+
+.dialog-body--inventory-form{
+    flex:6;
+    height:100%;
+    width: 100%;
+    border-radius: 5px;
+    background-color: var(--md-sys-color-surface-container);
+    display: flex;
+}
+
+.dialog-body--inventory-form--input-container{
+
+}
+
+.dialog-body--checkbox-list--new-attribute-btn{
+}

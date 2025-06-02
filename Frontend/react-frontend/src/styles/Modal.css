@@ -18,8 +18,8 @@
 .modal {
   position: fixed;
   z-index: 20;
-  background: #fff;
-  border-radius: 10px;
+  border-radius: 5px;
+  background-color: var(--md-sys-color-surface);
   /* Center the modal */
   top: 50%;
   left: 50%;
@@ -27,10 +27,10 @@
 }
 
 .modal__header {
-  background: var(--indigo-100);
   display: flex;
   align-items: center;
   gap: 2px;
+  background-color: var(--md-sys-color-surface-container);
   justify-content: space-between;
   border-top-left-radius: 10px;
   border-top-right-radius: 10px;
@@ -40,10 +40,11 @@
   padding-inline: 0.8em;
   font-size: 1.2em;
   font-family: 'Gotham-Bold';
+  color: var(--md-sys-color-on-surface);
 }
 
 .modal__main {
-  padding: 20px;
+  padding: 0.5em;
 }
 
 .close-button {
@@ -51,11 +52,11 @@
   background: transparent;
   padding-inline: 0.3em;
   cursor: pointer;
-  color: #fff;
+  color: var(--md-sys-color-on-surface);
   font-size: 36px;
   border-top-right-radius: 10px;
 }
 
 .close-button:hover {
-  background: var(--indigo-200);
+  background: var(--md-sys-color-surface-container-highest);
 }

@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react'
 import MenuLateral from './MenuLateral'
 import AttributeService from '../services/AttributeService';
-import "../styles/CrearInventarioCuerpoModal.css"
+import "../styles/NewInventoryDialogBody.css"
 import { useNavigate } from "react-router-dom";
 import InventoryService from '../services/InventoryService';
+import Button from './Button';
 
 export default function NewInventoryDialogBody() {
 
@@ -45,12 +46,11 @@ export default function NewInventoryDialogBody() {
 
   const checkBoxList = (
     attributes.map((a) => (
-      <label key={a.id} style={{ display: "flex" }}>
+      <label key={a.id} className='dialog-body--checkbox-list--checkbox-item'>
         <input
           type="checkbox"
           // El valor del check es el id del atributo
           value={a.id}
-
           // Cuando cambia el check se hace...
           onChange={(event) => { handleCheckboxChange(event) }}
         />
@@ -111,17 +111,31 @@ export default function NewInventoryDialogBody() {
 
   return (
     <div className='dialog-body'>
-      <div className='dialog-body--checkbox-list'>
-        {checkBoxList}
+      <div className='dialog-body--left-container'>
+        <div className='dialog-body--checkbox-list--search-bar'>
+          <input
+            type="text"
+            name="attributeSearchBar"
+            placeholder="Attribute name..."
+          />
+        </div>
+        <div className='dialog-body--checkbox-list--checkbox-list'>
+          {checkBoxList}
+        </div>
+        <div className='dialog-body--checkbox-list--new-attribute-btn'>
+          <button>
+            Nuevo Atributo
+          </button>
+        </div>
       </div>
       <div className='dialog-body--inventory-form'>
         <form onSubmit={handleFormSubmit}>
-          <div className="dialog-body--inventory-form--textbox">
+          <div className="dialog-body--inventory-form--input-container">
             <input
               type="text"
               name="inventoryName"
               placeholder="Inventory name..."
-
+              className='dialog-body--inventory-form--input-container--inventory-name'
               value={inventoryName}
               onChange={(e) => setInventoryName(e.target.value)}
             />
@@ -131,7 +145,7 @@ export default function NewInventoryDialogBody() {
               type="text"
               name="inventoryDescription"
               placeholder="Inventory description..."
-
+              className='dialog-body--inventory-form--input-container--inventory-description'
               value={inventoryDescription}
               onChange={(e) => setInventoryDescription(e.target.value)}
             />
@@ -140,18 +154,18 @@ export default function NewInventoryDialogBody() {
             <input
               type="date"
               name="inventoryRevisionDate"
-
+              className='dialog-body--inventory-form--input-container--inventory-revison-date'
               value={inventoryRevisionDate}
               onChange={(e) => setInventoryRevisionDate(e.target.value)}
             />
           </div>
-          <div className="">
+          <div className="dialog-body--inventory-form--input-container--accepted-list">
             {acceptedList}
           </div>
           <input
             type="submit"
             value="Create"
-            className=""
+            className="dialog-body--inventory-form--input-container--submit-btn"
           />
         </form>
       </div>
