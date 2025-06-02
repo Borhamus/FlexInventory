@@ -124,12 +124,12 @@ export default function NewInventoryDialogBody() {
         </div>
         <div className='dialog-body--checkbox-list--new-attribute-btn'>
           <button>
-            Nuevo Atributo
+            New Attribute
           </button>
         </div>
       </div>
-      <div className='dialog-body--inventory-form'>
-        <form onSubmit={handleFormSubmit}>
+      <div className='dialog-body--right-container'>
+        <form onSubmit={handleFormSubmit} className='dialog-body--inventory-form'>
           <div className="dialog-body--inventory-form--input-container">
             <input
               type="text"
@@ -140,7 +140,7 @@ export default function NewInventoryDialogBody() {
               onChange={(e) => setInventoryName(e.target.value)}
             />
           </div>
-          <div className="">
+          <div className="dialog-body--inventory-form--input-container">
             <input
               type="text"
               name="inventoryDescription"
@@ -150,7 +150,7 @@ export default function NewInventoryDialogBody() {
               onChange={(e) => setInventoryDescription(e.target.value)}
             />
           </div>
-          <div className="">
+          <div className="dialog-body--inventory-form--input-container">
             <input
               type="date"
               name="inventoryRevisionDate"

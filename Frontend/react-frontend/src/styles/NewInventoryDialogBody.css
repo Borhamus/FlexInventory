@@ -22,6 +22,7 @@
 }
 
 .dialog-body--checkbox-list--checkbox-list{
+    flex:8;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -38,27 +39,58 @@
     background-color: var(--md-sys-color-secondary);
     color: var(--md-sys-color-on-secondary);
     border-radius: 5px;
-    width: 60%;
+    width: 70%;
     height: 3vh;
     padding: .5em;
 }
 
 .dialog-body--checkbox-list--search-bar{
+    flex:1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     width: 100%;
 }
 
-.dialog-body--inventory-form{
+.dialog-body--right-container{
     flex:6;
-    height:100%;
-    width: 100%;
     border-radius: 5px;
     background-color: var(--md-sys-color-surface-container);
     display: flex;
 }
 
-.dialog-body--inventory-form--input-container{
-
+.dialog-body--checkbox-list--new-attribute-btn{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex:1;
+    height:100%;
+    width: 100%;
 }
 
-.dialog-body--checkbox-list--new-attribute-btn{
+.dialog-body--inventory-form{
+    height:100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1em;
+    padding: .4em;
+}
+
+.dialog-body--inventory-form--input-container{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    flex:2;
+}
+
+.dialog-body--inventory-form--input-container--accepted-list{
+    flex:10;
+}
+
+.dialog-body--inventory-form--input-container--submit-btn{
+    flex:;
 }
