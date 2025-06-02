@@ -1,11 +1,14 @@
 package com.untdf.flexinventory.users.Resource;
 
 import com.untdf.flexinventory.users.Service.ServiceUser;
+import com.untdf.flexinventory.users.Transferable.TransferableGetUser;
 import com.untdf.flexinventory.users.Transferable.TransferableUser;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/user")
@@ -22,6 +25,14 @@ public class ResourceUser {
         TransferableUser user = service.getUserById(id);
 
         return ResponseEntity.ok(user);
+    }
+
+    @GetMapping(value = "/all")
+    public ResponseEntity<List<TransferableGetUser>> getAllUser(){
+
+        List<TransferableGetUser> allUser = service.getAllUser();
+
+        return ResponseEntity.ok(allUser);
     }
 
 }

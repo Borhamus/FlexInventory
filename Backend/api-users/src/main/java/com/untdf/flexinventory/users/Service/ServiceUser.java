@@ -2,6 +2,7 @@ package com.untdf.flexinventory.users.Service;
 
 import com.untdf.flexinventory.users.Access.AccessUser;
 import com.untdf.flexinventory.users.Model.User;
+import com.untdf.flexinventory.users.Transferable.TransferableGetUser;
 import com.untdf.flexinventory.users.Transferable.TransferableUser;
 import com.untdf.flexinventory.users.Transformer.TransformerUser;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,6 +10,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -68,4 +70,17 @@ public class ServiceUser {
         return transformer.toDTO(createdUser);
     }
 
+    public List<TransferableGetUser> getAllUser(){
+
+        List<User>allUsers = accessUser.findAll();
+
+
+        if(allUsers.isEmpty()){
+            throw new ResponseStatusException(
+                    HttpStatus.NO_CONTENT, "There is no Users."
+            );
+        }
+
+        return transformer.toDTOGetAllUser(allUsers);
+    }
 }
