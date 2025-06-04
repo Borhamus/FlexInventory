@@ -1,3 +1,6 @@
+
+import 'primeicons/primeicons.css';
+        
 function Container({ children }) {
   return <div className="registro-container">{children}</div>;
 }
@@ -16,7 +19,7 @@ function InputField({ placeholder, type = "text" }) {
 function SubmitButton({ text }) {
   return (
     <button className="registro-button">
-      <span role="img" aria-label="user">👤</span> {text}
+      <i className="pi pi-user"></i> {text}
     </button>
   );
 }
@@ -26,11 +29,9 @@ function Registro() {
   return (
     <Container>
       <TitleBlock text="Registro de Usuario" />
-      <InputField placeholder="Nombre y Apellido" />
-      <InputField placeholder="Nombre de Usuario" />
+      <InputField placeholder="Correo Electrónico" type="email" />
       <InputField placeholder="Contraseña" type="password" />
       <InputField placeholder="Confirmar Contraseña" type="password" />
-      <InputField placeholder="Correo Electrónico" type="email" />
       <SubmitButton text="Registrarse" />
     </Container>
   );
