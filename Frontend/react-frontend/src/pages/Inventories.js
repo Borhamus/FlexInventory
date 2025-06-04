@@ -50,7 +50,7 @@ function Inventories() {
 
     // Cuerpo de la modal de eliminar inventarios
     const modalDeleteInventory = {
-        title: "Eliminar Inventario",
+        title: "¿Delete this inventory?",
         body: (
             <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
                 ¿Desea eliminar este Inventario?
@@ -69,7 +69,7 @@ function Inventories() {
     }
 
     const modalCreateInventory = {
-        title: "Crear Inventario",
+        title: "New Inventory",
         body: (
             <div>
                 <CrearInventarioCuerpoModal />
@@ -83,7 +83,7 @@ function Inventories() {
 
             <div className="MenuLateral">
                 <MenuLateral
-                    titulo="Inventarios"
+                    titulo="Inventories"
                     elementos={inventories}
                     showModal={showModal}
                     setShowModal={setShowModal}

@@ -1,4 +1,4 @@
-.light-high-contrast {
+:root {
   --md-sys-color-primary: rgb(52 33 87);
   --md-sys-color-surface-tint: rgb(104 84 142);
   --md-sys-color-on-primary: rgb(255 255 255);
@@ -24,7 +24,7 @@
   --md-sys-color-on-surface-variant: rgb(0 0 0);
   --md-sys-color-outline: rgb(46 43 51);
   --md-sys-color-outline-variant: rgb(76 71 81);
-  --md-sys-color-shadow: rgb(0 0 0);
+ --md-sys-color-shadow: gray;
   --md-sys-color-scrim: rgb(0 0 0);
   --md-sys-color-inverse-surface: rgb(50 47 53);
   --md-sys-color-inverse-on-surface: rgb(255 255 255);

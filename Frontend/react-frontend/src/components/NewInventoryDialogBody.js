@@ -46,7 +46,7 @@ export default function NewInventoryDialogBody() {
 
   const checkBoxList = (
     attributes.map((a) => (
-      <label key={a.id} className='dialog-body--checkbox-list--checkbox-item'>
+      <label key={a.id} className='dialog-body--checkbox-list--list--checkbox-item'>
         <input
           type="checkbox"
           // El valor del check es el id del atributo
@@ -60,11 +60,11 @@ export default function NewInventoryDialogBody() {
   )
 
   const acceptedList = (
-    <ul>
+    <ul className='dialog-body--inventory-form--input-container--accepted-list--container-list'>
       {selectedAttributes.map((id) => {
         const attr = attributes.find(a => a.id === id);
         return (
-          <li key={id}>
+          <li key={id} className='dialog-body--inventory-form--input-container--accepted-list--container-list--item'>
             {attr ? attr.label : "Atributo no encontrado"}
           </li>
         );
@@ -72,27 +72,10 @@ export default function NewInventoryDialogBody() {
     </ul>
   );
 
-
-  /*
-
-  {
-    "name": "string",
-    "description": "string",
-    "revision_date": "2025-06-02T00:58:32.425Z",
-    "attributesIds": [
-      0
-    ]
-  }
-
-
-  */
-
-  // Función que se ejecuta al enviar el formulario
   const handleFormSubmit = async (event) => {
-    event.preventDefault(); // Evita que el navegador recargue la página
+    event.preventDefault(); 
 
     try {
-      // Llamamos al backend
       const inventoryForm = {
         name: inventoryName,
         description: inventoryDescription,
@@ -101,7 +84,6 @@ export default function NewInventoryDialogBody() {
 
       }
 
-      // Bienvenido a concurrencia, el await hace esperar a que el authService responda
       const response = await InventoryService.createInventory(inventoryForm);
 
     } catch (error) {
@@ -119,11 +101,11 @@ export default function NewInventoryDialogBody() {
             placeholder="Attribute name..."
           />
         </div>
-        <div className='dialog-body--checkbox-list--checkbox-list'>
+        <div className='dialog-body--checkbox-list--list'>
           {checkBoxList}
         </div>
         <div className='dialog-body--checkbox-list--new-attribute-btn'>
-          <button>
+          <button className='dialog-body--checkbox-list--new-attribute-btn--btn'>
             New Attribute
           </button>
         </div>
@@ -139,8 +121,6 @@ export default function NewInventoryDialogBody() {
               value={inventoryName}
               onChange={(e) => setInventoryName(e.target.value)}
             />
-          </div>
-          <div className="dialog-body--inventory-form--input-container">
             <input
               type="text"
               name="inventoryDescription"
@@ -149,8 +129,6 @@ export default function NewInventoryDialogBody() {
               value={inventoryDescription}
               onChange={(e) => setInventoryDescription(e.target.value)}
             />
-          </div>
-          <div className="dialog-body--inventory-form--input-container">
             <input
               type="date"
               name="inventoryRevisionDate"
@@ -162,11 +140,13 @@ export default function NewInventoryDialogBody() {
           <div className="dialog-body--inventory-form--input-container--accepted-list">
             {acceptedList}
           </div>
-          <input
-            type="submit"
-            value="Create"
-            className="dialog-body--inventory-form--input-container--submit-btn"
-          />
+          <div className='dialog-body--inventory-form--input-container--submit-btn'>
+            <input
+              type="submit"
+              value="Create"
+              className="dialog-body--inventory-form--input-container--submit-btn--btn"
+            />
+          </div>
         </form>
       </div>
     </div>

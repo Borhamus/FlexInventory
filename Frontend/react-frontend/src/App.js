@@ -9,7 +9,7 @@ import { PrimeReactProvider } from 'primereact/api';
 import React from 'react';
 
 import AppRoutes from './routes/AppRoutes';
-import "./styles/material-theme/light.css"
+import "./styles/material-theme/dark.css"
 
 
 function App() {

@@ -1,4 +1,4 @@
-.dark-high-contrast {
+:root {
   --md-sys-color-primary: rgb(246 236 255);
   --md-sys-color-surface-tint: rgb(211 188 253);
   --md-sys-color-on-primary: rgb(0 0 0);
