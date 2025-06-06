@@ -4,7 +4,7 @@ import Movimiento from "./Movimiento";
 
 function UsuariosActivos({titulo}){
     return (
-        <div className="usuariosActivos shadow-6">
+        <div className="usuariosActivos">
             <div className="usuariosActivosTitulo">{titulo}</div>
             <div className="usuariosActivosMovimientos">
                 <Movimiento showProfilePicture={true} showName={true} nombre={"Usuario"} movimiento={"Crear inventario 'Electronicos'"}/>

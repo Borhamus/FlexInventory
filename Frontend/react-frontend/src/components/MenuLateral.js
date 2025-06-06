@@ -31,8 +31,8 @@ function MenuLateral({ titulo, showModal, setShowModal, elementos, modalCreate, 
         {botonesPorElemento}
       </div>
       <div className='MenuLateralAcciones'>
-        <Button icon={"pi pi-plus"} name={"New"} click={(handleModalCreate)} bgColor={"green"} />
-        <Button icon={"pi pi-minus"} name={"Delete"} click={(handleModalDelete)} bgColor={"red"}>
+        <Button icon={"pi pi-plus"} name={"New"} click={(handleModalCreate)} bgColor={"var(--md-sys-color-primary)"} fontColor={"var(--md-sys-color-on-primary)"}/>
+        <Button icon={"pi pi-minus"} name={"Delete"} click={(handleModalDelete)} bgColor={"var(--md-sys-color-secondary-container)"} fontColor={"var(--md-sys-color-on-secondary-container)"}>
         </Button>
       </div>
       <Modal open={showModal} onClose={() => setShowModal(false)} children={modalChildren} />

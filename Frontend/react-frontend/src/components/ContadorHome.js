@@ -3,7 +3,7 @@ import "../styles/ContadorHome.css";
 
 function ContadorHome({ titulo, numero }) {
     return (
-        <div className="contadorHome shadow-6">
+        <div className="contadorHome">
             <div className="contadorNumero">{numero}</div>
             <div className="contadorTitulo">{titulo}</div>
         </div>

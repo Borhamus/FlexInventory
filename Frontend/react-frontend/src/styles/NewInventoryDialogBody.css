@@ -2,7 +2,7 @@
     display: flex;
     flex-direction: row;
     height: 40vh;
-    width: 32vw;
+    width: 100;
     gap: 1em;
 }
 
@@ -55,6 +55,10 @@
     align-items: center;
     justify-content: center;
     width: 100%;
+}
+
+.dialog-body--checkbox-list--search-bar--input{
+    width: 80%;
 }
 
 .dialog-body--right-container {

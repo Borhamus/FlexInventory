@@ -99,6 +99,7 @@ export default function NewInventoryDialogBody() {
             type="text"
             name="attributeSearchBar"
             placeholder="Attribute name..."
+            className='dialog-body--checkbox-list--search-bar--input'
           />
         </div>
         <div className='dialog-body--checkbox-list--list'>

@@ -31,7 +31,7 @@ function Movimiento({showProfilePicture, showName, nombre, movimiento}){
             {profilePicture}
 
             {/* Nombre y movimiento */}
-            <div className="movimientoDatos shadow-6">
+            <div className="movimientoDatos">
 
                 {/* Nombre */}
                 {userName}

@@ -2,11 +2,11 @@
     width: 15vw;
     height: 6vh;
     border-radius: 30px;
-    background: var(--indigo-300);
+    background: var(--md-sys-color-secondary-container);
     border: none;
     font-family: 'Montserrat';
     font-size: 1.2vw;
-    color: #FFFFFF;
+    color: var(--md-sys-color-on-secondary-container);
     cursor: pointer;
 
     display: flex;
@@ -16,7 +16,8 @@
 }
 
 .botonGenerico:hover{
-    background: var(--indigo-400);
+    background: var(--md-sys-color-secondary-container);
+    opacity: 0.8;
 }
 
 .botonGenericoIcon{

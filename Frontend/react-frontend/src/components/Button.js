@@ -3,7 +3,7 @@ import "../styles/Button.css"
 
 function Button(props) {
   return (
-    <button className = "botonGenerico" style={{background: props.bgColor} } onClick={props.click}>
+    <button className = "botonGenerico" style={{background: props.bgColor, color: props.fontColor}  } onClick={props.click}>
       <div className="botonGenericoIcon">
         <i className={props.icon}></i>
       </div>

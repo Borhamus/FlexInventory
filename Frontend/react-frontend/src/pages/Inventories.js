@@ -34,13 +34,14 @@ function Inventories() {
     ]
 
     // Manejar la eliminación de inventarios
-    const handleDeleteInventory = () => {
+    const handleDeleteInventory = (event) => {
         InventoryService.deleteInventoryById(selectedId)
             .then(() => {
                 setElementos(prev => prev.filter(el => el.id !== selectedId));
                 setSelectedId(null);
             })
             .catch(error => alert('No se pudo eliminar el inventario.'));
+        setShowModal(false);
     };
 
     // Seleccionar un inventario

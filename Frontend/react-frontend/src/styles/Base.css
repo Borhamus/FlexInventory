@@ -5,10 +5,6 @@
     --box-shadow-1: 1px 1px 2px var(--md-sys-color-shadow);
     --box-shadow-2: 2px 2px 2px var(--md-sys-color-shadow);
 }
-
-
-/* -------------| Scroll bar |--------------- */
-
 /* -------------| Scroll bar |--------------- */
 
 /* width */
@@ -26,14 +22,14 @@
 
 /* Thumb */
 ::-webkit-scrollbar-thumb {
-    background: var(--indigo-200);
+    background: var(--md-sys-color-surface-container-high);
     border-radius: var(--border-radius);
-    border: .1em solid var(--indigo-500);
+    border: .1em solid var(--md-sys-color-surface-dim);
 }
 
 /* Thumb Hover*/
 ::-webkit-scrollbar-thumb:hover {
-    background: var(--indigo-300);
+    background: var(--md-sys-color-surface-container-highest);
     border-radius: var(--border-radius);
 }
 

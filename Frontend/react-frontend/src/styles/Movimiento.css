@@ -6,24 +6,27 @@
     width: 4em;     /* Tamaño fijo que coincide con el Avatar */
     height: 4em;    /* Tamaño fijo que coincide con el Avatar */
     border-radius: 50%;
-    box-shadow: 0 8px 8px 2px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    /*box-shadow: 0 8px 8px 2px rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19); */
     display: flex;
+    background-color: var(--md-sys-color-surface-container-high);
     justify-content:center;   
     align-items: center;
     flex-shrink: 0;   
     margin-right: .7vw;
 }
 
+/*
 .movimientoFotoPerfil:hover{
     box-shadow: 0 8px 16px 2px rgba(0, 0, 0, 0.25), 0 12px 40px 0 rgba(0, 0, 0, 0.22);
 }
+    */
 
 .movimientoDatos{
     display: flex;
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    background-color: var(--indigo-400);
+    background-color: var(--md-sys-color-surface-container-high);
     border-radius: var(--border-radius);
     width: clamp(200px, 20vw, 100%);
     height: clamp(80px, 8vh, 15vh);

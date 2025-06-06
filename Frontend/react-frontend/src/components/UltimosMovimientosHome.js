@@ -7,7 +7,7 @@ function UltimosMovimientosHome({titulo}){
 
 
     return(
-        <div class = "UltimosMovimientosHome shadow-6">
+        <div class = "UltimosMovimientosHome ">
             <div className="ultimosMovimientosTitulo">{titulo}</div>
             <div className="ultimosMovimientosMovimientos">
                 <Movimiento showProfilePicture={false} showName={false} movimiento={"Crear inventario 'Electronicos'"}/>
