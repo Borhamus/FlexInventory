@@ -1,43 +1,43 @@
-1) Si tu Docker esta viejo, sácalo y metete a la carpeta:
+------
 
-Infrastruture
- y pega esto en una terminal: docker-compose up -d
+LAUNCHERS:
 
-2) Cargar los datos a la base de datos, en windows:
-
-type .\backup.sql | docker exec -i FlexInventory psql -U flexinventory -d flexinventory
-
-3) Una vez cargado. abrirlo.
-
-
-
-
-----
-
-GIT:
-git pull para bajar.
-
-Para evitar romper cosas:
-git status
+Linux:
+ 	- abrir terminal en la carpeta raiz y ejecutar "./launcher.sh"
+ 
+Windows:
+	- abrir powershell en la carpeta raiz y ejecutar ".\launcher-windows.ps1"	
 
 ------
 
-launcher en linux:
- - Para levantarlo ir a una terminal y ejecutar "./launcher.sh"
- 
-=======
-
-git diff: Es para ver los cambios quevos hiciste
-
-git commit -m "Comentario"
-
-git push: para subirlo.
-
- // Para sacar archivos de la zona de staged
-git reset 
-
-
----
 APIS:
+
 Api usuarios -> http://localhost:8080/swagger-ui.html
 Api base -> http://localhost:8081/swagger-ui.html
+
+------
+
+GIT:
+
+git pull
+Descarga los cambios del repositorio remoto y los fusiona con tu rama local actual.
+
+git add .
+Agrega todos los archivos modificados o nuevos al área de staging, listos para hacer commit.
+
+git commit -m "mensaje"
+Guarda en el repositorio local los cambios preparados, con un mensaje descriptivo.
+
+git push
+Envía los commits locales al repositorio remoto (por ejemplo, GitHub).
+
+git diff
+Muestra las diferencias entre los archivos modificados y el último commit.
+
+git status
+Muestra el estado actual del repositorio: qué archivos cambiaron y cuáles están en staging.
+
+git reset
+Deshace cambios. Puede usarse para quitar archivos del staging o volver a un commit anterior (con cuidado).
+
+
