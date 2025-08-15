@@ -18,12 +18,12 @@
     flex-direction: column;
     overflow-y: auto;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
+    padding-top: 2rem;
     flex:8;
     height: 90vh;   
-    width: 78vw;
+    width: auto;
     gap: 1vw;
-    border: 1px solid black;
 }
 
 .items{
@@ -34,14 +34,7 @@
     align-content: flex-start;
     justify-content: center;
     height: 90vh;
-    width: 78vw;
-    gap: 1vw;
-}
-
-.lower_buttons{
-    display: flex;
-    align-items: center;
-    justify-content: center;
+    width: auto;
     gap: 1vw;
 }
 
@@ -49,7 +42,7 @@
     width: 10vw;
     height: 20vh;
     border-radius: 20px;
-    background-color:white;
+    background-color:rgb(255, 255, 255);
     border: 1px solid black;
 }
 
@@ -64,4 +57,11 @@
     transition: border 0.3s, box-shadow 0.3s;
     white-space: pre-wrap; /* permite saltos de línea */
     overflow-wrap: break-word; /* evita overflow lateral */
+}
+
+.lower_buttons{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 1vw;
 }
