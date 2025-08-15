@@ -5,6 +5,20 @@
     --box-shadow-1: 1px 1px 2px var(--md-sys-color-shadow);
     --box-shadow-2: 2px 2px 2px var(--md-sys-color-shadow);
 }
+.base{
+    padding: 0;
+    margin: 0;
+}
+
+.base-navbar{
+    padding: 0;
+    margin: 0;
+}
+
+.base-body{
+    padding: 0;
+    margin: 0;
+}
 /* -------------| Scroll bar |--------------- */
 
 /* width */
@@ -31,8 +45,4 @@
 ::-webkit-scrollbar-thumb:hover {
     background: var(--md-sys-color-surface-container-highest);
     border-radius: var(--border-radius);
-}
-
-.col-12 {
-    height: 9vh;
 }

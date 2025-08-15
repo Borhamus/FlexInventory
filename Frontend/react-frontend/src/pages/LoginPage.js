@@ -39,7 +39,7 @@ function Login() {
             console.log("Token: " + localStorage.getItem("token"))
 
             // Redirigimos al usuario a la página principal (o donde quieras)
-            navigate("/Home");
+            navigate("/inventories");
 
         } catch (error) {
             console.log("Formulario: " + username + " | " + password)

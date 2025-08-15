@@ -20,7 +20,7 @@ function AppRoutes() {
     <Router>
       <Routes>
         {/* Rutas principales */}
-        <Route path="/Home" element={<Base page = {<Home />} />} />
+        <Route path="/Home" element={<Base page = {<Home />} />} /> 
         <Route path="/inventories" element={<Base page = {<Inventories />} />} />
         <Route path="/catalogs" element={<Base page = {<Catalogs />} />} />
         <Route path="/users" element={<Base page = {<Users />} />} />

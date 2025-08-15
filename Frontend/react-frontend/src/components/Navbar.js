@@ -10,7 +10,7 @@ function Navbar() {
     return (
         <nav className='navbar-container'>
             <div className='navbarLeft'>
-                <a className='linkNavbar linkNavbar--home' href="/home">FlexInventory</a>
+                <b className='linkNavbar--title'>FlexInventory</b>
             </div>
             <div className='navbarCenter'>
                 <a className='linkNavbar linkNavbar--inventories' href="/inventories" >Inventories</a>

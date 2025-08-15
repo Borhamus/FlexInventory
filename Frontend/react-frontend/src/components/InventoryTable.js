@@ -78,7 +78,7 @@ function InventoryTable({ num }) {
 
     return (
         <div className=''>
-            <div className="" style={{ marginLeft: "0.5em"}}>
+            <div className="">
                 <DataTable
                     value={processedItems}
                     //footer={footer}

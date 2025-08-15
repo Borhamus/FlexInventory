@@ -16,6 +16,6 @@
 
 .MenuLateral{
     flex: 2;
-    height: 90vh;
+    height: 100%;
     width: 20vw;
 }
