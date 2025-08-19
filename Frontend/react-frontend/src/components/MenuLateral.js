@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import "../styles/MenuLateralInventario.css"
+import "../styles/MenuLateral.css"
 import Button from "./Button";
 import Modal from './Modal';
 
@@ -25,14 +25,14 @@ function MenuLateral({ titulo, showModal, setShowModal, elementos, modalCreate, 
   )
 
   return (
-    <div className='MenuLateralInventario'>
+    <div className='MenuLateralComponente'>
       <div className='MenuLateralTitulo'>{titulo}</div>
       <div className='listaDeInventarios'>
         {botonesPorElemento}
       </div>
       <div className='MenuLateralAcciones'>
-        <Button icon={"pi pi-plus"} name={"New"} click={(handleModalCreate)} bgColor={"var(--md-sys-color-primary)"} fontColor={"var(--md-sys-color-on-primary)"}/>
-        <Button icon={"pi pi-minus"} name={"Delete"} click={(handleModalDelete)} bgColor={"var(--md-sys-color-secondary-container)"} fontColor={"var(--md-sys-color-on-secondary-container)"}>
+        <Button icon={"pi pi-plus-circle"} name={""} click={(handleModalCreate)} bgColor={"var(--md-sys-color-inverse-primary)"} fontColor={"var( --md-sys-color-inverse-surface)"}/>
+        <Button icon={"pi pi-trash"} name={""} click={(handleModalDelete)} bgColor={"var(--md-sys-color-secondary-container)"} fontColor={"var(--md-sys-color-on-secondary-container)"}>
         </Button>
       </div>
       <Modal open={showModal} onClose={() => setShowModal(false)} children={modalChildren} />

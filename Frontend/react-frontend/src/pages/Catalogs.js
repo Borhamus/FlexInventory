@@ -77,19 +77,7 @@ function Catalogs() {
 
           <div className='items'>
             <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
-            <CatalogItem/>
+          
           </div>
           
           <div className='lower_buttons'>

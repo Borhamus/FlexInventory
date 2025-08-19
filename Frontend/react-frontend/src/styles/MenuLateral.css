@@ -1,8 +1,7 @@
-.MenuLateralInventario{
-    background-color: var(--md-sys-color-surface-container);
+.MenuLateralComponente{
+    background-color: var(--md-sys-color-inverse-surface);
     width: 100%;
-    height: 100%;
-    border-radius: var(--border-radius);
+    height: 103%; /*????????????????????????*/
     display: flex;
     flex-direction: column;
 }
@@ -10,9 +9,9 @@
 .MenuLateralTitulo{
     font-size: 1.5vw;
     font-weight: bold;
-    color: var(--md-sys-color-on-surface);
+    color: var(--md-sys-color-inverse-on-surface);
     margin: 1em;
-    border-bottom: 1px solid var(--md-sys-color-on-surface);
+    border-bottom: 1px solid var(--md-sys-color-inverse-on-surface);
     padding-bottom: 0.6em;
 }
 
@@ -33,5 +32,6 @@
     flex-direction: column;
     justify-content: space-evenly;
     align-items: center;
-    border-top: 1px solid var(--md-sys-color-on-surface);
+    margin: 1em;
+    border-top: 1px solid var(--md-sys-color-inverse-on-surface);
 }

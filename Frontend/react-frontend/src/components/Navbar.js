@@ -10,12 +10,12 @@ function Navbar() {
     return (
         <nav className='navbar-container'>
             <div className='navbarLeft'>
-                <a className='linkNavbar linkNavbar--home' href="/home">FlexInventory</a>
+                <b className='linkNavbar--title'>FlexInventory</b>
             </div>
             <div className='navbarCenter'>
-                <a className='linkNavbar linkNavbar--inventories' href="/inventories" >Inventories</a>
-                <a className='linkNavbar linkNavbar--catalogs' href="/catalogs">Catalogs</a>
-                <a className='linkNavbar linkNavbar--users' href="/users">Users</a>
+                <a className='linkNavbar linkNavbar--inventories' href="/inventories" >Inventarios</a>
+                <a className='linkNavbar linkNavbar--catalogs' href="/catalogs">Catalogos</a>
+                <a className='linkNavbar linkNavbar--users' href="/usuarios">Users</a>
             </div>
             <div className='navbarRight'>
                 <a className='linkNavbar linkNavbar--user' href="/profile"><i className="pi pi-fw pi-user"></i></a>
