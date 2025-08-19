@@ -84,7 +84,7 @@ function Inventories() {
 
             <div className="MenuLateral">
                 <MenuLateral
-                    titulo="Inventories"
+                    titulo="Inventarios"
                     elementos={inventories}
                     showModal={showModal}
                     setShowModal={setShowModal}

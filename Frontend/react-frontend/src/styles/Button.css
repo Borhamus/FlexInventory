@@ -2,11 +2,11 @@
     width: 15vw;
     height: 6vh;
     border-radius: 30px;
-    background: rgb(40, 89, 124);
+    background: #D9D9D9;
     border: none;
     font-family: 'Roboto';
     font-size: 1.2vw;
-    color: white;
+    color: black;
     cursor: pointer;
 
     display: flex;
@@ -16,7 +16,7 @@
 }
 
 .botonGenerico:hover{
-    background: rgb(44, 81, 116);
+    background: rgb(126, 131, 135);
     opacity: 0.8;
 }
 
