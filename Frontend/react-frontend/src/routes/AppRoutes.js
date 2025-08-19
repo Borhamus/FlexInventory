@@ -13,6 +13,7 @@ import Settings from '../pages/Settings';
 import NotFound from '../pages/NotFound';
 import LoginPage from "../pages/LoginPage";
 import SignUp from '../pages/SignUp';
+import Invite from '../pages/Invite';
 
 // Configuramos las rutas
 function AppRoutes() {
@@ -27,7 +28,9 @@ function AppRoutes() {
         <Route path="/settings" element={<Base page = {<Settings />} />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUp />} />
+        <Route path="/invite" element={<Invite />} />
         <Route path="/" element={<LoginPage />} />
+
 
         {/* Ruta para páginas no encontradas */}
         <Route path="*" element={<NotFound />} />
