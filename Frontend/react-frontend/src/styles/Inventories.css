@@ -8,14 +8,32 @@
 }
 
 .inventarioTabla{
+    display: flex;
+    flex-direction: column;
     flex: 8;
     height: 90vh;
-    width: 78vw;
+    width: 80vw;
     overflow-y: auto;
 }
 
+.ContenedorTablaBoton{
+    display: flex;
+    flex-direction: column;
+}
+
+.inventarioTabla{
+    display: flex;
+}
+
 .MenuLateral{
+    display: flex;
     flex: 2;
     height: 100%;
     width: 20vw;
+}
+
+.BotonesBajos{
+    border-radius: 20px;
+    background-color: rgb(34, 61, 85);
+
 }

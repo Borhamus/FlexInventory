@@ -92,12 +92,18 @@ function Inventories() {
                     modalDelete={modalDeleteInventory}
                 />
             </div>
-            <div className="inventarioTabla">
-                {showInventoryTable && selectedId && (
-                    <div>
-                        <InventoryTable num={selectedId} />
-                    </div>
-                )}
+            <div className='ContenedorTablaBoton'>
+                <div className="inventarioTabla">
+                    {showInventoryTable && selectedId && (
+                        <div>
+                            <InventoryTable num={selectedId} />
+                        </div>
+                    )}
+                </div>
+                <div className="BotonesBajos">
+                    <button>Agregar Articulos</button>
+                    <button>Editar atributos</button>
+                </div>
             </div>
         </div>
     );
