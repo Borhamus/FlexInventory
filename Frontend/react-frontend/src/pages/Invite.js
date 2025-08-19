@@ -20,6 +20,7 @@ function Invite() {
                 password: password
             };
 
+            // Queda pendiente el back de esto, la llave, tira rojo porque no esta creado esto en el back. PENDIENTE.
             const response = await AuthService.validateInvite(inviteForm);
             console.log("Invitación válida:", response);
 
