@@ -4,6 +4,7 @@ import InventoryTable from '../components/InventoryTable';
 import "../styles/Inventories.css"
 import MenuLateral from '../components/MenuLateral';
 import CrearInventarioCuerpoModal from '../components/NewInventoryDialogBody';
+import Button from "../components/Button";
 
 function Inventories() {
 
@@ -51,7 +52,7 @@ function Inventories() {
 
     // Cuerpo de la modal de eliminar inventarios
     const modalDeleteInventory = {
-        title: "¿Delete this inventory?",
+        title: "Eliminar este Inventario",
         body: (
             <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
                 ¿Desea eliminar este Inventario?
@@ -70,7 +71,7 @@ function Inventories() {
     }
 
     const modalCreateInventory = {
-        title: "New Inventory",
+        title: "Nuevo inventario",
         body: (
             <div>
                 <CrearInventarioCuerpoModal />
@@ -82,7 +83,7 @@ function Inventories() {
     return (
         <div className="inventory">
 
-            <div className="MenuLateral">
+            <div className="inventory--MenuLateral">
                 <MenuLateral
                     titulo="Inventarios"
                     elementos={inventories}
@@ -101,8 +102,8 @@ function Inventories() {
                     )}
                 </div>
                 <div className="BotonesBajos">
-                    <button>Agregar Articulos</button>
-                    <button>Editar atributos</button>
+                    <Button icon={"pi pi-plus-circle"} onClick={""} color={"primary"} type = {""} name={"Agregar Articulo"}/>
+                    <Button icon={"pi pi-fw pi-pencil"} onClick={""} color={"primary"} type = {""} name={"Editar Inventario"}/>
                 </div>
             </div>
         </div>

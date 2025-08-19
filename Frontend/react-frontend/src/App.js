@@ -14,12 +14,12 @@ import "./styles/material-theme/theme.css"
 
 function App() {
     return (
-        <PrimeReactProvider>
-            <div className="App">
+        <div className="App">
+            <PrimeReactProvider>
                 {/* ------| CONTENIDO PRINCIPAL |------ */}
                 <AppRoutes />
-            </div>
-        </PrimeReactProvider>
+            </PrimeReactProvider>
+        </div>
     );
 }
 

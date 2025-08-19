@@ -1,5 +1,7 @@
 .App {
   text-align: center;
+  height: 100%;
+  
 }
 
 body {
@@ -8,4 +10,5 @@ body {
   overflow-y: hidden;
   overflow-x: hidden;
   background-color: var(--md-sys-color-surface);
+  height: 100%;
 }

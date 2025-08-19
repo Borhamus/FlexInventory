@@ -10,7 +10,7 @@ function MenuLateral({ titulo, showModal, setShowModal, elementos, modalCreate, 
   // Array de botones con el nombre del inventario o catalogo y con la función de cambiar la tabla
   const botonesPorElemento = elementos.map((i) => (
     <div key={i.id}>
-      <Button  name={i.label} click={i.command} />
+      <Button icon={i.icon} name={i.label} click={i.command} color={"secondary-inverse"}/>
     </div>
   ))
 
@@ -31,9 +31,8 @@ function MenuLateral({ titulo, showModal, setShowModal, elementos, modalCreate, 
         {botonesPorElemento}
       </div>
       <div className='MenuLateralAcciones'>
-        <Button icon={"pi pi-plus-circle"}  click={(handleModalCreate)} bgColor={"var(--md-sys-color-inverse-primary)"} fontColor={"var( --md-sys-color-inverse-surface)"}/>
-        <Button icon={"pi pi-trash"}  click={(handleModalDelete)} bgColor={"var(--md-sys-color-secondary-container)"} fontColor={"var(--md-sys-color-on-secondary-container)"}>
-        </Button>
+        <Button icon={"pi pi-plus-circle"} onClick={(handleModalCreate)} color={"primary-inverse"} type = {""} name={modalCreate.title}/>
+        <Button icon={"pi pi-trash"} onClick={(handleModalDelete)} color = {"secondary-inverse" } type = {""} name={modalDelete.title}/>
       </div>
       <Modal open={showModal} onClose={() => setShowModal(false)} children={modalChildren} />
     </div>

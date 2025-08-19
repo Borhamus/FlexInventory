@@ -1,3 +1,4 @@
+/*
 .botonGenerico{
     width: 15vw;
     height: 6vh;
@@ -6,7 +7,7 @@
     border: none;
     font-family: 'Roboto';
     font-size: 1.2vw;
-    color: black;
+    color: white;
     cursor: pointer;
 
     display: flex;
@@ -22,4 +23,25 @@
 
 .botonGenericoIcon{
     margin-right: 0.5em;
+}
+*/
+
+.botonGenerico {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  font-size: 1rem;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.botonGenerico:hover {
+  opacity: 0.8;
+}
+
+.botonGenericoIcon i {
+  font-size: 1.2rem;
 }
