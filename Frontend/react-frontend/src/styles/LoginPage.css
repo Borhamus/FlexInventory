@@ -1,80 +1,146 @@
-.flex-container{
-    background: linear-gradient(135deg, var(--pink-50), #B58DED);
+/* === Contenedor principal === */
+.container {
+    display: flex;
     width: 100vw;
     height: 100vh;
+    margin: 0;
+    padding: 0;
+    font-family: 'Montserrat', sans-serif;
+}
+
+/* === Panel izquierdo (Bienvenida) === */
+.left-panel {
+    flex: 1;
+    background: 
+        url('../../public/FondoIntro.jpeg'); /* Ruta corregida */
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    padding: 4rem;
+    color: white;
+}
+
+
+.left-panel h1 {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+}
+
+.left-panel p {
+    font-size: 1.1rem;
+    line-height: 1.5;
+}
+
+.left-panel a {
+    color: #FFD600;
+    text-decoration: none;
+    font-weight: 500;
+}
+.left-panel a:hover {
+    text-decoration: underline;
+}
+
+/* === Panel derecho (Login) === */
+.right-panel {
+    flex: 1;
+    background: #CBE4EC;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: -0.5rem;
 }
 
-h4{
-    font-family: 'Segoe UI', bold;
-    font-size: 35px;
-    margin-top: 4rem;
-    margin-bottom: 2rem;
-}
-
-form{
-    display: inline-block;
-    align-items: center;
-    height: 270px;
-    width: 350px;
-    margin-bottom: 170px;
-}
-.text_area{
-    border-radius: 22px;
-    margin-bottom: 35px;
-    width: 100%;
-    height: 64px;
-    box-shadow: 0 0 8px 0 rgba(0, 0, 0, 0.2), 0 0 20px 0 rgba(0, 0, 0, 0.19);
-}
-
-.text_input{
-    margin-top: 1.2rem;
-    font-family: 'Montserrat regular';
-    font-size: 20px;
-    border: none;
-    width: 80%;
-}
-
-.btn{
-    margin-top: 28px;
-    width: 165px;
-    height: 60px;
-    border-radius: 30px;
-    background: #B58DED;
-    border: none;
-    font-family: 'Montserrat';
-    font-size: 20px;
-    color: #FFFFFF;
-    box-shadow: 0 4px 8px 0 rgba(181, 141, 237, 0.7), 0 6px 20px 0 rgba(181, 141, 237, 0.9);
-    cursor: pointer;
-}
-
-.btn:hover{
-    background: #8e5dd1;
-}
-
-.login{
-    display: inline-block;
+/* Caja del login */
+.login-box {
     background: #FFFFFF;
-    width: 434px;
-    height: 700px;
+    width: 400px;
+    padding: 2.5rem;
     border-radius: 22px;
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2),
+                0 6px 20px rgba(0, 0, 0, 0.19);
 }
 
-.link{
+.login-box h2 {
+    font-size: 28px;
+    margin-bottom: 2rem;
     color: #0E4579;
-    font-family: 'Montserrat light';
-    font-size: 18px;
+    text-align: center;
+}
+
+/* === Inputs === */
+.text_area {
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    width: 100%;
+    height: 55px;
+    box-shadow: 0 0 8px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+}
+
+.text_input {
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    border: none;
+    outline: none;
+    width: 100%;
+    height: 100%;
+}
+
+/* === Botones === */
+.btn-group {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 1rem;
+}
+
+.btn {
+    width: 48%;
+    height: 50px;
+    border-radius: 8px;
+    border: none;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 16px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: 0.2s;
+}
+
+/* Botón principal */
+.btn-primary {
+    background: #0E4579;
+    color: white;
+}
+.btn-primary:hover {
+    background: #062a47;
+}
+
+/* Botón secundario */
+.btn-secondary {
+    background: #f5f5f5;
+    color: #0E4579;
+    border: 1px solid #0E4579;
+}
+.btn-secondary:hover {
+    background: #e1e1e1;
+}
+
+/* === Link extra (opcional si usas) === */
+.link {
+    color: #0E4579;
+    font-size: 16px;
     cursor: pointer;
     display: block;
+    margin-top: 1rem;
     text-decoration: none;
+    text-align: center;
 }
 
-.link:hover{
+.link:hover {
     color: #051625;
-    text-decoration:underline;
+    text-decoration: underline;
 }

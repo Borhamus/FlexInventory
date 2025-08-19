@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import '../styles/LoginPage.css';
 import "primeicons/primeicons.css";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import AuthService from '../services/AuthService';
 
 
@@ -49,39 +48,58 @@ function Login() {
     };
 
     return (
-        <div className="flex-container">
-            <div className="login">
-                <h4>Login</h4>
-                <form onSubmit={handleLogin}>
-                    <div className="text_area">
-                        <input
-                            type="text"
-                            id="username"
-                            name="username"
-                            className="text_input"
-                            placeholder="Nombre de usuario"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />
-                    </div>
-                    <div className="text_area">
-                        <input
-                            type="password"
-                            id="password"
-                            name="password"
-                            className="text_input"
-                            placeholder="Contraseña"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                    </div>
-                    <input
-                        type="submit"
-                        value="LOGIN"
-                        className="btn"
-                    />
-                </form>
-                <a className="link" href="/signup">Sign Up</a>
+        <div className="container">
+            {/* Panel Izquierdo */}
+            <div className="left-panel">
+                <h1>Hola, Bienvenido a FlexInventory!</h1>
+                <p>
+                    Si ya contás con una cuenta, iniciá sesión.<br />
+                    Por otro lado, si tenés una invitación{" "}
+                    <a href="/invite">ingresá aquí</a>.
+                </p>
+            </div>
+
+            {/* Panel Derecho */}
+            <div className="right-panel">
+                <div className="login-box">
+                    <h2>Iniciar Sesión</h2>
+                    <form onSubmit={handleLogin}>
+                        <div className="text_area">
+                            <input
+                                type="text"
+                                id="username"
+                                name="username"
+                                className="text_input"
+                                placeholder="Nombre de usuario"
+                                value={username}
+                                onChange={(e) => setUsername(e.target.value)}
+                            />
+                        </div>
+                        <div className="text_area">
+                            <input
+                                type="password"
+                                id="password"
+                                name="password"
+                                className="text_input"
+                                placeholder="Contraseña"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                            />
+                        </div>
+                        <div className="btn-group">
+                            <button type="submit" className="btn btn-primary">
+                                Iniciar Sesión
+                            </button>
+                            <button
+                                type="button"
+                                className="btn btn-secondary"
+                                onClick={() => navigate("/signup")}
+                            >
+                                Registrarse
+                            </button>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
     );
