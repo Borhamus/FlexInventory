@@ -1,16 +1,16 @@
 .catalog{
     display: flex;
     flex-direction: row;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     width: 100%;
     height: 100%;
 }
 
-.MenuLateral{
-    flex: 2;
-    height: 90vh;
-    width: 20vw;
+.catalog--MenuLateral{
+    flex: 1.8;
+    height: 100%;
+    width: 100%;
 }
 
 .CatalogContainer{
@@ -19,11 +19,11 @@
     overflow-y: auto;
     align-items: center;
     justify-content: flex-start;
-    padding-top: 2rem;
     flex:8;
     height: 90vh;   
     width: auto;
     gap: 1vw;
+    margin: 1vw;
 }
 
 .items{

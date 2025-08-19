@@ -61,14 +61,12 @@ function Catalogs() {
      
     <div className="catalog">
 
-        <div className="MenuLateral">
+        <div className="catalog--MenuLateral">
             
             <MenuLateral 
                           titulo = "Catalogos"
                           elementos={catalogs}
-                          onSelect={handleCrearCatalogo}
-                          onCreate={handleCatalogoCreado}
-                          onDelete={handleSeleccionarElemento}>
+                          >
             </MenuLateral>
 
         </div>
