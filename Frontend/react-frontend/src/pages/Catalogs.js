@@ -3,6 +3,7 @@ import MenuLateral from "../components/MenuLateral";
 import Button from "../components/Button";
 import CatalogService from '../services/CatalogService';
 import CatalogItem from '../components/CatalogItem';
+import CatalogNewCatalog from '../components/Modal';
 
 function Catalogs() {
 
@@ -10,7 +11,7 @@ function Catalogs() {
       const [selectedId, setSelectedId] = useState(1); 
       const [showCrearModal, setShowCrearModal] = useState(false);
       const [showCatalogTable, setShowCatalogTable] = useState(true);
-      const [showModal, setShowModal] = useState(false)
+      const [showModal, setShowModal] = useState(false);
 
       const catalogs = [
         ...elementos.map((elemento) => ({
@@ -27,31 +28,23 @@ function Catalogs() {
               .catch(error => console.error('Error al cargar catalogos:', error));
       }, []);
   
-      // Manejar la eliminación de los catalogos STAND BY
-      const handleDeleteCatalog = () => {
-          setShowModal(true)
-          /*InventoryService.deleteInventoryById(selectedId)
-              .then(() => {
-                  setElementos(prev => prev.filter(el => el.id !== selectedId));
-                  setSelectedId(null);
-              })
-              .catch(error => alert('No se pudo eliminar el inventario.')); */
-      };
-  
+      // Modal - Crear Inventario
+      const mondalCreateCatalog = {
+        title: "Nuevo Catalogo",
+        body: (
+          <div>
+              <CatalogNewCatalog/>
+          </div>
+        )
+      }
+
       // Mostrar modal de crear inventario
       const handleCrearCatalogo = () => {
           setShowCrearModal(true);
           //setShowInventoryTable(false);
       };
   
-      // Agregar un nuevo inventario
-      const handleCatalogoCreado = (newInventory) => {
-          setElementos(prev => [...prev, newInventory]);
-          setShowCrearModal(false);
-          //setShowInventoryTable(true);
-      };
-  
-      // Seleccionar un inventario
+      // Seleccionar un Catalogo
       const handleSeleccionarElemento = (id) => {
           setSelectedId(id);
       };
@@ -66,8 +59,16 @@ function Catalogs() {
             <MenuLateral 
                           titulo = "Catalogos"
                           elementos={catalogs}
+<<<<<<< Updated upstream
                           >
             </MenuLateral>
+=======
+                          showModal={showModal}
+                          setShowModal={setShowModal}
+                          modalCreate={modalCreateCatalog}
+                          modalDelete={modalDeleteCatalog}
+            />
+>>>>>>> Stashed changes
 
         </div>
 
@@ -82,7 +83,6 @@ function Catalogs() {
             <Button icon="pi pi-plus-circle" name="Crear Articulo"/>
             <Button icon="pi pi-trash" name="Eliminar Articulo"/>
             <Button icon="pi pi-arrow-right" name="Mover Articulo"/>
-            <Button icon="pi pi-pencil" name="Editar Articulo"/>
           </div>
           
           <div contentEditable suppressContentEditableWarning={true} className='catalog--description'>

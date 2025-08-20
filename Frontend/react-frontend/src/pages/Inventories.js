@@ -3,24 +3,19 @@ import InventoryService from '../services/InventoryService';
 import InventoryTable from '../components/InventoryTable';
 import "../styles/Inventories.css"
 import MenuLateral from '../components/MenuLateral';
+<<<<<<< Updated upstream
 import CrearInventarioCuerpoModal from '../components/NewInventoryDialogBody';
 import Button from "../components/Button";
+=======
+import CrearInventarioCuerpoModal from '../Modals/NewInventoryDialogBody';
+>>>>>>> Stashed changes
 
 function Inventories() {
 
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
     const [selectedId, setSelectedId] = useState(1); // ID del inventario seleccionado, por ahora toma el primero, proximamente deberia comprobar si existe
     const [showInventoryTable, setShowInventoryTable] = useState(true);
-
-
     const [showModal, setShowModal] = useState(false);
-
-    // Cargar los inventarios al inicio
-    useEffect(() => {
-        InventoryService.getAllInventories()
-            .then(data => setElementos(data))
-            .catch(error => console.error('Error al cargar inventarios:', error));
-    }, []);
 
     // Mapeo la respuesta del axios...
     const inventories = [
@@ -33,6 +28,13 @@ function Inventories() {
 
         }))
     ]
+
+    // Cargar los inventarios al inicio
+    useEffect(() => {
+        InventoryService.getAllInventories()
+            .then(data => setElementos(data))
+            .catch(error => console.error('Error al cargar inventarios:', error));
+    }, []);
 
     // Manejar la eliminación de inventarios
     const handleDeleteInventory = (event) => {

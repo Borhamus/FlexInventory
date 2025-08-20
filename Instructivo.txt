@@ -40,4 +40,11 @@ Muestra el estado actual del repositorio: qué archivos cambiaron y cuáles est�
 git reset
 Deshace cambios. Puede usarse para quitar archivos del staging o volver a un commit anterior (con cuidado).
 
+------
+
+Para el Benja:
+
+Get-Content backup.sql | docker exec -i FlexInventory psql -U flexinventory flexinventory
+mvn --% -Dspring-boot.run.jvmArguments="-Duser.timezone=America/Argentina/Buenos_Aires" clean spring-boot:run
+npm start
 

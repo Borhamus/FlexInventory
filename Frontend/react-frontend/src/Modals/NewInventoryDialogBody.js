@@ -1,12 +1,11 @@
 import { useState, useEffect } from 'react'
-import MenuLateral from './MenuLateral'
 import AttributeService from '../services/AttributeService';
 import "../styles/NewInventoryDialogBody.css"
 import { useNavigate } from "react-router-dom";
 import InventoryService from '../services/InventoryService';
-import Button from './Button';
+import Button from '../components/Button';
 
-export default function NewInventoryDialogBody() {
+export default function NewInventory() {
 
   const [elements, setElements] = useState([]);
   const [selectedAttributes, setSelectedAttributes] = useState([])

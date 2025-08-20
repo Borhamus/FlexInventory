@@ -19,4 +19,3 @@ Write-Output "Iniciando frontend..."
 Start-Process powershell -ArgumentList "npm", "start" -WorkingDirectory "..\Frontend\react-frontend"
 
 Write-Output "Proyecto FlexInventory iniciado."
-
