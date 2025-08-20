@@ -1,47 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import '../styles/LoginPage.css';
 import "primeicons/primeicons.css";
 import { useNavigate } from "react-router-dom";
 import AuthService from '../services/AuthService';
 
-
 function Login() {
     // Estados para los campos del formulario
-    // useState actualiza el estado del componente cada vez que el usuario escribe,
-    // lo usamos para guardar lo que escribe 
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
 
     // Para redirigir después del login
     const navigate = useNavigate();
 
+    // useEffect que revisa si el usuario ya está logueado
+    useEffect(() => {
+        // Verificar si el token existe en localStorage
+        const token = localStorage.getItem("token");
+        if (token) {
+            // Si hay un token, redirigir al usuario a la página de inventarios
+            navigate("/inventories");
+        }
+    }, [navigate]); // El useEffect solo se ejecuta cuando el componente se monta
 
-    // Función que se ejecuta al enviar el formulario
     const handleLogin = async (event) => {
         event.preventDefault(); // Evita que el navegador recargue la página
         try {
-            // Llamamos al backend
-            console.log("Formulario: " + username + " | " + password)
             const loginForm = {
                 name: username,
                 password: password
             }
 
-            // Bienvenido a concurrencia, el await hace esperar a que el authService responda
             const response = await AuthService.login(loginForm);
-            
-            // Obtenemos el token
             const token = response.token;
 
-            // Lo guardamos en localStorage
+            // Guardar el token en localStorage
             localStorage.setItem("token", token);
             console.log("Token: " + localStorage.getItem("token"))
 
-            // Redirigimos al usuario a la página principal (o donde quieras)
+            // Redirigir al usuario a la página de inventarios
             navigate("/inventories");
 
         } catch (error) {
-            console.log("Formulario: " + username + " | " + password)
             console.error("Login fallido:", error);
             alert("Usuario o contraseña incorrectos");
         }
@@ -49,7 +48,6 @@ function Login() {
 
     return (
         <div className="container">
-            {/* Panel Izquierdo */}
             <div className="left-panel">
                 <h1>Hola, Bienvenido a FlexInventory!</h1>
                 <p>
@@ -59,7 +57,6 @@ function Login() {
                 </p>
             </div>
 
-            {/* Panel Derecho */}
             <div className="right-panel">
                 <div className="login-box">
                     <h2>Iniciar Sesión</h2>
