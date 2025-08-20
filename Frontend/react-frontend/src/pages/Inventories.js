@@ -3,11 +3,8 @@ import InventoryService from '../services/InventoryService';
 import InventoryTable from '../components/InventoryTable';
 import "../styles/Inventories.css"
 import MenuLateral from '../components/MenuLateral';
-<<<<<<< Updated upstream
 import Button from "../components/Button";
-=======
 import CrearInventarioCuerpoModal from '../Modals/NewInventoryDialogBody';
->>>>>>> Stashed changes
 
 function Inventories() {
 

@@ -29,8 +29,17 @@ function Catalogs() {
       }, []);
   
       // Modal - Crear Inventario
-      const mondalCreateCatalog = {
+      const modalCreateCatalog = {
         title: "Nuevo Catalogo",
+        body: (
+          <div>
+              <CatalogNewCatalog/>
+          </div>
+        )
+      }
+
+      const modalDeleteCatalog = {
+        title: "Borrar este Catalogo",
         body: (
           <div>
               <CatalogNewCatalog/>
@@ -59,16 +68,11 @@ function Catalogs() {
             <MenuLateral 
                           titulo = "Catalogos"
                           elementos={catalogs}
-<<<<<<< Updated upstream
-                          >
-            </MenuLateral>
-=======
                           showModal={showModal}
                           setShowModal={setShowModal}
                           modalCreate={modalCreateCatalog}
                           modalDelete={modalDeleteCatalog}
             />
->>>>>>> Stashed changes
 
         </div>
 
