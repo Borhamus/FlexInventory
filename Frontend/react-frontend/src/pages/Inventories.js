@@ -4,7 +4,6 @@ import InventoryTable from '../components/InventoryTable';
 import "../styles/Inventories.css"
 import MenuLateral from '../components/MenuLateral';
 <<<<<<< Updated upstream
-import CrearInventarioCuerpoModal from '../components/NewInventoryDialogBody';
 import Button from "../components/Button";
 =======
 import CrearInventarioCuerpoModal from '../Modals/NewInventoryDialogBody';
@@ -13,8 +12,23 @@ import CrearInventarioCuerpoModal from '../Modals/NewInventoryDialogBody';
 function Inventories() {
 
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
-    const [selectedId, setSelectedId] = useState(1); // ID del inventario seleccionado, por ahora toma el primero, proximamente deberia comprobar si existe
     const [showInventoryTable, setShowInventoryTable] = useState(true);
+
+    // Inicialmente null, porque no sabemos qué inventario hay
+    const [selectedId, setSelectedId] = useState(null);
+
+    // Cuando llegan los inventarios, asigno el primero
+    useEffect(() => {
+        InventoryService.getAllInventories()
+            .then(data => {
+                setElementos(data);
+                if (data.length > 0) {
+                    setSelectedId(data[0].id); // <-- selecciona el primero válido
+                }
+            })
+            .catch(error => console.error('Error al cargar inventarios:', error));
+    }, []);
+
     const [showModal, setShowModal] = useState(false);
 
     // Mapeo la respuesta del axios...
@@ -22,7 +36,7 @@ function Inventories() {
         ...elementos.map((elemento) => ({
             id: elemento.id,
             label: elemento.name,
-            icon: 'pi pi-table',
+            icon: '',
             attributes: elemento.attributes,
             command: () => handleSeleccionarElemento(elemento.id),
 
@@ -97,15 +111,15 @@ function Inventories() {
             </div>
             <div className='ContenedorTablaBoton'>
                 <div className="inventarioTabla">
-                    {showInventoryTable && selectedId && (
+                    {showInventoryTable && selectedId !== null && (
                         <div>
                             <InventoryTable num={selectedId} />
                         </div>
                     )}
                 </div>
                 <div className="BotonesBajos">
-                    <Button icon={"pi pi-plus-circle"} onClick={""} color={"primary"} type = {""} name={"Agregar Articulo"}/>
-                    <Button icon={"pi pi-fw pi-pencil"} onClick={""} color={"primary"} type = {""} name={"Editar Inventario"}/>
+                    <Button icon={"pi pi-plus-circle"} onClick={""} color={"primary"} type={""} name={"Agregar Articulo"} />
+                    <Button icon={"pi pi-fw pi-pencil"} onClick={""} color={"primary"} type={""} name={"Editar Inventario"} />
                 </div>
             </div>
         </div>

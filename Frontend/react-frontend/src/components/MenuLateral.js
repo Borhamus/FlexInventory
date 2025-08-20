@@ -31,8 +31,8 @@ function MenuLateral({ titulo = "default", showModal, setShowModal, elementos, m
         {botonesPorElemento}
       </div>
       <div className='MenuLateralAcciones'>
-        <Button icon={"pi pi-plus-circle"} onClick={(handleModalCreate)} color={"primary-inverse"} type = {""} name={""}/>
-        <Button icon={"pi pi-trash"} onClick={(handleModalDelete)} color = {"secondary-inverse" } type = {""} name={""}/>
+        <Button icon={"pi pi-plus-circle"} onClick={(handleModalCreate)} color={"primary-inverse"} type = {""} name={modalCreate.title}/>
+        <Button icon={"pi pi-trash"} onClick={(handleModalDelete)} color = {"secondary-inverse" } type = {""} name={modalDelete.title}/>
       </div>
       <Modal open={showModal} onClose={() => setShowModal(false)} children={modalChildren} />
     </div>
