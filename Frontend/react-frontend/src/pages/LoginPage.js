@@ -12,16 +12,56 @@ function Login() {
     // Para redirigir después del login
     const navigate = useNavigate();
 
-    // useEffect que revisa si el usuario ya está logueado
-    useEffect(() => {
-        // Verificar si el token existe en localStorage
-        const token = localStorage.getItem("token");
-        if (token) {
-            // Si hay un token, redirigir al usuario a la página de inventarios
+    // useEffect que revisa si el usuario ya está logueado y si el token ha expirado
+   useEffect(() => {
+    const token = localStorage.getItem("token");
+    const tokenExpiration = localStorage.getItem("tokenExpiration");
+
+    if (token && tokenExpiration) {
+        const currentTime = new Date().getTime(); // Tiempo actual en milisegundos
+
+        // Convertir tokenExpiration a número para la comparación
+        const expirationTime = parseInt(tokenExpiration, 10);
+
+        if (currentTime > expirationTime) { // Ahora comparas dos números
+            // Si el token ha expirado, eliminarlo de localStorage
+            localStorage.removeItem("token");
+            localStorage.removeItem("tokenExpiration");
+            console.log("Token expirado");
+        } else {
+            // Si el token no ha expirado, redirigir al usuario
             navigate("/inventories");
         }
-    }, [navigate]); // El useEffect solo se ejecuta cuando el componente se monta
+    }
+}, [navigate]); // Solo se ejecuta cuando el componente se monta
 
+// Función para renovar el token
+    const renewToken = async () => {
+        try {
+            const response = await AuthService.refreshToken();  // Petición al backend para renovar el token
+            const token = response.token;
+
+            // Guardamos el nuevo token y la nueva fecha de expiración (ejemplo: 1 hora)
+            const expirationTime = new Date().getTime() + 3600000; // 1 hora de expiración (en milisegundos)
+
+            // Actualizamos el token y la fecha de expiración en localStorage
+            localStorage.setItem("token", token);
+            localStorage.setItem("tokenExpiration", expirationTime.toString());
+
+            console.log("Token renovado: " + localStorage.getItem("token"));
+
+            // Redirigir al usuario a la página de inventarios
+            navigate("/inventories");
+
+        } catch (error) {
+            console.error("Error al renovar el token:", error);
+            // Si no podemos renovar el token, redirigir al login
+            navigate("/login");
+        }
+    };
+    
+
+    // Manejar el login
     const handleLogin = async (event) => {
         event.preventDefault(); // Evita que el navegador recargue la página
         try {
@@ -33,9 +73,14 @@ function Login() {
             const response = await AuthService.login(loginForm);
             const token = response.token;
 
-            // Guardar el token en localStorage
+            // Guardar el token y la fecha de expiración (ejemplo: 1 hora)
+            const expirationTime = new Date().getTime() + 3600000; // 1 hora de expiración (en milisegundos)
+
+            // Guardamos el token y la fecha de expiración en localStorage
             localStorage.setItem("token", token);
-            console.log("Token: " + localStorage.getItem("token"))
+            localStorage.setItem("tokenExpiration", expirationTime.toString());
+
+            console.log("Token guardado: " + localStorage.getItem("token"));
 
             // Redirigir al usuario a la página de inventarios
             navigate("/inventories");
