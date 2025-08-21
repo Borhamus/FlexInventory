@@ -9,7 +9,6 @@ import CrearInventarioCuerpoModal from '../Modals/NewInventoryDialogBody';
 function Inventories() {
 
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
-    const [showInventoryTable, setShowInventoryTable] = useState(true);
 
     // Inicialmente null, porque no sabemos qué inventario hay
     const [selectedId, setSelectedId] = useState(null);
@@ -39,13 +38,6 @@ function Inventories() {
 
         }))
     ]
-
-    // Cargar los inventarios al inicio
-    useEffect(() => {
-        InventoryService.getAllInventories()
-            .then(data => setElementos(data))
-            .catch(error => console.error('Error al cargar inventarios:', error));
-    }, []);
 
     // Manejar la eliminación de inventarios
     const handleDeleteInventory = (event) => {
@@ -108,7 +100,7 @@ function Inventories() {
             </div>
             <div className='ContenedorTablaBoton'>
                 <div className="inventarioTabla">
-                    {showInventoryTable && selectedId !== null && (
+                    {selectedId !== null && (
                         <div>
                             <InventoryTable num={selectedId} />
                         </div>

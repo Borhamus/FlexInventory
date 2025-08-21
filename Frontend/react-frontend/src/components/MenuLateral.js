@@ -10,7 +10,7 @@ function MenuLateral({ titulo = "default", showModal, setShowModal, elementos, m
   // Array de botones con el nombre del inventario o catalogo y con la función de cambiar la tabla
   const botonesPorElemento = elementos.map((i) => (
     <div key={i.id}>
-      <Button icon={i.icon} name={i.label} click={i.command} color={"secondary-inverse"}/>
+      <Button icon={i.icon} name={i.label} onClick={i.command} color={"secondary-inverse"}/>
     </div>
   ))
 
