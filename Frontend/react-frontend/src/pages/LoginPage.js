@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import '../styles/LoginPage.css';
 import "primeicons/primeicons.css";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 import AuthService from '../services/AuthService';
 
 function Login() {
@@ -30,6 +31,7 @@ function Login() {
             // Guardamos el token y la fecha de expiración en localStorage
             localStorage.setItem("token", token);
             localStorage.setItem("tokenExpiration", expirationTime.toString());
+            axios.defaults.headers.common.Authorization = `Bearer ${token}`;
 
             console.log("Token guardado: " + localStorage.getItem("token"));
 
