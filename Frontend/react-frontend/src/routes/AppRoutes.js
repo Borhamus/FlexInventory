@@ -12,6 +12,7 @@ import NotFound from '../pages/NotFound';
 import LoginPage from "../pages/LoginPage";
 import SignUp from '../pages/SignUp';
 import Invite from '../pages/Invite';
+import Test from '../pages/Test';
 
 // Función para verificar si el token es válido
 const checkToken = () => {
@@ -75,6 +76,10 @@ function AppRoutes() {
         <Route 
           path="/settings" 
           element={<ProtectedRoute element={<Base page={<Settings />} />} />} 
+        />
+        <Route 
+          path="/test" 
+          element={<Base page={<Test />} />}
         />
 
         {/* Ruta para páginas no encontradas */}
