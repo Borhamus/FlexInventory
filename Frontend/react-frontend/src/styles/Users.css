@@ -1,6 +1,6 @@
 .users-container {
   padding: 20px;
-  background-color: #d8edf7; /* Fondo azul claro */
+  background-color: var(--md-sys-color-surface); /* Fondo según theme */
   height: 100vh;
 }
 
@@ -11,7 +11,7 @@
   align-items: center;
   justify-content: center;
   width: 60%;
-  background: white;
+  background: var(--md-sys-color-surface-container-lowest);
   border-radius: 30px;
   padding: 8px 15px;
   box-shadow: 0px 2px 6px rgba(0,0,0,0.1);
@@ -23,16 +23,18 @@
   flex-grow: 1;
   font-size: 16px;
   padding: 5px 10px;
+  color: var(--md-sys-color-on-surface);
+  background: transparent;
 }
 
 .search-icon {
   font-size: 18px;
-  color: #333;
+  color: var(--md-sys-color-on-surface-variant);
 }
 
 /* --- Título --- */
 .table-title {
-  background-color: #6c98af;
+  background-color: var(--md-sys-color-primary);
   text-align: center;
   padding: 10px;
   border-radius: 5px 5px 0 0;
@@ -42,12 +44,12 @@
 .table-title h2 {
   margin: 0;
   font-size: 20px;
-  color: white;
+  color: var(--md-sys-color-on-primary);
 }
 
 /* --- Tabla --- */
 .table-container {
-  background: white;
+  background: var(--md-sys-color-surface-container-lowest);
   border-radius: 0 0 5px 5px;
   overflow: hidden;
   margin-bottom: 20px;
@@ -63,23 +65,25 @@
   padding: 12px;
   font-size: 14px;
   text-align: center;
-  border-bottom: 1px solid #ddd;
+  border-bottom: 1px solid var(--md-sys-color-outline-variant);
+  color: var(--md-sys-color-on-surface);
 }
 
 .users-table th {
-  background-color: #ffffff;
+  background-color: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
   font-weight: bold;
   text-transform: capitalize;
 }
 
 .users-table tr:hover {
-  background-color: #f2f8fd;
+  background-color: var(--md-sys-color-surface-container-high);
 }
 
 /* --- Botones acciones dentro de tabla --- */
 .action-btn {
-  background-color: #2c5d75;
-  color: white;
+  background-color: var(--md-sys-color-tertiary);
+  color: var(--md-sys-color-on-tertiary);
   padding: 8px 10px;
   margin: 0 5px;
   border: none;
@@ -88,7 +92,7 @@
 }
 
 .action-btn:hover {
-  opacity: 0.8;
+  background-color: var(--md-sys-color-tertiary-fixed-dim);
 }
 
 /* --- Botones inferiores --- */
@@ -99,8 +103,8 @@
 }
 
 .btn {
-  background-color: #2c5d75;
-  color: white;
+  background-color: var(--md-sys-color-primary);
+  color: var(--md-sys-color-on-primary);
   padding: 12px 20px;
   border-radius: 12px;
   border: none;
@@ -114,9 +118,10 @@
 }
 
 .btn:hover {
-  opacity: 0.85;
+  background-color: var(--md-sys-color-primary-fixed-dim);
 }
 
 .view-movements {
-  background-color: #1f3f56;
+  background-color: var(--md-sys-color-tertiary);
+  color: var(--md-sys-color-on-tertiary);
 }
