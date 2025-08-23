@@ -4,13 +4,13 @@ import HybridModal from "../components/Modal2";
 import DynamicForm from "../components/DynamicForm";
 
 function Test() {
-  const [isOpen, setIsOpen] = useState(true);
+  const [isOpen, setIsOpen] = useState(false);
   const [formData, setFormData] = useState({});
 
   const fields = [
-    { name: "nombre", label: "Nombre", type: "text" },
-    { name: "email", label: "Correo electrónico", type: "email" },
-    { name: "password", label: "Contraseña", type: "password" },
+    { name: "nombre", type: "text", placeholder:"test" },
+    { name: "email", type: "email", placeholder:"test 2"},
+    { name: "password", type: "password", placeholder:"test 3"},
   ];
 
   const handleChange = (name, value) => {
@@ -30,11 +30,17 @@ function Test() {
 
       <HybridModal
         isOpen={isOpen}
-        onClose={() => setIsOpen(false)}
+        onClose={
+          () => {
+            setIsOpen(false);
+            setFormData({}); // Esto se hace ya que la modal no destruye el child que recibe.
+          }
+          
+        }
         title="Nuevo Usuario"
         actions={[
-          { label: "Cancelar", onClick: () => setIsOpen(false), variant: "btn-secondary" },
-          { label: "Guardar", onClick: handleSubmit, variant: "btn-primary" },
+          { label: "Cancelar", onClick: () => setIsOpen(false), color: "secondary", size: "small" },
+          { label: "Guardar", onClick: handleSubmit, color: "primary", size: "small" },
         ]}
       >
         <DynamicForm fields={fields} values={formData} onChange={handleChange} />

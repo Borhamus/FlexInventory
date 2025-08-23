@@ -4,7 +4,7 @@ import InventoryTable from '../components/InventoryTable';
 import "../styles/Inventories.css"
 import MenuLateral from '../components/MenuLateral';
 import Button from "../components/Button";
-import CrearInventarioCuerpoModal from '../Modals/NewInventoryDialogBody';
+import NewInventoryDialogBody from '../Modals/NuevoInventarioFormulario';
 
 function Inventories() {
 
@@ -56,32 +56,52 @@ function Inventories() {
     };
 
     // Cuerpo de la modal de eliminar inventarios
-    const modalDeleteInventory = {
+    //const modalDeleteInventory = {
+    //    title: "Eliminar este Inventario",
+    //    body: (
+    //        <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
+    //            ¿Desea eliminar este Inventario?
+    //            <div style={{ display: 'flex', gap: "1em", justifyContent: 'space-evenly' }}>
+    //                <button onClick={() => setShowModal(false)}>
+    //                    <i className=''></i>
+    //                    Cancel
+    //                </button>
+    //                <button onClick={handleDeleteInventory}>
+    //                    <i className='pi pi-trash'></i>
+    //                    Delete
+    //                </button>
+    //            </div>
+    //        </div>
+    //    )
+    //}
+
+    //const modalCreateInventory = {
+    //    title: "Nuevo inventario",
+    //    body: (
+    //        <div>
+    //            <CrearInventarioCuerpoModal />
+    //        </div>
+    //    )
+    //}
+
+    const formularioBorrar = {
         title: "Eliminar este Inventario",
-        body: (
-            <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
-                ¿Desea eliminar este Inventario?
-                <div style={{ display: 'flex', gap: "1em", justifyContent: 'space-evenly' }}>
-                    <button onClick={() => setShowModal(false)}>
-                        <i className=''></i>
-                        Cancel
-                    </button>
-                    <button onClick={handleDeleteInventory}>
-                        <i className='pi pi-trash'></i>
-                        Delete
-                    </button>
-                </div>
-            </div>
-        )
+        fields: [],
+        customView: "¿Seguro que desea eliminar este inventario?",
+        actions: [
+            { label: "Cancelar", onClick: (close) => close(), color: "secondary", size: "small" },
+            { label: "Eliminar", onClick: (close) => close(), color: "primary", size: "small" },
+        ],
     }
 
-    const modalCreateInventory = {
-        title: "Nuevo inventario",
-        body: (
-            <div>
-                <CrearInventarioCuerpoModal />
-            </div>
-        )
+    const formularioCrear = {
+        title: "Crear Nuevo Inventario",
+        fields: [],
+        customView: <NewInventoryDialogBody/>,
+        actions: [
+            { label: "Cancelar", onClick: (close) => close(), color: "secondary", size: "small" },
+            { label: "Crear", onClick: (close) => close(), color: "primary", size: "small" },
+        ],
     }
 
 
@@ -92,10 +112,8 @@ function Inventories() {
                 <MenuLateral
                     titulo="Inventarios"
                     elementos={inventories}
-                    showModal={showModal}
-                    setShowModal={setShowModal}
-                    modalCreate={modalCreateInventory}
-                    modalDelete={modalDeleteInventory}
+                    formularioBorrar={formularioBorrar}
+                    formularioCrear={formularioCrear}
                 />
             </div>
             <div className='ContenedorTablaBoton'>

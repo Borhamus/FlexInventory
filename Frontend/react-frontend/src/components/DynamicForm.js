@@ -4,16 +4,17 @@ import "../styles/DynamicForm.css";
 
 function DynamicForm({ fields = [], values, onChange }) {
   return (
-    <form className="">
+    <form className="dynamic-form">
       {fields.map((field, i) => (
-        <div key={i} className="">
-          <label className="">{field.label}</label>
+        <div key={i} className="dynamic-form--field-container">
+          <label className="dynamic-form--field-container--label">{field.label}</label>
           <input
             type={field.type || "text"}
             name={field.name}
             value={values[field.name] || ""}
+            placeholder={field.placeholder}
             onChange={(e) => onChange(field.name, e.target.value)}
-            className=" "
+            className="dynamic-form--field-container--input"
           />
         </div>
       ))}

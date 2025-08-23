@@ -1,6 +1,7 @@
 // src/components/HybridModal.js
 import React, { useEffect, useRef } from "react";
 import "../styles/Modal2.css";
+import Button from "./Button";
 
 function Modal2({ isOpen, onClose, title, children, actions = [] }) {
   const dialogRef = useRef(null);
@@ -8,25 +9,13 @@ function Modal2({ isOpen, onClose, title, children, actions = [] }) {
   // Control apertura/cierre del <dialog>
   useEffect(() => {
     const dialog = dialogRef.current;
-    if (!dialog) return;
 
     if (isOpen) {
-      if (!dialog.open) dialog.showModal();
+      dialog.showModal();
     } else {
-      if (dialog.open) dialog.close();
+      dialog.close();
     }
   }, [isOpen]);
-
-  // Cerrar con Escape (aunque <dialog> ya lo hace, garantizamos onClose)
-  useEffect(() => {
-    const handleKey = (e) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", handleKey);
-    return () => window.removeEventListener("keydown", handleKey);
-  }, [onClose]);
-
-  if (!isOpen) return null;
 
   return (
     <dialog
@@ -61,13 +50,15 @@ function Modal2({ isOpen, onClose, title, children, actions = [] }) {
         {actions.length > 0 && (
           <footer className="">
             {actions.map((action, i) => (
-              <button
+
+              <Button
                 key={i}
-                onClick={action.onClick}
-                className={``}
-              >
-                {action.label}
-              </button>
+                onClick={() => action.onClick?.(onClose)}
+                name={action.label}
+                color={action.color}
+                size={action.size}
+              />
+
             ))}
           </footer>
         )}

@@ -1,28 +1,31 @@
 import React, { useState } from 'react'
 import "../styles/MenuLateral.css"
 import Button from "./Button";
-import Modal from './Modal';
+//import Modal from './Modal';
+import Modal from './Modal2';
+import DynamicForm from "../components/DynamicForm";
 
-function MenuLateral({ titulo = "default", showModal, setShowModal, elementos, modalCreate, modalDelete }) {
+function MenuLateral({ titulo = "default", elementos, formularioBorrar, formularioCrear }) {
 
-  const [modalChildren, setModalChildren] = useState(null);
+  const [isOpen, setIsOpen] = useState(false);
+  const [formData, setFormData] = useState({});
+  const [formFields, setFormFields] = useState({});
 
   // Array de botones con el nombre del inventario o catalogo y con la función de cambiar la tabla
   const botonesPorElemento = elementos.map((i) => (
     <div key={i.id}>
-      <Button icon={i.icon} name={i.label} onClick={i.command} color={"secondary-inverse"}/>
+      <Button icon={i.icon} name={i.label} onClick={i.command} color={"secondary-inverse"} />
     </div>
   ))
 
-  const handleModalDelete = () => (
-    setModalChildren(modalDelete),
-    setShowModal(true)
-  )
+  const handleChange = (name, value) => {
+    setFormData({ ...formData, [name]: value });
+  };
 
-  const handleModalCreate = () => (
-    setModalChildren(modalCreate),
-    setShowModal(true)
-  )
+  const handleSubmit = () => {
+    console.log("Datos enviados:", formData);
+    setIsOpen(false);
+  };
 
   return (
     <div className='MenuLateralComponente'>
@@ -31,10 +34,47 @@ function MenuLateral({ titulo = "default", showModal, setShowModal, elementos, m
         {botonesPorElemento}
       </div>
       <div className='MenuLateralAcciones'>
-        <Button icon={"pi pi-plus-circle"} onClick={(handleModalCreate)} color={"primary-inverse"} type = {""} name={modalCreate.title}/>
-        <Button icon={"pi pi-trash"} onClick={(handleModalDelete)} color = {"secondary-inverse" } type = {""} name={modalDelete.title}/>
+        {/* BOTON AGREGAR */}
+        <Button
+          icon={"pi pi-plus-circle"}
+          onClick={() => {
+            setIsOpen(true);
+            setFormFields(formularioCrear);
+          }}
+          color={"primary-inverse"}
+          type={""}
+          name={formularioCrear.title} />
+
+        {/* BOTON ELIMINAR */}
+        <Button
+          icon={"pi pi-trash"}
+          onClick={() => {
+            setIsOpen(true);
+            setFormFields(formularioBorrar);
+          }}
+          color={"secondary-inverse"}
+          type={""}
+          name={formularioBorrar.title} />
       </div>
-      <Modal open={showModal} onClose={() => setShowModal(false)} children={modalChildren} />
+
+      {/*<Modal open={showModal} onClose={() => setShowModal(false)} children={modalChildren} /> */}
+      <Modal
+        isOpen={isOpen}
+        onClose={
+          () => {
+            setIsOpen(false);
+            setFormData({}); // No guarda los datos en la modal.
+          }
+
+        }
+        title={formFields.title}
+        actions={formFields.actions}
+      >
+        {/* SI HAY UN CUSTOMVIEW LO CARGO, SINO, USO EL DYNAMICFORM */}
+        {formFields.customView ?? (
+          <DynamicForm fields={formFields.fields} values={formData} onChange={handleChange} />
+        )}
+      </Modal>
     </div>
   )
 }
