@@ -1,56 +1,48 @@
 // src/components/HybridModal.js
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, isValidElement, cloneElement } from "react";
 import "../styles/Modal2.css";
 import Button from "./Button";
 
 function Modal2({ isOpen, onClose, title, children, actions = [] }) {
   const dialogRef = useRef(null);
 
-  // Control apertura/cierre del <dialog>
   useEffect(() => {
     const dialog = dialogRef.current;
-
-    if (isOpen) {
-      dialog.showModal();
-    } else {
-      dialog.close();
-    }
+    if (isOpen) dialog.showModal();
+    else dialog.close();
   }, [isOpen]);
+
+  const renderChildren = () => {
+    // render-prop: children es una función -> children({ close })
+    if (typeof children === "function") {
+      return children({ close: onClose });
+    }
+    // elemento React -> clonamos e inyectamos prop close
+    if (isValidElement(children)) {
+      return cloneElement(children, { close: onClose });
+    }
+    // string / null / etc.
+    return children;
+  };
 
   return (
     <dialog
       ref={dialogRef}
       className="ModalContainer bg-transparent border-0"
-      onCancel={onClose} // fallback accesible
+      onCancel={onClose}
     >
-      {/* Overlay */}
-      <div
-        className="modal__overlay"
-        onClick={onClose}
-        aria-hidden="true"
-      />
-
-      {/* Caja modal */}
+      <div className="modal__overlay" onClick={onClose} aria-hidden="true" />
       <div className="modal">
-        {/* Header */}
         <header className="modal__header">
-          <h2 className="">{title}</h2>
-          <button
-            onClick={onClose}
-            className="close-button"
-          >
-            &times;
-          </button>
+          <h2>{title}</h2>
+          <button onClick={onClose} className="close-button">&times;</button>
         </header>
 
-        {/* Body */}
-        <main className="modal__main">{children}</main>
+        <main className="modal__main">{renderChildren()}</main>
 
-        {/* Footer con acciones */}
         {actions.length > 0 && (
-          <footer className="">
+          <footer>
             {actions.map((action, i) => (
-
               <Button
                 key={i}
                 onClick={() => action.onClick?.(onClose)}
@@ -58,7 +50,6 @@ function Modal2({ isOpen, onClose, title, children, actions = [] }) {
                 color={action.color}
                 size={action.size}
               />
-
             ))}
           </footer>
         )}

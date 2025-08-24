@@ -1,7 +1,7 @@
 .dialog-body {
     display: flex;
     flex-direction: row;
-    height: 50vh;
+    height: 60vh;
     width: 40vw;
     gap: 0.5em;
 }
@@ -45,7 +45,7 @@
     width: 70%;
     height: 3vh;
     padding: .5em;
-    font-size: .9vw;
+    font-size: .9em;
     box-shadow: var(--box-shadow-2);
     cursor:pointer;
 
@@ -132,7 +132,7 @@
     justify-content: start;
     padding-block: 1vh;
     gap: .8vh;
-    width: 80%;    
+    width: 100%;    
     height: 100%;
     box-shadow: var(--box-shadow-form-input);
     border-radius: var(--border-radius);
@@ -145,11 +145,11 @@
     background-color: var(--md-sys-color-surface);
     color: var(--md-sys-color-on-surface);
     border-radius: var(--border-radius);
-    width: 80%;
+    width: 70%;
 
     margin-right: 4vh;
     min-height: 2em;
-    font-size: .9vw;
+    font-size: .9em;
 
     box-shadow: var(--box-shadow-1);
 }
@@ -162,6 +162,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    gap: 1em;
 }
 
 .dialog-body--inventory-form--input-container--submit-btn--btn{

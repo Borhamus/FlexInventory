@@ -1,11 +1,4 @@
-import { useState, useEffect } from 'react'
-import AttributeService from '../services/AttributeService';
-import "../styles/NewInventoryDialogBody.css"
-import { useNavigate } from "react-router-dom";
-import InventoryService from '../services/InventoryService';
-import Button from '../components/Button';
-
-export default function NewInventory() {
+export default function NuevoInventarioFormulario({ onSubmit }) {
 
   const [elements, setElements] = useState([]);
   const [selectedAttributes, setSelectedAttributes] = useState([])
@@ -72,7 +65,7 @@ export default function NewInventory() {
   );
 
   const handleFormSubmit = async (event) => {
-    event.preventDefault(); 
+    event.preventDefault();
 
     try {
       const inventoryForm = {
@@ -90,64 +83,72 @@ export default function NewInventory() {
     }
   };
 
+  const [formData, setFormData] = useState({});
+
+  const handleChange = (name, value) => {
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const fields = [
+    { label: "Nombre del Inventario", name: "Nombre del Inventario", type: "text", placeholder: "Nombre del Inventario..." },
+    { label: "Descripcion del Inventario",name: "Descripcion del Inventario", type: "text", placeholder: "Descripcion del inventario..." },
+    { label: "Fecha de revision", name: "Fecha de revision", type: "date", placeholder: "" },
+  ];
+
   return (
     <div className='dialog-body'>
       <div className='dialog-body--left-container'>
-        <div className='dialog-body--checkbox-list--search-bar'>
-          <input
-            type="text"
-            name="attributeSearchBar"
-            placeholder="Attribute name..."
-            className='dialog-body--checkbox-list--search-bar--input'
-          />
-        </div>
+        Lista de Atributos:
         <div className='dialog-body--checkbox-list--list'>
           {checkBoxList}
         </div>
         <div className='dialog-body--checkbox-list--new-attribute-btn'>
-          <button className='dialog-body--checkbox-list--new-attribute-btn--btn'>
-            New Attribute
-          </button>
+          <Button icon={"pi pi-plus"} onClick={""} color={"secondary"} size={"small"} type={""} name={"Nuevo Atributo"} />
         </div>
       </div>
       <div className='dialog-body--right-container'>
-        <form onSubmit={handleFormSubmit} className='dialog-body--inventory-form'>
-          <div className="dialog-body--inventory-form--input-container">
-            <input
-              type="text"
-              name="inventoryName"
-              placeholder="Inventory name..."
-              className='dialog-body--inventory-form--input-container--inventory-name'
-              value={inventoryName}
-              onChange={(e) => setInventoryName(e.target.value)}
-            />
-            <input
-              type="text"
-              name="inventoryDescription"
-              placeholder="Inventory description..."
-              className='dialog-body--inventory-form--input-container--inventory-description'
-              value={inventoryDescription}
-              onChange={(e) => setInventoryDescription(e.target.value)}
-            />
-            <input
-              type="date"
-              name="inventoryRevisionDate"
-              className='dialog-body--inventory-form--input-container--inventory-revison-date'
-              value={inventoryRevisionDate}
-              onChange={(e) => setInventoryRevisionDate(e.target.value)}
-            />
-          </div>
-          <div className="dialog-body--inventory-form--input-container--accepted-list">
-            {acceptedList}
-          </div>
-          <div className='dialog-body--inventory-form--input-container--submit-btn'>
-            <input
-              type="submit"
-              value="Create"
-              className="dialog-body--inventory-form--input-container--submit-btn--btn"
-            />
-          </div>
-        </form>
+        {/*<form onSubmit={handleFormSubmit} className='dialog-body--inventory-form'>*/}
+        {/*  <div className="dialog-body--inventory-form--input-container">*/}
+        {/*    <input*/}
+        {/*      type="text"*/}
+        {/*      name="inventoryName"*/}
+        {/*      placeholder="Inventory name..."*/}
+        {/*      className='dialog-body--inventory-form--input-container--inventory-name'*/}
+        {/*      value={inventoryName}*/}
+        {/*      onChange={(e) => setInventoryName(e.target.value)}*/}
+        {/*    />*/}
+        {/*    <input*/}
+        {/*      type="text"*/}
+        {/*      name="inventoryDescription"*/}
+        {/*      placeholder="Inventory description..."*/}
+        {/*      className='dialog-body--inventory-form--input-container--inventory-description'*/}
+        {/*      value={inventoryDescription}*/}
+        {/*      onChange={(e) => setInventoryDescription(e.target.value)}*/}
+        {/*    />*/}
+        {/*    <input*/}
+        {/*      type="date"*/}
+        {/*      name="inventoryRevisionDate"*/}
+        {/*      className='dialog-body--inventory-form--input-container--inventory-revison-date'*/}
+        {/*      value={inventoryRevisionDate}*/}
+        {/*      onChange={(e) => setInventoryRevisionDate(e.target.value)}*/}
+        {/*    />*/}
+        {/*  </div>*/}
+        {/*  <div className="dialog-body--inventory-form--input-container--accepted-list">*/}
+        {/*    {acceptedList}*/}
+        {/*  </div>*/}
+        {/*  <div className='dialog-body--inventory-form--input-container--submit-btn'>*/}
+        {/*    <input*/}
+        {/*      type="submit"*/}
+        {/*      value="Create"*/}
+        {/*      className="dialog-body--inventory-form--input-container--submit-btn--btn"*/}
+        {/*    />*/}
+        {/*  </div>*/}
+        {/*</form>*/}
+        <DynamicForm fields={fields} values={formData} onChange={handleChange} />
+        <div className="dialog-body--inventory-form--input-container--accepted-list">
+          Atributos seleccionados:
+          {acceptedList}
+        </div>
       </div>
     </div>
   )

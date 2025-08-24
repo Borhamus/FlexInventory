@@ -1,31 +1,15 @@
-import React, { useState } from 'react'
+// src/components/MenuLateral.js
+import React from 'react'
 import "../styles/MenuLateral.css"
 import Button from "./Button";
-//import Modal from './Modal';
-import Modal from './Modal2';
-import DynamicForm from "../components/DynamicForm";
 
-function MenuLateral({ titulo = "default", elementos, formularioBorrar, formularioCrear }) {
-
-  const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({});
-  const [formFields, setFormFields] = useState({});
-
-  // Array de botones con el nombre del inventario o catalogo y con la función de cambiar la tabla
+function MenuLateral({ titulo = "default", elementos, onCreate, onDelete }) {
+  // Array de botones con el nombre del inventario o catálogo
   const botonesPorElemento = elementos.map((i) => (
     <div key={i.id}>
       <Button icon={i.icon} name={i.label} onClick={i.command} color={"secondary-inverse"} />
     </div>
   ))
-
-  const handleChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = () => {
-    console.log("Datos enviados:", formData);
-    setIsOpen(false);
-  };
 
   return (
     <div className='MenuLateralComponente'>
@@ -37,47 +21,21 @@ function MenuLateral({ titulo = "default", elementos, formularioBorrar, formular
         {/* BOTON AGREGAR */}
         <Button
           icon={"pi pi-plus-circle"}
-          onClick={() => {
-            setIsOpen(true);
-            setFormFields(formularioCrear);
-          }}
+          onClick={onCreate}   // <- ahora lo decide el padre
           color={"primary-inverse"}
-          type={""}
-          name={formularioCrear.title} />
+          name={"Nuevo"}
+        />
 
         {/* BOTON ELIMINAR */}
         <Button
           icon={"pi pi-trash"}
-          onClick={() => {
-            setIsOpen(true);
-            setFormFields(formularioBorrar);
-          }}
+          onClick={onDelete}   // <- ahora lo decide el padre
           color={"secondary-inverse"}
-          type={""}
-          name={formularioBorrar.title} />
+          name={"Eliminar"}
+        />
       </div>
-
-      {/*<Modal open={showModal} onClose={() => setShowModal(false)} children={modalChildren} /> */}
-      <Modal
-        isOpen={isOpen}
-        onClose={
-          () => {
-            setIsOpen(false);
-            setFormData({}); // No guarda los datos en la modal.
-          }
-
-        }
-        title={formFields.title}
-        actions={formFields.actions}
-      >
-        {/* SI HAY UN CUSTOMVIEW LO CARGO, SINO, USO EL DYNAMICFORM */}
-        {formFields.customView ?? (
-          <DynamicForm fields={formFields.fields} values={formData} onChange={handleChange} />
-        )}
-      </Modal>
     </div>
   )
 }
-
 
 export default MenuLateral;

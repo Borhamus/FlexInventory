@@ -5,7 +5,7 @@ function Button({ type = "default", size = "default", color = "primary", name, i
   
   // Definimos tipos de botones
   const buttonTypes = {
-    default: { padding: "0 16px", borderRadius: "var(--border-radius-button)"},
+    default: { padding: "1.4em", borderRadius: "var(--border-radius-button)"},
     
     "icon-button": { height: "6vh", width: "4vw", borderRadius: "var(--border-radius-button)" },
     
@@ -14,7 +14,7 @@ function Button({ type = "default", size = "default", color = "primary", name, i
 
   const buttonSizes = {
     default: {height: "6vh", width: "15vw"},
-    small: {height: "4vh", width: "6vw"},
+    small: {height: "4vh", width: "8vw"},
     medium: {height: "6vh", width: "12vw"},
     large: {height: "8vh", width: "17vw"}
   }

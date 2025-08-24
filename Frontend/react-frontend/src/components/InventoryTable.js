@@ -54,8 +54,8 @@ function InventoryTable({ num }) {
             field="name" // Vinculamos al campo 'name'
             header="Name" // Etiqueta de encabezado
             sortable={true} // Habilitar el ordenamiento
-            headerStyle={{ width: '10%', minWidth: '8rem' }}
-            style={{fontSize: "0.9vw"}}
+            headerStyle={{ width: '10%', minWidth: '8em' }}
+            style={{fontSize: "1em"}}
         />,
         // Generar las columnas para los atributos dinámicos
         ...inventory.attributes.map(attribute => (
@@ -64,8 +64,8 @@ function InventoryTable({ num }) {
                 field={attribute.name} // Vinculamos el campo dinámico
                 header={attribute.name}
                 sortable={true} // Habilitar el ordenamiento
-                headerStyle={{ width: '10%', minWidth: '8rem' }}
-                style={{fontSize: "0.9vw"}}
+                headerStyle={{ width: '10%', minWidth: '8em' }}
+                style={{fontSize: "1em"}}
             />
         ))
     ];
