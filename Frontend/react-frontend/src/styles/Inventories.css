@@ -14,6 +14,8 @@
     height: 90vh;
     width: 80vw;
     overflow-y: auto;
+
+    border: 1px solid black;
 }
 
 .ContenedorTablaBoton{
@@ -22,6 +24,8 @@
     justify-content: flex-start;
     gap: 5vh;
     margin: 1vw;
+
+    border: 1px solid greenyellow;
 }
 
 .inventory--MenuLateral{
@@ -33,4 +37,6 @@
 .BotonesBajos{
     display: flex;
     flex: 2;
+
+    border: 1px solid red;
 }
