@@ -1,16 +1,23 @@
 import React from "react";
 import "../styles/Button.css";
 
-function Button({ type = "default", color = "primary", name, icon, onClick }) {
+function Button({ type = "default", size = "default", color = "primary", name, icon, onClick}) {
   
   // Definimos tipos de botones
   const buttonTypes = {
-    default: { height: "6vh", width: "15vw", padding: "0 16px", borderRadius: "var(--border-radius-button)"},
+    default: { padding: "1.4em", borderRadius: "var(--border-radius-button)"},
     
     "icon-button": { height: "6vh", width: "4vw", borderRadius: "var(--border-radius-button)" },
     
     tab: { height: "6vh", padding: "0 24px", borderRadius: "0px" },
   };
+
+  const buttonSizes = {
+    default: {height: "6vh", width: "15vw"},
+    small: {height: "4vh", width: "8vw"},
+    medium: {height: "6vh", width: "12vw"},
+    large: {height: "8vh", width: "17vw"}
+  }
 
   // 🔹 Definimos colores (ejemplo inspirado en Material You)
   const buttonColors = {
@@ -28,6 +35,7 @@ function Button({ type = "default", color = "primary", name, icon, onClick }) {
   // Obtenemos el estilo segun props
   const typeStyle = buttonTypes[type] || buttonTypes.default;
   const colorStyle = buttonColors[color] || buttonColors.primary;
+  const buttonSize = buttonSizes[size] || buttonSizes.default;
 
   return (
     <button
@@ -35,6 +43,7 @@ function Button({ type = "default", color = "primary", name, icon, onClick }) {
       style={{
         ...typeStyle,
         ...colorStyle,
+        ...buttonSize,
       }}
       onClick={onClick}
     >

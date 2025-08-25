@@ -1,7 +1,8 @@
 import axios from "./AxiosConfig";
 
-// Este servicio centraliza el consumo de las apis relacionadas con Inventario.
+// Este servicio centraliza el consumo de las apis relacionadas con Catalogo.
 export class CatalogService {
+
     baseUrl = "http://localhost:8081/catalog/";
 
     // Método para obtener todos los inventarios.

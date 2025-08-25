@@ -3,7 +3,7 @@ import MenuLateral from "../components/MenuLateral";
 import Button from "../components/Button";
 import CatalogService from '../services/CatalogService';
 import CatalogItem from '../components/CatalogItem';
-import CatalogNewCatalog from '../components/Modal';
+import Modal from '../components/Modal2';
 
 function Catalogs() {
 
@@ -42,15 +42,13 @@ function Catalogs() {
         title: "Borrar este Catalogo",
         body: (
           <div>
-              <CatalogNewCatalog/>
+              <CatalogDeleteCatalog/>
           </div>
         )
       }
 
-      // Mostrar modal de crear inventario
       const handleCrearCatalogo = () => {
           setShowCrearModal(true);
-          //setShowInventoryTable(false);
       };
   
       // Seleccionar un Catalogo
@@ -66,14 +64,11 @@ function Catalogs() {
         <div className="catalog--MenuLateral">
             
             <MenuLateral 
-                          titulo = "Catalogos"
-                          elementos={catalogs}
-                          showModal={showModal}
-                          setShowModal={setShowModal}
-                          modalCreate={modalCreateCatalog}
-                          modalDelete={modalDeleteCatalog}
+              titulo="Catalogos"
+                    elementos={catalogs}
+                    onCreate={() => { setFormFields(formularioCrear); setIsOpen(true); }}
+                    onDelete={() => { setFormFields(formularioBorrar); setIsOpen(true); }}           
             />
-
         </div>
 
         <div className="CatalogContainer">
@@ -95,9 +90,21 @@ function Catalogs() {
 
         </div>
 
-    </div>
+    <Modal
+      isOpen={isOpen}
+      onClose={() => (
+      setIsOpen(false),
+      setFormFields({}) // Esto es para borrar los campos del formulario, asi no queda cargado cuando cerramos la modal
+      )}
+      title={formFields?.title}
+      actions={formFields?.actions || []}
+      >
+        {formFields?.customView}
+      </Modal>   
 
-  )
+    </div> 
+
+  );
 }
 
 

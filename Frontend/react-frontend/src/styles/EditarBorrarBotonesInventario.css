@@ -15,14 +15,14 @@
 }
 
 i{
-    font-size: .8vw;
+    font-size: 1em;
 }
 
 .inventoryButtonDeleteEdit{
     border: none;
     border-radius: 100%;
-    padding-inline: .5vw;
-    padding-block: 1vh;
+    padding-inline: .8em;
+    padding-block: .8em;
     transition: background 0.1s;
     cursor: pointer;
 }

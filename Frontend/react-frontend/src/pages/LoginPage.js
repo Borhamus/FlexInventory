@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import '../styles/LoginPage.css';
 import "primeicons/primeicons.css";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 import AuthService from '../services/AuthService';
 
 function Login() {
@@ -11,55 +12,6 @@ function Login() {
 
     // Para redirigir después del login
     const navigate = useNavigate();
-
-    // useEffect que revisa si el usuario ya está logueado y si el token ha expirado
-   useEffect(() => {
-    const token = localStorage.getItem("token");
-    const tokenExpiration = localStorage.getItem("tokenExpiration");
-
-    if (token && tokenExpiration) {
-        const currentTime = new Date().getTime(); // Tiempo actual en milisegundos
-
-        // Convertir tokenExpiration a número para la comparación
-        const expirationTime = parseInt(tokenExpiration, 10);
-
-        if (currentTime > expirationTime) { // Ahora comparas dos números
-            // Si el token ha expirado, eliminarlo de localStorage
-            localStorage.removeItem("token");
-            localStorage.removeItem("tokenExpiration");
-            console.log("Token expirado");
-        } else {
-            // Si el token no ha expirado, redirigir al usuario
-            navigate("/inventories");
-        }
-    }
-}, [navigate]); // Solo se ejecuta cuando el componente se monta
-
-// Función para renovar el token
-    const renewToken = async () => {
-        try {
-            const response = await AuthService.refreshToken();  // Petición al backend para renovar el token
-            const token = response.token;
-
-            // Guardamos el nuevo token y la nueva fecha de expiración (ejemplo: 1 hora)
-            const expirationTime = new Date().getTime() + 3600000; // 1 hora de expiración (en milisegundos)
-
-            // Actualizamos el token y la fecha de expiración en localStorage
-            localStorage.setItem("token", token);
-            localStorage.setItem("tokenExpiration", expirationTime.toString());
-
-            console.log("Token renovado: " + localStorage.getItem("token"));
-
-            // Redirigir al usuario a la página de inventarios
-            navigate("/inventories");
-
-        } catch (error) {
-            console.error("Error al renovar el token:", error);
-            // Si no podemos renovar el token, redirigir al login
-            navigate("/login");
-        }
-    };
-    
 
     // Manejar el login
     const handleLogin = async (event) => {
@@ -79,8 +31,12 @@ function Login() {
             // Guardamos el token y la fecha de expiración en localStorage
             localStorage.setItem("token", token);
             localStorage.setItem("tokenExpiration", expirationTime.toString());
+            axios.defaults.headers.common.Authorization = `Bearer ${token}`;
 
             console.log("Token guardado: " + localStorage.getItem("token"));
+
+            // Depuración: Verificar que el token se guarda correctamente
+            console.log("Redirigiendo a /inventories");
 
             // Redirigir al usuario a la página de inventarios
             navigate("/inventories");

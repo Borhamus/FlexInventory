@@ -4,118 +4,124 @@ import InventoryTable from '../components/InventoryTable';
 import "../styles/Inventories.css"
 import MenuLateral from '../components/MenuLateral';
 import Button from "../components/Button";
-import CrearInventarioCuerpoModal from '../Modals/NewInventoryDialogBody';
+import NewInventoryDialogBody from '../Modals/NuevoInventarioFormulario';
+import Modal from "../components/Modal2";
 
 function Inventories() {
+<<<<<<< HEAD
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
     const [showInventoryTable, setShowInventoryTable] = useState(true);
     // Inicialmente null, porque no sabemos qué inventario hay
     const [selectedId, setSelectedId] = useState(null);
     // Cuando llegan los inventarios, asigno el primero
+=======
+
+    // INVENTARIOS
+    const [elementos, setElementos] = useState([]);
+
+    const [selectedId, setSelectedId] = useState(null);
+
+>>>>>>> bdb03ed6b54aa4ff07bce5fd34cb660334e6cad2
     useEffect(() => {
         InventoryService.getAllInventories()
             .then(data => {
                 setElementos(data);
                 if (data.length > 0) {
-                    setSelectedId(data[0].id); // <-- selecciona el primero válido
+                    setSelectedId(data[0].id);
                 }
             })
             .catch(error => console.error('Error al cargar inventarios:', error));
     }, []);
 
-    const [showModal, setShowModal] = useState(false);
+    // ---- Modal control ----
+    const [isOpen, setIsOpen] = useState(false);
+    const [formFields, setFormFields] = useState(null);
 
-    // Mapeo la respuesta del axios...
-    const inventories = [
-        ...elementos.map((elemento) => ({
-            id: elemento.id,
-            label: elemento.name,
-            icon: '',
-            attributes: elemento.attributes,
-            command: () => handleSeleccionarElemento(elemento.id),
-
-        }))
-    ]
-
-    // Cargar los inventarios al inicio
-    useEffect(() => {
-        InventoryService.getAllInventories()
-            .then(data => setElementos(data))
-            .catch(error => console.error('Error al cargar inventarios:', error));
-    }, []);
-
-    // Manejar la eliminación de inventarios
-    const handleDeleteInventory = (event) => {
-        InventoryService.deleteInventoryById(selectedId)
-            .then(() => {
-                setElementos(prev => prev.filter(el => el.id !== selectedId));
-                setSelectedId(null);
-            })
-            .catch(error => alert('No se pudo eliminar el inventario.'));
-        setShowModal(false);
-    };
-
-    // Seleccionar un inventario
-    const handleSeleccionarElemento = (id) => {
-        setSelectedId(id);
-    };
-
-    // Cuerpo de la modal de eliminar inventarios
-    const modalDeleteInventory = {
+    // Configs de formularios
+    const formularioBorrar = {
         title: "Eliminar este Inventario",
-        body: (
+        customView: (
             <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
                 ¿Desea eliminar este Inventario?
-                <div style={{ display: 'flex', gap: "1em", justifyContent: 'space-evenly' }}>
-                    <button onClick={() => setShowModal(false)}>
-                        <i className=''></i>
-                        Cancel
-                    </button>
-                    <button onClick={handleDeleteInventory}>
-                        <i className='pi pi-trash'></i>
-                        Delete
-                    </button>
-                </div>
             </div>
-        )
+        ),
+        actions: [
+            { label: "Cancelar", onClick: (close) => close(), color: "secondary", size: "small" },
+            {
+                label: "Eliminar", onClick: async (close) => {
+                    try {
+                        await InventoryService.deleteInventoryById(selectedId);
+                        setElementos(prev => prev.filter(el => el.id !== selectedId));
+                        setSelectedId(null);
+                        close();
+                    } catch {
+                        alert('No se pudo eliminar el inventario.');
+                    }
+                }, color: "primary", size: "small"
+            },
+        ],
     }
 
-    const modalCreateInventory = {
-        title: "Nuevo inventario",
-        body: (
-            <div>
-                <CrearInventarioCuerpoModal />
-            </div>
-        )
-    }
+    const formularioCrear = {
+        title: "Crear Nuevo Inventario",
+        customView: (
+            <NewInventoryDialogBody
+                onSubmit={async (inventoryForm) => {
+                    await InventoryService.createInventory(inventoryForm);
+                    const data = await InventoryService.getAllInventories();
+                    setElementos(data);
+                }}
+            />
+        ),
+        actions: [], // los botones están dentro del customView
+    };
 
+
+    const inventories = elementos.map((elemento) => ({
+        id: elemento.id,
+        label: elemento.name,
+        icon: '',
+        attributes: elemento.attributes,
+        command: () => setSelectedId(elemento.id),
+    }));
 
     return (
         <div className="inventory">
 
+            {/* MENU LATERAL */}
             <div className="inventory--MenuLateral">
                 <MenuLateral
                     titulo="Inventarios"
                     elementos={inventories}
-                    showModal={showModal}
-                    setShowModal={setShowModal}
-                    modalCreate={modalCreateInventory}
-                    modalDelete={modalDeleteInventory}
+                    onCreate={() => { setFormFields(formularioCrear); setIsOpen(true); }}
+                    onDelete={() => { setFormFields(formularioBorrar); setIsOpen(true); }}
                 />
             </div>
+
             <div className='ContenedorTablaBoton'>
                 <div className="inventarioTabla">
-                    {showInventoryTable && selectedId !== null && (
-                        <div>
-                            <InventoryTable num={selectedId} />
-                        </div>
+                    {selectedId !== null && (
+                        <InventoryTable num={selectedId} />
                     )}
                 </div>
                 <div className="BotonesBajos">
-                    <Button icon={"pi pi-plus-circle"} onClick={""} color={"primary"} type={""} name={"Agregar Articulo"} />
-                    <Button icon={"pi pi-fw pi-pencil"} onClick={""} color={"primary"} type={""} name={"Editar Inventario"} />
+                    <Button icon={"pi pi-plus-circle"} onClick={""} color={"primary"} name={"Agregar Articulo"} />
+                    <Button icon={"pi pi-fw pi-pencil"} onClick={""} color={"primary"} name={"Editar Inventario"} />
                 </div>
             </div>
+
+            {/* Modal global controlada por Inventories */}
+            <Modal
+                isOpen={isOpen}
+                onClose={() => (
+                    setIsOpen(false),
+                    setFormFields({}) // Esto es para borrar los campos del formulario, asi no queda cargado cuando cerramos la modal
+                )}
+                title={formFields?.title}
+                actions={formFields?.actions || []}
+            >
+                {formFields?.customView}
+            </Modal>
         </div>
     );
 }
