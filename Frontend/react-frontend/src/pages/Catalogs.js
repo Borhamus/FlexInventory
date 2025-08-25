@@ -3,12 +3,7 @@ import MenuLateral from "../components/MenuLateral";
 import Button from "../components/Button";
 import CatalogService from '../services/CatalogService';
 import CatalogItem from '../components/CatalogItem';
-<<<<<<< HEAD
-import CatalogNewCatalog from '../components/Modal';
-import CatalogDeleteCatalog from '../components/Modal';
-=======
 import Modal from '../components/Modal2';
->>>>>>> 9152110 (Se agregan cambios en catalogos)
 
 function Catalogs() {
 
