@@ -14,6 +14,7 @@ import NotFound from '../pages/NotFound';
 import LoginPage from "../pages/LoginPage";
 import SignUp from '../pages/SignUp';
 import Invite from '../pages/Invite';
+import Profile from '../pages/Profile';
 
 // Configuramos las rutas
 function AppRoutes() {
@@ -26,6 +27,7 @@ function AppRoutes() {
         <Route path="/catalogs" element={<Base page = {<Catalogs />} />} />
         <Route path="/users" element={<Base page = {<Users />} />} />
         <Route path="/settings" element={<Base page = {<Settings />} />} />
+        <Route path="/Profile" element={ <Base page = {<Profile  />}  />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/signup" element={<SignUp />} />
         <Route path="/invite" element={<Invite />} />

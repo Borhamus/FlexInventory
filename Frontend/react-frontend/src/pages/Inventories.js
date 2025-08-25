@@ -7,13 +7,10 @@ import Button from "../components/Button";
 import CrearInventarioCuerpoModal from '../Modals/NewInventoryDialogBody';
 
 function Inventories() {
-
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
     const [showInventoryTable, setShowInventoryTable] = useState(true);
-
     // Inicialmente null, porque no sabemos qué inventario hay
     const [selectedId, setSelectedId] = useState(null);
-
     // Cuando llegan los inventarios, asigno el primero
     useEffect(() => {
         InventoryService.getAllInventories()
