@@ -9,6 +9,7 @@ import java.util.List;
 
 @Mapper(componentModel = "spring", uses = {TransformerAttribute.class, TransformerItem.class})
 public interface TransformerInventory {
+    
     TransferableInventory toDTO (Inventory inventory);
 
     Inventory toEntity (TransferableInventory transferableInventory);

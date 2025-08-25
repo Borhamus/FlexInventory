@@ -1,6 +1,7 @@
 package com.untdf.flexinventory.base.Transferable;
 
 import java.util.Date;
+import java.util.List;
 
 public class TransferableCatalog {
     private Integer id;
@@ -8,6 +9,7 @@ public class TransferableCatalog {
     private String description;
     private Date revision_date;
     private Date creation_date;
+    private List<TransferableCatalogItem> items;
 
     /* ------------------- Getters y Setters -------------------*/
     public Integer getId() {
@@ -29,7 +31,7 @@ public class TransferableCatalog {
     }
 
     public void setDescription(String description) {
-        this.description = this.description;
+        this.description = description;
     }
 
     public Date getRevision_date() {return revision_date;}
@@ -42,5 +44,13 @@ public class TransferableCatalog {
 
     public void setCreation_date(Date creation_date) {
         this.creation_date = creation_date;
+    }
+
+    public List<TransferableCatalogItem> getItems() {
+        return items;
+    }
+
+    public void setItems(List<TransferableCatalogItem> items) {
+        this.items = items;
     }
 }

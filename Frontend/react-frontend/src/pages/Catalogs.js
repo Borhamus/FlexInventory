@@ -4,6 +4,7 @@ import Button from "../components/Button";
 import CatalogService from '../services/CatalogService';
 import CatalogItem from '../components/CatalogItem';
 import CatalogNewCatalog from '../components/Modal';
+import CatalogDeleteCatalog from '../components/Modal';
 
 function Catalogs() {
 
@@ -42,15 +43,13 @@ function Catalogs() {
         title: "Borrar este Catalogo",
         body: (
           <div>
-              <CatalogNewCatalog/>
+              <CatalogDeleteCatalog/>
           </div>
         )
       }
 
-      // Mostrar modal de crear inventario
       const handleCrearCatalogo = () => {
           setShowCrearModal(true);
-          //setShowInventoryTable(false);
       };
   
       // Seleccionar un Catalogo

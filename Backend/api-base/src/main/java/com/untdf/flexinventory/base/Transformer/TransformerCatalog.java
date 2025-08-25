@@ -7,7 +7,7 @@ import org.mapstruct.Mapper;
 
 import java.util.List;
 
-@Mapper(componentModel = "spring")
+@Mapper(componentModel = "spring", uses = {TransformerItem.class})
 public interface TransformerCatalog {
 
     TransferableCatalog toDTO (Catalog Catalog);
@@ -16,4 +16,3 @@ public interface TransformerCatalog {
     List<TransferableCatalog> toDTOList (List<Catalog> catalogList);
     List<Catalog> toEntityList (List<TransferableCatalog> transferableCatalogList);
 }
-

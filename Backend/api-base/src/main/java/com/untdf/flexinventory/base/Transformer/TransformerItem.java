@@ -1,6 +1,7 @@
 package com.untdf.flexinventory.base.Transformer;
 
 import com.untdf.flexinventory.base.Model.Item;
+import com.untdf.flexinventory.base.Transferable.TransferableCatalogItem;
 import com.untdf.flexinventory.base.Transferable.TransferableItem;
 import com.untdf.flexinventory.base.Transferable.TransferableItemCreate;
 import com.untdf.flexinventory.base.Transferable.TransferableItemInventory;
@@ -18,6 +19,10 @@ public interface TransformerItem {
 
     @Mapping(target = "itemsAttributeValues", source = "itemsAttributeValues")
     TransferableItemInventory toDTOItemInventory (Item item);
+
+
+    @Mapping(target = "itemsAttributeValues", source = "itemsAttributeValues")
+    TransferableCatalogItem toDTOItemCatalog (Item item);
 
     @Mapping(target = "inventory", ignore = true)
     @Mapping(target = "catalogs", ignore = true)
