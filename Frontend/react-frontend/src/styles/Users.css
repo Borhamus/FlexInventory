@@ -175,7 +175,7 @@
 }
 
 /* --- Botones inferiores --- */
-.button-container {
+.BotonesBajos {
   display: flex;
   justify-content: space-between;
   gap: 10px;
@@ -183,64 +183,70 @@
   width: 100%;
 }
 
-.btn {
-  background-color: var(--md-sys-color-primary);
-  color: var(--md-sys-color-on-primary);
-  padding: 8px 12px;
-  border-radius: 6px;
-  border: none;
-  cursor: pointer;
-  font-size: 12px;
+/* --- Estilos para formularios del modal --- */
+.modal-form {
+  padding: 20px 0;
+}
+
+.form-group {
+  margin-bottom: 20px;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 8px;
   font-weight: 500;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  box-shadow:  var(--box-shadow-form-input);
-  transition: background-color 0.2s ease;
-  flex: 1;
-  justify-content: center;
-  min-width: 0;
-}
-
-.btn:hover {
-  background-color: var(--md-sys-color-primary-fixed-dim);
-}
-
-.btn i {
+  color: var(--md-sys-color-on-surface);
   font-size: 14px;
 }
 
-.btn span {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+.form-group input,
+.form-group select,
+.form-group textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1px solid var(--md-sys-color-outline-variant);
+  border-radius: 6px;
+  font-size: 14px;
+  color: var(--md-sys-color-on-surface);
+  background-color: var(--md-sys-color-surface-container-lowest);
+  box-sizing: border-box;
 }
 
-/* --- Botones específicos --- */
-.create-user {
-  background-color: var(--md-sys-color-primary);
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: var(--md-sys-color-primary);
+  box-shadow: 0 0 0 2px rgba(37, 82, 103, 0.1);
 }
 
-.create-user:hover {
-  background-color: var(--md-sys-color-primary-fixed-dim);
+.form-group textarea {
+  resize: vertical;
+  min-height: 80px;
+  font-family: inherit;
 }
 
-.create-role {
-  background-color: var(--md-sys-color-secondary-fixed);
-  color: var(--md-sys-color-on-secondary-fixed);
+.checkbox-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 8px;
 }
 
-.create-role:hover {
-  background-color: var(--md-sys-color-secondary-fixed-dim);
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: normal;
+  cursor: pointer;
+  margin-bottom: 0;
 }
 
-.view-movements {
-  background-color: var(--md-sys-color-tertiary);
-  color: var(--md-sys-color-on-tertiary);
-}
-
-.view-movements:hover {
-  background-color: var(--md-sys-color-tertiary-fixed-dim);
+.checkbox-group input[type="checkbox"] {
+  width: auto;
+  margin: 0;
+  cursor: pointer;
 }
 
 /* --- Scrollbar personalizado --- */
