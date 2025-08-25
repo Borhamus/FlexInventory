@@ -83,7 +83,7 @@ function AppRoutes() {
         />
 
         {/* Ruta para páginas no encontradas */}
-        <Route path="*" element={<LoginPage />} />
+        <Route path="*" element={<NotFound />} />
       </Routes>
     </Router>
   );
