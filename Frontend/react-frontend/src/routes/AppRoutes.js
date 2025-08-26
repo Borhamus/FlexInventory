@@ -12,9 +12,7 @@ import NotFound from '../pages/NotFound';
 import LoginPage from "../pages/LoginPage";
 import SignUp from '../pages/SignUp';
 import Invite from '../pages/Invite';
-<<<<<<< HEAD
 import Profile from '../pages/Profile';
-=======
 import Test from '../pages/Test';
 
 // Función para verificar si el token es válido
@@ -49,13 +47,11 @@ const PublicRoute = ({ element }) => {
 const ProtectedRoute = ({ element }) => {
   return checkToken() ? element : <Navigate to="/login" />;
 };
->>>>>>> bdb03ed6b54aa4ff07bce5fd34cb660334e6cad2
 
 function AppRoutes() {
   return (
     <Router>
       <Routes>
-<<<<<<< HEAD
         {/* Rutas principales */}
         <Route path="/Home" element={<Base page = {<Home />} />} /> 
         <Route path="/inventories" element={<Base page = {<Inventories />} />} />
@@ -67,12 +63,10 @@ function AppRoutes() {
         <Route path="/signup" element={<SignUp />} />
         <Route path="/invite" element={<Invite />} />
         <Route path="/" element={<LoginPage />} />
-=======
         {/* Rutas públicas accesibles solo si el usuario NO tiene un token válido */}
         <Route path="/login" element={<PublicRoute element={<LoginPage />} />} />
         <Route path="/signup" element={<PublicRoute element={<SignUp />} />} />
         <Route path="/invite" element={<PublicRoute element={<Invite />} />} />
->>>>>>> bdb03ed6b54aa4ff07bce5fd34cb660334e6cad2
 
         {/* Rutas protegidas (requieren un token válido) */}
         <Route 
