@@ -1,112 +1,109 @@
-import React, { useState, useCallback } from 'react';
-import '../styles/Users.css';
-import 'primeicons/primeicons.css';
-import Modal from '../components/Modal2';
-import Button from '../components/Button';
-import DynamicForm from '../components/DynamicForm';
+import React, { useState, useCallback } from "react";
+import { useNavigate } from "react-router-dom";
+import "../styles/Users.css";
+import "primeicons/primeicons.css";
+import Modal from "../components/Modal2";
+import Button from "../components/Button";
+import DynamicForm from "../components/DynamicForm";
 
 function Users() {
+  const navigate = useNavigate();
+
   const [usuarios, setUsuarios] = useState([
-    { id: 1, nombre: 'Usuario 1', rol: 'Admin', ultimaConexion: '10:00 AM' },
-    { id: 2, nombre: 'Usuario 2', rol: 'Editor', ultimaConexion: '09:30 AM' },
-    { id: 3, nombre: 'Usuario 3', rol: 'Viewer', ultimaConexion: '09:00 AM' },
-    { id: 4, nombre: 'Usuario 4', rol: 'Admin', ultimaConexion: '08:30 AM' },
-    { id: 5, nombre: 'Usuario 5', rol: 'Editor', ultimaConexion: '08:00 AM' },
-    { id: 6, nombre: 'Usuario 6', rol: 'Viewer', ultimaConexion: '07:30 AM' },
+    { id: 1, nombre: "Usuario 1", rol: "Admin", ultimaConexion: "10:00 AM" },
+    { id: 2, nombre: "Usuario 2", rol: "Editor", ultimaConexion: "09:30 AM" },
+    { id: 3, nombre: "Usuario 3", rol: "Viewer", ultimaConexion: "09:00 AM" },
+    { id: 4, nombre: "Usuario 4", rol: "Admin", ultimaConexion: "08:30 AM" },
+    { id: 5, nombre: "Usuario 5", rol: "Editor", ultimaConexion: "08:00 AM" },
+    { id: 6, nombre: "Usuario 6", rol: "Viewer", ultimaConexion: "07:30 AM" },
   ]);
 
-  // Estados para el Modal de usuarios
+  // Modal para crear usuario
   const [isOpen, setIsOpen] = useState(false);
-  const [modalType, setModalType] = useState('');
+  const [modalType, setModalType] = useState("");
   const [formValues, setFormValues] = useState({});
-  
-  // Estados para el modal de movimientos
+
+  // Modal de movimientos
   const [isMovimientosOpen, setIsMovimientosOpen] = useState(false);
   const [movimientosValues, setMovimientosValues] = useState({});
 
-  // Campos del formulario para Crear Usuario
+  // Campos formularios
   const userFormFields = [
     {
-      name: 'nombreUsuario',
-      label: 'Nombre de Usuario:',
-      type: 'text',
-      placeholder: 'Ingrese el nombre del nuevo usuario'
+      name: "nombreUsuario",
+      label: "Nombre de Usuario:",
+      type: "text",
+      placeholder: "Ingrese el nombre del nuevo usuario",
     },
     {
-      name: 'passwordUsuario',
-      label: 'Password de Usuario:',
-      type: 'password',
-      placeholder: 'Ingrese la nueva contraseña'
-    }
+      name: "passwordUsuario",
+      label: "Password de Usuario:",
+      type: "password",
+      placeholder: "Ingrese la nueva contraseña",
+    },
   ];
 
-  // Campos del formulario para movimientos (usando type=date en vez de calendar custom)
   const movimientosFormFields = [
     { name: "fechaDesde", label: "Desde", type: "date" },
-    { name: "fechaHasta", label: "Hasta", type: "date" }
+    { name: "fechaHasta", label: "Hasta", type: "date" },
   ];
 
-  // Función para manejar cambios en el formulario usando useCallback
+  // Funciones para formularios
   const handleFormChange = useCallback((fieldName, value) => {
-    setFormValues(prev => ({
-      ...prev,
-      [fieldName]: value
-    }));
+    setFormValues((prev) => ({ ...prev, [fieldName]: value }));
   }, []);
 
-  // Cambios para formulario de movimientos
   const handleMovimientosChange = (fieldName, value) => {
-    setMovimientosValues(prev => ({
-      ...prev,
-      [fieldName]: value
-    }));
+    setMovimientosValues((prev) => ({ ...prev, [fieldName]: value }));
   };
 
-  // Función para cerrar el modal y limpiar estado
   const closeModal = useCallback(() => {
     setIsOpen(false);
-    setModalType('');
+    setModalType("");
     setFormValues({});
   }, []);
 
-  // Función para cerrar modal de movimientos
   const closeMovimientosModal = () => {
     setIsMovimientosOpen(false);
     setMovimientosValues({});
   };
 
-  // Función para abrir modal de Crear Usuario
+  // Crear usuario
   const handleCrearUsuario = () => {
-    setModalType('usuario');
-    setFormValues({}); 
+    setModalType("usuario");
+    setFormValues({});
     setIsOpen(true);
   };
 
-  // Función para crear usuario
   const crearUsuario = () => {
     if (formValues.nombreUsuario && formValues.passwordUsuario) {
       const nuevoUsuario = {
         id: usuarios.length + 1,
         nombre: formValues.nombreUsuario,
-        rol: 'Viewer', // Rol por defecto
-        ultimaConexion: 'Ahora'
+        rol: "Viewer",
+        ultimaConexion: "Ahora",
       };
-      setUsuarios(prev => [...prev, nuevoUsuario]);
+      setUsuarios((prev) => [...prev, nuevoUsuario]);
       closeModal();
     } else {
-      alert('Por favor complete todos los campos requeridos');
+      alert("Por favor complete todos los campos requeridos");
     }
   };
 
-  // Función para consultar movimientos
+  // Consultar movimientos
   const consultarMovimientos = () => {
-    console.log('Consultando movimientos:', movimientosValues);
+    console.log("Consultando movimientos:", movimientosValues);
     closeMovimientosModal();
   };
 
-  // Render del contenido del modal según el tipo
+  // Abrir Profile con info del usuario
+  const handleEditarUsuario = (usuario) => {
+    navigate("/profile", { state: { usuario } });
+  };
+
+  // Render del modal
   const renderModalContent = () => {
-    if (modalType === 'usuario') {
+    if (modalType === "usuario") {
       return (
         <DynamicForm
           fields={userFormFields}
@@ -118,28 +115,16 @@ function Users() {
     return null;
   };
 
-  // Obtener título del modal
   const getModalTitle = () => {
-    switch (modalType) {
-      case 'usuario': return 'Crear Usuario';
-      default: return '';
-    }
+    if (modalType === "usuario") return "Crear Usuario";
+    return "";
   };
 
-  // Obtener acciones del modal
   const getModalActions = () => {
-    if (modalType === 'usuario') {
+    if (modalType === "usuario") {
       return [
-        {
-          label: "Cancelar",
-          onClick: closeModal,
-          variant: "secondary",
-        },
-        {
-          label: "Crear Usuario",
-          onClick: crearUsuario,
-          variant: "primary",
-        }
+        { label: "Cancelar", onClick: closeModal, variant: "secondary" },
+        { label: "Crear Usuario", onClick: crearUsuario, variant: "primary" },
       ];
     }
     return [];
@@ -148,10 +133,7 @@ function Users() {
   return (
     <div className="users-container">
       <div className="search-bar">
-        <input
-          type="text"
-          placeholder="Ingrese el nombre de usuario a buscar"
-        />
+        <input type="text" placeholder="Ingrese el nombre de usuario a buscar" />
         <button>
           <i className="pi pi-search"></i> Buscar
         </button>
@@ -183,7 +165,10 @@ function Users() {
                     <td>{usuario.ultimaConexion}</td>
                     <td>
                       <div className="actions-cell">
-                        <button className="action-btn edit-btn">
+                        <button
+                          className="action-btn edit-btn"
+                          onClick={() => handleEditarUsuario(usuario)}
+                        >
                           <i className="pi pi-pencil"></i>
                         </button>
                         <button className="action-btn delete-btn">
@@ -230,16 +215,8 @@ function Users() {
         onClose={closeMovimientosModal}
         title="Log de Movimientos"
         actions={[
-          { 
-            label: "Cancelar", 
-            onClick: closeMovimientosModal, 
-            variant: "secondary" 
-          },
-          { 
-            label: "Consultar", 
-            onClick: consultarMovimientos, 
-            variant: "primary" 
-          }
+          { label: "Cancelar", onClick: closeMovimientosModal, variant: "secondary" },
+          { label: "Consultar", onClick: consultarMovimientos, variant: "primary" },
         ]}
       >
         <DynamicForm

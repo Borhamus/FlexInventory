@@ -1,0 +1,96 @@
+    .profile-container {
+    padding: 20px;
+    color: var(--md-sys-color-on-background);
+    background: var(--md-sys-color-background);
+    }
+
+    .btn-edit {
+    background: var(--md-sys-color-primary);
+    color: var(--md-sys-color-on-primary);
+    border: none;
+    padding: 8px 14px;
+    cursor: pointer;
+    border-radius: 6px;
+    }
+
+    .btn-edit:hover {
+    background: var(--md-sys-color-primary-container);
+    color: var(--md-sys-color-on-primary-container);
+    }
+
+    .modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: var(--md-sys-color-scrim);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+    }
+
+    .modal-content {
+    background: var(--md-sys-color-surface);
+    color: var(--md-sys-color-on-surface);
+    padding: 20px;
+    border-radius: 8px;
+    width: 400px;
+    max-width: 90%;
+    box-shadow: 0 4px 10px var(--md-sys-color-shadow);
+    }
+
+    .modal-content h3 {
+    margin-top: 0;
+    }
+
+    .modal-content label {
+    display: block;
+    margin-top: 10px;
+    margin-bottom: 5px;
+    }
+
+    .modal-content input {
+    width: 100%;
+    padding: 6px 10px;
+    border: 1px solid var(--md-sys-color-outline);
+    border-radius: 4px;
+    background: var(--md-sys-color-surface-container-lowest);
+    color: var(--md-sys-color-on-surface);
+    }
+
+    .modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 15px;
+    }
+
+    .btn-save {
+    background: var(--md-sys-color-tertiary);
+    color: var(--md-sys-color-on-tertiary);
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    }
+
+    .btn-save:hover {
+    background: var(--md-sys-color-tertiary-container);
+    color: var(--md-sys-color-on-tertiary-container);
+    }
+
+    .btn-cancel {
+    background: var(--md-sys-color-error);
+    color: var(--md-sys-color-on-error);
+    border: none;
+    padding: 6px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    }
+
+    .btn-cancel:hover {
+    background: var(--md-sys-color-error-container);
+    color: var(--md-sys-color-on-error-container);
+    }

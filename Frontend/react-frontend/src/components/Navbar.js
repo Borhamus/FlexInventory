@@ -18,7 +18,7 @@ function Navbar() {
                 <a className='linkNavbar linkNavbar--users' href="/users">Users</a>
             </div>
             <div className='navbarRight'>
-                <a className='linkNavbar linkNavbar--user' href="/profile"><i className="pi pi-fw pi-user"></i></a>
+                <a className='linkNavbar linkNavbar--user' href="/profile2"><i className="pi pi-fw pi-user"></i></a>
                 <a className='linkNavbar linkNavbar--settings' href="/settings"><i className="pi pi-fw pi-cog"></i></a>
             </div>
         </nav>

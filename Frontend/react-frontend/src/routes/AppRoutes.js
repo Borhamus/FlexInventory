@@ -14,6 +14,7 @@ import SignUp from '../pages/SignUp';
 import Invite from '../pages/Invite';
 import Profile from '../pages/Profile';
 import Test from '../pages/Test';
+import Profile2 from '../pages/Profile2'; // Nueva página de perfil
 
 // Función para verificar si el token es válido
 const checkToken = () => {
@@ -51,18 +52,7 @@ const ProtectedRoute = ({ element }) => {
 function AppRoutes() {
   return (
     <Router>
-      <Routes>
-        {/* Rutas principales */}
-        <Route path="/Home" element={<Base page = {<Home />} />} /> 
-        <Route path="/inventories" element={<Base page = {<Inventories />} />} />
-        <Route path="/catalogs" element={<Base page = {<Catalogs />} />} />
-        <Route path="/users" element={<Base page = {<Users />} />} />
-        <Route path="/settings" element={<Base page = {<Settings />} />} />
-        <Route path="/Profile" element={ <Base page = {<Profile  />}  />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/signup" element={<SignUp />} />
-        <Route path="/invite" element={<Invite />} />
-        <Route path="/" element={<LoginPage />} />
+      <Routes>        
         {/* Rutas públicas accesibles solo si el usuario NO tiene un token válido */}
         <Route path="/login" element={<PublicRoute element={<LoginPage />} />} />
         <Route path="/signup" element={<PublicRoute element={<SignUp />} />} />
@@ -88,6 +78,14 @@ function AppRoutes() {
         <Route 
           path="/settings" 
           element={<ProtectedRoute element={<Base page={<Settings />} />} />} 
+        />
+        <Route 
+          path="/profile" 
+          element={<ProtectedRoute element={<Base page={<Profile />} />} />} 
+        />
+        <Route 
+          path="/profile2" 
+          element={<ProtectedRoute element={<Base page={<Profile2 />} />} />} 
         />
         <Route 
           path="/test" 
