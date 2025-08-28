@@ -14,7 +14,6 @@ import SignUp from '../pages/SignUp';
 import Invite from '../pages/Invite';
 import Profile from '../pages/Profile';
 import Test from '../pages/Test';
-import Profile2 from '../pages/Profile2'; // Nueva página de perfil
 
 // Función para verificar si el token es válido
 const checkToken = () => {
@@ -82,10 +81,6 @@ function AppRoutes() {
         <Route 
           path="/profile" 
           element={<ProtectedRoute element={<Base page={<Profile />} />} />} 
-        />
-        <Route 
-          path="/profile2" 
-          element={<ProtectedRoute element={<Base page={<Profile2 />} />} />} 
         />
         <Route 
           path="/test" 
