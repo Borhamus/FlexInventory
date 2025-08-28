@@ -76,7 +76,7 @@ public class ServiceCatalog {
     /* CREA UN CATALOGO */
     public TransferableCatalog createCatalog(TransferableCatalogCreate transferable){
 
-        Catalog catalog = transformer.toEntity(transferable);
+        Catalog catalog = transformer.toEntityCreate(transferable);
 
         // asigno la fecha de creación a la fecha de hoy.
         catalog.setCreation_date(new Date());

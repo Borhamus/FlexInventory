@@ -20,10 +20,6 @@ public interface TransformerItem {
     @Mapping(target = "itemsAttributeValues", source = "itemsAttributeValues")
     TransferableItemInventory toDTOItemInventory (Item item);
 
-
-    @Mapping(target = "itemsAttributeValues", source = "itemsAttributeValues")
-    TransferableCatalogItem toDTOItemCatalog (Item item);
-
     @Mapping(target = "inventory", ignore = true)
     @Mapping(target = "catalogs", ignore = true)
     Item toEntity(TransferableItemCreate transferableItemCreate);

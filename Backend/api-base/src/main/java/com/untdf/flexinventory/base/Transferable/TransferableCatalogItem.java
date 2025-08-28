@@ -1,18 +1,21 @@
 package com.untdf.flexinventory.base.Transferable;
 
+import com.untdf.flexinventory.base.Model.Catalog;
+import com.untdf.flexinventory.base.Model.Item;
+import jakarta.persistence.Column;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
 import java.util.Date;
 import java.util.List;
 
 public class TransferableCatalogItem
 {
     private Integer id;
-    private String name;
-    private Date creation_date;
-    private List<TransferableAttributeValue> itemsAttributeValues;
-    
 
-    // Setters & Getters
+    private TransferableItemCatalog item;
 
+    private Integer organisation;
 
     public Integer getId() {
         return id;
@@ -22,28 +25,20 @@ public class TransferableCatalogItem
         this.id = id;
     }
 
-    public String getName() {
-        return name;
+    public Integer getOrganisation() {
+        return organisation;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setOrganisation(Integer organisation) {
+        this.organisation = organisation;
     }
 
-    public Date getCreation_date() {
-        return creation_date;
+    public TransferableItemCatalog getItem() {
+        return item;
     }
 
-    public void setCreation_date(Date creation_date) {
-        this.creation_date = creation_date;
-    }
-
-    public List<TransferableAttributeValue> getItemsAttributeValues() {
-        return itemsAttributeValues;
-    }
-
-    public void setItemsAttributeValues(List<TransferableAttributeValue> itemsAttributeValues) {
-        this.itemsAttributeValues = itemsAttributeValues;
+    public void setItem(TransferableItemCatalog item) {
+        this.item = item;
     }
 }
 
