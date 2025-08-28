@@ -46,7 +46,7 @@
     height: 3vh;
     padding: .5em;
     font-size: .9em;
-    box-shadow: var(--box-shadow-2);
+    box-shadow: var(--box-shadow-1);
     cursor:pointer;
 
 }

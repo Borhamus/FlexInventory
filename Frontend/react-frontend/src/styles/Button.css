@@ -36,6 +36,7 @@
   border: none;
   cursor: pointer;
   transition: all 0.2s ease;
+  box-shadow: var(--box-shadow-form-input);
 }
 
 .botonGenerico:hover {

@@ -145,28 +145,30 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
       </div>
 
       <Modal2
-  isOpen={isAttrModalOpen}
-  onClose={() => setIsAttrModalOpen(false)}
-  title="Crear Atributo"
-  actions={[
-    { label: "Cancelar", onClick: (close) => close(), color: "secondary", size: "small" },
-    { label: "Guardar", onClick: async (close) => {
-        await handleCreateAttribute();
-        close();
-      }, color: "primary", size: "small" },
-  ]}
->
-  <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
-    <label>
-      Nombre del Atributo:
-      <input
-        type="text"
-        value={newAttrName}
-        onChange={(e) => setNewAttrName(e.target.value)}
-      />
-    </label>
-  </div>
-</Modal2>
+        isOpen={isAttrModalOpen}
+        onClose={() => setIsAttrModalOpen(false)}
+        title="Crear Atributo"
+        actions={[
+          { label: "Cancelar", onClick: (close) => close(), color: "secondary", size: "small" },
+          {
+            label: "Guardar", onClick: async (close) => {
+              await handleCreateAttribute();
+              close();
+            }, color: "primary", size: "small"
+          },
+        ]}
+      >
+        <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
+          <label>
+            Nombre del Atributo:
+            <input
+              type="text"
+              value={newAttrName}
+              onChange={(e) => setNewAttrName(e.target.value)}
+            />
+          </label>
+        </div>
+      </Modal2>
     </div>
   );
 }

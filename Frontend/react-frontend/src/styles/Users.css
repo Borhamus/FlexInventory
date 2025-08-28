@@ -175,7 +175,7 @@
 }
 
 /* --- Botones inferiores --- */
-.BotonesBajos {
+.users--botones-bajos {
   display: flex;
   justify-content: space-between;
   gap: 10px;

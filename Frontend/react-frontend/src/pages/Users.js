@@ -183,7 +183,7 @@ function Users() {
           </div>
         </div>
 
-        <div className="BotonesBajos">
+        <div className="users--botones-bajos">
           <Button
             icon="pi pi-user-plus"
             onClick={handleCrearUsuario}

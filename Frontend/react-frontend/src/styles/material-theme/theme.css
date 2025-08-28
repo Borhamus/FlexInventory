@@ -24,7 +24,7 @@
   --md-sys-color-on-surface-variant: rgb(0 0 0);
   --md-sys-color-outline: rgb(46 43 51);
   --md-sys-color-outline-variant: rgb(76 71 81);
-  --md-sys-color-shadow: rgb(0, 0, 0, 0.5);
+  --md-sys-color-shadow: rgb(0, 0, 0, 0.15);
   --md-sys-color-scrim: rgba(0, 0, 0, 0.7);
   --md-sys-color-inverse-surface: rgb(37 82 103);
   --md-sys-color-inverse-on-surface: rgb(211 233 244);

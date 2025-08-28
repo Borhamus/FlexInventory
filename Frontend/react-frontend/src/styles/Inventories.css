@@ -7,6 +7,15 @@
     height: 100%;
 }
 
+.tabla-container{
+    height: 75vh;
+    width: 100%;
+}
+
+.tabla-container--table{
+    box-shadow: var(--box-shadow-form-input);
+}
+
 .inventarioTabla{
     display: flex;
     flex-direction: column;
@@ -14,8 +23,6 @@
     height: 90vh;
     width: 80vw;
     overflow-y: auto;
-
-    border: 1px solid black;
 }
 
 .ContenedorTablaBoton{
@@ -24,8 +31,6 @@
     justify-content: flex-start;
     gap: 5vh;
     margin: 1vw;
-
-    border: 1px solid greenyellow;
 }
 
 .inventory--MenuLateral{
@@ -37,6 +42,7 @@
 .BotonesBajos{
     display: flex;
     flex: 2;
-
-    border: 1px solid red;
+    flex-direction: row;
+    justify-content: flex-start;
+    gap: 2vh;
 }
