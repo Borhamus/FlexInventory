@@ -1,0 +1,103 @@
+/* ModalConfiguracion.css */
+.configuracion-modal-content {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.configuracion-option {
+  width: 100%;
+}
+
+.logout-button {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 12px 15px;
+  background-color: var(--md-sys-color-surface-container);
+  border: 1px solid var(--md-sys-color-outline);
+  border-radius: 6px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.2s ease;
+}
+
+.logout-button:hover {
+  background-color: var(--md-sys-color-surface-container-high);
+  border-color: var(--md-sys-color-primary);
+}
+
+.logout-button i {
+  color: var(--md-sys-color-error);
+  font-size: 1.2rem;
+}
+
+.logout-button span {
+  font-weight: 500;
+  color: var(--md-sys-color-on-surface);
+}
+
+/* Estilos para el popup de confirmación de logout */
+.logout-confirmation-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--md-sys-color-scrim);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 3000;
+}
+
+.logout-confirmation-dialog {
+  background-color: var(--md-sys-color-surface-container-highest);
+  padding: 25px;
+  border-radius: 8px;
+  box-shadow: var(--md-sys-color-shadow);
+  text-align: center;
+  min-width: 300px;
+}
+
+.logout-confirmation-dialog p {
+  margin: 0 0 25px 0;
+  font-size: 18px;
+  color: var(--md-sys-color-on-surface);
+}
+
+.logout-confirmation-buttons {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+}
+
+.logout-confirmation-button {
+  padding: 10px 25px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: 500;
+  transition: background-color 0.3s;
+}
+
+.logout-confirmation-button.no {
+  background-color: var(--md-sys-color-secondary);
+  color: var(--md-sys-color-on-secondary);
+}
+
+.logout-confirmation-button.no:hover {
+  background-color: var(--md-sys-color-secondary-container);
+}
+
+.logout-confirmation-button.yes {
+  background-color: var(--md-sys-color-error);
+  color: var(--md-sys-color-on-error);
+}
+
+.logout-confirmation-button.yes:hover {
+  background-color: var(--md-sys-color-error-container);
+}
