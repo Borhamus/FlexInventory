@@ -1,4 +1,4 @@
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import InventoryService from "../services/InventoryService";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
@@ -55,7 +55,7 @@ function InventoryTable({ num }) {
             header="Name" // Etiqueta de encabezado
             sortable={true} // Habilitar el ordenamiento
             headerStyle={{ width: '10%', minWidth: '8em' }}
-            style={{fontSize: "1em"}}
+            style={{ fontSize: "1em" }}
         />,
         // Generar las columnas para los atributos dinámicos
         ...inventory.attributes.map(attribute => (
@@ -65,7 +65,7 @@ function InventoryTable({ num }) {
                 header={attribute.name}
                 sortable={true} // Habilitar el ordenamiento
                 headerStyle={{ width: '10%', minWidth: '8em' }}
-                style={{fontSize: "1em"}}
+                style={{ fontSize: "1em" }}
             />
         ))
     ];
@@ -102,7 +102,9 @@ function InventoryTable({ num }) {
                     <Column // Columna de borrado y edicion
                         headerStyle={{ width: '10%', minWidth: '8rem' }}
                         bodyStyle={{ textAlign: 'center' }}
-                        body={EditarBorrarBotonesInventario}
+                        body={(rowData) => (
+                            <EditarBorrarBotonesInventario itemId={rowData.id} />
+                        )}
                     />
                 </DataTable>
             </div>
