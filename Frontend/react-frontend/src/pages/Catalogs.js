@@ -33,7 +33,7 @@ function Catalogs() {
         title: "Nuevo Catalogo",
         body: (
           <div>
-              <CatalogNewCatalog/>
+              
           </div>
         )
       }
@@ -42,7 +42,7 @@ function Catalogs() {
         title: "Borrar este Catalogo",
         body: (
           <div>
-              <CatalogDeleteCatalog/>
+              
           </div>
         )
       }
@@ -66,8 +66,8 @@ function Catalogs() {
             <MenuLateral 
               titulo="Catalogos"
                     elementos={catalogs}
-                    onCreate={() => { setFormFields(formularioCrear); setIsOpen(true); }}
-                    onDelete={() => { setFormFields(formularioBorrar); setIsOpen(true); }}           
+                    onCreate={() => { }}
+                    onDelete={() => {  }}           
             />
         </div>
 
@@ -91,15 +91,12 @@ function Catalogs() {
         </div>
 
     <Modal
-      isOpen={isOpen}
-      onClose={() => (
-      setIsOpen(false),
-      setFormFields({}) // Esto es para borrar los campos del formulario, asi no queda cargado cuando cerramos la modal
-      )}
-      title={formFields?.title}
-      actions={formFields?.actions || []}
+      isOpen={{}}
+      onClose={{}}
+      title={{}}
+      actions={{}}
       >
-        {formFields?.customView}
+        {{}}
       </Modal>   
 
     </div> 

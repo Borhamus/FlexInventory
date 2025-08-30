@@ -5,7 +5,7 @@ import { Column } from "primereact/column";
 import "../styles/InventoryTable.css"
 import EditarBorrarBotonesInventario from "./EditarBorrarBotonesInventario";
 
-function InventoryTable({ num }) {
+function InventoryTable({ num, setDatosInventario, reload}) {
     // Estado para almacenar el inventario
     const [inventory, setInventory] = useState(null);
 
@@ -13,14 +13,16 @@ function InventoryTable({ num }) {
     const [first, setFirst] = useState(0); // Página actual
     const [rows, setRows] = useState(5); // Filas por página
 
+    
+
     useEffect(() => {
         if (num) {
             // Llamar a la API solo si num tiene un valor
             InventoryService.getInventoryById(num)
-                .then(data => setInventory(data))
+                .then(data => {setInventory(data); setDatosInventario(data)})
                 .catch(error => console.error("Error al cargar inventario:", error));
         }
-    }, [num]); // Aquí agregamos 'num' como dependencia
+    }, [num,reload]); // Aquí agregamos 'num' como dependencia
 
     // Renderizar loading mientras se obtiene el inventario
     if (!inventory) {
@@ -103,7 +105,15 @@ function InventoryTable({ num }) {
                         headerStyle={{ width: '10%', minWidth: '8rem' }}
                         bodyStyle={{ textAlign: 'center' }}
                         body={(rowData) => (
-                            <EditarBorrarBotonesInventario itemId={rowData.id} />
+                            <EditarBorrarBotonesInventario
+                                itemId={rowData.id}
+                                onDeleteSuccess={() => // <--- CORRECTO
+                                    setInventory((prev) => ({
+                                        ...prev,
+                                        items: prev.items.filter((item) => item.id !== rowData.id)
+                                    }))
+                                }
+                            />
                         )}
                     />
                 </DataTable>

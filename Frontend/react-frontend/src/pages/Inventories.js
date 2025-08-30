@@ -6,13 +6,17 @@ import MenuLateral from '../components/MenuLateral';
 import Button from "../components/Button";
 import NewInventoryDialogBody from '../Modals/NuevoInventarioFormulario';
 import Modal from "../components/Modal2";
+import InventarioArticulo from '../Modals/InventarioArticulo';
+import ItemService from '../services/ItemService';
 
 function Inventories() {
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
-    const [showInventoryTable, setShowInventoryTable] = useState(true);
     // Inicialmente null, porque no sabemos qué inventario hay
     const [selectedId, setSelectedId] = useState(null);
-    
+
+    const [inventario, setInventario] = useState([]);
+    const [reload, setReload] = useState(false);
+
     // Cuando llegan los inventarios, asigno el primero
     useEffect(() => {
         InventoryService.getAllInventories()
@@ -24,6 +28,12 @@ function Inventories() {
             })
             .catch(error => console.error('Error al cargar inventarios:', error));
     }, []);
+
+    useEffect(() => {
+        if (elementos.length > 0 && selectedId === null) {
+            setSelectedId(elementos[0].id);
+        }
+    }, [elementos, selectedId]);
 
     // ---- Modal control ----
     const [isOpen, setIsOpen] = useState(false);
@@ -43,6 +53,10 @@ function Inventories() {
                 label: "Eliminar", onClick: async (close) => {
                     try {
                         await InventoryService.deleteInventoryById(selectedId);
+
+                        // PREV SE TRATA DEL ESTADO ANTERIOR DEL USESTATE
+
+                        // esta seccion toma el estado usestate y quita de él el selectedId del inventario borrado
                         setElementos(prev => prev.filter(el => el.id !== selectedId));
                         setSelectedId(null);
                         close();
@@ -67,6 +81,20 @@ function Inventories() {
         ),
         actions: [], // los botones están dentro del customView
     };
+
+    const formularioAgregarArticulo = {
+        title: "Agregar Articulo",
+        customView: (
+            <InventarioArticulo
+                datosInventario={inventario}
+                onSubmit={async (payload) => {
+                    await ItemService.createItem(payload);
+                    setReload(prev => !prev);
+                }}
+
+            />),
+        actions: [], // los botones están dentro del customView
+    }
 
 
     const inventories = elementos.map((elemento) => ({
@@ -93,11 +121,15 @@ function Inventories() {
             <div className='ContenedorTablaBoton'>
                 <div className="inventarioTabla">
                     {selectedId !== null && (
-                        <InventoryTable num={selectedId} />
+                        <InventoryTable
+                            num={selectedId}
+                            setDatosInventario={setInventario}
+                            reload={reload}
+                        />
                     )}
                 </div>
                 <div className="BotonesBajos">
-                    <Button icon={"pi pi-plus-circle"} onClick={""} color={"primary"} name={"Agregar Articulo"} />
+                    <Button icon={"pi pi-plus-circle"} onClick={() => { setFormFields(formularioAgregarArticulo); setIsOpen(true); }} color={"primary"} name={"Agregar Articulo"} />
                     <Button icon={"pi pi-fw pi-pencil"} onClick={""} color={"primary"} name={"Editar Inventario"} />
                 </div>
             </div>
