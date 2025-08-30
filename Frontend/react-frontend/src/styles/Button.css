@@ -35,12 +35,12 @@
   font-weight: 500;
   border: none;
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: all 0.1s ease;
   box-shadow: var(--box-shadow-form-input);
 }
 
 .botonGenerico:hover {
-  opacity: 0.8;
+  filter: brightness(0.85);
 }
 
 .botonGenericoIcon i {

@@ -1,6 +1,7 @@
 :root {
     --border-radius: 5px;
     --border-radius-button: 15px;
+    --border-radius-icon-button: 100%;
     --box-shadow-0: 0px 0px 8px var(--md-sys-color-shadow);
     --box-shadow-1: 1px 1px 8px var(--md-sys-color-shadow);
     --box-shadow-2: 2px 2px 8px var(--md-sys-color-shadow);

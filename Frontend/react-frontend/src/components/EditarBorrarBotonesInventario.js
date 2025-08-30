@@ -3,14 +3,11 @@ import { useState } from "react";
 import "../styles/EditarBorrarBotonesInventario.css";
 import Modal from "./Modal2";
 import Button from "./Button";
+import ItemService from "../services/ItemService";
 
-export default function EditarBorrarBotonesInventario({itemId}) {
+export default function EditarBorrarBotonesInventario({ itemId, onDeleteSuccess }) {
   const [isOpen, setIsOpen] = useState(false);
   const [formFields, setFormFields] = useState(null);
-
-  const handleBorrarItem = () =>{
-    
-  }
 
   /* ------------------------| MODAL ELIMINAR |------------------------ */
   const modalEliminar = {
@@ -21,10 +18,14 @@ export default function EditarBorrarBotonesInventario({itemId}) {
       </div>
     ),
     actions: [
-      {label: "Cancelar", onClick: (close) => close(), color: "secondary", size: "small"},
-      {label: "Eliminar",onClick: async (close) => {
+      { label: "Cancelar", onClick: (close) => close(), color: "secondary", size: "small" },
+      {
+        label: "Eliminar", onClick: async (close) => {
           try {
-            console.log("Artículo eliminado! ID:", itemId);
+            await ItemService.deleteItemById(itemId)
+
+            if (onDeleteSuccess) onDeleteSuccess();
+
             close();
           } catch {
             alert("No se pudo eliminar el artículo.");
@@ -36,7 +37,7 @@ export default function EditarBorrarBotonesInventario({itemId}) {
     ],
   };
 
-  /* ------------------------| MODAL ELIMINAR |------------------------ */
+  /* ------------------------| MODAL EDITAR |------------------------ */
   const modalEditar = {
     title: "Editar elemento",
     customView: (
@@ -85,23 +86,13 @@ export default function EditarBorrarBotonesInventario({itemId}) {
   return (
     <div className="contenedorBotonesEditarBorrar">
       <div className="botonEditar">
-        <button
-          className="inventoryButtonDeleteEdit"
-          onClick={handleModalEditar}
-        >
-          <i className="pi pi-fw pi-pencil"></i>
-        </button>
+        <Button icon={"pi pi-fw pi-pencil"} onClick={handleModalEditar} color={"secondary"} type={"icon-button"} size="small" />
       </div>
 
       <div className="separadorEditarEliminar"></div>
 
       <div className="botonEliminar">
-        <button
-          className="inventoryButtonDeleteEdit"
-          onClick={handleModalEliminar}
-        >
-          <i className="pi pi-fw pi-trash"></i>
-        </button>
+        <Button icon={"pi pi-fw pi-trash"} onClick={handleModalEliminar} color={"secondary"} type={"icon-button"} size="small" />
       </div>
 
       {/* Modal con la nueva API */}
