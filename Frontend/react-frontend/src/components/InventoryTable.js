@@ -102,8 +102,9 @@ function InventoryTable({ num, setDatosInventario, reload}) {
                     {/* Generar columnas dinámicas basadas en los atributos */}
                     {dynamicColumns}
                     <Column // Columna de borrado y edicion
-                        headerStyle={{ width: '10%', minWidth: '8rem' }}
+                        headerStyle={{ width: '10%', minWidth: "8rem"}}
                         bodyStyle={{ textAlign: 'center' }}
+                        header={"Acciones"}
                         body={(rowData) => (
                             <EditarBorrarBotonesInventario
                                 itemId={rowData.id}
