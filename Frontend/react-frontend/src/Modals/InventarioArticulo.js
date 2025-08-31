@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import DynamicForm from '../components/DynamicForm';
 import ItemService from '../services/ItemService';
 import Button from '../components/Button';
+import "../styles/InventarioArticulo.css"
 
 function InventarioArticulo({ datosInventario, onSubmit, close }) {
   const [values, setValues] = useState({ name: "" });
@@ -45,20 +46,26 @@ function InventarioArticulo({ datosInventario, onSubmit, close }) {
   };
 
   return (
-    <div>
-      <DynamicForm fields={fields} values={values} onChange={handleChange} />
-      <Button
-            onClick={close}
-            color={"secondary-inverse"}
-            size={"small"}
-            name={"Cancelar"}
-          />
-          <Button
-            onClick={handleSubmit}
-            color={"primary"}
-            size={"small"}
-            name={"Agregar Articulo"}
-          />
+    <div className='inventario-articulo-modal-container'>
+
+      <div className='inventario-articulo-modal-container--body'>
+        <DynamicForm fields={fields} values={values} onChange={handleChange} formDirection = "grid-3" />
+      </div>
+
+      <div className='inventario-articulo-modal-container--footer'>
+        <Button
+          onClick={close}
+          color={"secondary-inverse"}
+          size={"small"}
+          name={"Cancelar"}
+        />
+        <Button
+          onClick={handleSubmit}
+          color={"primary"}
+          size={"small"}
+          name={"Agregar Articulo"}
+        />
+      </div>
     </div>
   );
 }
