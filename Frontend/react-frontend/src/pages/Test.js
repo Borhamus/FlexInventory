@@ -1,52 +1,24 @@
-// src/pages/DemoForm.js
-import React, { useState } from "react";
-import HybridModal from "../components/Modal2";
-import DynamicForm from "../components/DynamicForm";
+import React from "react";
+import GanttChart from "../components/GanttChart";
 
-function Test() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [formData, setFormData] = useState({});
+export default function App() {
+  const processes = ["P1", "P2", "P3", "P4"];
 
-  const fields = [
-    { name: "nombre", type: "text", placeholder:"test" },
-    { name: "email", type: "email", placeholder:"test 2"},
-    { name: "password", type: "password", placeholder:"test 3"},
+  // Ejemplo Round Robin (quantum=2)
+  const schedule = [
+    { process: "P1", start: 0, end: 2 },
+    { process: "P2", start: 2, end: 4 },
+    { process: "P1", start: 4, end: 5 },
+    { process: "P3", start: 5, end: 6 },
+    { process: "P2", start: 6, end: 7 },
+    { process: "P1", start: 7, end: 12 },
+    { process: "P4", start: 13, end: 23 }
   ];
-
-  const handleChange = (name, value) => {
-    setFormData({ ...formData, [name]: value });
-  };
-
-  const handleSubmit = () => {
-    console.log("Datos enviados:", formData);
-    setIsOpen(false);
-  };
 
   return (
     <div>
-      <button onClick={() => setIsOpen(true)} className="px-4 py-2 bg-blue-600 text-white rounded">
-        Abrir Formulario
-      </button>
-
-      <HybridModal
-        isOpen={isOpen}
-        onClose={
-          () => {
-            setIsOpen(false);
-            setFormData({}); // Esto se hace ya que la modal no destruye el child que recibe.
-          }
-          
-        }
-        title="Nuevo Usuario"
-        actions={[
-          { label: "Cancelar", onClick: () => setIsOpen(false), color: "secondary", size: "small" },
-          { label: "Guardar", onClick: handleSubmit, color: "primary", size: "small" },
-        ]}
-      >
-        <DynamicForm fields={fields} values={formData} onChange={handleChange} />
-      </HybridModal>
+      <h1>Simulador CPU Scheduling</h1>
+      <GanttChart schedule={schedule} processes={processes} totalTime={23} />
     </div>
   );
 }
-
-export default Test;
