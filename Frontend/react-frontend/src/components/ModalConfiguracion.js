@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import "/node_modules/primeflex/primeflex.css";
 import "../styles/ModalConfiguracion.css";
+import Button from "./Button";
 
 function ModalConfiguracion({ onClose }) {
   const [showLogoutConfirmation, setShowLogoutConfirmation] = useState(false);
@@ -30,23 +31,25 @@ function ModalConfiguracion({ onClose }) {
           <div className="logout-confirmation-dialog">
             <p>¿Seguro quieres desloguearte?</p>
             <div className="logout-confirmation-buttons">
-              <button
-                className="logout-confirmation-button no"
-                onClick={() => setShowLogoutConfirmation(false)}
-              >
-                No
-              </button>
-              <button
-                className="logout-confirmation-button yes"
-                onClick={handleLogout}
-              >
-                Sí
-              </button>
+              <Button 
+                icon="" 
+                onClick={() => setShowLogoutConfirmation(false)} 
+                color="secondary" 
+                name="No" 
+                size="medium"
+              />
+              <Button 
+                icon="" 
+                onClick={handleLogout} 
+                color="primary" 
+                name="Sí" 
+                size="medium"
+              />
             </div>
           </div>
         </div>
       )}
-    </div>
+  </div>
   );
 }
 

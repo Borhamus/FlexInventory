@@ -1,80 +1,167 @@
 /* ProfileModal.css */
+/* Contenedor principal del modal - organiza todo el contenido en una columna */
 .profile-modal-content {
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 24px;
+  padding: 0;
 }
 
-.input-fields {
+/* Layout de dos columnas - izquierda para campos, derecha para roles */
+.profile-modal-grid {
+  display: flex;
+  gap: 24px;
+}
+
+/* Columna izquierda - contiene los campos de entrada */
+.profile-modal-left {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 16px;
 }
 
-.field-set {
+/* Columna derecha - contiene la sección de roles */
+.profile-modal-right {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 8px;
 }
 
+
+/* Etiquetas de los campos ("Nombre de Usuario", "Contraseña") */
 .field-set label {
+  /* Grosor de fuente */
   font-weight: 500;
+  /* Color del texto - usa variable de theme para texto en superficie */
   color: var(--md-sys-color-on-surface);
+  /* Tamaño de fuente */
+  font-size: 14px;
+  /* Altura de línea */
+  line-height: 20px;
 }
 
+/* Contenedor para inputs con iconos */
 .input-with-icon {
+  /* Posicionamiento relativo para iconos absolutos */
   position: relative;
+  /* Alinea elementos verticalmente */
   display: flex;
   align-items: center;
 }
 
+/* Campos de entrada de texto */
 .input-with-icon input {
+  /* Ancho completo */
   width: 100%;
-  padding: 10px 40px 10px 15px;
-  border: 1px solid var(--md-sys-color-outline);
-  border-radius: 4px;
-  background-color: var(--md-sys-color-surface-container);
+  /* Espaciado interno - espacio a la derecha para iconos */
+  padding: 12px 16px;
+  padding-right: 45px;
+  /* Borde gris claro - usa variable de theme para borde */
+  border: 1px solid var( --md-sys-color-on-primary);
+  /* Bordes redondeados */
+  border-radius: 8px;
+  /* Fondo gris muy claro - usa variable de theme para superficie */
+  background-color: var( --md-sys-color-on-primary);
+  /* Color del texto - usa variable de theme para texto en superficie */
   color: var(--md-sys-color-on-surface);
+  /* Tamaño de fuente */
   font-size: 16px;
+  /* Transición suave para efectos interactivos */
+  transition: all 0.2s ease;
 }
 
-.input-with-icon i {
-  position: absolute;
-  right: 15px;
-  color: var(--md-sys-color-primary);
+/* Estado focus de los inputs - cuando el usuario hace clic */
+.input-with-icon input:focus {
+  /* Quita el contorno predeterminado */
+  outline: none;
+  /* Borde azul al enfocar - usa variable de theme para color primario */
+  border-color: var(--md-sys-color-primary);
+  /* Fondo blanco al enfocar */
+  background-color: var(--md-sys-color-surface-container-lowest);
+  /* Sombra azul sutil al enfocar */
+  box-shadow: var(--md-sys-color-shadow);
 }
 
+
+
+/* Botón para mostrar/ocultar contraseña (ojo) */
 .icon-eye {
+  /* Posicionamiento absoluto dentro del contenedor */
   position: absolute;
-  right: 15px;
+  /* Distancia desde la derecha */
+  right: 16px;
+  /* Sin fondo ni borde */
   background: none;
   border: none;
+  /* Cursor de puntero */
   cursor: pointer;
+  /* Color del icono - usa variable de theme para color primario */
   color: var(--md-sys-color-primary);
+  /* Sin padding */
+  padding: 0;
+  /* Centra el icono verticalmente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
+/* Sección de roles - contenedor principal */
 .roles-section {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
+/* Etiqueta "Roles del Usuario:" */
 .roles-section label {
+  /* Grosor de fuente */
   font-weight: 500;
+  /* Color del texto - usa variable de theme para texto en superficie */
   color: var(--md-sys-color-on-surface);
+  /* Tamaño de fuente */
+  font-size: 14px;
+  /* Altura de línea */
+  line-height: 20px;
 }
 
+/* Contenedor blanco con sombra para los chips de roles */
 .roles-box {
+  /* Fondo blanco del contenedor - usa variable de theme para superficie más clara */
+  background-color: var(--md-sys-color-on-primary);
+  /* Borde gris claro - usa variable de theme para borde */
+  border: 1px solid var(--md-sys-color-on-primary);
+  /* Bordes redondeados */
+  border-radius: 8px;
+  /* Espaciado interno */
+  padding: 16px;
+  /* Sombra sutil para dar profundidad */
+  box-shadow: var(--md-sys-color-shadow);
+  /* Organiza chips en línea con salto automático */
   display: flex;
   flex-wrap: wrap;
+  /* Espacio entre chips */
   gap: 8px;
+  /* Altura mínima para que se vea bien incluso con pocos roles */
+  min-height: 60px;
 }
 
+/* Chips individuales de roles (ej: "Empleado") */
 .role-chip {
-  padding: 6px 12px;
-  background-color: var(--md-sys-color-primary-container);
-  color: var(--md-sys-color-on-primary-container);
-  border-radius: 16px;
+  /* Espaciado interno */
+  padding: 8px 16px;
+  /* Fondo azul claro - usa variable de theme para contenedor primario */
+  background-color: var(--md-sys-color-on-primary);
+  /* Color del texto - usa variable de theme para texto en contenedor primario */
+  color: var(--md-sys-color-on-primary);
+  /* Bordes muy redondeados */
+  border-radius: 20px;
+  /* Tamaño de fuente */
   font-size: 14px;
+  /* Grosor de fuente */
   font-weight: 500;
+  /* Centra el texto */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
