@@ -1,11 +1,19 @@
 import React from "react";
 
-function RolesBadgeList({ roles = [] }) {
-  if (roles.length === null) return <p className="text-muted">Sin roles asignados</p>;
+function RolesBadgeList({ roles = [], onRemove }) {
+  if (roles.length === 0)
+    return <p className="text-muted">Sin roles asignados</p>;
+
   return (
     <div className="roles-badges">
       {roles.map((r) => (
-        <span key={r} className="role-badge">{r}</span>
+        <button
+          key={r}
+          className="role-badge"
+          onClick={() => onRemove(r)}
+        >
+          {r} ✕
+        </button>
       ))}
     </div>
   );
