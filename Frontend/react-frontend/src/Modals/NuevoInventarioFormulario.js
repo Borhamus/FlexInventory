@@ -3,33 +3,23 @@ import AttributeService from '../services/AttributeService';
 import "../styles/NewInventoryDialogBody.css";
 import DynamicForm from "../components/DynamicForm";
 import Button from '../components/Button';
-import Modal2 from "../components/Modal2";
+import Modal from "../components/Modal2";
+import AttributeTypes from '../utils/AttributeTypes';
 
 export default function NuevoInventarioFormulario({ onSubmit, close }) {
   const [elements, setElements] = useState([]);
   const [selectedAttributes, setSelectedAttributes] = useState([]);
   const [formData, setFormData] = useState({});
+  const [formDataAtributo, setFormDataAtributo] = useState({});
 
   const [isAttrModalOpen, setIsAttrModalOpen] = useState(false);
-  const [newAttrName, setNewAttrName] = useState("");
-
-  const handleCreateAttribute = async () => {
-    try {
-      const created = await AttributeService.createAttribute({ name: newAttrName });
-      setElements(prev => [...prev, created]); // refresca lista local
-      setNewAttrName("");
-      setIsAttrModalOpen(false); // cierra modal
-    } catch (err) {
-      console.error("No se pudo crear atributo:", err);
-    }
-  };
 
   // cargar atributos disponibles
   useEffect(() => {
     AttributeService.getAllAttributes()
       .then(data => setElements(data))
       .catch(error => console.error('Error al cargar atributos:', error));
-  }, []);
+  }, [elements]);
 
   const attributes = elements.map((e) => ({
     label: e.name,
@@ -49,6 +39,10 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
     setFormData({ ...formData, [name]: value });
   };
 
+  const handleChangeAtributo = (name, value) => {
+    setFormDataAtributo({ ...formDataAtributo, [name]: value });
+  };
+
   const handleSubmit = async () => {
     const inventoryForm = {
       name: formData["Nombre del Inventario"],
@@ -62,6 +56,21 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
     } catch (e) {
       console.error("Failed to create inventory:", e);
       // puedes mostrar un toast aquí si quieres
+    }
+  };
+
+  const handleCreateAttribute = async () => {
+    
+    // Armamos el body de request para crear el atributo
+    const attributeForm = {
+      name: formDataAtributo["nombre-atributo"],
+      type: formDataAtributo["tipo-atributo"],
+    }
+    try {
+      await AttributeService.createAttribute(attributeForm);
+      setIsAttrModalOpen(false); // cierra modal
+    } catch (err) {
+      console.error("No se pudo crear atributo:", err);
     }
   };
 
@@ -96,10 +105,20 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
     </ul>
   );
 
+  // Fields del formulario "Crear nuevo inventario"
   const fields = [
     { label: "Nombre del Inventario", name: "Nombre del Inventario", type: "text", placeholder: "Nombre del Inventario..." },
     { label: "Descripcion del Inventario", name: "Descripcion del Inventario", type: "text", placeholder: "Descripcion del inventario..." },
     { label: "Fecha de revision", name: "Fecha de revision", type: "date" }
+  ];
+
+  // Fields del formulario "Crear Atributo"
+  const fieldCrearAtributo = [
+    { label: "Nombre del Atributo", name: "nombre-atributo", type: "text", placeholder: "Nombre del Atributo..." },
+    {
+      label: "Tipo del Atributo", name: "tipo-atributo", type: "select",
+      options: AttributeTypes.map((type) => ({ label: type, value: type }))
+    }
   ];
 
   return (
@@ -144,9 +163,12 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
         </div>
       </div>
 
-      <Modal2
+      <Modal
         isOpen={isAttrModalOpen}
-        onClose={() => setIsAttrModalOpen(false)}
+        onClose={() => {
+          setIsAttrModalOpen(false); // cierra modal
+          setFormDataAtributo(""); // limpia input
+        }}
         title="Crear Atributo"
         actions={[
           { label: "Cancelar", onClick: (close) => close(), color: "secondary", size: "small" },
@@ -158,17 +180,8 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
           },
         ]}
       >
-        <div style={{ display: "flex", flexDirection: "column", gap: "1em" }}>
-          <label>
-            Nombre del Atributo:
-            <input
-              type="text"
-              value={newAttrName}
-              onChange={(e) => setNewAttrName(e.target.value)}
-            />
-          </label>
-        </div>
-      </Modal2>
+        <DynamicForm fields={fieldCrearAtributo} values={formDataAtributo} onChange={handleChangeAtributo} />
+      </Modal>
     </div>
   );
 }
