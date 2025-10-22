@@ -18,19 +18,35 @@ function DynamicForm({ fields = [], values, onChange, formDirection = "default" 
       {fields.map((field, i) => (
         <div key={i} className="dynamic-form--field-container">
           <label className="dynamic-form--field-container--label">{field.label}</label>
-          <input
-            type={field.type || "text"}
-            name={field.name}
-            value={values[field.name] || ""}
-            placeholder={field.placeholder}
-            onChange={(e) => onChange(field.name, e.target.value)}
-            className="dynamic-form--field-container--input"
-          />
+
+          {field.type === "select" ? (
+            <select
+              name={field.name}
+              value={values[field.name] || ""}
+              onChange={(e) => onChange(field.name, e.target.value)}
+              className="dynamic-form--field-container--input"
+            >
+              <option value="">Seleccione...</option>
+              {field.options?.map((opt, j) => (
+                <option key={j} value={opt.value}>
+                  {opt.label}
+                </option>
+              ))}
+            </select>
+          ) : (
+            <input
+              type={field.type || "text"}
+              name={field.name}
+              value={values[field.name] || ""}
+              placeholder={field.placeholder}
+              onChange={(e) => onChange(field.name, e.target.value)}
+              className="dynamic-form--field-container--input"
+            />
+          )}
         </div>
       ))}
     </form>
   );
 }
-
 
 export default DynamicForm;
