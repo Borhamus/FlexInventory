@@ -14,12 +14,14 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
 
   const [isAttrModalOpen, setIsAttrModalOpen] = useState(false);
 
+  const [nuevoAtributo, setNuevoAtributo] = useState(false);
+
   // cargar atributos disponibles
   useEffect(() => {
     AttributeService.getAllAttributes()
       .then(data => setElements(data))
       .catch(error => console.error('Error al cargar atributos:', error));
-  }, [elements]);
+  }, [nuevoAtributo]);
 
   const attributes = elements.map((e) => ({
     label: e.name,
@@ -69,6 +71,7 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
     try {
       await AttributeService.createAttribute(attributeForm);
       setIsAttrModalOpen(false); // cierra modal
+      setNuevoAtributo(antiguo => !antiguo); // trigger para recargar lista de atributos
     } catch (err) {
       console.error("No se pudo crear atributo:", err);
     }
