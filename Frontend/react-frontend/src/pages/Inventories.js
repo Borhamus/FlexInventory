@@ -68,20 +68,6 @@ function Inventories() {
         ],
     }
 
-    const formularioCrear = {
-        title: "Crear Nuevo Inventario",
-        customView: (
-            <NewInventoryDialogBody
-                onSubmit={async (inventoryForm) => {
-                    await InventoryService.createInventory(inventoryForm);
-                    const data = await InventoryService.getAllInventories();
-                    setElementos(data);
-                }}
-            />
-        ),
-        actions: [], // los botones están dentro del customView
-    };
-
     const formularioAgregarArticulo = {
         title: "Agregar Articulo",
         customView: (
@@ -96,6 +82,38 @@ function Inventories() {
         actions: [], // los botones están dentro del customView
     }
 
+    const handleInventorySubmit = async (inventoryForm, isEdit, id) => {
+        if (isEdit) {
+            await InventoryService.updateInventory(id, inventoryForm);
+        } else {
+            await InventoryService.createInventory(inventoryForm);
+            const data = await InventoryService.getAllInventories();
+            setElementos(data);
+        }
+    };
+
+    const formularioCrear = {
+        title: "Crear Nuevo Inventario",
+        customView: (
+            <NewInventoryDialogBody
+                onSubmit={handleInventorySubmit}
+                isEdit={false}
+            />
+        ),
+        actions: [], // los botones están dentro del customView
+    };
+
+    const formularioEditar = {
+        title: "Editar " + (elementos.find(el => el.id === selectedId)?.name || ''),
+        customView: (
+            <NewInventoryDialogBody
+                onSubmit={handleInventorySubmit}
+                data={elementos.find(el => el.id === selectedId)}
+                isEdit={true}
+            />
+        ),
+        actions: [], // los botones están dentro del customView
+    };
 
     const inventories = elementos.map((elemento) => ({
         id: elemento.id,
@@ -130,7 +148,7 @@ function Inventories() {
                 </div>
                 <div className="BotonesBajos">
                     <Button icon={"pi pi-plus-circle"} onClick={() => { setFormFields(formularioAgregarArticulo); setIsOpen(true); }} color={"primary"} name={"Agregar Articulo"} />
-                    <Button icon={"pi pi-fw pi-pencil"} onClick={""} color={"primary"} name={"Editar Inventario"} />
+                    <Button icon={"pi pi-fw pi-pencil"} onClick={() => { setFormFields(formularioEditar); setIsOpen(true); }} color={"primary"} name={"Editar Inventario"} />
                 </div>
             </div>
 

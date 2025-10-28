@@ -6,10 +6,14 @@ import Button from '../components/Button';
 import Modal from "../components/Modal2";
 import AttributeTypes from '../utils/AttributeTypes';
 
-export default function NuevoInventarioFormulario({ onSubmit, close }) {
+export default function NuevoInventarioFormulario({ onSubmit, close, isEdit = false, data = {} }) {
   const [elements, setElements] = useState([]);
   const [selectedAttributes, setSelectedAttributes] = useState([]);
-  const [formData, setFormData] = useState({});
+  const [formData, setFormData] = useState({
+    "Nombre del Inventario": "",
+    "Descripcion del Inventario": "",
+    "Fecha de revision": ""
+  });
   const [formDataAtributo, setFormDataAtributo] = useState({});
 
   const [isAttrModalOpen, setIsAttrModalOpen] = useState(false);
@@ -22,6 +26,19 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
       .then(data => setElements(data))
       .catch(error => console.error('Error al cargar atributos:', error));
   }, [nuevoAtributo]);
+
+  useEffect(() => {
+    if (isEdit && data) {
+      setFormData({
+        "Nombre del Inventario": data.name || "",
+        "Descripcion del Inventario": data.description || "",
+        "Fecha de revision": data.revision_date || "",
+      });
+      // también inicializamos los atributos seleccionados
+      setSelectedAttributes(data.attributesIds || []);
+    }
+  }, [isEdit, data]);
+
 
   const attributes = elements.map((e) => ({
     label: e.name,
@@ -52,17 +69,18 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
       revision_date: formData["Fecha de revision"],
       attributesIds: selectedAttributes,
     };
+
     try {
-      await onSubmit(inventoryForm); // crea y refresca lista (padre)
-      close();                       // cierra modal desde el hijo
+      await onSubmit(inventoryForm, isEdit, data?.id);
+      close();
     } catch (e) {
-      console.error("Failed to create inventory:", e);
-      // puedes mostrar un toast aquí si quieres
+      console.error(isEdit ? "Failed to update inventory:" : "Failed to create inventory:", e);
     }
   };
 
+
   const handleCreateAttribute = async () => {
-    
+
     // Armamos el body de request para crear el atributo
     const attributeForm = {
       name: formDataAtributo["nombre-atributo"],
@@ -85,6 +103,7 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
           type="checkbox"
           value={a.id}
           onChange={handleCheckboxChange}
+          checked={selectedAttributes.includes(a.id)}
         />
         {a.label}
       </label>
@@ -161,7 +180,7 @@ export default function NuevoInventarioFormulario({ onSubmit, close }) {
             onClick={handleSubmit}
             color={"primary"}
             size={"small"}
-            name={"Crear"}
+            name={isEdit ? "Guardar Cambios" : "Crear"}
           />
         </div>
       </div>
