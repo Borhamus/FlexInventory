@@ -9,6 +9,8 @@ services:
       - 5432:5432
 
     environment:
+      TZ: America/Argentina/Buenos_Aires
+      PGTZ: America/Argentina/Buenos_Aires
       POSTGRES_USER: flexinventory # The PostgreSQL user (useful to connect to the database)
       POSTGRES_PASSWORD: 4556 # The PostgreSQL password (useful to connect to the database)
       POSTGRES_DB: flexinventory # The PostgreSQL default database (automatically created at first launch)

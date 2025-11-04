@@ -1,15 +1,13 @@
 import React, { useState } from 'react';
-import { Menubar } from 'primereact/menubar';
-import { Avatar } from 'primereact/avatar';
-import { Button as PButton } from 'primereact/button';
 import "/node_modules/primeflex/primeflex.css";
 import "../styles/Navbar.css";
-
-import Modal2 from "./Modal2";  // Asegúrate de que el Modal2.js esté bien importado
-import ProfileModal from "./ProfileModal";  // Asegúrate de que ProfileModal.js esté bien importado
+import Modal2 from "./Modal2";
+import ProfileModal from "./ProfileModal";
+import ModalConfiguracion from "./ModalConfiguracion";
 
 function Navbar() {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
   return (
     <>
@@ -17,15 +15,13 @@ function Navbar() {
         <div className='navbarLeft'>
           <b className='linkNavbar--title'>FlexInventory</b>
         </div>
-
         <div className='navbarCenter'>
           <a className='linkNavbar linkNavbar--inventories' href="/inventories">Inventarios</a>
           <a className='linkNavbar linkNavbar--catalogs' href="/catalogs">Catalogos</a>
           <a className='linkNavbar linkNavbar--users' href="/users">Users</a>
         </div>
-
         <div className='navbarRight'>
-          {/* Botón para abrir el modal */}
+          {/* Botón para abrir el modal de perfil */}
           <button
             type="button"
             className="linkNavbar linkNavbar--user"
@@ -34,14 +30,20 @@ function Navbar() {
           >
             <i className="pi pi-fw pi-user"></i>
           </button>
-
-          <a className='linkNavbar linkNavbar--settings' href="/settings">
+          
+          {/* Botón para abrir el modal de configuraciones */}
+          <button
+            type="button"
+            className="linkNavbar linkNavbar--settings"
+            onClick={() => setIsSettingsOpen(true)}
+            aria-label="Configuraciones"
+          >
             <i className="pi pi-fw pi-cog"></i>
-          </a>
+          </button>
         </div>
       </nav>
 
-      {/* Abrir el modal cuando el estado 'isProfileOpen' es verdadero */}
+      {/* Modal de perfil de usuario */}
       <Modal2
         isOpen={isProfileOpen}
         onClose={() => setIsProfileOpen(false)}
@@ -52,6 +54,18 @@ function Navbar() {
         ]}
       >
         <ProfileModal onCancel={() => setIsProfileOpen(false)} />
+      </Modal2>
+
+      {/* Modal de configuraciones */}
+      <Modal2
+        isOpen={isSettingsOpen}
+        onClose={() => setIsSettingsOpen(false)}
+        title="Configuraciones"
+        actions={[
+          { label: "Cerrar", color: "secondary", size: "lg", onClick: (close) => close() }
+        ]}
+      >
+        <ModalConfiguracion onClose={() => setIsSettingsOpen(false)} />
       </Modal2>
     </>
   );

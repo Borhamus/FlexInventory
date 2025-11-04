@@ -44,7 +44,12 @@ Deshace cambios. Puede usarse para quitar archivos del staging o volver a un com
 
 Para el Benja:
 
+1) primera linea: Abrir infraestructura y pegar este código:
 Get-Content backup.sql | docker exec -i FlexInventory psql -U flexinventory flexinventory
+
+2) Dentro de api_base y api_usuarios pegar este código:
 mvn --% -Dspring-boot.run.jvmArguments="-Duser.timezone=America/Argentina/Buenos_Aires" clean spring-boot:run
+
+3) en Frontent pegar esta linea: 
 npm start
 
