@@ -18,12 +18,19 @@ function Inventories() {
     const [reload, setReload] = useState(false);
 
     // Cuando llegan los inventarios, asigno el primero
+
+    // Esto no es un useEffect porque tiene el array de dependencias vacío,
+    // así que solo se ejecuta una vez al montar el componente.
+    // podria ser facilmente un const pero por consistencia lo dejo así.
     useEffect(() => {
         InventoryService.getAllInventories()
             .then(data => {
                 setElementos(data);
                 if (data.length > 0) {
-                    setSelectedId(data[0].id);
+                    const inventories = data
+                        .slice() // crea una copia para no mutar el array original
+                        .sort((a, b) => a.id - b.id); // ordena por id ascendente
+                    setSelectedId(inventories[0].id);
                 }
             })
             .catch(error => console.error('Error al cargar inventarios:', error));
@@ -82,9 +89,26 @@ function Inventories() {
         actions: [], // los botones están dentro del customView
     }
 
+    const formularioEditarArticulo = {
+        title: "Agregar Articulo",
+        customView: (
+            <InventarioArticulo
+                datosInventario={inventario}
+                onSubmit={async (payload) => {
+                    await ItemService.createItem(payload);
+                    setReload(prev => !prev);
+                }}
+
+            />),
+        actions: [], // los botones están dentro del customView
+    }
+
     const handleInventorySubmit = async (inventoryForm, isEdit, id) => {
         if (isEdit) {
             await InventoryService.updateInventory(id, inventoryForm);
+            const data = await InventoryService.getAllInventories();
+            setElementos(data);
+            setReload(prev => !prev);
         } else {
             await InventoryService.createInventory(inventoryForm);
             const data = await InventoryService.getAllInventories();
@@ -143,6 +167,7 @@ function Inventories() {
                             num={selectedId}
                             setDatosInventario={setInventario}
                             reload={reload}
+                            modalEditar={formularioEditarArticulo}
                         />
                     )}
                 </div>

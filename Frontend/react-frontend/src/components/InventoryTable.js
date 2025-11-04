@@ -5,7 +5,7 @@ import { Column } from "primereact/column";
 import "../styles/InventoryTable.css"
 import EditarBorrarBotonesInventario from "./EditarBorrarBotonesInventario";
 
-function InventoryTable({ num, setDatosInventario, reload}) {
+function InventoryTable({ num, setDatosInventario, reload, modalEditar}) {
     // Estado para almacenar el inventario
     const [inventory, setInventory] = useState(null);
 
@@ -114,6 +114,7 @@ function InventoryTable({ num, setDatosInventario, reload}) {
                                         items: prev.items.filter((item) => item.id !== rowData.id)
                                     }))
                                 }
+                                modalEditar={modalEditar}
                             />
                         )}
                     />

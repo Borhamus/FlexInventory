@@ -34,11 +34,16 @@ export default function NuevoInventarioFormulario({ onSubmit, close, isEdit = fa
         "Descripcion del Inventario": data.description || "",
         "Fecha de revision": data.revision_date || "",
       });
-      // también inicializamos los atributos seleccionados
-      setSelectedAttributes(data.attributesIds || []);
     }
   }, [isEdit, data]);
 
+  useEffect(() => {
+    if (isEdit && data && elements.length > 0) {
+      // obtenemos los ids de los atributos del inventario
+      const idsAtributosInventario = data.attributes?.map(attr => attr.id) || [];
+      setSelectedAttributes(idsAtributosInventario);
+    }
+  }, [isEdit, data, elements]);
 
   const attributes = elements.map((e) => ({
     label: e.name,
@@ -69,6 +74,11 @@ export default function NuevoInventarioFormulario({ onSubmit, close, isEdit = fa
       revision_date: formData["Fecha de revision"],
       attributesIds: selectedAttributes,
     };
+
+    if (isEdit) {
+      inventoryForm.id = data.id;
+      inventoryForm.creation_date = data.creation_date;
+    }
 
     try {
       await onSubmit(inventoryForm, isEdit, data?.id);

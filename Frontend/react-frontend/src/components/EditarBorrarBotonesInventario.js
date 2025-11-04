@@ -5,7 +5,7 @@ import Modal from "./Modal2";
 import Button from "./Button";
 import ItemService from "../services/ItemService";
 
-export default function EditarBorrarBotonesInventario({ itemId, onDeleteSuccess }) {
+export default function EditarBorrarBotonesInventario({ itemId, onDeleteSuccess, modalEditar}) {
   const [isOpen, setIsOpen] = useState(false);
   const [formFields, setFormFields] = useState(null);
 
@@ -37,37 +37,6 @@ export default function EditarBorrarBotonesInventario({ itemId, onDeleteSuccess 
     ],
   };
 
-  /* ------------------------| MODAL EDITAR |------------------------ */
-  const modalEditar = {
-    title: "Editar elemento",
-    customView: (
-      <div style={{ display: "flex", flexDirection: "column", gap: "1.5em" }}>
-        ¿Desea editar este artículo?
-      </div>
-    ),
-    actions: [
-      {
-        label: "Cancelar",
-        onClick: (close) => close(),
-        color: "secondary",
-        size: "small",
-      },
-      {
-        label: "Editar",
-        onClick: async (close) => {
-          try {
-            // TODO: Lógica de edición real
-            console.log("Artículo editado!");
-            close();
-          } catch {
-            alert("No se pudo editar el artículo.");
-          }
-        },
-        color: "primary",
-        size: "small",
-      },
-    ],
-  };
 
   // SETEO EL FORMULARIO DE BORRAR
   // ABRO LA MODAL

@@ -29,6 +29,17 @@ export class InventoryService {
                 throw error; // Lanza el error para que se pueda manejar en el componente
             });
     }
+
+    // Método para crear un nuevo inventario.
+    updateInventory(id, inventoryData) {
+        return axios
+            .put(this.baseUrl + id, inventoryData)
+            .then((res) => res.data) // Devuelve la respuesta del servidor (puedes usarla si necesitas)
+            .catch((error) => {
+                console.error("Error al editar el inventario:", error);
+                throw error; // Lanza el error para que se pueda manejar en el componente
+            });
+    }
 }
 
 export default new InventoryService();
