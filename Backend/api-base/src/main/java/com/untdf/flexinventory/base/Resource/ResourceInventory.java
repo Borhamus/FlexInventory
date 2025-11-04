@@ -4,6 +4,7 @@ package com.untdf.flexinventory.base.Resource;
 import com.untdf.flexinventory.base.Service.ServiceInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate;
+import com.untdf.flexinventory.base.Transferable.TransferableInventoryEdit;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -51,7 +52,7 @@ public class ResourceInventory implements InventoryApiDocumentacion {
     // -----------------------------------------------------------------------
     @Override
     @PutMapping(value = "/{id}")
-    public ResponseEntity<TransferableInventory> updateInventoy(Integer id, TransferableInventory transferableInventory) {
+    public ResponseEntity<TransferableInventory> updateInventoy(Integer id, TransferableInventoryEdit transferableInventory) {
         return ResponseEntity.ok(service.editInventory(transferableInventory));
     }
 

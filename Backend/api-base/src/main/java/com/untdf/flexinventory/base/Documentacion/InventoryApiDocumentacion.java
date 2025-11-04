@@ -2,6 +2,7 @@ package com.untdf.flexinventory.base.Documentation;
 
 import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate;
+import com.untdf.flexinventory.base.Transferable.TransferableInventoryEdit;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -92,7 +93,7 @@ public interface InventoryApiDocumentacion {
 
     ResponseEntity<TransferableInventory> updateInventoy(
             @PathVariable("id") Integer id,
-            @RequestBody TransferableInventory transferableInventory
+            @RequestBody TransferableInventoryEdit transferableInventory
     );
 
 
