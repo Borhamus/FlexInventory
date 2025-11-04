@@ -1,11 +1,11 @@
-import { useEffect, useState} from "react";
+import { useEffect, useState } from "react";
 import InventoryService from "../services/InventoryService";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import "../styles/InventoryTable.css"
 import EditarBorrarBotonesInventario from "./EditarBorrarBotonesInventario";
 
-function InventoryTable({ num }) {
+function InventoryTable({ num, setDatosInventario, reload, modalEditar}) {
     // Estado para almacenar el inventario
     const [inventory, setInventory] = useState(null);
 
@@ -13,14 +13,16 @@ function InventoryTable({ num }) {
     const [first, setFirst] = useState(0); // Página actual
     const [rows, setRows] = useState(5); // Filas por página
 
+    
+
     useEffect(() => {
         if (num) {
             // Llamar a la API solo si num tiene un valor
             InventoryService.getInventoryById(num)
-                .then(data => setInventory(data))
+                .then(data => {setInventory(data); setDatosInventario(data)})
                 .catch(error => console.error("Error al cargar inventario:", error));
         }
-    }, [num]); // Aquí agregamos 'num' como dependencia
+    }, [num,reload]); // Aquí agregamos 'num' como dependencia
 
     // Renderizar loading mientras se obtiene el inventario
     if (!inventory) {
@@ -55,7 +57,7 @@ function InventoryTable({ num }) {
             header="Name" // Etiqueta de encabezado
             sortable={true} // Habilitar el ordenamiento
             headerStyle={{ width: '10%', minWidth: '8em' }}
-            style={{fontSize: "1em"}}
+            style={{ fontSize: "1em" }}
         />,
         // Generar las columnas para los atributos dinámicos
         ...inventory.attributes.map(attribute => (
@@ -65,7 +67,7 @@ function InventoryTable({ num }) {
                 header={attribute.name}
                 sortable={true} // Habilitar el ordenamiento
                 headerStyle={{ width: '10%', minWidth: '8em' }}
-                style={{fontSize: "1em"}}
+                style={{ fontSize: "1em" }}
             />
         ))
     ];
@@ -100,9 +102,21 @@ function InventoryTable({ num }) {
                     {/* Generar columnas dinámicas basadas en los atributos */}
                     {dynamicColumns}
                     <Column // Columna de borrado y edicion
-                        headerStyle={{ width: '10%', minWidth: '8rem' }}
+                        headerStyle={{ width: '10%', minWidth: "8rem"}}
                         bodyStyle={{ textAlign: 'center' }}
-                        body={EditarBorrarBotonesInventario}
+                        header={"Acciones"}
+                        body={(rowData) => (
+                            <EditarBorrarBotonesInventario
+                                itemId={rowData.id}
+                                onDeleteSuccess={() => // <--- CORRECTO
+                                    setInventory((prev) => ({
+                                        ...prev,
+                                        items: prev.items.filter((item) => item.id !== rowData.id)
+                                    }))
+                                }
+                                modalEditar={modalEditar}
+                            />
+                        )}
                     />
                 </DataTable>
             </div>

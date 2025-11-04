@@ -6,24 +6,41 @@ import MenuLateral from '../components/MenuLateral';
 import Button from "../components/Button";
 import NewInventoryDialogBody from '../Modals/NuevoInventarioFormulario';
 import Modal from "../components/Modal2";
+import InventarioArticulo from '../Modals/InventarioArticulo';
+import ItemService from '../services/ItemService';
 
 function Inventories() {
     const [elementos, setElementos] = useState([]); // Inventarios disponibles
-    const [showInventoryTable, setShowInventoryTable] = useState(true);
     // Inicialmente null, porque no sabemos qué inventario hay
     const [selectedId, setSelectedId] = useState(null);
-    
+
+    const [inventario, setInventario] = useState([]);
+    const [reload, setReload] = useState(false);
+
     // Cuando llegan los inventarios, asigno el primero
+
+    // Esto no es un useEffect porque tiene el array de dependencias vacío,
+    // así que solo se ejecuta una vez al montar el componente.
+    // podria ser facilmente un const pero por consistencia lo dejo así.
     useEffect(() => {
         InventoryService.getAllInventories()
             .then(data => {
                 setElementos(data);
                 if (data.length > 0) {
-                    setSelectedId(data[0].id);
+                    const inventories = data
+                        .slice() // crea una copia para no mutar el array original
+                        .sort((a, b) => a.id - b.id); // ordena por id ascendente
+                    setSelectedId(inventories[0].id);
                 }
             })
             .catch(error => console.error('Error al cargar inventarios:', error));
     }, []);
+
+    useEffect(() => {
+        if (elementos.length > 0 && selectedId === null) {
+            setSelectedId(elementos[0].id);
+        }
+    }, [elementos, selectedId]);
 
     // ---- Modal control ----
     const [isOpen, setIsOpen] = useState(false);
@@ -43,6 +60,10 @@ function Inventories() {
                 label: "Eliminar", onClick: async (close) => {
                     try {
                         await InventoryService.deleteInventoryById(selectedId);
+
+                        // PREV SE TRATA DEL ESTADO ANTERIOR DEL USESTATE
+
+                        // esta seccion toma el estado usestate y quita de él el selectedId del inventario borrado
                         setElementos(prev => prev.filter(el => el.id !== selectedId));
                         setSelectedId(null);
                         close();
@@ -54,20 +75,69 @@ function Inventories() {
         ],
     }
 
+    const formularioAgregarArticulo = {
+        title: "Agregar Articulo",
+        customView: (
+            <InventarioArticulo
+                datosInventario={inventario}
+                onSubmit={async (payload) => {
+                    await ItemService.createItem(payload);
+                    setReload(prev => !prev);
+                }}
+
+            />),
+        actions: [], // los botones están dentro del customView
+    }
+
+    const formularioEditarArticulo = {
+        title: "Agregar Articulo",
+        customView: (
+            <InventarioArticulo
+                datosInventario={inventario}
+                onSubmit={async (payload) => {
+                    await ItemService.createItem(payload);
+                    setReload(prev => !prev);
+                }}
+
+            />),
+        actions: [], // los botones están dentro del customView
+    }
+
+    const handleInventorySubmit = async (inventoryForm, isEdit, id) => {
+        if (isEdit) {
+            await InventoryService.updateInventory(id, inventoryForm);
+            const data = await InventoryService.getAllInventories();
+            setElementos(data);
+            setReload(prev => !prev);
+        } else {
+            await InventoryService.createInventory(inventoryForm);
+            const data = await InventoryService.getAllInventories();
+            setElementos(data);
+        }
+    };
+
     const formularioCrear = {
         title: "Crear Nuevo Inventario",
         customView: (
             <NewInventoryDialogBody
-                onSubmit={async (inventoryForm) => {
-                    await InventoryService.createInventory(inventoryForm);
-                    const data = await InventoryService.getAllInventories();
-                    setElementos(data);
-                }}
+                onSubmit={handleInventorySubmit}
+                isEdit={false}
             />
         ),
         actions: [], // los botones están dentro del customView
     };
 
+    const formularioEditar = {
+        title: "Editar " + (elementos.find(el => el.id === selectedId)?.name || ''),
+        customView: (
+            <NewInventoryDialogBody
+                onSubmit={handleInventorySubmit}
+                data={elementos.find(el => el.id === selectedId)}
+                isEdit={true}
+            />
+        ),
+        actions: [], // los botones están dentro del customView
+    };
 
     const inventories = elementos.map((elemento) => ({
         id: elemento.id,
@@ -93,12 +163,17 @@ function Inventories() {
             <div className='ContenedorTablaBoton'>
                 <div className="inventarioTabla">
                     {selectedId !== null && (
-                        <InventoryTable num={selectedId} />
+                        <InventoryTable
+                            num={selectedId}
+                            setDatosInventario={setInventario}
+                            reload={reload}
+                            modalEditar={formularioEditarArticulo}
+                        />
                     )}
                 </div>
                 <div className="BotonesBajos">
-                    <Button icon={"pi pi-plus-circle"} onClick={""} color={"primary"} name={"Agregar Articulo"} />
-                    <Button icon={"pi pi-fw pi-pencil"} onClick={""} color={"primary"} name={"Editar Inventario"} />
+                    <Button icon={"pi pi-plus-circle"} onClick={() => { setFormFields(formularioAgregarArticulo); setIsOpen(true); }} color={"primary"} name={"Agregar Articulo"} />
+                    <Button icon={"pi pi-fw pi-pencil"} onClick={() => { setFormFields(formularioEditar); setIsOpen(true); }} color={"primary"} name={"Editar Inventario"} />
                 </div>
             </div>
 

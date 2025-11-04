@@ -6,32 +6,7 @@
     gap: 1em;
 }
 
-.botonEditar {
-    color: orange;
-}
-
-.botonEliminar {
-    color: red;
-}
-
-i{
-    font-size: 1em;
-}
-
-.inventoryButtonDeleteEdit{
-    border: none;
-    border-radius: 100%;
-    padding-inline: .8em;
-    padding-block: .8em;
-    transition: background 0.1s;
-    cursor: pointer;
-}
-
-button:hover{
-    background-color: lightgray;
-}
-
 .separadorEditarEliminar{
-    height: 1.5em;
+    height: 2.3em;
     border: 1px solid lightgray;
 }

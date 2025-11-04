@@ -1,72 +1,81 @@
+// src/components/EditarBorrarBotonesInventario.js
 import { useState } from "react";
-import "../styles/EditarBorrarBotonesInventario.css"
-import Modal from './Modal';
+import "../styles/EditarBorrarBotonesInventario.css";
+import Modal from "./Modal2";
+import Button from "./Button";
+import ItemService from "../services/ItemService";
 
-export default function EditarBorrarBotonesInventario() {
-    const [showModal, setShowModal] = useState(false);
-    const [modalChildren, setModalChildren] = useState(null);
+export default function EditarBorrarBotonesInventario({ itemId, onDeleteSuccess, modalEditar}) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [formFields, setFormFields] = useState(null);
 
-    const modalEliminar = {
-        title: "Eliminar elemento",
-        body: (
-            <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
-                ¿Desea eliminar este articulo?
-                <div style={{ display: 'flex', gap: "1em", justifyContent: 'space-evenly' }}>
-                    <button onClick={() => setShowModal(false)}>
-                        <i className=''></i>
-                        Cancel
-                    </button>
-                    <button onClick={{}}>
-                        <i className='pi pi-trash'></i>
-                        Delete
-                    </button>
-                </div>
-            </div>
-        )
-    }
+  /* ------------------------| MODAL ELIMINAR |------------------------ */
+  const modalEliminar = {
+    title: "Eliminar elemento",
+    customView: (
+      <div style={{ display: "flex", flexDirection: "column", gap: "1.5em" }}>
+        ¿Desea eliminar este artículo?
+      </div>
+    ),
+    actions: [
+      { label: "Cancelar", onClick: (close) => close(), color: "secondary", size: "small" },
+      {
+        label: "Eliminar", onClick: async (close) => {
+          try {
+            await ItemService.deleteItemById(itemId)
 
-    const modalEditar = {
-        title: "Editar elemento",
-        body: (
-            <div style={{ display: 'flex', flexDirection: "column", gap: "1.5em" }}>
-                ¿Desea editar este Articulo?
-                <div style={{ display: 'flex', gap: "1em", justifyContent: 'space-evenly' }}>
-                    <button onClick={() => setShowModal(false)}>
-                        <i className=''></i>
-                        Cancel
-                    </button>
-                </div>
-            </div>
-        )
-    }
+            if (onDeleteSuccess) onDeleteSuccess();
 
-    const handleModalEliminar = () => (
-        setModalChildren(modalEliminar),
-        setShowModal(true)
-    )
+            close();
+          } catch {
+            alert("No se pudo eliminar el artículo.");
+          }
+        },
+        color: "primary",
+        size: "small",
+      },
+    ],
+  };
 
-    const handleModalEditar = () => (
-        setModalChildren(modalEditar),
-        setShowModal(true)
-    )
 
-    return (
-        <div className="contenedorBotonesEditarBorrar">
-            <div className="botonEditar">
-                <button className="inventoryButtonDeleteEdit" onClick={handleModalEditar}>
-                    <i className="pi pi-fw pi-pencil"></i>
-                </button>
+  // SETEO EL FORMULARIO DE BORRAR
+  // ABRO LA MODAL
+  const handleModalEliminar = () => {
+    setFormFields(modalEliminar);
+    setIsOpen(true);
+  };
 
-            </div>
-            <div className="separadorEditarEliminar">
+  // SETEO EL FORMULARIO DE EDITAR
+  // ABRO LA MODAL
+  const handleModalEditar = () => {
+    setFormFields(modalEditar);
+    setIsOpen(true);
+  };
 
-            </div>
-            <div className="botonEliminar" onClick={handleModalEliminar}>
-                <button className="inventoryButtonDeleteEdit">
-                    <i className="pi pi-fw pi-trash"></i>
-                </button>
-            </div>
-            <Modal open={showModal} onClose={() => setShowModal(false)} children={modalChildren} />
-        </div>
-    )
+  return (
+    <div className="contenedorBotonesEditarBorrar">
+      <div className="botonEditar">
+        <Button icon={"pi pi-fw pi-pencil"} onClick={handleModalEditar} color={"secondary"} type={"icon-button"} size="small" />
+      </div>
+
+      <div className="separadorEditarEliminar"></div>
+
+      <div className="botonEliminar">
+        <Button icon={"pi pi-fw pi-trash"} onClick={handleModalEliminar} color={"secondary"} type={"icon-button"} size="small" />
+      </div>
+
+      {/* Modal con la nueva API */}
+      <Modal
+        isOpen={isOpen}
+        onClose={() => {
+          setIsOpen(false);
+          setFormFields(null);
+        }}
+        title={formFields?.title}
+        actions={formFields?.actions || []}
+      >
+        {formFields?.customView}
+      </Modal>
+    </div>
+  );
 }

@@ -85,7 +85,8 @@
 }
 
 .modal__main {
-  padding: .8em;
+  padding-inline: 0.8vw;
+  padding-block: 1.8vh;
 }
 
 .modal footer {

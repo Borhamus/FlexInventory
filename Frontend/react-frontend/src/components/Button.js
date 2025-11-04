@@ -1,23 +1,39 @@
 import React from "react";
 import "../styles/Button.css";
 
-function Button({ type = "default", size = "default", color = "primary", name, icon, onClick}) {
-  
+function Button({ type = "default", size = "default", color = "primary", name, icon, onClick }) {
+
   // Definimos tipos de botones
   const buttonTypes = {
-    default: { padding: "1.4em", borderRadius: "var(--border-radius-button)"},
-    
-    "icon-button": { height: "6vh", width: "4vw", borderRadius: "var(--border-radius-button)" },
-    
-    tab: { height: "6vh", padding: "0 24px", borderRadius: "0px" },
+    "default": { padding: "1.4em", borderRadius: "var(--border-radius-button)" },
+
+    "icon-button": {borderRadius: "var(--border-radius-icon-button)" },
+
+    "tab": {borderRadius: "0px" },
   };
 
-  const buttonSizes = {
-    default: {height: "6vh", width: "15vw"},
-    small: {height: "4vh", width: "8vw"},
-    medium: {height: "6vh", width: "12vw"},
-    large: {height: "8vh", width: "17vw"}
-  }
+  const buttonSizesByType = {
+    "icon-button": {
+      default: { height: "6vh", width: "4vw", iconSize: "1em" },
+      small: { minHeight: "4vh", minWidth: "2.5vw", iconSize: "0.9em" },
+      medium: { height: "6vh", width: "4vw", iconSize: "1.2em"},
+      large: { height: "8vh", width: "5vw", iconSize: "1.35em" },
+    },
+    "tab": {
+      default: { height: "6vh", width: "15vw" },
+      small: { height: "4vh", width: "8vw" },
+      medium: { height: "6vh", width: "12vw" },
+      large: { height: "8vh", width: "17vw" },
+    },
+    "default": {
+      default: { height: "6vh", width: "15vw", iconSize: "1.2em" },
+      small: { height: "4vh", width: "8vw" },
+      medium: { height: "6vh", width: "12vw" },
+      large: { height: "8vh", width: "17vw" },
+    }
+  };
+
+
 
   // 🔹 Definimos colores (ejemplo inspirado en Material You)
   const buttonColors = {
@@ -35,7 +51,11 @@ function Button({ type = "default", size = "default", color = "primary", name, i
   // Obtenemos el estilo segun props
   const typeStyle = buttonTypes[type] || buttonTypes.default;
   const colorStyle = buttonColors[color] || buttonColors.primary;
-  const buttonSize = buttonSizes[size] || buttonSizes.default;
+
+  const buttonSize =
+    (buttonSizesByType[type] && buttonSizesByType[type][size]) ||
+    buttonSizesByType.default[size] ||
+    buttonSizesByType.default.default;
 
   return (
     <button
@@ -49,7 +69,7 @@ function Button({ type = "default", size = "default", color = "primary", name, i
     >
       {icon && (
         <div className="botonGenericoIcon">
-          <i className={icon}></i>
+          <i className={icon} style={{fontSize: buttonSize.iconSize}}></i>
         </div>
       )}
       {name && <div className="botonGenericoName">{name}</div>}

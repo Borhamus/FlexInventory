@@ -26,6 +26,8 @@
 }
 
 .MenuLateralAcciones{
+
+    border-top: 1px solid var(--md-sys-color-inverse-on-surface);
     padding-top: 1vh;
     flex: 2;
     display: flex;

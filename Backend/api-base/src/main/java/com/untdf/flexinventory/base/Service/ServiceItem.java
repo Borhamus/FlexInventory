@@ -5,8 +5,6 @@ import com.untdf.flexinventory.base.Access.AccessAttribute;
 import com.untdf.flexinventory.base.Access.AccessCatalog;
 import com.untdf.flexinventory.base.Access.AccessInventory;
 import com.untdf.flexinventory.base.Access.AccessItem;
-import com.untdf.flexinventory.base.Handler.AttributeTypeHandler;
-import com.untdf.flexinventory.base.Handler.AttributeTypeHandlerRegistry;
 import com.untdf.flexinventory.base.Model.Attribute;
 import com.untdf.flexinventory.base.Model.Inventory;
 import com.untdf.flexinventory.base.Model.Item;
@@ -55,9 +53,6 @@ public class ServiceItem {
 
     @Autowired
     TransformerAttribute transformerAttribute;
-
-    @Autowired
-    AttributeTypeHandlerRegistry registry;
 
     Logger auditor = LoggerFactory.getLogger(ResourceItem.class);
 
@@ -132,12 +127,6 @@ public class ServiceItem {
 
             // Obtengo el atributo de la bd y lo seteo al itemAttribute
             Attribute attribute = transformerAttribute.toEntity(serviceAttribute.getAttributeById(attributeId));
-
-            // Si el Tipo del Atributo posee un handler lo ejecuto.
-            Optional<AttributeTypeHandler> handlerOptional = registry.getHandler(attribute.getType());
-            System.out.println("Atributo del tipo: " + attribute.getType());
-            // Los :: siempre me confunden pero es una forma abreviada de escribir handler -> handler.onItemInserted()
-            handlerOptional.ifPresent(AttributeTypeHandler::onItemInserted);
 
             itemAttributeValue.setAttribute(attribute);
 

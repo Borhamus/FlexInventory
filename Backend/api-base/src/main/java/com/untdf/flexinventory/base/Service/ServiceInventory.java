@@ -2,13 +2,12 @@ package com.untdf.flexinventory.base.Service;
 
 
 import com.untdf.flexinventory.base.Access.AccessInventory;
-import com.untdf.flexinventory.base.Handler.AttributeTypeHandler;
-import com.untdf.flexinventory.base.Handler.AttributeTypeHandlerRegistry;
 import com.untdf.flexinventory.base.Model.Attribute;
 import com.untdf.flexinventory.base.Model.Inventory;
 import com.untdf.flexinventory.base.Resource.ResourceItem;
 import com.untdf.flexinventory.base.Transferable.TransferableInventory;
 import com.untdf.flexinventory.base.Transferable.TransferableInventoryCreate;
+import com.untdf.flexinventory.base.Transferable.TransferableInventoryEdit;
 import com.untdf.flexinventory.base.Transformer.TransformerAttribute;
 import com.untdf.flexinventory.base.Transformer.TransformerInventory;
 import org.slf4j.Logger;
@@ -46,9 +45,6 @@ public class ServiceInventory {
     @Autowired
     TransformerAttribute transformerAttribute;
 
-    @Autowired
-    AttributeTypeHandlerRegistry registry;
-
     Logger auditor = LoggerFactory.getLogger(ResourceItem.class);
 
     /* Obtiene todos los inventarios */
@@ -70,7 +66,7 @@ public class ServiceInventory {
     }
 
     /* Busca una entidad por el id del transferible y la edita, si no encuentra la entidad, arroja una excepción */
-    public TransferableInventory editInventory(TransferableInventory transferable){
+    public TransferableInventory editInventory(TransferableInventoryEdit transferable){
 
         /* Si no se encuentra una entidad con el id correspondiente arroja un 404 - NOT FOUND */
         if (access.findById(transferable.getId()).isEmpty()){
@@ -85,6 +81,19 @@ public class ServiceInventory {
         inventory.setDescription(transferable.getDescription());
         inventory.setRevision_date(transferable.getRevision_date());
         inventory.setCreation_date(transferable.getCreation_date());
+
+        List<Attribute> atributeList = new ArrayList<>();
+        for(Integer id : transferable.getAttributesIds()){
+
+            // Obtengo el atributo de la BD
+            Attribute attribute = transformerAttribute.toEntity(serviceAttribute.getAttributeById(id));
+
+            // Añado el atributo a la Lista
+            atributeList.add(attribute);
+        }
+
+        // Seteo la lista de atributos al Inventario
+        inventory.setAttributes(atributeList);
 
         access.save(inventory);
 
@@ -123,14 +132,6 @@ public class ServiceInventory {
 
             // Obtengo el atributo de la BD
             Attribute attribute = transformerAttribute.toEntity(serviceAttribute.getAttributeById(id));
-
-            // Si el Tipo del Atributo posee un handler lo ejecuto.
-            Optional<AttributeTypeHandler> handlerOptional = registry.getHandler(attribute.getType());
-            auditor.info("Atributo del tipo: {}", attribute.getType());
-
-            // Los :: siempre me confunden pero es una forma abreviada de escribir handler -> handler.onItemInserted()
-            // Si tiene un Handler, ejecuta la acción onAttributeAdded
-            handlerOptional.ifPresent(AttributeTypeHandler::onAttributeAdded);
 
             // Añado el atributo a la Lista
             atributeList.add(attribute);
