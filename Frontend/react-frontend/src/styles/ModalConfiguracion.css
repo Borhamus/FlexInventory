@@ -1,0 +1,118 @@
+/* ModalConfiguracion.css */
+
+/* Contenedor principal del modal de configuración */
+.configuracion-modal-content {
+  padding: 20px; /* Espaciado interno de 20px en todos los lados */
+  display: flex; /* Usa flexbox para organizar el contenido */
+  flex-direction: column; /* Organiza los elementos en columna vertical */
+  gap: 15px; /* Espacio de 15px entre elementos hijos */
+}
+
+/* Opción individual dentro del modal */
+.configuracion-option {
+  width: 100%; /* Ocupa todo el ancho disponible */
+}
+
+/* Botón para cerrar sesión */
+.logout-button {
+  display: flex; /* Usa flexbox para alinear elementos internos */
+  align-items: center; /* Centra verticalmente los elementos */
+  gap: 10px; /* Espacio de 10px entre ícono y texto */
+  width: 100%; /* Ocupa todo el ancho disponible */
+  padding: 12px 15px; /* Espaciado interno: 12px vertical, 15px horizontal */
+  background-color: var(--md-sys-color-on-primary); /* Fondo usando variable de theme (probablemente blanco o claro) */
+  border: 1px solid var(--md-sys-color-on-primary); /* Borde del mismo color que el fondo */
+  border-radius: 6px; /* Bordes ligeramente redondeados */
+  cursor: pointer; /* Cambia el cursor a mano al pasar el mouse */
+  text-align: left; /* Alinea el texto a la izquierda */
+  transition: all 0.2s ease; /* Transición suave para cambios de estilo */
+}
+
+/* Efecto hover del botón de logout */
+.logout-button:hover {
+  background-color: var(--md-sys-color-surface-container-high); /* Cambia el fondo al pasar el mouse */
+  border-color: var(--md-sys-color-primary); /* Cambia el color del borde al color primario */
+}
+
+/* Ícono dentro del botón de logout */
+.logout-button i {
+  color: var(--md-sys-color-error-container); /* Color rojo para el ícono (indicando acción peligrosa) */
+  font-size: 1.2rem; /* Tamaño de fuente ligeramente más grande */
+}
+
+/* Texto dentro del botón de logout */
+.logout-button span {
+  font-weight: 500; /* Grosor de fuente medio */
+  color: var(--md-sys-color-on-surface); /* Color de texto usando variable de theme */
+}
+
+/* Overlay para el popup de confirmación de logout */
+.logout-confirmation-overlay {
+  position: fixed; /* Posición fija respecto a la ventana */
+  top: 0; /* Comienza en la parte superior */
+  left: 0; /* Comienza en la izquierda */
+  right: 0; /* Se extiende hasta la derecha */
+  bottom: 0; /* Se extiende hasta abajo */
+  background-color: var(--md-sys-color-primary-container); /* Fondo semitransparente oscuro */
+  display: flex; /* Usa flexbox para centrar contenido */
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  z-index: 3000; /* Asegura que esté por encima de otros elementos */
+}
+
+/* Cuadro de diálogo de confirmación de logout */
+.logout-confirmation-dialog {
+  background-color: var(--md-sys-color-primary-container); /* Fondo usando variable de theme */
+  padding: 25px; /* Espaciado interno generoso */
+  border-radius: 8px; /* Bordes redondeados */
+  box-shadow: var(--md-sys-color-on-primary); /* Sombra usando variable de theme */
+  text-align: center; /* Centra el texto */
+  min-width: 300px; /* Ancho mínimo para asegurar buena apariencia */
+}
+
+/* Párrafo dentro del diálogo de confirmación */
+.logout-confirmation-dialog p {
+  margin: 0 0 25px 0; /* Sin margen superior/lateral, 25px inferior */
+  font-size: 18px; /* Tamaño de fuente más grande */
+  color: var(--md-sys-color-on-secondary-container); /* Color de texto usando variable de theme */
+}
+
+/* Contenedor de los botones de confirmación */
+.logout-confirmation-buttons {
+  display: flex; /* Usa flexbox para alinear botones */
+  justify-content: center; /* Centra los botones horizontalmente */
+  gap: 15px; /* Espacio entre botones */
+}
+
+/* Estilo base para los botones de confirmación */
+.logout-confirmation-button {
+  padding: 10px 25px; /* Espaciado interno */
+  border: none; /* Sin borde */
+  border-radius: 4px; /* Bordes ligeramente redondeados */
+  cursor: pointer; /* Cursor de mano */
+  font-size: 16px; /* Tamaño de fuente */
+  font-weight: 500; /* Grosor de fuente medio */
+  transition: background-color 0.3s; /* Transición suave para el fondo */
+}
+
+/* Botón "No" (cancelar logout) */
+.logout-confirmation-button.no {
+  background-color: var(--md-sys-color-secondary); /* Fondo usando variable secundaria */
+  color: var(--md-sys-color-on-surface); /* Color de texto usando variable */
+}
+
+/* Efecto hover del botón "No" */
+.logout-confirmation-button.no:hover {
+  background-color: var(--md-sys-color-primary-fixed); /* Cambia el fondo al pasar el mouse */
+}
+
+/* Botón "Sí" (confirmar logout) */
+.logout-confirmation-button.yes {
+  background-color: var( --md-sys-color-primary); /* Fondo rojo (indicando acción peligrosa) */
+  color: var(--md-sys-color-on-surface); /* Color de texto (probablemente blanco) */
+}
+
+/* Efecto hover del botón "Sí" */
+.logout-confirmation-button.yes:hover {
+  background-color: var(--md-sys-color-error-container); /* Cambia el fondo al pasar el mouse */
+}

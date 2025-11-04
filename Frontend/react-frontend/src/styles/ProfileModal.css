@@ -1,106 +1,167 @@
-/* Perfil */
+/* ProfileModal.css */
+/* Contenedor principal del modal - organiza todo el contenido en una columna */
 .profile-modal-content {
   display: flex;
-  flex-direction: row; /* ahora es fila, dos columnas */
-  gap: 2rem;
-  padding: 2rem;
-  background: var(--md-sys-color-surface);
-  border-radius: 16px;
-  max-width: 800px;
-  margin: 0 auto; /* Centrado del modal */
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1); /* Sombra suave */
+  flex-direction: column;
+  gap: 24px;
+  padding: 0;
 }
 
-/* Campos (columna izquierda) */
-.input-fields {
+/* Layout de dos columnas - izquierda para campos, derecha para roles */
+.profile-modal-grid {
+  display: flex;
+  gap: 24px;
+}
+
+/* Columna izquierda - contiene los campos de entrada */
+.profile-modal-left {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1.2rem;
+  gap: 16px;
 }
 
-.field-set {
+/* Columna derecha - contiene la sección de roles */
+.profile-modal-right {
+  flex: 1;
   display: flex;
   flex-direction: column;
 }
 
+
+/* Etiquetas de los campos ("Nombre de Usuario", "Contraseña") */
 .field-set label {
-  font-size: 1rem;
-  font-weight: 600;
+  /* Grosor de fuente */
+  font-weight: 500;
+  /* Color del texto - usa variable de theme para texto en superficie */
   color: var(--md-sys-color-on-surface);
-  margin-bottom: 0.5rem;
+  /* Tamaño de fuente */
+  font-size: 14px;
+  /* Altura de línea */
+  line-height: 20px;
 }
 
+/* Contenedor para inputs con iconos */
 .input-with-icon {
+  /* Posicionamiento relativo para iconos absolutos */
+  position: relative;
+  /* Alinea elementos verticalmente */
   display: flex;
   align-items: center;
-  background: var(--md-sys-color-surface-container-lowest);
-  border: 1px solid var(--md-sys-color-outline-variant);
-  border-radius: 12px;
-  padding: 0.6rem 1rem;
-  gap: 1rem;
 }
 
+/* Campos de entrada de texto */
 .input-with-icon input {
-  border: none;
-  outline: none;
-  background: transparent;
+  /* Ancho completo */
   width: 100%;
-  padding: 0.4rem;
-  font-size: 1rem;
+  /* Espaciado interno - espacio a la derecha para iconos */
+  padding: 12px 16px;
+  padding-right: 45px;
+  /* Borde gris claro - usa variable de theme para borde */
+  border: 1px solid var( --md-sys-color-on-primary);
+  /* Bordes redondeados */
+  border-radius: 8px;
+  /* Fondo gris muy claro - usa variable de theme para superficie */
+  background-color: var( --md-sys-color-on-primary);
+  /* Color del texto - usa variable de theme para texto en superficie */
   color: var(--md-sys-color-on-surface);
+  /* Tamaño de fuente */
+  font-size: 16px;
+  /* Transición suave para efectos interactivos */
+  transition: all 0.2s ease;
 }
 
-.input-with-icon i {
-  color: var(--md-sys-color-on-surface-variant);
-  margin-left: 1rem;
+/* Estado focus de los inputs - cuando el usuario hace clic */
+.input-with-icon input:focus {
+  /* Quita el contorno predeterminado */
+  outline: none;
+  /* Borde azul al enfocar - usa variable de theme para color primario */
+  border-color: var(--md-sys-color-primary);
+  /* Fondo blanco al enfocar */
+  background-color: var(--md-sys-color-surface-container-lowest);
+  /* Sombra azul sutil al enfocar */
+  box-shadow: var(--md-sys-color-shadow);
 }
 
+
+
+/* Botón para mostrar/ocultar contraseña (ojo) */
 .icon-eye {
-  background: transparent;
+  /* Posicionamiento absoluto dentro del contenedor */
+  position: absolute;
+  /* Distancia desde la derecha */
+  right: 16px;
+  /* Sin fondo ni borde */
+  background: none;
   border: none;
-  color: var(--md-sys-color-on-surface-variant);
-  font-size: 1.2rem;
+  /* Cursor de puntero */
   cursor: pointer;
-}
-
-.icon-eye:hover {
+  /* Color del icono - usa variable de theme para color primario */
   color: var(--md-sys-color-primary);
+  /* Sin padding */
+  padding: 0;
+  /* Centra el icono verticalmente */
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-/* Roles (columna derecha) */
+/* Sección de roles - contenedor principal */
 .roles-section {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1rem;
+  gap: 12px;
 }
 
+/* Etiqueta "Roles del Usuario:" */
+.roles-section label {
+  /* Grosor de fuente */
+  font-weight: 500;
+  /* Color del texto - usa variable de theme para texto en superficie */
+  color: var(--md-sys-color-on-surface);
+  /* Tamaño de fuente */
+  font-size: 14px;
+  /* Altura de línea */
+  line-height: 20px;
+}
+
+/* Contenedor blanco con sombra para los chips de roles */
 .roles-box {
+  /* Fondo blanco del contenedor - usa variable de theme para superficie más clara */
+  background-color: var(--md-sys-color-on-primary);
+  /* Borde gris claro - usa variable de theme para borde */
+  border: 1px solid var(--md-sys-color-on-primary);
+  /* Bordes redondeados */
+  border-radius: 8px;
+  /* Espaciado interno */
+  padding: 16px;
+  /* Sombra sutil para dar profundidad */
+  box-shadow: var(--md-sys-color-shadow);
+  /* Organiza chips en línea con salto automático */
   display: flex;
   flex-wrap: wrap;
-  gap: 0.75rem;
-  padding: 1rem;
-  background: var(--md-sys-color-surface-container-lowest);
-  border-radius: 12px;
+  /* Espacio entre chips */
+  gap: 8px;
+  /* Altura mínima para que se vea bien incluso con pocos roles */
+  min-height: 60px;
 }
 
+/* Chips individuales de roles (ej: "Empleado") */
 .role-chip {
-  padding: 0.6rem 1.2rem;
-  background-color: var(--md-sys-color-tertiary);
-  color: var(--md-sys-color-on-tertiary);
-  font-size: 1rem;
+  /* Espaciado interno */
+  padding: 8px 16px;
+  /* Fondo azul claro - usa variable de theme para contenedor primario */
+  background-color: var(--md-sys-color-on-primary);
+  /* Color del texto - usa variable de theme para texto en contenedor primario */
+  color: var(--md-sys-color-on-primary);
+  /* Bordes muy redondeados */
   border-radius: 20px;
-  display: inline-block;
-}
-
-.role-chip:hover {
-  background-color: var(--md-sys-color-tertiary-fixed);
-}
-
-/* Responsive: en pantallas chicas vuelve a 1 columna */
-@media (max-width: 768px) {
-  .profile-modal-content {
-    flex-direction: column;
-  }
+  /* Tamaño de fuente */
+  font-size: 14px;
+  /* Grosor de fuente */
+  font-weight: 500;
+  /* Centra el texto */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
