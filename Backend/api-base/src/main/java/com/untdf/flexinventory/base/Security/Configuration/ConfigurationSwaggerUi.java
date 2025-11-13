@@ -11,8 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
- * Clase de configuración para Swagger/OpenAPI.
- * <p>
+// * Clase de configuración para Swagger/OpenAPI.
+// * <p>
  * Esta clase configura la documentación Swagger de la API REST de FlexInventory,
  * estableciendo el esquema de autenticación JWT (Bearer Token), metadatos de la API
  * (nombre, descripción, contacto, licencia, etc.) y otros componentes necesarios
@@ -59,8 +59,8 @@ public class ConfigurationSwaggerUi {
                         addList("Bearer Authentication"))
                 .components(new Components().addSecuritySchemes
                         ("Bearer Authentication", createAPIKeyScheme()))
-                .info(new Info().title("API Users")
-                        .description("API in charge of logins, user authentication and authorization.")
+                .info(new Info().title("API Base")
+                        .description("API encargada de la gestion de Inventarios, Catalogos, Articulos y Atributos.")
                         .version("1.0"));
     }
 }
