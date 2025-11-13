@@ -1,0 +1,2 @@
+Levantar spring con Maven:
+	mvn spring-boot:run
