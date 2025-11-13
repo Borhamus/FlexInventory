@@ -31,6 +31,10 @@ echo "🚀 Iniciando api-user..."
 cd ../api-users || exit
 gnome-terminal -- bash -c "mvn spring-boot:run; exec bash"
 
+echo "🚀 Iniciando api-registro..."
+cd ../api-registro || exit
+gnome-terminal -- bash -c "mvn spring-boot:run; exec bash"
+
 # 4. Levantar el frontend
 echo "🌐 Iniciando frontend..."
 cd ../../Frontend/react-frontend || exit
