@@ -13,8 +13,14 @@ sudo docker compose up -d
 sleep 5 
 
 # 2. Restaurar la base de datos desde backup.sql
-echo "💾 Restaurando base de datos..."
-sudo docker exec -i FlexInventory psql -U flexinventory flexinventory < backup.sql
+echo "💾 Restaurando base de datos de api-base..."
+sudo docker exec -i FlexInventory psql -U flexinventory api-base < backup_base.sql
+
+echo "💾 Restaurando base de datos de api-users..."
+sudo docker exec -i FlexInventory psql -U flexinventory api-base < backup_users.sql
+
+echo "💾 Restaurando base de datos de api-registro..."
+sudo docker exec -i FlexInventory psql -U flexinventory api-base < backup_registro.sql
 
 # 3. Levantar los microservicios con Maven
 echo "🚀 Iniciando api-base..."
