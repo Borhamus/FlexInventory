@@ -158,8 +158,7 @@ CREATE TABLE "api-users"."user" (
     password text NOT NULL,
     state boolean NOT NULL,
     creation_date date NOT NULL,
-    email character varying NOT NULL,
-    tenant_uuid uuid DEFAULT gen_random_uuid() NOT NULL
+    email character varying NOT NULL
 );
 
 
@@ -285,9 +284,9 @@ COPY "api-users".role (id, name) FROM stdin;
 -- Data for Name: user; Type: TABLE DATA; Schema: api-users; Owner: flexinventory
 --
 
-COPY "api-users"."user" (id, name, password, state, creation_date, email, tenant_uuid) FROM stdin;
-3	test	$2a$10$yAkBvnEiRXA4K2jePYr5e.mM3SLfFpKWrjjPbX3k5jSzhlO5XUzYy	t	2025-05-19	test	5686df93-c821-4ee6-98cb-f738c3fd6969
-4	username	$2a$10$ek49uIgcm7ZEyXQeXEes8O1kKn1JU22c3bjfLmxI1VSstQcC0gxou	t	2025-05-19	email	d12e8632-80e4-4fe2-8f63-6c948eb59f37
+COPY "api-users"."user" (id, name, password, state, creation_date, email) FROM stdin;
+3	test	$2a$10$yAkBvnEiRXA4K2jePYr5e.mM3SLfFpKWrjjPbX3k5jSzhlO5XUzYy	t	2025-05-19	test
+4	username	$2a$10$ek49uIgcm7ZEyXQeXEes8O1kKn1JU22c3bjfLmxI1VSstQcC0gxou	t	2025-05-19	email
 \.
 
 
@@ -412,14 +411,6 @@ ALTER TABLE ONLY "api-users"."user"
 
 ALTER TABLE ONLY "api-users"."user"
     ADD CONSTRAINT user_unique_name UNIQUE (name);
-
-
---
--- Name: user user_unique_tenant; Type: CONSTRAINT; Schema: api-users; Owner: flexinventory
---
-
-ALTER TABLE ONLY "api-users"."user"
-    ADD CONSTRAINT user_unique_tenant UNIQUE (tenant_uuid);
 
 
 --
