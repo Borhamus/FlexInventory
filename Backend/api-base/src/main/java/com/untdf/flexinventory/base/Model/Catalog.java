@@ -26,7 +26,7 @@ public class Catalog {
     @Column
     private Date creation_date;
 
-    @OneToMany(mappedBy = "catalog")
+    @OneToMany(mappedBy = "catalog", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CatalogItem> items;
 
     /* ------------------- Getters y Setters -------------------*/

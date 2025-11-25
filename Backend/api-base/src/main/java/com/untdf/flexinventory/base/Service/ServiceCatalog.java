@@ -3,6 +3,7 @@ package com.untdf.flexinventory.base.Service;
 
 import com.untdf.flexinventory.base.Access.AccessCatalog;
 import com.untdf.flexinventory.base.Model.Catalog;
+import com.untdf.flexinventory.base.Model.CatalogItem;
 import com.untdf.flexinventory.base.Transferable.TransferableCatalog;
 import com.untdf.flexinventory.base.Transferable.TransferableCatalogCreate;
 import com.untdf.flexinventory.base.Transformer.TransformerCatalog;
@@ -74,7 +75,28 @@ public class ServiceCatalog {
 
         return transformer.toDTO(catalog);
     }
-
+    public void removeItemfromCatalog(int idCatalogo,int idItem){
+        if (access.findById(idCatalogo).isEmpty()){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Catalog with id: "+ idCatalogo + " was not found for edit."
+            );
+        }
+        Catalog catalogo = access.findById(idCatalogo).get();
+        CatalogItem itemAremover = null;
+        for (CatalogItem item : catalogo.getItems()){
+            if (item.getItem().getId()==idItem){
+                itemAremover= item;
+                break;
+            }
+        }
+        if (itemAremover == null){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Item with id: "+ idCatalogo + " was not found on catalog "+idCatalogo+"."
+            );
+        }
+        catalogo.getItems().remove(itemAremover);
+        access.save(catalogo);
+    }
     /* CREA UN CATALOGO */
     public TransferableCatalog createCatalog(TransferableCatalogCreate transferable){
 
