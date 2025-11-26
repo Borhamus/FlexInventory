@@ -114,9 +114,9 @@ public class ResourceCatalog {
             )
     })
     //--------------------------| Remove item from Catalog BY ID |--------------------------
-    @PutMapping(value = "/edit/{idCatalogo}/{idItem}")
-    public ResponseEntity<Void> removeItemOnCatalog(@PathVariable("idCatalogo") Integer idCatalogo,@PathVariable("idItem") Integer idItem){
-        service.removeItemfromCatalog(idCatalogo,idItem);
+    @PutMapping(value = "/edit/{idCatalogo}/idsItems")
+    public ResponseEntity<Void> removeItemOnCatalog(@PathVariable("idCatalogo") Integer idCatalogo,@RequestBody List<Integer> idItems){
+        service.removeItemfromCatalog(idCatalogo,idItems);
         return ResponseEntity.ok().build();
     }
     //--------------------------| Documentación API |--------------------------

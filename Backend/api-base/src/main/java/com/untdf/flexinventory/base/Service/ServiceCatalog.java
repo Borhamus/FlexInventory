@@ -2,6 +2,7 @@ package com.untdf.flexinventory.base.Service;
 
 
 import com.untdf.flexinventory.base.Access.AccessCatalog;
+import com.untdf.flexinventory.base.Access.AccessCatalogItem;
 import com.untdf.flexinventory.base.Model.Catalog;
 import com.untdf.flexinventory.base.Model.CatalogItem;
 import com.untdf.flexinventory.base.Transferable.TransferableCatalog;
@@ -11,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
-
 import java.util.Date;
 import java.util.List;
 
@@ -20,7 +20,8 @@ public class ServiceCatalog {
 
     @Autowired
     AccessCatalog access;
-
+    @Autowired
+    AccessCatalogItem accessCatalogItem;
     @Autowired
     TransformerCatalog transformer;
 
@@ -70,32 +71,26 @@ public class ServiceCatalog {
         catalog.setDescription(transferable.getDescription());
         catalog.setRevision_date(transferable.getRevision_date());
         catalog.setCreation_date(transferable.getCreation_date());
-
         access.save(catalog);
-
         return transformer.toDTO(catalog);
     }
-    public void removeItemfromCatalog(int idCatalogo,int idItem){
+    public void removeItemfromCatalog(int idCatalogo,List<Integer> idItems){
         if (access.findById(idCatalogo).isEmpty()){
             throw new ResponseStatusException(
                     HttpStatus.NOT_FOUND, "Catalog with id: "+ idCatalogo + " was not found for edit."
             );
         }
-        Catalog catalogo = access.findById(idCatalogo).get();
-        CatalogItem itemAremover = null;
-        for (CatalogItem item : catalogo.getItems()){
-            if (item.getItem().getId()==idItem){
-                itemAremover= item;
-                break;
+        int FilasAfectadas = accessCatalogItem.deleteItemsFromCatalog(idCatalogo,idItems);
+        if (FilasAfectadas != idItems.size()){
+            if (FilasAfectadas == 0){
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "No items were removed, not found this items on this catalog"
+                );
             }
-        }
-        if (itemAremover == null){
             throw new ResponseStatusException(
-                    HttpStatus.NOT_FOUND, "Item with id: "+ idCatalogo + " was not found on catalog "+idCatalogo+"."
+                    HttpStatus.NOT_FOUND, "Only " + FilasAfectadas + " of " + idItems.size() + " items were removed."
             );
         }
-        catalogo.getItems().remove(itemAremover);
-        access.save(catalogo);
     }
     /* CREA UN CATALOGO */
     public TransferableCatalog createCatalog(TransferableCatalogCreate transferable){
