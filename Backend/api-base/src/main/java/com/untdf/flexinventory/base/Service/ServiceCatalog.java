@@ -3,8 +3,10 @@ package com.untdf.flexinventory.base.Service;
 
 import com.untdf.flexinventory.base.Access.AccessCatalog;
 import com.untdf.flexinventory.base.Access.AccessCatalogItem;
+import com.untdf.flexinventory.base.Access.AccessItem;
 import com.untdf.flexinventory.base.Model.Catalog;
 import com.untdf.flexinventory.base.Model.CatalogItem;
+import com.untdf.flexinventory.base.Model.Item;
 import com.untdf.flexinventory.base.Transferable.TransferableCatalog;
 import com.untdf.flexinventory.base.Transferable.TransferableCatalogCreate;
 import com.untdf.flexinventory.base.Transformer.TransformerCatalog;
@@ -12,8 +14,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class ServiceCatalog {
@@ -22,6 +27,8 @@ public class ServiceCatalog {
     AccessCatalog access;
     @Autowired
     AccessCatalogItem accessCatalogItem;
+    @Autowired
+    AccessItem accessItem;
     @Autowired
     TransformerCatalog transformer;
 
@@ -74,6 +81,36 @@ public class ServiceCatalog {
         access.save(catalog);
         return transformer.toDTO(catalog);
     }
+
+    public void addItemsInCatalog(int idCatalogo,List<Integer> idItems){
+        Optional<Catalog> catalog = access.findById(idCatalogo);
+        if (catalog.isEmpty()){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Catalog with id: "+ idCatalogo + " was not found for edit."
+            );
+        }
+        List<Item> items = new ArrayList<>();
+        for (int IDitem : idItems) {
+            Optional<Item> item = accessItem.findById(IDitem);
+            if (item.isEmpty()) {
+                throw new ResponseStatusException(
+                        HttpStatus.NOT_FOUND, "Item with id: " + IDitem + " was not found ."
+                );
+            }
+            items.add(item.get());
+        }
+        Catalog catalogoDestino = catalog.get();
+        for(Item item : items){
+            if (!catalogoDestino.getItems().contains(item)){
+                CatalogItem catalogItem = new CatalogItem();
+                catalogItem.setCatalog(catalogoDestino);
+                catalogItem.setOrganisation(null);
+                catalogItem.setItem(item);
+                accessCatalogItem.save(catalogItem);
+            }
+        }
+    }
+
     public void removeItemfromCatalog(int idCatalogo,List<Integer> idItems){
         if (access.findById(idCatalogo).isEmpty()){
             throw new ResponseStatusException(
@@ -92,6 +129,22 @@ public class ServiceCatalog {
             );
         }
     }
+
+    public void moveItemsFromCatalogs(int idCatalogoOrigen,int idCatalogoDestino,List<Integer>idItems){
+        if (access.findById(idCatalogoOrigen).isEmpty()){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Catalog with id: "+ idCatalogoOrigen + " was not found for edit."
+            );
+        }
+        if (access.findById(idCatalogoDestino).isEmpty()){
+            throw new ResponseStatusException(
+                    HttpStatus.NOT_FOUND, "Catalog with id: "+ idCatalogoDestino + " was not found for edit."
+            );
+        }
+        removeItemfromCatalog(idCatalogoOrigen,idItems);
+        addItemsInCatalog(idCatalogoDestino,idItems);
+    }
+
     /* CREA UN CATALOGO */
     public TransferableCatalog createCatalog(TransferableCatalogCreate transferable){
 

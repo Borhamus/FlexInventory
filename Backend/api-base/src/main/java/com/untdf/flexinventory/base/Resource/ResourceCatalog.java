@@ -98,6 +98,30 @@ public class ResourceCatalog {
         return ResponseEntity.ok(service.editCatalog(transferableCatalog));
     }
     //--------------------------| Documentación API |--------------------------
+    @Operation(summary = "add item on Catalog by id.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "item has added successfully."),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "The Catalog or items was not found.",
+                    content = @Content() /* No content for 404 */),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error, check header response.",
+                    content = @Content() /* No content for 500 */
+            )
+    })
+    //--------------------------| Add item in catalog |--------------------------
+    @PutMapping(value = "/edit/{Catalogid}/ItemsId")
+    public ResponseEntity<Void> addItemsInCatalog(@PathVariable("Catalogid") Integer Catalogid, @RequestBody List<Integer> ItemsId){
+        service.addItemsInCatalog(Catalogid,ItemsId);
+        return ResponseEntity.ok().build();
+    }
+
+
+    //--------------------------| Documentación API |--------------------------
     @Operation(summary = "remove an Item by id.")
     @ApiResponses({
             @ApiResponse(
@@ -105,7 +129,7 @@ public class ResourceCatalog {
                     description = "Item remove  successfully."),
             @ApiResponse(
                     responseCode = "404",
-                    description = "The Catalog or Item was not found.",
+                    description = "The Catalog or Items was not found.",
                     content = @Content() /* No content for 404 */),
             @ApiResponse(
                     responseCode = "500",
@@ -119,6 +143,30 @@ public class ResourceCatalog {
         service.removeItemfromCatalog(idCatalogo,idItems);
         return ResponseEntity.ok().build();
     }
+
+    //--------------------------| Documentación API |--------------------------
+    @Operation(summary = "move an Item by id.")
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Item remove  successfully."),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "The Catalogs or Items was not found.",
+                    content = @Content() /* No content for 404 */),
+            @ApiResponse(
+                    responseCode = "500",
+                    description = "Internal server error, check header response.",
+                    content = @Content() /* No content for 500 */
+            )
+    })
+    //--------------------------| Remove item from Catalog BY ID |--------------------------
+    @PutMapping(value = "/edit/{idCatalogoOrigen}/{idCatalogoDestino}/idsItems")
+    public ResponseEntity<Void> moveItemsFromCatalogs(@PathVariable("idCatalogoOrigen") Integer idCatalogoOrigen,@PathVariable("idCatalogoDestino") Integer idCatalogoDestino,@RequestBody List<Integer> idItems){
+        service.moveItemsFromCatalogs(idCatalogoOrigen,idCatalogoDestino,idItems);
+        return ResponseEntity.ok().build();
+    }
+
     //--------------------------| Documentación API |--------------------------
     @Operation(summary = "Creates an Catalog")
     @ApiResponses({
