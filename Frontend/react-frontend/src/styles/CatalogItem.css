@@ -43,7 +43,13 @@
     height: 20vh;
     border-radius: 20px;
     background-color:rgb(255, 255, 255);
-    border: 1px solid black;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.catalog-item--button:hover {
+    background-color: #f0f0f0; 
+    transform: translateY(-0.5px); 
+    cursor: pointer; 
 }
 
 .catalog--description {
@@ -64,4 +70,8 @@
     align-items: center;
     justify-content: center;
     gap: 1vw;
+}
+
+.catalog-item--button.selected {
+  background-color: #d6d6d6; 
 }

@@ -1,12 +1,10 @@
-import React from "react";
 import "../styles/CatalogItem.css"
 
-function CatalogItem({image,name,onClick}) {
+function CatalogItem({image,name,onClick,isSelected}) {
     return (
-        <button className="catalog-item--button"> 
-            <img scr={image}/>
+        <button className={`catalog-item--button ${isSelected ? 'selected' : ''}`} onClick={onClick}> 
+            <img src={image}/>
             <span>{name}</span>
-            {/* onClick = {el pop up de la modal xd} */}
         </button>
     );
 }
