@@ -9,6 +9,9 @@ export default function EditarBorrarBotonesInventario({ itemId, onDeleteSuccess,
   const [isOpen, setIsOpen] = useState(false);
   const [formFields, setFormFields] = useState(null);
 
+  
+
+
   /* ------------------------| MODAL ELIMINAR |------------------------ */
   const modalEliminar = {
     title: "Eliminar elemento",
