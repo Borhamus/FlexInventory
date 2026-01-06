@@ -204,177 +204,177 @@ class CatalogItem(models.Model):
         return f'{self.catalog.name} contiene {self.item.name}'
 
 ### MODELOS PARA USUARIOS Y ROLES ###
-from django.db import models
-from django.contrib.auth.hashers import make_password, check_password
-from django.utils import timezone
-import uuid
-
-# NOTA IMPORTANTE:
-# Estos modelos están diseñados para residir en los esquemas replicados
-# por Tenant (via django-tenants), aislando así los usuarios y roles de cada inquilino.
-# El esquema "api-users" de tu SQL se traduce a las tablas dentro del esquema del Tenant.
-
-
-class Privilege(models.Model):
-    """
-    Define un permiso específico (ej. INVENTORY_READ, USER_CREATE).
-    Corresponde a la tabla "api-users".privilege.
-    Usamos IntegerField para smallserial (int2) para compatibilidad general.
-    """
-    id = models.SmallAutoField(primary_key=True)
-    name = models.CharField(
-        max_length=255, 
-        unique=True, 
-        null=False
-    )
-    description = models.TextField(null=True, blank=True)
-
-    class Meta:
-        db_table = 'privilege'
-        verbose_name = 'Privilegio'
-        verbose_name_plural = 'Privilegios'
-
-    def __str__(self):
-        return self.name
-
-class Role(models.Model):
-    """
-    Define un rol (ej. Gerente, Contador, Operador) al que se asignan Privilegios.
-    Corresponde a la tabla "api-users"."role".
-    """
-    id = models.SmallAutoField(primary_key=True)
-    name = models.CharField(
-        max_length=255, 
-        unique=True, 
-        null=False
-    )
-    
-    # Relación Many-to-Many: Un rol tiene muchos privilegios (PrivilegeRole)
-    privileges = models.ManyToManyField(
-        Privilege,
-        through='PrivilegeRole',
-        related_name='roles_with_privilege'
-    )
-
-    class Meta:
-        db_table = 'role'
-        verbose_name = 'Rol'
-        verbose_name_plural = 'Roles'
-
-    def __str__(self):
-        return self.name
-
-class User(models.Model):
-    """
-    Representa a un empleado o usuario interno del Tenant.
-    Corresponde a la tabla "api-users"."user".
-    """
-    id = models.SmallAutoField(primary_key=True)
-    name = models.CharField(max_length=255, unique=True, null=False)
-    
-    # Guardamos el hash de la contraseña.
-    password = models.CharField(max_length=255, null=False)
-    
-    # El campo state (bool NOT NULL)
-    state = models.BooleanField(default=True)
-    
-    # creation_date (date NOT NULL)
-    creation_date = models.DateField(default=timezone.now)
-    
-    # email (varchar NOT NULL) con restricción de unicidad
-    email = models.CharField(max_length=255, unique=True, null=False)
-
-    # tenant_uuid uuid DEFAULT gen_random_uuid() NOT NULL
-    # NOTA: En django-tenants, este campo no es estrictamente necesario 
-    # en los modelos de inquilinos, ya que el esquema ya aísla la pertenencia.
-    # Lo incluimos por fidelidad al SQL, pero es redundante bajo django-tenants.
-    tenant_uuid = models.UUIDField(
-        default=uuid.uuid4, 
-        unique=True, 
-        null=False
-    )
-
-    # Relación Many-to-Many: Un usuario tiene muchos roles (UserRole)
-    roles = models.ManyToManyField(
-        Role,
-        through='UserRole',
-        related_name='users_with_role'
-    )
-
-    class Meta:
-        db_table = 'user'
-        verbose_name = 'Usuario Interno'
-        verbose_name_plural = 'Usuarios Internos'
-
-    # Métodos para manejar la contraseña (buenas prácticas en Django)
-    def set_password(self, raw_password):
-        self.password = make_password(raw_password)
-
-    def check_password(self, raw_password):
-        return check_password(raw_password, self.password)
-
-    def __str__(self):
-        return self.name
-
-# --- Tablas Intermedias (Through Models) ---
-
-class PrivilegeRole(models.Model):
-    """
-    Asocia un Privilegio con un Rol (Many-to-Many).
-    Corresponde a la tabla "api-users".privilege_role.
-    """
-    id = models.SmallAutoField(primary_key=True)
-    
-    # id_privilege int2 NOT NULL | ON DELETE CASCADE
-    privilege = models.ForeignKey(
-        Privilege, 
-        on_delete=models.CASCADE, 
-        null=False
-    )
-    
-    # id_role int2 NOT NULL | ON DELETE CASCADE
-    role = models.ForeignKey(
-        Role, 
-        on_delete=models.CASCADE, 
-        null=False
-    )
-
-    class Meta:
-        db_table = 'privilege_role'
-        verbose_name = 'Privilegio-Rol'
-        verbose_name_plural = 'Privilegios-Roles'
-        # Podrías añadir unique_together = ('privilege', 'role') si es necesario.
-
-    def __str__(self):
-        return f'{self.role.name} tiene permiso: {self.privilege.name}'
-
-
-class UserRole(models.Model):
-    """
-    Asocia un Usuario con un Rol (Many-to-Many).
-    Corresponde a la tabla "api-users".user_role.
-    """
-    id = models.SmallAutoField(primary_key=True)
-    
-    # id_role int2 NOT NULL | ON DELETE CASCADE
-    role = models.ForeignKey(
-        Role, 
-        on_delete=models.CASCADE, 
-        null=False
-    )
-    
-    # id_user int2 NOT NULL | ON DELETE CASCADE
-    user = models.ForeignKey(
-        User, 
-        on_delete=models.CASCADE, 
-        null=False
-    )
-
-    class Meta:
-        db_table = 'user_role'
-        verbose_name = 'Usuario-Rol'
-        verbose_name_plural = 'Usuarios-Roles'
-        # Podrías añadir unique_together = ('user', 'role') si es necesario.
-
-    def __str__(self):
-        return f'{self.user.name} es {self.role.name}'
+#from django.db import models
+#from django.contrib.auth.hashers import make_password, check_password
+#from django.utils import timezone
+#import uuid
+#
+## NOTA IMPORTANTE:
+## Estos modelos están diseñados para residir en los esquemas replicados
+## por Tenant (via django-tenants), aislando así los usuarios y roles de cada inquilino.
+## El esquema "api-users" de tu SQL se traduce a las tablas dentro del esquema del Tenant.
+#
+#
+#class Privilege(models.Model):
+#    """
+#    Define un permiso específico (ej. INVENTORY_READ, USER_CREATE).
+#    Corresponde a la tabla "api-users".privilege.
+#    Usamos IntegerField para smallserial (int2) para compatibilidad general.
+#    """
+#    id = models.SmallAutoField(primary_key=True)
+#    name = models.CharField(
+#        max_length=255, 
+#        unique=True, 
+#        null=False
+#    )
+#    description = models.TextField(null=True, blank=True)
+#
+#    class Meta:
+#        db_table = 'privilege'
+#        verbose_name = 'Privilegio'
+#        verbose_name_plural = 'Privilegios'
+#
+#    def __str__(self):
+#        return self.name
+#
+#class Role(models.Model):
+#    """
+#    Define un rol (ej. Gerente, Contador, Operador) al que se asignan Privilegios.
+#    Corresponde a la tabla "api-users"."role".
+#    """
+#    id = models.SmallAutoField(primary_key=True)
+#    name = models.CharField(
+#        max_length=255, 
+#        unique=True, 
+#        null=False
+#    )
+#    
+#    # Relación Many-to-Many: Un rol tiene muchos privilegios (PrivilegeRole)
+#    privileges = models.ManyToManyField(
+#        Privilege,
+#        through='PrivilegeRole',
+#        related_name='roles_with_privilege'
+#    )
+#
+#    class Meta:
+#        db_table = 'role'
+#        verbose_name = 'Rol'
+#        verbose_name_plural = 'Roles'
+#
+#    def __str__(self):
+#        return self.name
+#
+#class User(models.Model):
+#    """
+#    Representa a un empleado o usuario interno del Tenant.
+#    Corresponde a la tabla "api-users"."user".
+#    """
+#    id = models.SmallAutoField(primary_key=True)
+#    name = models.CharField(max_length=255, unique=True, null=False)
+#    
+#    # Guardamos el hash de la contraseña.
+#    password = models.CharField(max_length=255, null=False)
+#    
+#    # El campo state (bool NOT NULL)
+#    state = models.BooleanField(default=True)
+#    
+#    # creation_date (date NOT NULL)
+#    creation_date = models.DateField(default=timezone.now)
+#    
+#    # email (varchar NOT NULL) con restricción de unicidad
+#    email = models.CharField(max_length=255, unique=True, null=False)
+#
+#    # tenant_uuid uuid DEFAULT gen_random_uuid() NOT NULL
+#    # NOTA: En django-tenants, este campo no es estrictamente necesario 
+#    # en los modelos de inquilinos, ya que el esquema ya aísla la pertenencia.
+#    # Lo incluimos por fidelidad al SQL, pero es redundante bajo django-tenants.
+#    tenant_uuid = models.UUIDField(
+#        default=uuid.uuid4, 
+#        unique=True, 
+#        null=False
+#    )
+#
+#    # Relación Many-to-Many: Un usuario tiene muchos roles (UserRole)
+#    roles = models.ManyToManyField(
+#        Role,
+#        through='UserRole',
+#        related_name='users_with_role'
+#    )
+#
+#    class Meta:
+#        db_table = 'user'
+#        verbose_name = 'Usuario Interno'
+#        verbose_name_plural = 'Usuarios Internos'
+#
+#    # Métodos para manejar la contraseña (buenas prácticas en Django)
+#    def set_password(self, raw_password):
+#        self.password = make_password(raw_password)
+#
+#    def check_password(self, raw_password):
+#        return check_password(raw_password, self.password)
+#
+#    def __str__(self):
+#        return self.name
+#
+## --- Tablas Intermedias (Through Models) ---
+#
+#class PrivilegeRole(models.Model):
+#    """
+#    Asocia un Privilegio con un Rol (Many-to-Many).
+#    Corresponde a la tabla "api-users".privilege_role.
+#    """
+#    id = models.SmallAutoField(primary_key=True)
+#    
+#    # id_privilege int2 NOT NULL | ON DELETE CASCADE
+#    privilege = models.ForeignKey(
+#        Privilege, 
+#        on_delete=models.CASCADE, 
+#        null=False
+#    )
+#    
+#    # id_role int2 NOT NULL | ON DELETE CASCADE
+#    role = models.ForeignKey(
+#        Role, 
+#        on_delete=models.CASCADE, 
+#        null=False
+#    )
+#
+#    class Meta:
+#        db_table = 'privilege_role'
+#        verbose_name = 'Privilegio-Rol'
+#        verbose_name_plural = 'Privilegios-Roles'
+#        # Podrías añadir unique_together = ('privilege', 'role') si es necesario.
+#
+#    def __str__(self):
+#        return f'{self.role.name} tiene permiso: {self.privilege.name}'
+#
+#
+#class UserRole(models.Model):
+#    """
+#    Asocia un Usuario con un Rol (Many-to-Many).
+#    Corresponde a la tabla "api-users".user_role.
+#    """
+#    id = models.SmallAutoField(primary_key=True)
+#    
+#    # id_role int2 NOT NULL | ON DELETE CASCADE
+#    role = models.ForeignKey(
+#        Role, 
+#        on_delete=models.CASCADE, 
+#        null=False
+#    )
+#    
+#    # id_user int2 NOT NULL | ON DELETE CASCADE
+#    user = models.ForeignKey(
+#        User, 
+#        on_delete=models.CASCADE, 
+#        null=False
+#    )
+#
+#    class Meta:
+#        db_table = 'user_role'
+#        verbose_name = 'Usuario-Rol'
+#        verbose_name_plural = 'Usuarios-Roles'
+#        # Podrías añadir unique_together = ('user', 'role') si es necesario.
+#
+#    def __str__(self):
+#        return f'{self.user.name} es {self.role.name}'
