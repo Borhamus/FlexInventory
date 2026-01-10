@@ -22,22 +22,24 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
 import java.util.List;
 
-
 /**
  * Configuración principal de seguridad para la API base de FlexInventory.
  * <p>
  * Esta clase configura las reglas de seguridad HTTP para la aplicación,
  * incluyendo:
  * <ul>
- *     <li>Desactivación de CSRF (no se usa con JWT).</li>
- *     <li>Protección de endpoints y definición de rutas públicas.</li>
- *     <li>Aplicación de filtros JWT para autenticación.</li>
- *     <li>Política de sesión sin estado (stateless).</li>
+ * <li>Desactivación de CSRF (no se usa con JWT).</li>
+ * <li>Protección de endpoints y definición de rutas públicas.</li>
+ * <li>Aplicación de filtros JWT para autenticación.</li> >>JWT: Json Web Token
+ * <li>Política de sesión sin estado (stateless).</li>
  * </ul>
  * </p>
  *
- * <p>Además, define las reglas de configuración de CORS necesarias
- * para permitir la comunicación entre el backend y el cliente React.</p>
+ * <p>
+ * Además, define las reglas de configuración de CORS necesarias >> CORS:
+ * Cross-Origin Resource Sharing
+ * para permitir la comunicación entre el backend y el cliente React.
+ * </p>
  *
  * @author Milton Gomez
  */
@@ -46,7 +48,8 @@ import java.util.List;
 public class SecurityConfiguration {
 
     /**
-     * Filtro JWT que se ejecuta antes del filtro de autenticación por nombre de usuario y contraseña.
+     * Filtro JWT que se ejecuta antes del filtro de autenticación por nombre de
+     * usuario y contraseña.
      * Se encarga de validar el token JWT en cada solicitud.
      */
     @Autowired
@@ -64,16 +67,20 @@ public class SecurityConfiguration {
      * <p>
      * Se configuran las siguientes reglas:
      * <ul>
-     *     <li>Se permite acceso sin autenticación a rutas públicas como /auth/** y documentación Swagger.</li>
-     *     <li>Se exige autenticación para el resto de los endpoints.</li>
-     *     <li>Se aplica el filtro JWT antes del filtro de autenticación de Spring Security.</li>
-     *     <li>Se configura el manejo de sesiones como STATELESS (sin sesiones HTTP).</li>
+     * <li>Se permite acceso sin autenticación a rutas públicas como /auth/** y
+     * documentación Swagger.</li>
+     * <li>Se exige autenticación para el resto de los endpoints.</li>
+     * <li>Se aplica el filtro JWT antes del filtro de autenticación de Spring
+     * Security.</li>
+     * <li>Se configura el manejo de sesiones como STATELESS (sin sesiones
+     * HTTP).</li>
      * </ul>
      * </p>
      *
      * @param http instancia de configuración de {@link HttpSecurity}
      * @return {@link SecurityFilterChain} configurado para Spring Security
-     * @throws Exception si ocurre un error en la construcción de la cadena de filtros
+     * @throws Exception si ocurre un error en la construcción de la cadena de
+     *                   filtros
      */
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
@@ -81,16 +88,18 @@ public class SecurityConfiguration {
                 .cors(Customizer.withDefaults()) // Permitimos el CORS
                 .csrf(csrf -> csrf.disable()) // Desactivamos el csrf ya que no lo usamos nosotros
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(  // Permitimos el acceso libre a todas las siguientes rutas...
+                        .requestMatchers( // Permitimos el acceso libre a todas las siguientes rutas...
                                 "/auth/**", // Registro/Inicio de sesión
-                                "/v3/api-docs/**",   //
-                                "/swagger-ui/**",    // Openapi y Swagger
-                                "/swagger-ui.html",  //
-                                "/openapi/**"        //
+                                "/v3/api-docs/**", //
+                                "/swagger-ui/**", // Openapi y Swagger
+                                "/swagger-ui.html", //
+                                "/openapi/**" //
                         ).permitAll()
                         .anyRequest().authenticated() // El resto requiere authenticacion
                 )
-                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // La sesión del usuario no posee estado
+                .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS)) // La sesión del
+                                                                                                        // usuario no
+                                                                                                        // posee estado
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class); // Añadimos el filtro de JWT
         return http.build();
     }
@@ -98,11 +107,13 @@ public class SecurityConfiguration {
     /**
      * Configura las reglas CORS (Cross-Origin Resource Sharing) de la API.
      * <p>
-     * Permite peticiones desde la aplicación React que corre en <code>http://localhost:3000</code>,
+     * Permite peticiones desde la aplicación React que corre en
+     * <code>http://localhost:3000</code>,
      * y autoriza métodos y cabeceras típicas necesarias para operaciones seguras.
      * </p>
      *
-     * @return {@link CorsConfigurationSource} con la política de CORS aplicada globalmente
+     * @return {@link CorsConfigurationSource} con la política de CORS aplicada
+     *         globalmente
      */
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -121,18 +132,20 @@ public class SecurityConfiguration {
     /**
      * Configura el gestor de autenticación de Spring Security.
      * <p>
-     * Usa un {@link UserDetailsService} personalizado junto con un {@link PasswordEncoder}
+     * Usa un {@link UserDetailsService} personalizado junto con un
+     * {@link PasswordEncoder}
      * para validar las credenciales de los usuarios.
      * </p>
      *
-     * @param http configuración de seguridad HTTP
+     * @param http                  configuración de seguridad HTTP
      * @param bCryptPasswordEncoder codificador de contraseñas
-     * @param userDetailsService servicio de detalles del usuario
+     * @param userDetailsService    servicio de detalles del usuario
      * @return instancia de {@link AuthenticationManager}
      * @throws Exception si ocurre un error durante la configuración
      */
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder, UserDetailsService userDetailsService)
+    public AuthenticationManager authenticationManager(HttpSecurity http, BCryptPasswordEncoder bCryptPasswordEncoder,
+            UserDetailsService userDetailsService)
             throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
                 .userDetailsService(serviceUserDetail)
@@ -141,11 +154,11 @@ public class SecurityConfiguration {
                 .build();
     }
 
-
     /**
      * Define el codificador de contraseñas a utilizar.
      * <p>
-     * Utiliza el algoritmo BCrypt para cifrar y verificar contraseñas de forma segura.
+     * Utiliza el algoritmo BCrypt para cifrar y verificar contraseñas de forma
+     * segura.
      * </p>
      *
      * @return instancia de {@link BCryptPasswordEncoder}

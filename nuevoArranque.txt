@@ -1,0 +1,8 @@
+1 abrir docker.
+2 \FlexInventory\Backend\api-base  		-> mvn spring-boot:run
+3 \FlexInventory\Backend\api-users 		-> mvn spring-boot:run
+4 tengo que abrir una powershel desde el escritorio, meter: cd "D:\Facultad\3ro\Lab Sof\FlexInventory\Frontend\react-frontend"
+y luego						-> npm start
+
+y ya esta.
+Ojo esto es para joako nomas.
