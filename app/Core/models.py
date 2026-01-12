@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, ForeignKey, Tab
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
-from app.database import Base
+from app.db_config import Base
 
 # Tabla intermedia para la relación many-to-many entre Catalogo e Item
 catalogo_item = Table(
