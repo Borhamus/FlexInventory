@@ -9,6 +9,7 @@ from models import Users
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
 from jose import JWTError, jwt
+import enum
 
 router = APIRouter(
     prefix="/auth",
@@ -24,6 +25,8 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl='auth/token')
 class CreateUserRequest(BaseModel):
     username: str
     password: str
+    role: UserRole  # Ahora pedimos el rol al crear
+    owner_id: int = None # Opcional, solo necesario si creas un empleado manualmente
 
 class Token(BaseModel):
     access_token: str
@@ -43,6 +46,8 @@ async def create_user(db: db_dependency, create_user_request: CreateUserRequest)
     create_user_model = Users(
         username=create_user_request.username,
         hashed_password=bcrypt_context.hash(create_user_request.password),
+        role=create_user_request.role,
+        owner_id=create_user_request.owner_id
     )
     db.add(create_user_model)
     db.commit()
@@ -55,6 +60,7 @@ async def login_for_access_token(form_data: Annotated[OAuth2PasswordRequestForm,
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Incorrect username or password")
+    
     token = create_access_token(user.username, user.id, timedelta(minutes=30))
     
     return {"access_token": token, "token_type": "bearer"}
