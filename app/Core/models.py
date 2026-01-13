@@ -3,6 +3,7 @@ from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db_config import Base
+import enum
 
 # Tabla intermedia para la relación many-to-many entre Catalogo e Item
 catalogo_item = Table(
@@ -51,3 +52,22 @@ class Catalogo(Base):
     
     # Relación: Un catálogo puede tener muchos items (de cualquier inventario)
     items = relationship("Item", secondary=catalogo_item, back_populates="catalogos")
+
+class UserRole(str, enum.Enum):
+    tenant = "tenant"
+    notenant = "notenant"
+
+class Users(Base):
+    __tablename__ = "users"
+
+    id = Column(Integer, primary_key=True, index=True)
+    username = Column(String, unique=True)
+    hashed_password = Column(String)
+
+    #Correo electronico opcional
+    email = Column(String, unique=True, nullable=True)
+    
+    # Asegúrate de tener estas dos columnas:
+    role = Column(String, default=UserRole.notenant) 
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
+
