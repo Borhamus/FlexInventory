@@ -1,0 +1,11 @@
+
+# Git Ignore:
+
+# Basura Cache
+**/__pycache__ 
+
+# Entorno Virtual
+venv 
+
+# Base de datos de Test
+todosapp.db

@@ -4,6 +4,7 @@ import enum
 
 class UserRole(str, enum.Enum):
     tenant = "tenant"
+    administrator = "administrator" 
     employee = "employee"
 
 class Users(Base):
@@ -12,8 +13,7 @@ class Users(Base):
     id = Column(Integer, primary_key=True, index=True)
     username = Column(String, unique=True)
     hashed_password = Column(String)
-    role = Column(String, default=UserRole.employee) # Campo para el tipo de usuario
     
-    # Autorreferencia: Si es empleado, apunta al ID del tenant.
-    # Si es tenant, este campo es NULL.
+    # Asegúrate de tener estas dos columnas:
+    role = Column(String, default=UserRole.employee) 
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=True)
