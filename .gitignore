@@ -6,6 +6,6 @@
 
 # Entorno Virtual
 venv 
-
+.venv
 # Base de datos de Test
 todosapp.db
