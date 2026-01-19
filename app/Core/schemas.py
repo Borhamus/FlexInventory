@@ -5,23 +5,25 @@ from datetime import datetime
 # ==================== Schemas para Inventario ====================
 
 class InventarioBase(BaseModel):
-    nombre: str = Field(..., min_length=1, max_length=255)
-    atributos: Dict[str, Any] = Field(default_factory=dict)
+    nombre: str = Field(..., min_length=1, max_length=50)
+    atributos: Dict[str, str] = Field(default_factory=dict)
 
 class InventarioCreate(InventarioBase):
     pass
 
 class InventarioUpdate(BaseModel):
-    nombre: Optional[str] = Field(None, min_length=1, max_length=255)
-    atributos: Optional[Dict[str, Any]] = None
+    nombre: Optional[str] = Field(None, min_length=1, max_length=50)
+    atributos: Optional[Dict[str, str]] = None
 
 class InventarioResponse(InventarioBase):
     id: int
     creado_en: datetime
     actualizado_en: datetime
-    
     model_config = ConfigDict(from_attributes=True)
 
+class InventarioAtributoAdd(BaseModel):
+    nombre: str = Field(..., min_length=1, max_length=100)
+    tipo: str
 # ==================== Schemas para Item ====================
 
 class ItemBase(BaseModel):

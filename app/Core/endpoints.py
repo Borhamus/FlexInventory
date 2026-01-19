@@ -1,24 +1,30 @@
 from fastapi import APIRouter, Depends, HTTPException
 from typing import List
 from sqlalchemy.orm import Session
-
+from sqlalchemy.orm.attributes import flag_modified
 from . import schemas, models
 from app.db_config import get_db
-from .validators import validate_item_attributes
+from .validators import *
 
 
 router = APIRouter()
 
 
 # ==================== ENDPOINTS DE INVENTARIO ====================
-
 @router.post("/inventarios/", response_model=schemas.InventarioResponse, status_code=201)
 def create_inventario(inventario: schemas.InventarioCreate, db: Session = Depends(get_db)):
     db_inventario = db.query(models.Inventario).filter(models.Inventario.nombre == inventario.nombre).first()
     if db_inventario:
-        raise HTTPException(status_code=400, detail="El inventario ya existe")
-    
-    new_inventario = models.Inventario(**inventario.model_dump())
+        raise HTTPException(
+            status_code=400, 
+            detail=f"Ya existe un inventario con el nombre '{inventario.nombre}'"
+        )
+    data = inventario.model_dump()
+    if "atributos" in data and data["atributos"]:
+        data["atributos"] = validate_inventario_atributos(data["atributos"])
+    else:
+        data["atributos"] = {}
+    new_inventario = models.Inventario(**data)
     db.add(new_inventario)
     db.commit()
     db.refresh(new_inventario)
@@ -29,33 +35,90 @@ def get_inventarios(db: Session = Depends(get_db)):
     inventarios = db.query(models.Inventario).all()
     return inventarios
 
+
 @router.get("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse)
-def get_inventario(inventario_id: int, db: Session = Depends(get_db)):                
-    inventario = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
+def get_inventario(inventario_id: int, db: Session = Depends(get_db)):
+    inventario = db.query(models.Inventario).filter( models.Inventario.id == inventario_id ).first()
     if not inventario:
-        raise HTTPException(status_code=404, detail="Inventario no encontrado")
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Inventario con ID {inventario_id} no encontrado"
+        )
     return inventario
 
 @router.put("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse)
-def update_inventario(inventario_id: int, inventario: schemas.InventarioUpdate, db: Session = Depends(get_db)):
-    db_inventario = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
+def update_inventario( inventario_id: int, inventario: schemas.InventarioUpdate, db: Session = Depends(get_db) ):
+    db_inventario = db.query(models.Inventario).filter( models.Inventario.id == inventario_id ).first()
     if not db_inventario:
-        raise HTTPException(status_code=404, detail="Inventario no encontrado")
-    
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Inventario con ID {inventario_id} no encontrado"
+        )
     update_data = inventario.model_dump(exclude_unset=True)
+    if "atributos" in update_data and update_data["atributos"]:
+        update_data["atributos"] = validate_inventario_atributos(update_data["atributos"])
+        item_count = db.query(models.Item).filter(
+            models.Item.inventario_id == inventario_id
+        ).count()
     for field, value in update_data.items():
         setattr(db_inventario, field, value)
-    
+    if "atributos" in update_data:
+        flag_modified(db_inventario, "atributos")
     db.commit()
     db.refresh(db_inventario)
     return db_inventario
 
+
+@router.post("/inventarios/{inventario_id}/atributos", response_model=schemas.InventarioResponse)
+def add_atributo_inventario( inventario_id: int, atributo: dict, db: Session = Depends(get_db) ):
+    inventario = db.query(models.Inventario).filter( models.Inventario.id == inventario_id ).first()
+    if not inventario:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Inventario con ID {inventario_id} no encontrado"
+        )
+    if not atributo or len(atributo) != 1:  #el endpoint es para agregar un solo atributo, si le pones mas se jode xd
+        raise HTTPException(
+            status_code=400,
+            detail="Debe proporcionar exactamente un atributo con formato {nombre: tipo}"
+        )
+    nombre_atributo = list(atributo.keys())[0]
+    tipo_atributo = list(atributo.values())[0]
+    validated_atributo = validate_single_atributo(nombre_atributo, tipo_atributo)
+    if inventario.atributos is None:
+        inventario.atributos = {}
+    validate_atributo_not_exists(inventario.atributos, nombre_atributo)
+    inventario.atributos.update(validated_atributo)
+    flag_modified(inventario, "atributos")
+    db.commit()
+    db.refresh(inventario)
+    return inventario
+
+
+@router.delete("/inventarios/{inventario_id}/atributos/{atributo_nombre}", response_model=schemas.InventarioResponse)
+def delete_atributo_inventario(inventario_id: int, atributo_nombre: str, db: Session = Depends(get_db) ):
+    inventario = db.query(models.Inventario).filter( models.Inventario.id == inventario_id).first()
+    if not inventario:
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Inventario con ID {inventario_id} no encontrado"
+        )
+    validate_atributo_exists(inventario.atributos, atributo_nombre)
+    del inventario.atributos[atributo_nombre]
+    flag_modified(inventario, "atributos")
+    db.commit()
+    db.refresh(inventario)
+    return inventario
+
+
 @router.delete("/inventarios/{inventario_id}", status_code=204)
 def delete_inventario(inventario_id: int, db: Session = Depends(get_db)):
-    db_inventario = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
+    db_inventario = db.query(models.Inventario).filter( models.Inventario.id == inventario_id ).first()
     if not db_inventario:
-        raise HTTPException(status_code=404, detail="Inventario no encontrado")
-    
+        raise HTTPException(
+            status_code=404, 
+            detail=f"Inventario con ID {inventario_id} no encontrado"
+        )
     db.delete(db_inventario)
     db.commit()
     return None
