@@ -184,3 +184,33 @@ async def get_my_employees(user: user_dependency, db: db_dependency):
         "Tenant": tenant_name,
         "Employees": employees_list
     }
+
+async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]):
+    """
+    Obtener usuario actual desde el token JWT
+    Para usar en otros módulos
+    """
+    try:
+        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username: str = payload.get("sub")
+        user_id: int = payload.get("id")
+        role: str = payload.get("role")
+        owner_id: int = payload.get("owner_id")
+        
+        if username is None or user_id is None:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED, 
+                detail="Could not validate user."
+            )
+        
+        return {
+            "username": username, 
+            "id": user_id, 
+            "role": role, 
+            "owner_id": owner_id
+        }
+    except JWTError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED, 
+            detail="Could not validate user."
+        )

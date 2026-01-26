@@ -1,231 +1,139 @@
-from fastapi import APIRouter, Depends, HTTPException
-from typing import List
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from typing import List
+import re
 
-from . import schemas, models
-from app.db_config import get_db
-from .validators import validate_item_attributes
+from app.db_config import get_db, create_tenant_schema
+from app.Core import models, schemas
+from passlib.context import CryptContext
 
+router = APIRouter(prefix="/tenants", tags=["Tenants"])
 
-router = APIRouter()
+# Contexto para hashear passwords
+bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+def generate_schema_name(tenant_name: str) -> str:
+    """Generar nombre de esquema válido desde el nombre del tenant"""
+    # Convertir a minúsculas, reemplazar espacios y caracteres especiales
+    schema = re.sub(r'[^a-z0-9]', '_', tenant_name.lower())
+    schema = f"tenant_{schema}"
+    return schema[:63]  # Límite de PostgreSQL para nombres
 
-# ==================== ENDPOINTS DE INVENTARIO ====================
+# ==================== ENDPOINTS ====================
 
-@router.post("/inventarios/", response_model=schemas.InventarioResponse, status_code=201)
-def create_inventario(inventario: schemas.InventarioCreate, db: Session = Depends(get_db)):
-    db_inventario = db.query(models.Inventario).filter(models.Inventario.nombre == inventario.nombre).first()
-    if db_inventario:
-        raise HTTPException(status_code=400, detail="El inventario ya existe")
+@router.post("/", response_model=schemas.TenantResponse, status_code=status.HTTP_201_CREATED)
+def create_tenant(
+    tenant_data: schemas.TenantCreate,
+    db: Session = Depends(get_db)
+):
+    """
+    Crear un nuevo tenant con su esquema y usuario owner
     
-    new_inventario = models.Inventario(**inventario.model_dump())
-    db.add(new_inventario)
-    db.commit()
-    db.refresh(new_inventario)
-    return new_inventario
-
-@router.get("/inventarios/all", response_model=List[schemas.InventarioResponse])
-def get_inventarios(db: Session = Depends(get_db)):
-    inventarios = db.query(models.Inventario).all()
-    return inventarios
-
-@router.get("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse)
-def get_inventario(inventario_id: int, db: Session = Depends(get_db)):                
-    inventario = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
-    if not inventario:
-        raise HTTPException(status_code=404, detail="Inventario no encontrado")
-    return inventario
-
-@router.put("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse)
-def update_inventario(inventario_id: int, inventario: schemas.InventarioUpdate, db: Session = Depends(get_db)):
-    db_inventario = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
-    if not db_inventario:
-        raise HTTPException(status_code=404, detail="Inventario no encontrado")
+    Este endpoint crea:
+    1. Un registro en la tabla tenants
+    2. Un usuario owner para ese tenant
+    3. Un esquema en PostgreSQL con las tablas de la aplicación
+    """
+    # Verificar si el email ya existe
+    existing_user = db.query(models.Users).filter(
+        models.Users.email == tenant_data.owner_email
+    ).first()
     
-    update_data = inventario.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(db_inventario, field, value)
+    if existing_user:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El email ya está registrado"
+        )
     
-    db.commit()
-    db.refresh(db_inventario)
-    return db_inventario
-
-@router.delete("/inventarios/{inventario_id}", status_code=204)
-def delete_inventario(inventario_id: int, db: Session = Depends(get_db)):
-    db_inventario = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
-    if not db_inventario:
-        raise HTTPException(status_code=404, detail="Inventario no encontrado")
+    # Verificar si el username ya existe
+    existing_username = db.query(models.Users).filter(
+        models.Users.username == tenant_data.owner_username
+    ).first()
     
-    db.delete(db_inventario)
-    db.commit()
-    return None
-
-# ==================== ENDPOINTS DE ITEMS ====================
-
-@router.post("/items/", response_model=schemas.ItemResponse, status_code=201)
-def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
+    if existing_username:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="El nombre de usuario ya está en uso"
+        )
     
-    # 1. Verificar que el inventario existe
-    inventario = db.query(models.Inventario)\
-        .filter(models.Inventario.id == item.inventario_id)\
-        .first()
-
-    if not inventario:
-        raise HTTPException(status_code=404, detail="Inventario no encontrado")
-
-    # 2. Validar atributos del item contra el inventario
-    validated_atributos = validate_item_attributes(
-        item_atributos=item.atributos,
-        inventario_atributos=inventario.atributos,
-        inventario_nombre=inventario.nombre
-    )
-
-    # 3. Crear item con datos validados
-    item_data = item.model_dump()
-    item_data["atributos"] = validated_atributos
-
-    new_item = models.Item(**item_data)
-    db.add(new_item)
-    db.commit()
-    db.refresh(new_item)
-
-    return new_item
-
-@router.get("/items/", response_model=List[schemas.ItemResponse])
-def get_items(inventario_id: int = None, db: Session = Depends(get_db)):
-    """Obtener todos los items, opcionalmente filtrados por inventario"""
-    query = db.query(models.Item)
-    if inventario_id:
-        query = query.filter(models.Item.inventario_id == inventario_id)
-    items = query.all()
-    return items
-
-@router.get("/items/{item_id}", response_model=schemas.ItemResponse)
-def get_item(item_id: int, db: Session = Depends(get_db)):
-    item = db.query(models.Item).filter(models.Item.id == item_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Item no encontrado")
-    return item
-
-@router.put("/items/{item_id}", response_model=schemas.ItemResponse)
-def update_item(item_id: int, item: schemas.ItemUpdate, db: Session = Depends(get_db)):
-    """Actualizar un item"""
-    db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
-    if not db_item:
-        raise HTTPException(status_code=404, detail="Item no encontrado")
+    # Generar nombre de esquema
+    schema_name = generate_schema_name(tenant_data.name)
     
-    update_data = item.model_dump(exclude_unset=True)
+    # Verificar si el esquema ya existe
+    existing_tenant = db.query(models.Tenant).filter(
+        models.Tenant.schema_name == schema_name
+    ).first()
     
-    # Si se actualiza el inventario_id, verificar que existe
-    if 'inventario_id' in update_data:
-        inventario = db.query(models.Inventario).filter(models.Inventario.id == update_data['inventario_id']).first()
-        if not inventario:
-            raise HTTPException(status_code=404, detail="Inventario no encontrado")
+    if existing_tenant:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Ya existe un tenant con ese nombre. Schema generado: {schema_name}"
+        )
     
-    for field, value in update_data.items():
-        setattr(db_item, field, value)
-    
-    db.commit()
-    db.refresh(db_item)
-    return db_item
-
-@router.delete("/items/{item_id}", status_code=204)
-def delete_item(item_id: int, db: Session = Depends(get_db)):
-    """Eliminar un item"""
-    db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
-    if not db_item:
-        raise HTTPException(status_code=404, detail="Item no encontrado")
-    
-    db.delete(db_item)
-    db.commit()
-    return None
-
-# ==================== ENDPOINTS DE CATÁLOGOS ====================
-
-@router.post("/catalogos/", response_model=schemas.CatalogoResponse, status_code=201)
-def create_catalogo(catalogo: schemas.CatalogoCreate, db: Session = Depends(get_db)):
-    """Crear un nuevo catálogo"""
-    db_catalogo = db.query(models.Catalogo).filter(models.Catalogo.nombre == catalogo.nombre).first()
-    if db_catalogo:
-        raise HTTPException(status_code=400, detail="El catálogo ya existe")
-    
-    new_catalogo = models.Catalogo(**catalogo.model_dump())
-    db.add(new_catalogo)
-    db.commit()
-    db.refresh(new_catalogo)
-    return new_catalogo
-
-@router.get("/catalogos/", response_model=List[schemas.CatalogoResponse])
-def get_catalogos(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
-    """Obtener todos los catálogos"""
-    catalogos = db.query(models.Catalogo).offset(skip).limit(limit).all()
-    return catalogos
-
-@router.get("/catalogos/{catalogo_id}", response_model=schemas.CatalogoWithItems)
-def get_catalogo(catalogo_id: int, db: Session = Depends(get_db)):
-    """Obtener un catálogo por ID con sus items"""
-    catalogo = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
-    if not catalogo:
-        raise HTTPException(status_code=404, detail="Catálogo no encontrado")
-    return catalogo
-
-@router.put("/catalogos/{catalogo_id}", response_model=schemas.CatalogoResponse)
-def update_catalogo(catalogo_id: int, catalogo: schemas.CatalogoUpdate, db: Session = Depends(get_db)):
-    """Actualizar un catálogo"""
-    db_catalogo = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
-    if not db_catalogo:
-        raise HTTPException(status_code=404, detail="Catálogo no encontrado")
-    
-    update_data = catalogo.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(db_catalogo, field, value)
-    
-    db.commit()
-    db.refresh(db_catalogo)
-    return db_catalogo
-
-@router.delete("/catalogos/{catalogo_id}", status_code=204)
-def delete_catalogo(catalogo_id: int, db: Session = Depends(get_db)):
-    """Eliminar un catálogo"""
-    db_catalogo = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
-    if not db_catalogo:
-        raise HTTPException(status_code=404, detail="Catálogo no encontrado")
-    
-    db.delete(db_catalogo)
-    db.commit()
-    return None
-
-@router.post("/catalogos/{catalogo_id}/items", response_model=schemas.CatalogoWithItems)
-def add_items_to_catalogo(catalogo_id: int, data: schemas.CatalogoItemAdd, db: Session = Depends(get_db)):
-    """Añadir items a un catálogo"""
-    catalogo = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
-    if not catalogo:
-        raise HTTPException(status_code=404, detail="Catálogo no encontrado")
-    
-    for item_id in data.item_ids:
-        item = db.query(models.Item).filter(models.Item.id == item_id).first()
-        if not item:
-            raise HTTPException(status_code=404, detail=f"Item {item_id} no encontrado")
-        if item not in catalogo.items:
-            catalogo.items.append(item)
-    
-    db.commit()
-    db.refresh(catalogo)
-    return catalogo
-
-@router.delete("/catalogos/{catalogo_id}/items/{item_id}", status_code=204)
-def remove_item_from_catalogo(catalogo_id: int, item_id: int, db: Session = Depends(get_db)):
-    """Remover un item de un catálogo"""
-    catalogo = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
-    if not catalogo:
-        raise HTTPException(status_code=404, detail="Catálogo no encontrado")
-    
-    item = db.query(models.Item).filter(models.Item.id == item_id).first()
-    if not item:
-        raise HTTPException(status_code=404, detail="Item no encontrado")
-    
-    if item in catalogo.items:
-        catalogo.items.remove(item)
+    try:
+        # 1. Crear registro del tenant
+        new_tenant = models.Tenant(
+            name=tenant_data.name,
+            schema_name=schema_name
+        )
+        db.add(new_tenant)
+        db.flush()  # Para obtener el ID sin hacer commit
+        
+        # 2. Crear usuario owner
+        owner_user = models.Users(
+            username=tenant_data.owner_username,
+            email=tenant_data.owner_email,
+            hashed_password=bcrypt_context.hash(tenant_data.owner_password),
+            tenant_id=new_tenant.id,
+            role=models.UserRole.tenant,  # El owner es tipo "tenant"
+            is_active=True
+        )
+        db.add(owner_user)
         db.commit()
+        
+        # 3. Crear esquema físico en la BD con sus tablas
+        create_tenant_schema(schema_name)
+        
+        db.refresh(new_tenant)
+        
+        print(f"✅ Tenant '{tenant_data.name}' creado exitosamente")
+        print(f"   - Schema: {schema_name}")
+        print(f"   - Owner: {tenant_data.owner_username}")
+        
+        return new_tenant
+        
+    except Exception as e:
+        db.rollback()
+        print(f"❌ Error al crear tenant: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error al crear tenant: {str(e)}"
+        )
+
+@router.get("/", response_model=List[schemas.TenantResponse])
+def list_tenants(
+    skip: int = 0,
+    limit: int = 100,
+    db: Session = Depends(get_db)
+):
+    """Listar todos los tenants"""
+    tenants = db.query(models.Tenant).offset(skip).limit(limit).all()
+    return tenants
+
+@router.get("/{tenant_id}", response_model=schemas.TenantResponse)
+def get_tenant(
+    tenant_id: str,
+    db: Session = Depends(get_db)
+):
+    """Obtener información de un tenant específico por su tenant_id (UUID)"""
+    tenant = db.query(models.Tenant).filter(
+        models.Tenant.tenant_id == tenant_id
+    ).first()
     
-    return None
+    if not tenant:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Tenant no encontrado"
+        )
+    
+    return tenant
