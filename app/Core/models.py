@@ -28,7 +28,7 @@ class Item(Base):
     __tablename__ = "item"
     
     id = Column(Integer, primary_key=True, index=True)
-    nombre = Column(String(100), unique=True, nullable=False)
+    nombre = Column(String(100), nullable=False)
     cantidad = Column(Integer, nullable=False, default=0)
     inventario_id = Column(Integer, ForeignKey('inventario.id', ondelete='CASCADE'), nullable=False, index=True)
     atributos = Column(JSONB, default={})

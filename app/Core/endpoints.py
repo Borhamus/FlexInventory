@@ -11,7 +11,7 @@ router = APIRouter()
 
 
 # ==================== ENDPOINTS DE INVENTARIO ====================
-@router.post("/inventarios/", response_model=schemas.InventarioResponse, status_code=201)
+@router.post("/inventarios/", response_model=schemas.InventarioResponse, status_code=201, tags=["Gestión de Inventarios"])
 def create_inventario(inventario: schemas.InventarioCreate, db: Session = Depends(get_db)):
     db_inventario = db.query(models.Inventario).filter(models.Inventario.nombre == inventario.nombre).first()
     if db_inventario:
@@ -30,13 +30,13 @@ def create_inventario(inventario: schemas.InventarioCreate, db: Session = Depend
     db.refresh(new_inventario)
     return new_inventario
 
-@router.get("/inventarios/all", response_model=List[schemas.InventarioResponse])
+@router.get("/inventarios/all", response_model=List[schemas.InventarioResponse], tags=["Gestión de Inventarios"])
 def get_inventarios(db: Session = Depends(get_db)):
     inventarios = db.query(models.Inventario).all()
     return inventarios
 
 
-@router.get("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse)
+@router.get("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse, tags=["Gestión de Inventarios"])
 def get_inventario(inventario_id: int, db: Session = Depends(get_db)):
     inventario = db.query(models.Inventario).filter( models.Inventario.id == inventario_id ).first()
     if not inventario:
@@ -46,7 +46,7 @@ def get_inventario(inventario_id: int, db: Session = Depends(get_db)):
         )
     return inventario
 
-@router.put("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse)
+@router.put("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse, tags=["Gestión de Inventarios"])
 def update_inventario( inventario_id: int, inventario: schemas.InventarioUpdate, db: Session = Depends(get_db) ):
     db_inventario = db.query(models.Inventario).filter( models.Inventario.id == inventario_id ).first()
     if not db_inventario:
@@ -69,7 +69,7 @@ def update_inventario( inventario_id: int, inventario: schemas.InventarioUpdate,
     return db_inventario
 
 
-@router.post("/inventarios/{inventario_id}/atributos", response_model=schemas.InventarioResponse)
+@router.post("/inventarios/{inventario_id}/atributos", response_model=schemas.InventarioResponse, tags=["Gestión de Atributos Inventario"])
 def add_atributo_inventario( inventario_id: int, atributo: dict, db: Session = Depends(get_db) ):
     inventario = db.query(models.Inventario).filter( models.Inventario.id == inventario_id ).first()
     if not inventario:
@@ -95,7 +95,7 @@ def add_atributo_inventario( inventario_id: int, atributo: dict, db: Session = D
     return inventario
 
 
-@router.delete("/inventarios/{inventario_id}/atributos/{atributo_nombre}", response_model=schemas.InventarioResponse)
+@router.delete("/inventarios/{inventario_id}/atributos/{atributo_nombre}", response_model=schemas.InventarioResponse, tags=["Gestión de Atributos Inventario"])
 def delete_atributo_inventario(inventario_id: int, atributo_nombre: str, db: Session = Depends(get_db) ):
     inventario = db.query(models.Inventario).filter( models.Inventario.id == inventario_id).first()
     if not inventario:
@@ -111,7 +111,7 @@ def delete_atributo_inventario(inventario_id: int, atributo_nombre: str, db: Ses
     return inventario
 
 
-@router.delete("/inventarios/{inventario_id}", status_code=204)
+@router.delete("/inventarios/{inventario_id}", status_code=204, tags=["Gestión de Inventarios"])
 def delete_inventario(inventario_id: int, db: Session = Depends(get_db)):
     db_inventario = db.query(models.Inventario).filter( models.Inventario.id == inventario_id ).first()
     if not db_inventario:
@@ -125,7 +125,7 @@ def delete_inventario(inventario_id: int, db: Session = Depends(get_db)):
 
 # ==================== ENDPOINTS DE ITEMS ====================
 
-@router.post("/items/", response_model=schemas.ItemResponse, status_code=201)
+@router.post("/items/", response_model=schemas.ItemResponse, status_code=201, tags=["Gestion de Items"])
 def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
     
     # 1. Verificar que el inventario existe
@@ -154,7 +154,7 @@ def create_item(item: schemas.ItemCreate, db: Session = Depends(get_db)):
 
     return new_item
 
-@router.get("/items/", response_model=List[schemas.ItemResponse])
+@router.get("/items/", response_model=List[schemas.ItemResponse], tags=["Gestion de Items"])
 def get_items(inventario_id: int = None, db: Session = Depends(get_db)):
     """Obtener todos los items, opcionalmente filtrados por inventario"""
     query = db.query(models.Item)
@@ -163,14 +163,14 @@ def get_items(inventario_id: int = None, db: Session = Depends(get_db)):
     items = query.all()
     return items
 
-@router.get("/items/{item_id}", response_model=schemas.ItemResponse)
+@router.get("/items/{item_id}", response_model=schemas.ItemResponse, tags=["Gestion de Items"])
 def get_item(item_id: int, db: Session = Depends(get_db)):
     item = db.query(models.Item).filter(models.Item.id == item_id).first()
     if not item:
         raise HTTPException(status_code=404, detail="Item no encontrado")
     return item
 
-@router.put("/items/{item_id}", response_model=schemas.ItemResponse)
+@router.put("/items/{item_id}", response_model=schemas.ItemResponse, tags=["Gestion de Items"])
 def update_item(item_id: int, item: schemas.ItemUpdate, db: Session = Depends(get_db)):
     """Actualizar un item"""
     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
@@ -192,7 +192,7 @@ def update_item(item_id: int, item: schemas.ItemUpdate, db: Session = Depends(ge
     db.refresh(db_item)
     return db_item
 
-@router.delete("/items/{item_id}", status_code=204)
+@router.delete("/items/{item_id}", status_code=204, tags=["Gestion de Items"])
 def delete_item(item_id: int, db: Session = Depends(get_db)):
     """Eliminar un item"""
     db_item = db.query(models.Item).filter(models.Item.id == item_id).first()
@@ -205,7 +205,7 @@ def delete_item(item_id: int, db: Session = Depends(get_db)):
 
 # ==================== ENDPOINTS DE CATÁLOGOS ====================
 
-@router.post("/catalogos/", response_model=schemas.CatalogoResponse, status_code=201)
+@router.post("/catalogos/", response_model=schemas.CatalogoResponse, status_code=201, tags=["Gestión de Catalogos"])
 def create_catalogo(catalogo: schemas.CatalogoCreate, db: Session = Depends(get_db)):
     """Crear un nuevo catálogo"""
     db_catalogo = db.query(models.Catalogo).filter(models.Catalogo.nombre == catalogo.nombre).first()
@@ -218,13 +218,13 @@ def create_catalogo(catalogo: schemas.CatalogoCreate, db: Session = Depends(get_
     db.refresh(new_catalogo)
     return new_catalogo
 
-@router.get("/catalogos/", response_model=List[schemas.CatalogoResponse])
+@router.get("/catalogos/", response_model=List[schemas.CatalogoResponse], tags=["Gestión de Catalogos"])
 def get_catalogos(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """Obtener todos los catálogos"""
     catalogos = db.query(models.Catalogo).offset(skip).limit(limit).all()
     return catalogos
 
-@router.get("/catalogos/{catalogo_id}", response_model=schemas.CatalogoWithItems)
+@router.get("/catalogos/{catalogo_id}", response_model=schemas.CatalogoWithItems, tags=["Gestión de Catalogos"])
 def get_catalogo(catalogo_id: int, db: Session = Depends(get_db)):
     """Obtener un catálogo por ID con sus items"""
     catalogo = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
@@ -232,7 +232,7 @@ def get_catalogo(catalogo_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Catálogo no encontrado")
     return catalogo
 
-@router.put("/catalogos/{catalogo_id}", response_model=schemas.CatalogoResponse)
+@router.put("/catalogos/{catalogo_id}", response_model=schemas.CatalogoResponse,tags=["Gestión de Catalogos"])
 def update_catalogo(catalogo_id: int, catalogo: schemas.CatalogoUpdate, db: Session = Depends(get_db)):
     """Actualizar un catálogo"""
     db_catalogo = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
@@ -247,7 +247,7 @@ def update_catalogo(catalogo_id: int, catalogo: schemas.CatalogoUpdate, db: Sess
     db.refresh(db_catalogo)
     return db_catalogo
 
-@router.delete("/catalogos/{catalogo_id}", status_code=204)
+@router.delete("/catalogos/{catalogo_id}", status_code=204, tags=["Gestión de Catalogos"])
 def delete_catalogo(catalogo_id: int, db: Session = Depends(get_db)):
     """Eliminar un catálogo"""
     db_catalogo = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
@@ -258,7 +258,7 @@ def delete_catalogo(catalogo_id: int, db: Session = Depends(get_db)):
     db.commit()
     return None
 
-@router.post("/catalogos/{catalogo_id}/items", response_model=schemas.CatalogoWithItems)
+@router.post("/catalogos/{catalogo_id}/items", response_model=schemas.CatalogoWithItems, tags=["Gestión de Catalogos"])
 def add_items_to_catalogo(catalogo_id: int, data: schemas.CatalogoItemAdd, db: Session = Depends(get_db)):
     """Añadir items a un catálogo"""
     catalogo = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
@@ -276,7 +276,7 @@ def add_items_to_catalogo(catalogo_id: int, data: schemas.CatalogoItemAdd, db: S
     db.refresh(catalogo)
     return catalogo
 
-@router.delete("/catalogos/{catalogo_id}/items/{item_id}", status_code=204)
+@router.delete("/catalogos/{catalogo_id}/items/{item_id}", status_code=204, tags=["Gestión de Catalogos"])
 def remove_item_from_catalogo(catalogo_id: int, item_id: int, db: Session = Depends(get_db)):
     """Remover un item de un catálogo"""
     catalogo = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
