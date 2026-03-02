@@ -10,7 +10,7 @@ router = APIRouter()
 
 # ==================== ENDPOINTS DE INVENTARIO ====================
 
-@router.post("/inventarios/", response_model=schemas.InventarioResponse, status_code=201)
+@router.post("/inventarios/", response_model=schemas.InventarioResponse, status_code=201,tags=["Inventarios"])
 def create_inventario(
     inventario: schemas.InventarioCreate, 
     db: Session = Depends(get_tenant_db)  # CAMBIAR: get_db -> get_tenant_db
@@ -29,13 +29,13 @@ def create_inventario(
     db.refresh(new_inventario)
     return new_inventario
 
-@router.get("/inventarios/all", response_model=List[schemas.InventarioResponse])
+@router.get("/inventarios/all", response_model=List[schemas.InventarioResponse],tags=["Inventarios"])
 def get_inventarios(db: Session = Depends(get_tenant_db)):  # CAMBIAR
     """Listar todos los inventarios del tenant"""
     inventarios = db.query(models.Inventario).all()
     return inventarios
 
-@router.get("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse)
+@router.get("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse,tags=["Inventarios"])
 def get_inventario(
     inventario_id: int, 
     db: Session = Depends(get_tenant_db)  # CAMBIAR
@@ -50,7 +50,7 @@ def get_inventario(
     
     return inventario
 
-@router.put("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse)
+@router.put("/inventarios/{inventario_id}", response_model=schemas.InventarioResponse,tags=["Inventarios"])
 def update_inventario(
     inventario_id: int, 
     inventario: schemas.InventarioUpdate, 
@@ -72,7 +72,7 @@ def update_inventario(
     db.refresh(db_inventario)
     return db_inventario
 
-@router.delete("/inventarios/{inventario_id}", status_code=204)
+@router.delete("/inventarios/{inventario_id}", status_code=204,tags=["Inventarios"])
 def delete_inventario(
     inventario_id: int, 
     db: Session = Depends(get_tenant_db)  # CAMBIAR
@@ -91,7 +91,7 @@ def delete_inventario(
 
 # ==================== ENDPOINTS DE ITEMS ====================
 
-@router.post("/items/", response_model=schemas.ItemResponse, status_code=201)
+@router.post("/items/", response_model=schemas.ItemResponse, status_code=201,tags=["Items"])
 def create_item(
     item: schemas.ItemCreate, 
     db: Session = Depends(get_tenant_db)  # CAMBIAR
@@ -123,7 +123,7 @@ def create_item(
 
     return new_item
 
-@router.get("/items/", response_model=List[schemas.ItemResponse])
+@router.get("/items/", response_model=List[schemas.ItemResponse],tags=["Items"])
 def get_items(
     inventario_id: int = None, 
     db: Session = Depends(get_tenant_db)  # CAMBIAR
@@ -135,7 +135,7 @@ def get_items(
     items = query.all()
     return items
 
-@router.get("/items/{item_id}", response_model=schemas.ItemResponse)
+@router.get("/items/{item_id}", response_model=schemas.ItemResponse,tags=["Items"])
 def get_item(
     item_id: int, 
     db: Session = Depends(get_tenant_db)  # CAMBIAR
@@ -146,7 +146,7 @@ def get_item(
         raise HTTPException(status_code=404, detail="Item no encontrado")
     return item
 
-@router.put("/items/{item_id}", response_model=schemas.ItemResponse)
+@router.put("/items/{item_id}", response_model=schemas.ItemResponse,tags=["Items"])
 def update_item(
     item_id: int, 
     item: schemas.ItemUpdate, 
@@ -173,7 +173,7 @@ def update_item(
     db.refresh(db_item)
     return db_item
 
-@router.delete("/items/{item_id}", status_code=204)
+@router.delete("/items/{item_id}", status_code=204,tags=["Items"])
 def delete_item(
     item_id: int, 
     db: Session = Depends(get_tenant_db)  # CAMBIAR
@@ -189,7 +189,7 @@ def delete_item(
 
 # ==================== ENDPOINTS DE CATÁLOGOS ====================
 
-@router.post("/catalogos/", response_model=schemas.CatalogoResponse, status_code=201)
+@router.post("/catalogos/", response_model=schemas.CatalogoResponse, status_code=201,tags=["Catálogos"])
 def create_catalogo(
     catalogo: schemas.CatalogoCreate, 
     db: Session = Depends(get_tenant_db)  # CAMBIAR
@@ -208,7 +208,7 @@ def create_catalogo(
     db.refresh(new_catalogo)
     return new_catalogo
 
-@router.get("/catalogos/", response_model=List[schemas.CatalogoResponse])
+@router.get("/catalogos/", response_model=List[schemas.CatalogoResponse],tags=["Catálogos"])
 def get_catalogos(
     skip: int = 0, 
     limit: int = 100, 
@@ -218,7 +218,7 @@ def get_catalogos(
     catalogos = db.query(models.Catalogo).offset(skip).limit(limit).all()
     return catalogos
 
-@router.get("/catalogos/{catalogo_id}", response_model=schemas.CatalogoWithItems)
+@router.get("/catalogos/{catalogo_id}", response_model=schemas.CatalogoWithItems,tags=["Catálogos"])
 def get_catalogo(
     catalogo_id: int, 
     db: Session = Depends(get_tenant_db)  # CAMBIAR
@@ -233,7 +233,7 @@ def get_catalogo(
     
     return catalogo
 
-@router.put("/catalogos/{catalogo_id}", response_model=schemas.CatalogoResponse)
+@router.put("/catalogos/{catalogo_id}", response_model=schemas.CatalogoResponse,tags=["Catálogos"])
 def update_catalogo(
     catalogo_id: int, 
     catalogo: schemas.CatalogoUpdate, 
@@ -255,7 +255,7 @@ def update_catalogo(
     db.refresh(db_catalogo)
     return db_catalogo
 
-@router.delete("/catalogos/{catalogo_id}", status_code=204)
+@router.delete("/catalogos/{catalogo_id}", status_code=204,tags=["Catálogos"])
 def delete_catalogo(
     catalogo_id: int, 
     db: Session = Depends(get_tenant_db)  # CAMBIAR
@@ -272,7 +272,7 @@ def delete_catalogo(
     db.commit()
     return None
 
-@router.post("/catalogos/{catalogo_id}/items", response_model=schemas.CatalogoWithItems)
+@router.post("/catalogos/{catalogo_id}/items", response_model=schemas.CatalogoWithItems,tags=["Catálogos"])
 def add_items_to_catalogo(
     catalogo_id: int, 
     data: schemas.CatalogoItemAdd, 
@@ -300,7 +300,7 @@ def add_items_to_catalogo(
     db.refresh(catalogo)
     return catalogo
 
-@router.delete("/catalogos/{catalogo_id}/items/{item_id}", status_code=204)
+@router.delete("/catalogos/{catalogo_id}/items/{item_id}", status_code=204,tags=["Catálogos"])
 def remove_item_from_catalogo(
     catalogo_id: int, 
     item_id: int, 
