@@ -5,7 +5,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from starlette import status
 from passlib.context import CryptContext
-from fastapi.security import OAuth2PasswordRequestForm, OAuth2PasswordBearer
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
 from app.Core.models import Users, UserRole
@@ -22,8 +22,8 @@ ALGORITHM  = "HS256"
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
-# URL absoluta — coincide con como está montado el router en main.py
-oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/auth/token")
+# tokenUrl apunta al endpoint form para que el botón "Authorize" de Swagger funcione
+oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/auth/token-form")
 
 
 # ==========================================
@@ -32,6 +32,11 @@ oauth2_bearer = OAuth2PasswordBearer(tokenUrl="/auth/token")
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
 
 
 class CreateEmployeeRequest(BaseModel):
@@ -119,9 +124,35 @@ def require_admin_or_owner(user: dict):
 # ==========================================
 @router.post("/token", response_model=Token)
 async def login_for_access_token(
+    login_data: LoginRequest,
+    db: db_dependency,
+):
+    """
+    Login con JSON. Devuelve JWT.
+
+    ```json
+    { "username": "mi_usuario", "password": "mi_contrasena" }
+    ```
+    """
+    user = authenticate_user(login_data.username, login_data.password, db)
+    if not user:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Usuario o contrasena incorrectos.",
+        )
+    token = create_access_token(user, timedelta(minutes=30))
+    return {"access_token": token, "token_type": "bearer"}
+
+
+@router.post("/token-form", response_model=Token, include_in_schema=False)
+async def login_form(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: db_dependency,
 ):
+    """
+    Endpoint oculto que mantiene el botón 'Authorize' de Swagger funcional.
+    Usa el mismo form data que espera OAuth2PasswordRequestForm (solo username y password).
+    """
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
         raise HTTPException(
