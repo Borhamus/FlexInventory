@@ -1,12 +1,16 @@
 """
-Dependencias de tenant para los endpoints de inventario/items/catálogos.
+Dependencias de tenant y permisos.
 
-Flujo de autenticación en cada request:
-  1. JWT → get_current_user → dict con tenant_id (int) del usuario
-  2. get_tenant_from_token  → busca el objeto Tenant usando ese tenant_id
-  3. get_tenant_db          → sesión apuntando al schema correcto
+Flujo base:
+  JWT → tenant_id → Tenant → schema DB session
 
-No se requiere ningún header extra. El tenant se infiere del JWT.
+Flujo con permisos:
+  JWT → usuario activo → verificar resource+action en su custom_role
+  El tenant owner bypasea toda verificación de permisos.
+
+Reglas inamovibles (hardcoded, no delegables a permisos):
+  - Ningún empleado puede tocar al usuario tenant owner
+  - Ningún empleado puede quitarse su propio custom_role
 """
 
 from typing import Annotated
@@ -14,28 +18,18 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.db_config import get_db, get_tenant_db_context
-from app.Core.models import Tenant, Users, UserRole
+from app.Core.models import Tenant, Users, UserRole, RolePermission
+
+
 from app.Core.auth import get_current_user
 
-
-# ----------------------------------------
-# 1. Resolver tenant desde el JWT
-# ----------------------------------------
 async def get_tenant_from_token(
     current_user: Annotated[dict, Depends(get_current_user)],
     db: Session = Depends(get_db),
 ) -> Tenant:
-    """
-    Obtiene el objeto Tenant usando el tenant_id guardado en el JWT.
-    No requiere ningún header adicional.
-    Lanza 404 si el tenant no existe o está inactivo.
-    """
     tenant = (
         db.query(Tenant)
-        .filter(
-            Tenant.id == current_user["tenant_id"],
-            Tenant.is_active == True,
-        )
+        .filter(Tenant.id == current_user["tenant_id"], Tenant.is_active == True)
         .first()
     )
     if not tenant:
@@ -47,74 +41,104 @@ async def get_tenant_from_token(
 
 
 # ----------------------------------------
-# 2. Verificar que el usuario está activo
+# Verificar usuario activo
 # ----------------------------------------
 async def get_verified_context(
     current_user: Annotated[dict, Depends(get_current_user)],
     tenant: Annotated[Tenant, Depends(get_tenant_from_token)],
     db: Session = Depends(get_db),
 ) -> dict:
-    """
-    Verifica que el usuario del JWT sigue activo en BD.
-    Devuelve {"user": <Users>, "tenant": <Tenant>} para uso posterior.
-    """
     user = db.query(Users).filter(
         Users.id        == current_user["id"],
+        Users.tenant_id == current_user["tenant_id"],
         Users.is_active == True,
     ).first()
-
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuario no encontrado o inactivo.",
         )
-
     return {"user": user, "tenant": tenant}
 
 
 # ----------------------------------------
-# 3. Sesión de BD apuntando al schema del tenant
+# Sesión apuntando al schema del tenant
 # ----------------------------------------
 def get_tenant_db(tenant: Annotated[Tenant, Depends(get_tenant_from_token)]):
-    """
-    Abre una sesión de SQLAlchemy con search_path = schema del tenant.
-    El tenant se resuelve automáticamente desde el JWT.
-    """
     with get_tenant_db_context(tenant.schema_name) as db:
         yield db
 
 
 # ----------------------------------------
-# 4. Dependencias compuestas por rol
+# Verificación de permisos granulares
 # ----------------------------------------
-async def require_tenant_access(
-    context: Annotated[dict, Depends(get_verified_context)],
-) -> dict:
-    """Cualquier usuario activo del tenant puede usar este endpoint."""
-    return context
+def _check_permission(resource: str, action: str, context: dict, db: Session) -> dict:
+    """
+    Lógica central:
+    - tenant   → bypass total
+    - employee sin custom_role → 403 sin acceso
+    - employee con custom_role → verifica resource+action en role_permissions
+    """
+    user: Users = context["user"]
 
+    if user.role == UserRole.tenant:
+        return context
 
-async def require_editor_or_above(
-    context: Annotated[dict, Depends(get_verified_context)],
-) -> dict:
-    """Solo tenant owner, admin o editor pueden crear/modificar datos."""
-    role = context["user"].role
-    if role not in (UserRole.tenant, UserRole.admin, UserRole.editor):
+    if user.custom_role_id is None:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Se requiere rol editor, admin o tenant para modificar datos.",
+            detail="No tenés un rol asignado. Contactá al dueño del tenant.",
         )
+
+    permission = db.query(RolePermission).filter(
+        RolePermission.role_id  == user.custom_role_id,
+        RolePermission.resource == resource,
+        RolePermission.action   == action,
+    ).first()
+
+    if not permission:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail=f"No tenés permiso para '{action}' en '{resource}'.",
+        )
+
     return context
 
 
-async def require_admin_or_above(
+def require_permission(resource: str, action: str):
+    """
+    Factory de dependencias para proteger endpoints por permiso.
+
+    Uso:
+        @router.post("/inventarios/")
+        def create_inventario(
+            _: dict = Depends(require_permission("inventarios", "create")),
+            db: Session = Depends(get_tenant_db),
+        ): ...
+    """
+    async def dependency(
+        context: Annotated[dict, Depends(get_verified_context)],
+        db: Session = Depends(get_db),
+    ) -> dict:
+        return _check_permission(resource, action, context, db)
+    return dependency
+
+
+# ----------------------------------------
+# Dependencia exclusiva del tenant owner
+# (para operaciones que NUNCA se pueden delegar)
+# ----------------------------------------
+async def require_tenant_owner(
     context: Annotated[dict, Depends(get_verified_context)],
 ) -> dict:
-    """Solo tenant owner o admin pueden eliminar o gestionar empleados."""
-    role = context["user"].role
-    if role not in (UserRole.tenant, UserRole.admin):
+    """
+    Reservado para acciones que el tenant owner nunca puede delegar,
+    como modificar su propio perfil de owner o gestión de developer.
+    Para el resto, usar require_permission().
+    """
+    if context["user"].role != UserRole.tenant:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Se requiere rol admin o tenant para esta acción.",
+            detail="Solo el dueño del tenant puede realizar esta acción.",
         )
     return context

@@ -1,36 +1,33 @@
+from dotenv import load_dotenv
+load_dotenv()
+
 from fastapi import FastAPI
 from app.db_config import engine, Base, TenantBase
-from app.tenant.endpoints import router as inventory_router
 from app.Core.endpoints import router as tenant_router
 from app.Core.auth import router as auth_router
-from app.Core import models as core_models  # Importar para que se registren
+from app.Core.roles import router as roles_router
+from app.tenant.inventarios import router as inventarios_router
+from app.tenant.items import router as items_router
+from app.tenant.catalogos import router as catalogos_router
+from app.Core import models as core_models  # registra modelos en Base
 
 app = FastAPI(
-    title="Stock Manager API - Multi-tenant",
+    title="Stock Manager API — Multi-tenant",
     description="API para gestión de inventarios con soporte multi-tenant",
-    version="2.0.0"
+    version="3.0.0",
 )
 
-app.include_router(tenant_router)
-app.include_router(inventory_router)
-app.include_router(auth_router)
+app.include_router(auth_router)        # /auth/*
+app.include_router(tenant_router)      # /tenants/*       ← requiere X-Developer-Key
+app.include_router(roles_router)       # /roles/*, /empleados/*
+app.include_router(inventarios_router) # /inventarios/*
+app.include_router(items_router)       # /items/*
+app.include_router(catalogos_router)   # /catalogos/*
 
-# SOLO crear tablas del schema public (tenants y users)
+# Crea tablas del schema public: tenants, users, custom_roles, role_permissions
 Base.metadata.create_all(bind=engine)
 
-# NO crear las tablas de TenantBase aquí
-# Esas se crean cuando se crea cada tenant
 
-@app.get("/")
+@app.get("/", tags=["Health"])
 def read_root():
-    """Endpoint de bienvenida"""
-    return {
-        "message": "Bienvenido a Stock Manager API Multi-tenant",
-        "docs": "/docs",
-        "version": "2.0.0",
-        "endpoints": {
-            "tenants": "/tenants - Gestión de tenants",
-            "auth": "/auth - Autenticación",
-            "inventory": "/inventarios, /items, /catalogos - Gestión de inventario"
-        }
-    }
+    return {"message": "Stock Manager API Multi-tenant v3", "docs": "/docs"}

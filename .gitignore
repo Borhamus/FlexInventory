@@ -1,7 +1,9 @@
 **/.venv/
 **/venv/
-
-# Ignora cualquier carpeta __pycache__ en cualquier nivel del proyecto
 **/__pycache__/
+CLAUDE.md
 *.py[cod]
 *$py.class
+.env
+
+

@@ -1,5 +1,6 @@
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Annotated
+import os
 from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -17,7 +18,7 @@ from app.db_config import get_db
 # ==========================================
 router = APIRouter(prefix="/auth", tags=["Auth"])
 
-SECRET_KEY = "fdgth654f0ghj156fdg4h05fgh1510sfd2g1t2j15ñ41fg2h10sd5f4jui4"
+SECRET_KEY = os.getenv("SECRET_KEY")
 ALGORITHM  = "HS256"
 
 bcrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -39,21 +40,12 @@ class LoginRequest(BaseModel):
     password: str
 
 
-class CreateEmployeeRequest(BaseModel):
-    username: str
-    password: str
-    email: str | None = None
-    role: UserRole = UserRole.viewer
-
-
 # ==========================================
 # Helpers JWT
 # ==========================================
 def authenticate_user(username: str, password: str, db: Session):
     user = db.query(Users).filter(Users.username == username).first()
-    if not user:
-        return False
-    if not bcrypt_context.verify(password, user.hashed_password):
+    if not user or not bcrypt_context.verify(password, user.hashed_password):
         return False
     return user
 
@@ -65,23 +57,22 @@ def create_access_token(user: Users, expires_delta: timedelta) -> str:
         "role":      user.role,
         "tenant_id": user.tenant_id,
     }
-    payload["exp"] = datetime.utcnow() + expires_delta
+    payload["exp"] = datetime.now(timezone.utc) + expires_delta
     return jwt.encode(payload, SECRET_KEY, algorithm=ALGORITHM)
 
 
-# UNICA definicion — sin duplicados
 async def get_current_user(token: Annotated[str, Depends(oauth2_bearer)]) -> dict:
     try:
-        payload    = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username   = payload.get("sub")
-        user_id    = payload.get("id")
-        role       = payload.get("role")
-        tenant_id  = payload.get("tenant_id")
+        payload   = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        username  = payload.get("sub")
+        user_id   = payload.get("id")
+        role      = payload.get("role")
+        tenant_id = payload.get("tenant_id")
 
         if username is None or user_id is None:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Token invalido: faltan campos obligatorios.",
+                detail="Token inválido: faltan campos obligatorios.",
                 headers={"WWW-Authenticate": "Bearer"},
             )
         return {"username": username, "id": user_id, "role": role, "tenant_id": tenant_id}
@@ -101,47 +92,34 @@ user_dependency = Annotated[dict,    Depends(get_current_user)]
 
 
 # ==========================================
-# Helpers de permisos
-# ==========================================
-def require_tenant_owner(user: dict):
-    if user["role"] != UserRole.tenant:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Solo el dueno del tenant puede realizar esta accion.",
-        )
-
-
-def require_admin_or_owner(user: dict):
-    if user["role"] not in (UserRole.tenant, UserRole.admin):
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Se requiere rol admin o tenant para esta accion.",
-        )
-
-
-# ==========================================
 # Endpoints
 # ==========================================
 @router.post("/token", response_model=Token)
-async def login_for_access_token(
-    login_data: LoginRequest,
-    db: db_dependency,
-):
+async def login(login_data: LoginRequest, db: db_dependency):
     """
-    Login con JSON. Devuelve JWT.
+    Autentica un usuario y devuelve un JWT válido por 30 minutos.
 
+    El token debe enviarse en el header `Authorization: Bearer <token>` en todos
+    los endpoints protegidos.
+
+    **Ejemplo de request:**
     ```json
-    { "username": "mi_usuario", "password": "mi_contrasena" }
+    { "username": "juan", "password": "miPassword123" }
+    ```
+
+    **Ejemplo de response:**
+    ```json
+    { "access_token": "eyJhbGci...", "token_type": "bearer" }
     ```
     """
     user = authenticate_user(login_data.username, login_data.password, db)
     if not user:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuario o contrasena incorrectos.",
+            detail="Usuario o contraseña incorrectos.",
         )
-    token = create_access_token(user, timedelta(minutes=30))
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": create_access_token(user, timedelta(minutes=30)),
+            "token_type": "bearer"}
 
 
 @router.post("/token-form", response_model=Token, include_in_schema=False)
@@ -149,71 +127,31 @@ async def login_form(
     form_data: Annotated[OAuth2PasswordRequestForm, Depends()],
     db: db_dependency,
 ):
-    """
-    Endpoint oculto que mantiene el botón 'Authorize' de Swagger funcional.
-    Usa el mismo form data que espera OAuth2PasswordRequestForm (solo username y password).
-    """
+    """Endpoint oculto — mantiene el botón Authorize de Swagger funcional."""
     user = authenticate_user(form_data.username, form_data.password, db)
     if not user:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Usuario o contrasena incorrectos.",
-        )
-    token = create_access_token(user, timedelta(minutes=30))
-    return {"access_token": token, "token_type": "bearer"}
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="Usuario o contraseña incorrectos.")
+    return {"access_token": create_access_token(user, timedelta(minutes=30)),
+            "token_type": "bearer"}
 
 
 @router.get("/me", status_code=status.HTTP_200_OK)
 async def get_me(user: user_dependency):
-    """Diagnostico: muestra los datos del token actual"""
+    """
+    Devuelve la información del usuario autenticado según su token JWT.
+
+    Útil para verificar qué usuario está activo en la sesión actual y conocer
+    su `tenant_id` y `role`.
+
+    **Ejemplo de response:**
+    ```json
+    {
+      "username": "juan",
+      "id": 4,
+      "role": "employee",
+      "tenant_id": 2
+    }
+    ```
+    """
     return user
-
-
-@router.post("/create-employee", status_code=status.HTTP_201_CREATED)
-async def create_employee(
-    user: user_dependency,
-    db: db_dependency,
-    req: CreateEmployeeRequest,
-):
-    require_tenant_owner(user)
-
-    if db.query(Users).filter(Users.username == req.username).first():
-        raise HTTPException(status_code=400, detail="El nombre de usuario ya esta en uso.")
-
-    if req.email and db.query(Users).filter(Users.email == req.email).first():
-        raise HTTPException(status_code=400, detail="El email ya esta registrado.")
-
-    new_user = Users(
-        username        = req.username,
-        hashed_password = bcrypt_context.hash(req.password),
-        email           = req.email,
-        role            = req.role,
-        tenant_id       = user["tenant_id"],
-        is_active       = True,
-    )
-    db.add(new_user)
-    db.commit()
-    return {
-        "message":   f"Empleado '{req.username}' creado con rol '{req.role}'.",
-        "tenant_id": user["tenant_id"],
-    }
-
-
-@router.get("/my-employees", status_code=status.HTTP_200_OK)
-async def get_my_employees(user: user_dependency, db: db_dependency):
-    require_tenant_owner(user)
-
-    employees = (
-        db.query(Users)
-        .filter(Users.tenant_id == user["tenant_id"], Users.role != UserRole.tenant)
-        .all()
-    )
-
-    return {
-        "tenant_id": user["tenant_id"],
-        "owner":     user["username"],
-        "employees": [
-            {"username": e.username, "role": e.role, "is_active": e.is_active}
-            for e in employees
-        ],
-    }
