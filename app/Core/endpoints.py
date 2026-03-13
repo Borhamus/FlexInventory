@@ -16,11 +16,10 @@ from app.Core.auth import bcrypt_context
 router = APIRouter(prefix="/tenants", tags=["Tenants (Developer)"])
 
 # ——— API Key de developer ———
-DEVELOPER_API_KEY = os.getenv("DEVELOPER_API_KEY")
-api_key_header   = APIKeyHeader(name="X-Developer-Key", auto_error=False)
+api_key_header = APIKeyHeader(name="X-Developer-Key", auto_error=False)
 
 def verify_developer_key(key: str = Security(api_key_header)):
-    if key != DEVELOPER_API_KEY:
+    if key != os.getenv("DEVELOPER_API_KEY"):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acceso restringido. Se requiere X-Developer-Key válida.",
