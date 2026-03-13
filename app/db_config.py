@@ -8,7 +8,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://stockuser:stockpass123@localhost:5432/stock_manager")
+db_port = os.getenv("DB_PORT", "5432")
+
+DATABASE_URL = os.getenv("DATABASE_URL", f"postgresql://stockuser:stockpass123@localhost:{db_port}/stock_manager")
 
 # Engine principal
 engine = create_engine(
