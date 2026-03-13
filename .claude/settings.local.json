@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(echo \"\" > \"D:\\\\mis archivos\\\\Desktop\\\\laboratorio de software\\\\FlexInventory\\\\init.sql\")"
+    ]
+  }
+}

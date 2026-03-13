@@ -54,33 +54,23 @@ def get_tenant_db_context(tenant_schema: str):
 
 def create_tenant_schema(tenant_schema: str) -> bool:
     """
-    Crear esquema para un nuevo tenant y sus tablas
-    
-    Args:
-        tenant_schema: Nombre del esquema a crear
-        
-    Returns:
-        True si se creó exitosamente
+    Crear esquema para un nuevo tenant y sus tablas.
+    Usa schema_translate_map para crear las tablas en el schema correcto (SQLAlchemy 2.0).
     """
-    # Importar modelos de tenant aquí para registrarlos en TenantBase
-    from app.tenant import models as tenant_models
-    
+    # Importar modelos de tenant aquí para asegurar que estén registrados en TenantBase
+    from app.tenant import models as tenant_models  # noqa: F401
+
     try:
-        with engine.connect() as conn:
-            # Crear esquema
-            conn.execute(CreateSchema(tenant_schema, if_not_exists=True))
-            conn.commit()
-            
-            # Cambiar al nuevo esquema
-            conn.execute(text(f"SET search_path TO {tenant_schema}"))
-            conn.commit()
-            
-        # Crear todas las tablas del tenant en el nuevo esquema
-        # Importante: esto usa una nueva conexión con el search_path correcto
+        # 1. Crear el schema
         with engine.begin() as conn:
-            conn.execute(text(f"SET search_path TO {tenant_schema}"))
-            TenantBase.metadata.create_all(bind=conn)
-            
+            conn.execute(CreateSchema(tenant_schema, if_not_exists=True))
+
+        # 2. Crear las tablas del tenant dentro del nuevo schema.
+        #    schema_translate_map mapea None (tablas sin schema explícito) al schema del tenant.
+        with engine.begin() as conn:
+            conn = conn.execution_options(schema_translate_map={None: tenant_schema})
+            TenantBase.metadata.create_all(conn)
+
         print(f"✅ Schema '{tenant_schema}' creado exitosamente")
         return True
     except Exception as e:
