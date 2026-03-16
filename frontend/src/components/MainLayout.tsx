@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
-import { Layout, Menu, Button, theme, Typography } from 'antd';
+import { Layout, Menu, Button, theme } from 'antd';
 import {
-  UserOutlined,
   LogoutOutlined,
   MenuFoldOutlined,
   MenuUnfoldOutlined,
@@ -11,7 +10,6 @@ import {
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 const { Header, Sider, Content } = Layout;
-const { Title } = Typography;
 
 const MainLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
