@@ -1,17 +1,16 @@
 import React from 'react';
 import { Navigate, useLocation } from 'react-router-dom';
+import { useAuthContext } from '../context/AuthContext';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const token = localStorage.getItem('token');
+  const { isAuthenticated } = useAuthContext();
   const location = useLocation();
 
-  if (!token) {
-    // Redirigimos al login, pero guardamos la ubicación donde intentaba entrar
-    // para poder devolverlo ahí después de loguearse.
+  if (!isAuthenticated) {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
