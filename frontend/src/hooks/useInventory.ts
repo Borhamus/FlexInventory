@@ -7,3 +7,10 @@ export const useInventory = (id: number) => {
     queryFn: () => inventoryService.getInventario(id),
   });
 };
+
+export const useInventories = () => {
+  return useQuery({
+    queryKey: ['inventories'],
+    queryFn: () => inventoryService.getInventarios(),
+  });
+};
