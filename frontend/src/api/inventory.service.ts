@@ -12,5 +12,11 @@ export const inventoryService = {
   getInventario: async (id: number): Promise<Inventario> => {
     const response = await api.get(`/inventarios/${id}`);
     return response.data;
-  },
+  }
+  ,
+  getInventarios: async (): Promise<Inventario[]> => {
+    const response = await api.get('/inventarios/all');
+    return response.data;
+  }
+  ,
 };

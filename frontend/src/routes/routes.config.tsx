@@ -21,6 +21,10 @@ export const routes: RouteObject[] = [
         path: 'usuarios',
         element: <InventoryPage />,
       },
+      {
+        path: 'inventario/:id',
+        element: <InventoryPage />,
+      },
       // Puedes agregar más sub-rutas aquí: asistencia, reportes, etc.
     ],
   },

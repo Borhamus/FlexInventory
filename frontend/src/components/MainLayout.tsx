@@ -9,6 +9,7 @@ import {
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
+import { useInventories } from '../hooks/useInventory';
 
 const { Header, Sider, Content } = Layout;
 
@@ -27,9 +28,16 @@ const MainLayout: React.FC = () => {
     navigate('/');
   };
 
+  const { data: inventories } = useInventories();
+
+  const inventarioItems = (inventories ?? []).map(inv => ({
+    key: `/dashboard/inventario/${inv.id}`,
+    label: inv.nombre,
+  }));
+
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} theme="dark">
+      <Sider trigger={null} collapsible collapsed={collapsed} theme="dark" style={{ display: 'flex', flexDirection: 'column' }}>
         <div style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <span style={{ color: 'white', fontWeight: 'bold' }}>{collapsed ? 'FI' : 'FlexInventory'}</span>
         </div>
@@ -38,11 +46,22 @@ const MainLayout: React.FC = () => {
           mode="inline"
           defaultSelectedKeys={[location.pathname]}
           onClick={({ key }) => navigate(key)}
+          style={{ flex: 1 }}
           items={[
             { key: '/dashboard', icon: <DashboardOutlined />, label: 'Inicio' },
             { key: '/dashboard/usuarios', icon: <TeamOutlined />, label: 'Personal' },
+            ...inventarioItems,
           ]}
         />
+        <div style={{ padding: 16 }}>
+          <Button
+            type="primary"
+            block
+            onClick={() => navigate('/dashboard/inventario/nuevo')}
+          >
+            {collapsed ? '+' : 'Crear inventario'}
+          </Button>
+        </div>
       </Sider>
       <Layout>
         <Header style={{ padding: 0, background: colorBgContainer, display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: 24 }}>
