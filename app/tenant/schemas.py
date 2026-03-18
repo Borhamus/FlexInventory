@@ -19,8 +19,11 @@ class InventarioResponse(InventarioBase):
     id: int
     creado_en: datetime
     actualizado_en: datetime
-    
+
     model_config = ConfigDict(from_attributes=True)
+
+class InventarioWithItems(InventarioResponse):
+    items: List["ItemResponse"] = []
 
 # ==================== Schemas para Item ====================
 

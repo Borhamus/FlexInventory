@@ -14,8 +14,8 @@ const InventoryPage: React.FC = () => {
   if (isLoading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
   if (error) return <Alert message="Error" description="No se pudo cargar el inventario" type="error" showIcon />;
 
-  // --- LÓGICA DE COLUMNAS DINÁMICAS ---
-  const dynamicColumns = [
+  // Columnas fijas que todo item tiene
+  const columns: any[] = [
     {
       title: 'ID',
       dataIndex: 'id',
@@ -28,21 +28,27 @@ const InventoryPage: React.FC = () => {
       key: 'nombre',
       render: (text: string) => <a>{text}</a>,
     },
+    {
+      title: 'Cantidad',
+      dataIndex: 'cantidad',
+      key: 'cantidad',
+      width: 100,
+    },
   ];
 
-  // Agregamos una columna por cada atributo dinámico (color, talle, etc)
+  // Columnas dinámicas: una por cada atributo definido en el inventario
   if (data?.atributos) {
     Object.keys(data.atributos).forEach((key) => {
-      dynamicColumns.push({
-        title: key.toUpperCase(),
-        dataIndex: ['atributos', key], // Acceso a objeto anidado
+      columns.push({
+        title: key.charAt(0).toUpperCase() + key.slice(1),
+        dataIndex: ['atributos', key],
         key: key,
-        render: (value: any) => value || <Tag color="default">N/A</Tag>,
+        render: (value: any) => (value !== undefined && value !== null && value !== '') ? value : <Tag color="default">N/A</Tag>,
       });
     });
   }
 
-  dynamicColumns.push({
+  columns.push({
     title: 'Creado el',
     dataIndex: 'creado_en',
     key: 'creado_en',
@@ -58,9 +64,9 @@ const InventoryPage: React.FC = () => {
         <Tag color="blue">ID: {data?.id}</Tag>
       </div>
 
-      <Table 
-        columns={dynamicColumns} 
-        dataSource={data ? [data] : []} // El API devuelve un objeto, Table espera un array
+      <Table
+        columns={columns}
+        dataSource={data?.items ?? []}
         rowKey="id"
         pagination={false}
         bordered

@@ -55,7 +55,7 @@ def get_inventarios(
     return db.query(models.Inventario).all()
 
 
-@router.get("/{inventario_id}", response_model=schemas.InventarioResponse)
+@router.get("/{inventario_id}", response_model=schemas.InventarioWithItems)
 def get_inventario(
     inventario_id: int,
     _: dict = _perm("inventarios", "read"),
