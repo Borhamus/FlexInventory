@@ -2,12 +2,14 @@ import React from 'react';
 import { useInventory } from '../hooks/useInventory';
 import dayjs from 'dayjs'; // Antd recomienda dayjs para fechas
 import { Alert, Card, Spin, Table, Tag, Typography } from 'antd';
+import { useParams } from 'react-router-dom';
 
 const { Title } = Typography;
 
 const InventoryPage: React.FC = () => {
   // Hardcodeamos el ID 1 por ahora como en tu curl
-  const { data, isLoading, error } = useInventory(1);
+  const { id } = useParams();
+  const { data, isLoading, error } = useInventory(Number(id));
 
   if (isLoading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
   if (error) return <Alert message="Error" description="No se pudo cargar el inventario" type="error" showIcon />;
