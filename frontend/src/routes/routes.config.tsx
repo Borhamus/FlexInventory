@@ -26,7 +26,7 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'inventario',
-        element: <InventoryLayout />, // El "dueño" del panel lateral de inventarios
+        element: <InventoryLayout />,
         children: [
           { index: true, element: <Placeholder title="Seleccione un inventario" /> },
           { path: ':id', element: <InventoryPage /> },
