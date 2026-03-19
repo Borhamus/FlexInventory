@@ -19,7 +19,7 @@ export const useAuth = () => {
         description: 'Sesión iniciada correctamente.',
         placement: 'topRight',
       });
-      navigate('/dashboard/usuarios');
+      navigate('/dashboard');
     },
     onError: (error: AxiosError<{ detail: string }>) => {
       notification.error({

@@ -1,96 +1,101 @@
-import React, { useState } from 'react';
-import { Layout, Menu, Button, theme } from 'antd';
+import React from 'react';
+import { Layout, Button, Typography } from 'antd';
 import {
   LogoutOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
   DashboardOutlined,
   TeamOutlined,
+  DatabaseOutlined, // Para Inventarios
+  AppstoreOutlined, // Para Catálogos
+  SettingOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
-import { useInventories } from '../hooks/useInventory';
 
-const { Header, Sider, Content } = Layout;
+const { Sider, Content } = Layout;
+const { Text } = Typography;
 
 const MainLayout: React.FC = () => {
-  const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate();
   const location = useLocation();
   const { logout } = useAuthContext();
 
-  const {
-    token: { colorBgContainer, borderRadiusLG },
-  } = theme.useToken();
-
-  const handleLogout = () => {
-    logout();
-    navigate('/');
-  };
-
-  const { data: inventories } = useInventories();
-
-  const inventarioItems = (inventories ?? []).map(inv => ({
-    key: `/dashboard/inventario/${inv.id}`,
-    label: inv.nombre,
-  }));
+  const navItems = [
+    { key: '/dashboard', icon: <DashboardOutlined />, label: 'Inicio' },
+    { key: '/dashboard/inventario', icon: <DatabaseOutlined />, label: 'Inventarios' },
+    { key: '/dashboard/catalogos', icon: <AppstoreOutlined />, label: 'Catálogos' },
+    { key: '/dashboard/usuarios', icon: <TeamOutlined />, label: 'Usuarios' },
+    { key: '/dashboard/config', icon: <SettingOutlined />, label: 'Ajustes' },
+  ];
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
-      <Sider trigger={null} collapsible collapsed={collapsed} theme="dark" style={{ display: 'flex', flexDirection: 'column' }}>
-        <div style={{ height: 32, margin: 16, background: 'rgba(255, 255, 255, 0.2)', borderRadius: 6, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-          <span style={{ color: 'white', fontWeight: 'bold' }}>{collapsed ? 'FI' : 'FlexInventory'}</span>
-        </div>
-        <Menu
-          theme="dark"
-          mode="inline"
-          defaultSelectedKeys={[location.pathname]}
-          onClick={({ key }) => navigate(key)}
-          style={{ flex: 1 }}
-          items={[
-            { key: '/dashboard', icon: <DashboardOutlined />, label: 'Inicio' },
-            { key: '/dashboard/usuarios', icon: <TeamOutlined />, label: 'Personal' },
-            ...inventarioItems,
-          ]}
-        />
-        <div style={{ padding: 16 }}>
-          <Button
-            type="primary"
-            block
-            onClick={() => navigate('/dashboard/inventario/nuevo')}
-          >
-            {collapsed ? '+' : 'Crear inventario'}
-          </Button>
+      <Sider
+        width={110}
+        theme="dark"
+        style={{
+          height: '100vh',
+          position: 'sticky',
+          top: 0,
+          left: 0,
+          backgroundColor: '#001529',
+          borderRight: '1px solid #002140',
+        }}
+      >
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          paddingTop: 20,
+          paddingBottom: 20
+        }}>
+
+          <div style={{ flex: 1 }}>
+            {navItems.map((item) => {
+              const isActive = item.key === '/dashboard'
+                ? location.pathname === '/dashboard'
+                : location.pathname.startsWith(item.key);
+
+              return (
+                <div
+                  key={item.key}
+                  onClick={() => navigate(item.key)}
+                  className={`nav-item-rail ${isActive ? 'active' : ''}`}
+                  style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    padding: '16px 0',
+                    cursor: 'pointer',
+                    backgroundColor: isActive ? '#1677ff' : 'transparent',
+                    color: 'white',
+                    marginBottom: 4,
+                    borderLeft: isActive ? '3px solid #fff' : '3px solid transparent',
+                  }}
+                >
+                  <span style={{ fontSize: '24px' }}>{item.icon}</span>
+                  <Text style={{ color: 'white', fontSize: '10px', marginTop: 4, textTransform: 'uppercase' }}>
+                    {item.label}
+                  </Text>
+                </div>
+              );
+            })}
+          </div>
+          <div className="logout-btn-rail" style={{ textAlign: 'center' }}>
+            <Button
+              type="text"
+              icon={<LogoutOutlined style={{ color: 'rgba(255,255,255,0.7)', fontSize: '24px' }} />}
+              onClick={logout}
+              style={{ height: 'auto', padding: '10px' }}
+            />
+            <div style={{ marginTop: 4 }}>
+              <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px' }}>SALIR</Text>
+            </div>
+          </div>
+
         </div>
       </Sider>
       <Layout>
-        <Header style={{ padding: 0, background: colorBgContainer, display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: 24 }}>
-          <Button
-            type="text"
-            icon={collapsed ? <MenuUnfoldOutlined /> : <MenuFoldOutlined />}
-            onClick={() => setCollapsed(!collapsed)}
-            style={{ fontSize: '16px', width: 64, height: 64 }}
-          />
-          <Button 
-            type="link" 
-            danger 
-            icon={<LogoutOutlined />} 
-            onClick={handleLogout}
-          >
-            Cerrar Sesión
-          </Button>
-        </Header>
-        <Content
-          style={{
-            margin: '24px 16px',
-            padding: 24,
-            minHeight: 280,
-            background: colorBgContainer,
-            borderRadius: borderRadiusLG,
-            overflow: 'initial'
-          }}
-        >
-          {/* Aquí es donde React Router inyectará las páginas hijas */}
+        <Content style={{ minHeight: '100vh', display: 'flex' }}>
           <Outlet />
         </Content>
       </Layout>
