@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Card, Form, Input, Button, Typography, Space } from 'antd';
+import { Layout, Card, Form, Input, Button, Typography } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import type { LoginCredentials } from '../schemas/auth.schema';

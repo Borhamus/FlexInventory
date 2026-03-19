@@ -3,6 +3,12 @@ import LoginPage from '../pages/LoginPage';
 import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/MainLayout';
 import InventoryPage from '../pages/InventoryPage';
+import InventoryLayout from '../components/InventoryLayout';
+
+// Placeholder rápido para secciones que aún no creamos
+const Placeholder = ({ title }: { title: string }) => (
+  <div style={{ padding: 20 }}><h2>{title}</h2><p>Próximamente...</p></div>
+);
 
 export const routes: RouteObject[] = [
   {
@@ -11,21 +17,33 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/dashboard',
-    element: (
-      <ProtectedRoute>
-        <MainLayout />
-      </ProtectedRoute>
+    element: (<ProtectedRoute> <MainLayout /> </ProtectedRoute>
     ),
     children: [
       {
-        path: 'usuarios',
-        element: <InventoryPage />,
+        index: true, // Esto hace que /dashboard muestre el Inicio por defecto
+        element: <Placeholder title="Inicio / Dashboard General" />,
       },
       {
-        path: 'inventario/:id',
-        element: <InventoryPage />,
+        path: 'inventario',
+        element: <InventoryLayout />, // El "dueño" del panel lateral de inventarios
+        children: [
+          { index: true, element: <Placeholder title="Seleccione un inventario" /> },
+          { path: ':id', element: <InventoryPage /> },
+        ]
       },
-      // Puedes agregar más sub-rutas aquí: asistencia, reportes, etc.
+      {
+        path: 'catalogos',
+        element: <Placeholder title="Gestión de Catálogos" />,
+      },
+      {
+        path: 'usuarios',
+        element: <Placeholder title="Gestión de Usuarios" />,
+      },
+      {
+        path: 'config',
+        element: <Placeholder title="Configuración del Sistema" />,
+      },
     ],
   },
   {
