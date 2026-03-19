@@ -3,7 +3,9 @@ import LoginPage from '../pages/LoginPage';
 import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/MainLayout';
 import InventoryPage from '../pages/InventoryPage';
-import InventoryLayout from '../components/InventoryLayout';
+import { InventoryLayout } from '../components/InventoryLayout';
+import { CatalogLayout } from '../components/CatalogosLayout';
+import CatalogosPage from '../pages/CatalogosPage';
 
 // Placeholder rápido para secciones que aún no creamos
 const Placeholder = ({ title }: { title: string }) => (
@@ -34,7 +36,11 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'catalogos',
-        element: <Placeholder title="Gestión de Catálogos" />,
+        element: <CatalogLayout />,
+        children: [
+          { index: true, element: <Placeholder title="Seleccione un Catalogo" /> },
+          { path: ':id', element: < CatalogosPage /> },
+        ]
       },
       {
         path: 'usuarios',
