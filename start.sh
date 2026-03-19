@@ -38,7 +38,7 @@ open_terminal() {
   fi
 }
 
-open_terminal "uvicorn" "cd '$PROJECT_DIR' && uvicorn app.main:app --reload"
+open_terminal "uvicorn" "cd '$PROJECT_DIR' && source .venv/bin/activate && uvicorn app.main:app --reload"
 open_terminal "npm-dev"  "cd '$PROJECT_DIR/frontend' && npm run dev"
 
 echo ""
