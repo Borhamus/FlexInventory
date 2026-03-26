@@ -6,3 +6,4 @@ CLAUDE.md
 *$py.class
 .env
 .claude/
+**/node_modules
