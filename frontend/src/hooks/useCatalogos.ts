@@ -3,7 +3,7 @@ import { catalogosService } from '../api/catalogos.service';
 
 export const useCatalogo = (id: number) => {
   return useQuery({
-    queryKey: ['catalogo', id],
+    queryKey: ['catalogos', id],
     queryFn: () => catalogosService.getCatalogo(id),
   });
 };

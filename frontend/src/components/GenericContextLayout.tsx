@@ -13,8 +13,8 @@ interface GenericContextLayoutProps {
   onAddClick?: () => void;
 }
 
-const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({ 
-  title, items, isLoading, basePath, onAddClick 
+const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
+  title, items, isLoading, basePath, onAddClick
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -25,28 +25,29 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
         <div style={{ padding: '20px' }}>
           <Text strong type="secondary">{title}</Text>
         </div>
-        
+
         {isLoading ? (
           <div style={{ textAlign: 'center', marginTop: 20 }}><Spin /></div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            {items?.map(item => (
-              <Button
-                key={item.id}
-                type="text"
-                block
-                className="context-menu-item"
-                style={{
-                  textAlign: 'left', borderRadius: 0, height: 45, paddingLeft: 24,
-                  backgroundColor: location.pathname === `${basePath}/${item.id}` ? '#f0f5ff' : 'transparent',
-                  color: location.pathname === `${basePath}/${item.id}` ? '#1677ff' : 'rgba(0,0,0,0.85)'
-                }}
-                onClick={() => navigate(`${basePath}/${item.id}`)}
-              >
-                {item.nombre}
-              </Button>
-            ))}
-            
+            <div style={{ height: "75vh", overflowY: "scroll" }}>
+              {items?.map(item => (
+                <Button
+                  key={item.id}
+                  type="text"
+                  block
+                  className="context-menu-item"
+                  style={{
+                    textAlign: 'left', borderRadius: 0, height: 45, paddingLeft: 24,
+                    backgroundColor: location.pathname === `${basePath}/${item.id}` ? '#f0f5ff' : 'transparent',
+                    color: location.pathname === `${basePath}/${item.id}` ? '#1677ff' : 'rgba(0,0,0,0.85)'
+                  }}
+                  onClick={() => navigate(`${basePath}/${item.id}`)}
+                >
+                  {item.nombre}
+                </Button>
+              ))}
+            </div>
             <div style={{ padding: '20px 16px' }}>
               <Button type="dashed" block onClick={onAddClick}>
                 + Crear Nuevo
@@ -55,8 +56,8 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
           </div>
         )}
       </Sider>
-      
-      <Content style={{padding: '10px'}}>
+
+      <Content style={{ padding: '10px' }}>
         <Outlet />
       </Content>
     </Layout>

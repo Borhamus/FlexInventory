@@ -1,5 +1,5 @@
 import React from 'react';
-import {   Card, Table, Tag, Typography } from 'antd';
+import {   Card, Tag, Typography } from 'antd';
 
 const { Title } = Typography;
 
