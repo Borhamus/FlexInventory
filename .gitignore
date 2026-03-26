@@ -7,3 +7,4 @@ CLAUDE.md
 .env
 .claude/
 DOC/.obsidian/
+**/node_modules
