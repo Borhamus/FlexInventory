@@ -1,16 +1,16 @@
 import { useQuery } from '@tanstack/react-query';
-import { inventoryService } from '../api/inventory.service';
+import { catalogosService } from '../api/catalogos.service';
 
 export const useCatalogo = (id: number) => {
   return useQuery({
-    queryKey: ['inventory', id],
-    queryFn: () => inventoryService.getInventario(id),
+    queryKey: ['catalogo', id],
+    queryFn: () => catalogosService.getCatalogo(id),
   });
 };
 
 export const useCatalogos = () => {
   return useQuery({
-    queryKey: ['inventories'],
-    queryFn: () => inventoryService.getInventarios(),
+    queryKey: ['catalogos'],
+    queryFn: () => catalogosService.getCatalogos(),
   });
 };
