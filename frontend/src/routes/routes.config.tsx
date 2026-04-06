@@ -3,6 +3,7 @@ import LoginPage from '../pages/LoginPage';
 import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/MainLayout';
 import InventoryPage from '../pages/InventoryPage';
+import { InventoryDashboard }  from '../pages/InventoryDashboard';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { CatalogLayout } from '../components/CatalogosLayout';
 import CatalogosPage from '../pages/CatalogosPage';
@@ -30,7 +31,7 @@ export const routes: RouteObject[] = [
         path: 'inventario',
         element: <InventoryLayout />,
         children: [
-          { index: true, element: <Placeholder title="Seleccione un inventario" /> },
+          { index: true, element: <InventoryDashboard /> },
           { path: ':id', element: <InventoryPage /> },
         ]
       },

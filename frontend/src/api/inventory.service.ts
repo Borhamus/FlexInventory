@@ -30,4 +30,8 @@ export const inventoryService = {
     return response.data;
   }
   ,
+  createInventory: async (data: any) => {
+    const response = await api.post('/inventarios/', data);
+    return response.data;
+  },
 };
