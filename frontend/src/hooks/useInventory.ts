@@ -24,3 +24,25 @@ export const useCreateInventory = () => {
     },
   });
 };
+
+export const useUpdateInventory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: { nombre: string } }) => 
+      inventoryService.updateInventory(id, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['inventories'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory', variables.id] });
+    },
+  });
+};
+
+export const useDeleteInventory = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => inventoryService.deleteInventory(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventories'] });
+    },
+  });
+};

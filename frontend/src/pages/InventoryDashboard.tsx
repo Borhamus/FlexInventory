@@ -1,4 +1,3 @@
-import React from 'react';
 import { Card, Row, Col, Statistic, Empty } from 'antd';
 import { BoxPlotOutlined, PartitionOutlined, BuildOutlined } from '@ant-design/icons';
 import { useInventories } from '../hooks/useInventory';
