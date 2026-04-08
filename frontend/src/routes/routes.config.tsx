@@ -7,6 +7,7 @@ import { InventoryDashboard }  from '../pages/InventoryDashboard';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { CatalogLayout } from '../components/CatalogosLayout';
 import CatalogosPage from '../pages/CatalogosPage';
+import CatalogoDashboard from '../pages/CatalogDashboard';
 
 // Placeholder rápido para secciones que aún no creamos
 const Placeholder = ({ title }: { title: string }) => (
@@ -39,7 +40,7 @@ export const routes: RouteObject[] = [
         path: 'catalogos',
         element: <CatalogLayout />,
         children: [
-          { index: true, element: <Placeholder title="Seleccione un Catalogo" /> },
+          { index: true, element: <CatalogoDashboard /> },
           { path: ':id', element: < CatalogosPage /> },
         ]
       },

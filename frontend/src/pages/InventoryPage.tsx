@@ -123,7 +123,7 @@ const InventoryPage: React.FC = () => {
     key: 'acciones',
     align: 'center',
     // 1. Agregamos '_', 'record' como parámetros de la función
-    render: (_, record: any) => (
+    render: (_: any, record: any) => (
       <Space size="small">
         <Button
           type="text"
