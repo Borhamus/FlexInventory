@@ -6,4 +6,5 @@ CLAUDE.md
 *$py.class
 .env
 .claude/
+DOC/.obsidian/
 **/node_modules

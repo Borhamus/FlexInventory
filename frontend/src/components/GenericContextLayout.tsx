@@ -25,7 +25,6 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
         <div style={{ padding: '20px' }}>
           <Text strong type="secondary">{title}</Text>
         </div>
-
         {isLoading ? (
           <div style={{ textAlign: 'center', marginTop: 20 }}><Spin /></div>
         ) : (

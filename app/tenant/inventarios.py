@@ -37,8 +37,7 @@ def create_inventario(
         raise HTTPException(400, detail="El inventario ya existe")
     new_inv = models.Inventario(**inventario.model_dump())
     db.add(new_inv)
-    db.commit()
-    db.refresh(new_inv)
+    db.flush()
     return new_inv
 
 
