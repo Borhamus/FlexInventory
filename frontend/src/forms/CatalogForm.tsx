@@ -17,16 +17,17 @@ export const CatalogForm: React.FC<CatalogFormProps> = ({ form, onFinish }) => {
       <Form.Item
         name="nombre"
         label="Nombre del Catálogo"
-        rules={[{ required: true, message: 'El nombre es obligatorio' }, { min: 3, message: 'Mínimo 3 caracteres' }]}
+        rules={[{ required: true, message: 'El nombre es obligatorio.' }, { min: 3, message: 'Mínimo 3 caracteres' }]}
       >
-        <Input placeholder="Ej: Temporada Verano 2026" />
+        <Input />
       </Form.Item>
 
       <Form.Item
         name="descripcion"
         label="Descripción"
+        rules={[{ required: false }, { max: 100, message: 'Máximo 100 caracteres' }]}
       >
-        <Input.TextArea rows={3} placeholder="Opcional: Breve descripción del catálogo" />
+        <Input.TextArea rows={3} />
       </Form.Item>
     </Form>
   );

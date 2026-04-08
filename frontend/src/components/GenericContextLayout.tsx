@@ -56,7 +56,7 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
         )}
       </Sider>
 
-      <Content style={{ padding: '10px' }}>
+      <Content style={{ height: 'calc(100vh)', overflow: 'hidden' }}>
         <Outlet />
       </Content>
     </Layout>
