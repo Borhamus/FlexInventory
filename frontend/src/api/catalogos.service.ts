@@ -6,9 +6,12 @@ export const catalogosService = {
     const response = await api.get(`/catalogos/${id}`);
     return response.data;
   },
-  
   getCatalogos: async (): Promise<Catalogo[]> => {
     const response = await api.get('/catalogos');
+    return response.data;
+  },
+  createCatalogo: async (data: any) => {
+    const response = await api.post('/catalogos/', data);
     return response.data;
   },
 };
