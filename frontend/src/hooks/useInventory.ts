@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryService } from '../api/inventory.service';
+import { message } from 'antd';
 
 export const useInventory = (id: number) => {
   return useQuery({
@@ -28,7 +29,7 @@ export const useCreateInventory = () => {
 export const useUpdateInventory = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: { nombre: string } }) => 
+    mutationFn: ({ id, payload }: { id: number; payload: { nombre: string } }) =>
       inventoryService.updateInventory(id, payload),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['inventories'] });
@@ -44,5 +45,49 @@ export const useDeleteInventory = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventories'] });
     },
+  });
+};
+
+export const useCreateItem = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: any) => inventoryService.createItem(payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['inventory', variables.inventario_id] });
+    },
+  });
+};
+
+export const useDeleteItem = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (itemId: number) => inventoryService.deleteItem(itemId),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] }); 
+    },
+  });
+};
+
+export const useUpdateItem = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    // La función recibe un objeto con el ID y el cuerpo (payload)
+    mutationFn: ({ id, payload }: { id: number; payload: any }) => 
+      inventoryService.updateItem(id, payload),
+    
+    onSuccess: () => {
+      // IMPORTANTE: 'inventory' debe ser la misma key que usás en useQuery
+      // Esto hace que la tabla se actualice "mágicamente"
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      message.success('Artículo actualizado con éxito');
+    },
+    
+    onError: (error: any) => {
+      console.error("Error al actualizar:", error);
+      message.error('No se pudo actualizar el artículo');
+    }
   });
 };

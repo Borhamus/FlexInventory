@@ -20,24 +20,24 @@ export interface Inventario {
 }
 
 export const inventoryService = {
-  
+
   getInventario: async (id: number): Promise<Inventario> => {
     const response = await api.get(`/inventarios/${id}`);
     return response.data;
   }
   ,
-  
+
   getInventarios: async (): Promise<Inventario[]> => {
     const response = await api.get('/inventarios/all');
     return response.data;
   }
   ,
-  
+
   createInventory: async (data: any) => {
     const response = await api.post('/inventarios/', data);
     return response.data;
   },
-  
+
   deleteInventory: async (id: number) => {
     const response = await api.delete(`/inventarios/${id}`);
     return response.data;
@@ -46,6 +46,21 @@ export const inventoryService = {
   updateInventory: async (id: number, payload: { nombre: string }) => {
     const response = await api.put(`/inventarios/${id}`, payload);
     return response.data;
+  },
+
+  createItem: async (payload: any) => {
+    const response = await api.post(`/items/`, payload);
+    return response.data;
+  },
+
+  deleteItem: async (itemId: number) => {
+    const response = await api.delete(`/items/${itemId}`);
+    return response.data;
+  },
+
+  updateItem: async (id: number, payload: any) => {
+    const { data } = await api.put(`/items/${id}`, payload);
+    return data;
   },
 
 };
