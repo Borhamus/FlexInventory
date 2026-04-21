@@ -118,7 +118,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
                 
                 <Form.Item style={{ marginBottom: 0 }}>
                   <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                    + Agregar Atributo
+                     Agregar Atributo
                   </Button>
                 </Form.Item>
               </>
