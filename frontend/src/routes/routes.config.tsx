@@ -8,8 +8,9 @@ import { InventoryLayout } from '../components/InventoryLayout';
 import { CatalogLayout } from '../components/CatalogosLayout';
 import CatalogosPage from '../pages/CatalogosPage';
 import CatalogoDashboard from '../pages/CatalogDashboard';
-import UsuariosPage from '../pages/UsuariosPage';   // ← nuevo
+import UsuariosPage from '../pages/UsuariosPage';   
 import ConfigPage from '../pages/ConfigPage';
+import DashboardPage from '../pages/DashboardPage';
 
 
 // Placeholder rápido para secciones que aún no creamos
@@ -28,7 +29,7 @@ export const routes: RouteObject[] = [
     children: [
       {
         index: true,
-        element: <Placeholder title="Inicio / Dashboard General" />,
+        element: <DashboardPage />,
       },
       {
         path: 'inventario',
