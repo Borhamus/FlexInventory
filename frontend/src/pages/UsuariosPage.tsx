@@ -17,6 +17,7 @@ import {
   Badge,
   Switch,
   Collapse,
+  theme,
 } from 'antd';
 import {
   PlusOutlined,
@@ -42,6 +43,7 @@ import {
 import { ModalChangePassword } from '../components/ModalChangePassword';
 import { ModalCreateUser } from '../components/ModalCreateUser';
 import type { UserResponse, CustomRoleResponse, PermissionIn } from '../schemas/usuarios.schema';
+
 
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
@@ -74,6 +76,7 @@ function hasPermission(role: CustomRoleResponse, resource: Resource, action: Act
 // ─── Panel de Roles ───────────────────────────────────────────────────────────
 
 const RolesPanel: React.FC = () => {
+  const { token } = theme.useToken();
   const { data: roles = [], isLoading } = useRoles();
   const { mutate: createRole, isPending: creating } = useCreateRole();
   const { mutate: deleteRole } = useDeleteRole();
@@ -155,13 +158,13 @@ const RolesPanel: React.FC = () => {
                 <table style={{ width: '100%', borderCollapse: 'collapse' }}>
                   <thead>
                     <tr>
-                      <th style={{ textAlign: 'left', paddingBottom: 8, color: '#8c8c8c', fontSize: 12 }}>
+                      <th style={{ textAlign: 'left', paddingBottom: 8, color: token.colorTextSecondary, fontSize: 12 }}>
                         RECURSO
                       </th>
                       {ACTIONS.map((action) => (
                         <th
                           key={action}
-                          style={{ textAlign: 'center', paddingBottom: 8, color: '#8c8c8c', fontSize: 12 }}
+                          style={{ textAlign: 'center', paddingBottom: 8, color: token.colorTextSecondary, fontSize: 12 }}
                         >
                           {ACTION_LABELS[action].toUpperCase()}
                         </th>
@@ -203,6 +206,7 @@ const RolesPanel: React.FC = () => {
 // ─── Página principal ─────────────────────────────────────────────────────────
 
 const UsuariosPage: React.FC = () => {
+  const { token } = theme.useToken();
   const { data: empleados = [], isLoading } = useEmpleados();
   const { data: roles = [] }                = useRoles();
   const { mutate: assignRole }              = useAssignRole();
@@ -330,7 +334,7 @@ const UsuariosPage: React.FC = () => {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f5f5f5' }}>
+    <Layout style={{ minHeight: '100vh', background: token.colorBgLayout }}>
       <Content style={{ padding: 32 }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <Space>
@@ -366,7 +370,7 @@ const UsuariosPage: React.FC = () => {
         style={{
           padding: 24,
           borderLeft: '1px solid #f0f0f0',
-          background: '#fff',
+          background: token.colorBgContainer,
           overflowY: 'auto',
         }}
       >

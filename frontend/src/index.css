@@ -9,7 +9,7 @@ body {
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
     'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
     'Noto Color Emoji';
-  background-color: #f0f2f5; /* El gris suave clásico de Ant Design */
+  background-color: transparent;
 }
 
 /* Ant Design ya maneja el box-sizing, pero esto ayuda a evitar sorpresas */
@@ -45,5 +45,6 @@ body {
 }
 
 .context-menu-item:hover {
-  background-color: #f5f5f5 !important;
+  background-color: #1677ff !important;
+  color: white !important;
 }

@@ -2,7 +2,7 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 import os
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from passlib.context import CryptContext
@@ -38,6 +38,13 @@ class Token(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+class UpdateProfileRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+
+class ChangeOwnPasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=8)
 
 
 # ==========================================
@@ -155,3 +162,48 @@ async def get_me(user: user_dependency):
     ```
     """
     return user
+
+@router.get("/me/profile", status_code=200)
+async def get_my_profile(user: user_dependency, db: db_dependency):
+    """Devuelve el perfil completo del usuario autenticado."""
+    db_user = db.query(Users).filter(Users.id == user["id"]).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    return {
+        "id": db_user.id,
+        "username": db_user.username,
+        "email": db_user.email,
+        "role": db_user.role,
+    }
+
+@router.patch("/me/username", status_code=200)
+async def update_my_username(
+    body: UpdateProfileRequest,
+    user: user_dependency,
+    db: db_dependency,
+):
+    """Cambia el username del usuario autenticado."""
+    db_user = db.query(Users).filter(Users.id == user["id"]).first()
+    if not db_user:
+        raise HTTPException(404, detail="Usuario no encontrado.")
+    if db.query(Users).filter(Users.username == body.username, Users.id != user["id"]).first():
+        raise HTTPException(400, detail="Ese nombre de usuario ya está en uso.")
+    db_user.username = body.username
+    db.commit()
+    db.refresh(db_user)
+    return {"username": db_user.username}
+
+@router.patch("/me/password", status_code=204)
+async def change_my_password(
+    body: ChangeOwnPasswordRequest,
+    user: user_dependency,
+    db: db_dependency,
+):
+    """Cambia la contraseña del usuario autenticado verificando la contraseña actual."""
+    db_user = db.query(Users).filter(Users.id == user["id"]).first()
+    if not db_user:
+        raise HTTPException(404, detail="Usuario no encontrado.")
+    if not bcrypt_context.verify(body.current_password, db_user.hashed_password):
+        raise HTTPException(400, detail="La contraseña actual es incorrecta.")
+    db_user.hashed_password = bcrypt_context.hash(body.new_password)
+    db.commit()

@@ -1,13 +1,15 @@
 import React from 'react';
-import { Layout, Card, Form, Input, Button, Typography } from 'antd';
+import { Layout, Card, Form, Input, Button, Typography, theme } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import type { LoginCredentials } from '../schemas/auth.schema';
+
 
 const { Content } = Layout;
 const { Title, Text } = Typography;
 
 const LoginPage: React.FC = () => {
+  const { token } = theme.useToken();
   const { login, isLoading } = useAuth();
 
   const onFinish = (values: LoginCredentials) => {
@@ -15,7 +17,7 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: '#f0f2f5' }}>
+    <Layout style={{ minHeight: '100vh', background: token.colorBgLayout }}>
       <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Card 
           style={{ width: 400, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px' }}

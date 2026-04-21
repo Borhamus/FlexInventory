@@ -9,6 +9,8 @@ import { CatalogLayout } from '../components/CatalogosLayout';
 import CatalogosPage from '../pages/CatalogosPage';
 import CatalogoDashboard from '../pages/CatalogDashboard';
 import UsuariosPage from '../pages/UsuariosPage';   // ← nuevo
+import ConfigPage from '../pages/ConfigPage';
+
 
 // Placeholder rápido para secciones que aún no creamos
 const Placeholder = ({ title }: { title: string }) => (
@@ -48,9 +50,8 @@ export const routes: RouteObject[] = [
         path: 'usuarios',
         element: <UsuariosPage />,   // ← reemplaza el Placeholder
       },
-      {
-        path: 'config',
-        element: <Placeholder title="Configuración del Sistema" />,
+      { 
+        path: 'config', element: <ConfigPage /> 
       },
     ],
   },
