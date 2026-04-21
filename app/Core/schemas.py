@@ -89,3 +89,7 @@ class ChangePasswordRequest(BaseModel):
 # ==================== Cambio de Nombre ====================
 class UpdateUsernameRequest(BaseModel):
     username: str = Field(..., min_length=3, max_length=50)
+
+# ==================== Cambio de Correo a los employee ====================
+class UpdateEmailRequest(BaseModel):
+    email: Optional[EmailStr] = None

@@ -40,6 +40,7 @@ import {
   useRenameRole,
   useTogglePermission,
   useUpdateUsername,
+  useUpdateEmail,
 } from '../hooks/useUsuarios';
 import { ModalChangePassword } from '../components/ModalChangePassword';
 import { ModalCreateUser } from '../components/ModalCreateUser';
@@ -251,6 +252,7 @@ const UsuariosPage: React.FC = () => {
   const { mutate: deactivate }             = useDeactivateEmpleado();
   const { mutate: activate }              = useActivateEmpleado();
   const { mutate: updateUsername }        = useUpdateUsername();
+  const { mutate: updateEmail } = useUpdateEmail();
 
   // Permisos del usuario actual sobre empleados
   const canCreate      = isTenant || hasPermission('empleados', 'create');
@@ -296,8 +298,26 @@ const UsuariosPage: React.FC = () => {
       title:     'Email',
       dataIndex: 'email',
       key:       'email',
-      render: (email: string | null) =>
-        email ? <Text>{email}</Text> : <Text type="secondary">—</Text>,
+      render: (email: string | null, record: UserResponse) =>
+        canEdit ? (
+          <Text
+            editable={{
+              tooltip: 'Editar email',
+              onChange: (val: string) => {
+                const trimmed = (val ?? '').trim();
+                // Si borra el email lo mandamos como null
+                const newEmail = trimmed || null;
+                if (newEmail !== email) {
+                  updateEmail({ id: record.id, email: newEmail });
+                }
+              },
+            }}
+          >
+            {email ?? ''}
+          </Text>
+        ) : (
+          email ? <Text>{email}</Text> : <Text type="secondary">—</Text>
+        ),
     },
     {
       title:     'Estado',

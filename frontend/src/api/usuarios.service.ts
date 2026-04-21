@@ -32,6 +32,9 @@ export const usuariosService = {
   updateUsername: (id: number, data: { username: string }) =>
     api.patch<UserResponse>(`/empleados/${id}/username`, data).then((r) => r.data),
 
+  updateEmail: (id: number, email: string | null) =>
+    api.patch<UserResponse>(`/empleados/${id}/email`, { email }).then((r) => r.data),
+
   // ── Roles ────────────────────────────────────────────────
   listRoles: () =>
     api.get<CustomRoleResponse[]>('/roles/').then((r) => r.data),

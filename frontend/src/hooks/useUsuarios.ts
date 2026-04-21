@@ -167,3 +167,17 @@ export const useTogglePermission = () => {
       notification.error({ message: e.response?.data?.detail || 'Error al modificar permiso.' }),
   });
 };
+
+export const useUpdateEmail = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, email }: { id: number; email: string | null }) =>
+      usuariosService.updateEmail(id, email),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: EMPLEADOS_KEY });
+      notification.success({ message: 'Email actualizado correctamente.' });
+    },
+    onError: (e: any) =>
+      notification.error({ message: e.response?.data?.detail || 'Error al actualizar email.' }),
+  });
+};
