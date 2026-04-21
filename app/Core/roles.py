@@ -18,7 +18,7 @@ from app.Core.models import CustomRole, RolePermission, Users, UserRole, Resourc
 from app.Core.schemas import (
     CustomRoleCreate, CustomRoleUpdate, CustomRoleResponse,
     PermissionIn, UserResponse, AssignRoleRequest,
-    CreateEmployeeRequest,
+    CreateEmployeeRequest, ChangePasswordRequest, UpdateUsernameRequest,
 )
 from app.tenant.dependencies import require_permission, get_verified_context
 from app.Core.auth import bcrypt_context
@@ -420,6 +420,86 @@ def deactivate_employee(
 
     employee.is_active = False
     db.commit()
+
+
+@router.patch("/empleados/{employee_id}/password", status_code=204, tags=["Empleados"])
+def change_employee_password(
+    employee_id: int,
+    body: ChangePasswordRequest,
+    ctx: Annotated[dict, Depends(require_permission("empleados", "update"))],
+    db: db_dep,
+):
+    """
+    Cambia la contraseña de un empleado.
+
+    Restricciones:
+    - No se puede cambiar la contraseña del tenant owner.
+    - Un empleado no puede cambiar su propia contraseña desde acá
+      (para eso existiría un endpoint de perfil propio).
+
+    Requiere permiso `empleados:update` (o ser tenant owner).
+    """
+    requester: Users = ctx["user"]
+    employee = _get_employee_or_404(employee_id, ctx["tenant"].id, db)
+
+    if employee.role == UserRole.tenant:
+        raise HTTPException(403, detail="No se puede modificar la contraseña del dueño del tenant.")
+
+    if employee.id == requester.id and requester.role != UserRole.tenant:
+        raise HTTPException(403, detail="Usá el endpoint de perfil para cambiar tu propia contraseña.")
+
+    employee.hashed_password = bcrypt_context.hash(body.new_password)
+    db.commit()
+
+
+@router.patch("/empleados/{employee_id}/activate", response_model=UserResponse, tags=["Empleados"])
+def activate_employee(
+    employee_id: int,
+    ctx: Annotated[dict, Depends(require_permission("empleados", "update"))],
+    db: db_dep,
+):
+    """
+    Reactiva un empleado previamente desactivado.
+    Requiere permiso `empleados:update` (o ser tenant owner).
+    """
+    employee = _get_employee_or_404(employee_id, ctx["tenant"].id, db)
+
+    if employee.role == UserRole.tenant:
+        raise HTTPException(403, detail="No se puede modificar al dueño del tenant.")
+
+    employee.is_active = True
+    db.commit()
+    db.refresh(employee)
+    return employee
+
+
+
+@router.patch("/empleados/{employee_id}/username", response_model=UserResponse, tags=["Empleados"])
+def update_employee_username(
+    employee_id: int,
+    body: UpdateUsernameRequest,
+    ctx: Annotated[dict, Depends(require_permission("empleados", "update"))],
+    db: db_dep,
+):
+    """
+    Edita el nombre de usuario de un empleado.
+    Requiere permiso `empleados:update` (o ser tenant owner).
+    """
+    employee = _get_employee_or_404(employee_id, ctx["tenant"].id, db)
+
+    if employee.role == UserRole.tenant:
+        raise HTTPException(403, detail="No se puede modificar al dueño del tenant.")
+
+    if db.query(Users).filter(
+        Users.username == body.username,
+        Users.id != employee_id,
+    ).first():
+        raise HTTPException(400, detail="Ese nombre de usuario ya está en uso.")
+
+    employee.username = body.username
+    db.commit()
+    db.refresh(employee)
+    return employee
 
 
 # ============================================================

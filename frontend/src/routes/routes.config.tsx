@@ -3,11 +3,12 @@ import LoginPage from '../pages/LoginPage';
 import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/MainLayout';
 import InventoryPage from '../pages/InventoryPage';
-import { InventoryDashboard }  from '../pages/InventoryDashboard';
+import { InventoryDashboard } from '../pages/InventoryDashboard';
 import { InventoryLayout } from '../components/InventoryLayout';
 import { CatalogLayout } from '../components/CatalogosLayout';
 import CatalogosPage from '../pages/CatalogosPage';
 import CatalogoDashboard from '../pages/CatalogDashboard';
+import UsuariosPage from '../pages/UsuariosPage';   // ← nuevo
 
 // Placeholder rápido para secciones que aún no creamos
 const Placeholder = ({ title }: { title: string }) => (
@@ -21,11 +22,10 @@ export const routes: RouteObject[] = [
   },
   {
     path: '/dashboard',
-    element: (<ProtectedRoute> <MainLayout /> </ProtectedRoute>
-    ),
+    element: (<ProtectedRoute> <MainLayout /> </ProtectedRoute>),
     children: [
       {
-        index: true, // Esto hace que /dashboard muestre el Inicio por defecto
+        index: true,
         element: <Placeholder title="Inicio / Dashboard General" />,
       },
       {
@@ -34,19 +34,19 @@ export const routes: RouteObject[] = [
         children: [
           { index: true, element: <InventoryDashboard /> },
           { path: ':id', element: <InventoryPage /> },
-        ]
+        ],
       },
       {
         path: 'catalogos',
         element: <CatalogLayout />,
         children: [
           { index: true, element: <CatalogoDashboard /> },
-          { path: ':id', element: < CatalogosPage /> },
-        ]
+          { path: ':id', element: <CatalogosPage /> },
+        ],
       },
       {
         path: 'usuarios',
-        element: <Placeholder title="Gestión de Usuarios" />,
+        element: <UsuariosPage />,   // ← reemplaza el Placeholder
       },
       {
         path: 'config',
@@ -57,5 +57,5 @@ export const routes: RouteObject[] = [
   {
     path: '*',
     element: <Navigate to="/" replace />,
-  }
+  },
 ];
