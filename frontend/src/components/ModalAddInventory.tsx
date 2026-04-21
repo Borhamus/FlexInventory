@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Form, Input, Button, Space } from 'antd';
+import { Modal, Form, Input, Button, Space, theme } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useCreateInventory } from '../hooks/useInventory';
 
@@ -10,6 +10,7 @@ interface Props {
 
 export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
   const [form] = Form.useForm();
+  const { token } = theme.useToken();
 
   const { mutate: createInventory, isPending } = useCreateInventory();
 
@@ -26,11 +27,10 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
         });
       }
 
-      // 3. Armamos el paquete final exacto como lo pide tu backend
       const payloadFinal = {
-        nombre: values.nombre,
+        nombre:      values.nombre,
         descripcion: values.descripcion,
-        atributos: atributosFormateados // ¡Acá va el JSON perfecto!
+        atributos:   atributosFormateados,
       };
 
       console.log("JSON empaquetado y listo para FastAPI:", payloadFinal);
@@ -38,7 +38,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
       createInventory(payloadFinal, {
         onSuccess: () => {
           form.resetFields();
-          onClose(); // Se cierra el modal y se recarga la barra lateral sola
+          onClose();
         },
         onError: (error) => {
           console.error("Falló el POST", error);
@@ -58,19 +58,19 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
       open={open}
       onOk={handleSubmit}
       onCancel={onClose}
-      okText={isPending ? "Creando..." : "Crear"} // ¡Acá!
+      okText={isPending ? "Creando..." : "Crear"}
       cancelText="Cancelar"
-      confirmLoading={isPending} // ¡Y acá!
+      confirmLoading={isPending}
       destroyOnClose
     >
-      <p style={{ marginBottom: 20, color: '#666' }}>
+      <p style={{ marginBottom: 20, color: token.colorTextSecondary }}>
         Define los detalles del inventario y los atributos base que tendrán sus artículos.
       </p>
       
       <Form form={form} layout="vertical">
-        <Form.Item 
-          label="Nombre del Inventario" 
-          name="nombre" 
+        <Form.Item
+          label="Nombre del Inventario"
+          name="nombre"
           rules={[{ required: true, message: 'El nombre es obligatorio' }]}
         >
           <Input placeholder="Ej: Depósito Central" size="large" />
@@ -80,45 +80,51 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
           <Input.TextArea rows={2} placeholder="Detalles opcionales..." />
         </Form.Item>
 
-        {/* --- INICIO ZONA DE ESQUEMA DE ATRIBUTOS (Solo nombres) --- */}
-        <div style={{ padding: '16px', background: '#f5f5f5', borderRadius: '8px', marginBottom: '24px' }}>
-        <h4 style={{ marginTop: 0, marginBottom: 8 }}>Atributos del Inventario</h4>
-        <p style={{ fontSize: '12px', color: '#888', marginBottom: 16 }}>
+        <div style={{
+          padding:      '16px',
+          background:   token.colorFillAlter,
+          borderRadius: token.borderRadiusLG,
+          marginBottom: '24px',
+          border:       `1px solid ${token.colorBorderSecondary}`,
+        }}>
+          <h4 style={{ marginTop: 0, marginBottom: 8, color: token.colorText }}>
+            Atributos del Inventario
+          </h4>
+          <p style={{ fontSize: '12px', color: token.colorTextTertiary, marginBottom: 16 }}>
             Definí qué datos se le pedirán a cada artículo (ej: Color, Talle, Material).
-        </p>
+          </p>
         
-            <Form.List name="atributos_dinamicos">
-                {(fields, { add, remove }) => (
-                <>
-                    {fields.map(({ key, name, ...restField }) => (
-                    <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                        <Form.Item
-                        {...restField}
-                        name={[name, 'llave']} // Mantenemos 'llave' para no romper el mapeo
-                        rules={[{ required: true, message: 'Nombre del Atributo' }]}
-                        >
-                        {/* Expandimos el ancho a 350px ya que ahora está solo */}
-                        <Input placeholder="Nombre del atributo (ej: Color)" style={{ width: '350px' }} />
-                        </Form.Item>
-                        
-                        {/* ELIMINAMOS EL FORM.ITEM DE 'VALOR' AQUÍ */}
-                        
-                        <MinusCircleOutlined 
-                        onClick={() => remove(name)} 
-                        style={{ color: '#ff4d4f', marginLeft: '8px' }} 
-                        />
-                    </Space>
-                    ))}
-                    
-                    <Form.Item style={{ marginBottom: 0 }}>
-                    <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                        Agregar Atributo 
-                    </Button>
+          <Form.List name="atributos_dinamicos">
+            {(fields, { add, remove }) => (
+              <>
+                {fields.map(({ key, name, ...restField }) => (
+                  <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'llave']}
+                      rules={[{ required: true, message: 'Nombre del Atributo' }]}
+                    >
+                      <Input
+                        placeholder="Nombre del atributo (ej: Color)"
+                        style={{ width: '350px' }}
+                      />
                     </Form.Item>
-                </>
-                )}
-            </Form.List>
-        </div>     
+                    <MinusCircleOutlined
+                      onClick={() => remove(name)}
+                      style={{ color: token.colorError, marginLeft: '8px' }}
+                    />
+                  </Space>
+                ))}
+                
+                <Form.Item style={{ marginBottom: 0 }}>
+                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                    + Agregar Atributo
+                  </Button>
+                </Form.Item>
+              </>
+            )}
+          </Form.List>
+        </div>
       </Form>
     </Modal>
   );
