@@ -18,7 +18,7 @@ from app.Core.models import CustomRole, RolePermission, Users, UserRole, Resourc
 from app.Core.schemas import (
     CustomRoleCreate, CustomRoleUpdate, CustomRoleResponse,
     PermissionIn, UserResponse, AssignRoleRequest,
-    CreateEmployeeRequest, ChangePasswordRequest, UpdateUsernameRequest,
+    CreateEmployeeRequest, ChangePasswordRequest, UpdateUsernameRequest, UpdateEmailRequest,
 )
 from app.tenant.dependencies import require_permission, get_verified_context
 from app.Core.auth import bcrypt_context
@@ -497,6 +497,33 @@ def update_employee_username(
         raise HTTPException(400, detail="Ese nombre de usuario ya está en uso.")
 
     employee.username = body.username
+    db.commit()
+    db.refresh(employee)
+    return employee
+
+@router.patch("/empleados/{employee_id}/email", response_model=UserResponse, tags=["Empleados"])
+def update_employee_email(
+    employee_id: int,
+    body: UpdateEmailRequest,
+    ctx: Annotated[dict, Depends(require_permission("empleados", "update"))],
+    db: db_dep,
+):
+    """
+    Actualiza el email de un empleado.
+    Requiere permiso `empleados:update` (o ser tenant owner).
+    """
+    employee = _get_employee_or_404(employee_id, ctx["tenant"].id, db)
+
+    if employee.role == UserRole.tenant:
+        raise HTTPException(403, detail="No se puede modificar al dueño del tenant.")
+
+    if body.email and db.query(Users).filter(
+        Users.email == body.email,
+        Users.id != employee_id,
+    ).first():
+        raise HTTPException(400, detail="Ese email ya está registrado.")
+
+    employee.email = body.email
     db.commit()
     db.refresh(employee)
     return employee
