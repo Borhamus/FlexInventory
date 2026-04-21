@@ -27,10 +27,10 @@ export const usuariosService = {
     api.delete(`/empleados/${id}`).then((r) => r.data),
 
   activateEmpleado: (id: number) =>
-  api.patch<UserResponse>(`/empleados/${id}/activate`).then((r) => r.data),
+    api.patch<UserResponse>(`/empleados/${id}/activate`).then((r) => r.data),
 
   updateUsername: (id: number, data: { username: string }) =>
-  api.patch<UserResponse>(`/empleados/${id}/username`, data).then((r) => r.data),
+    api.patch<UserResponse>(`/empleados/${id}/username`, data).then((r) => r.data),
 
   // ── Roles ────────────────────────────────────────────────
   listRoles: () =>
@@ -38,6 +38,9 @@ export const usuariosService = {
 
   createRole: (data: CustomRoleCreate) =>
     api.post<CustomRoleResponse>('/roles/', data).then((r) => r.data),
+
+  renameRole: (id: number, name: string) =>
+    api.put<CustomRoleResponse>(`/roles/${id}`, { name }).then((r) => r.data),
 
   deleteRole: (id: number) =>
     api.delete(`/roles/${id}`).then((r) => r.data),

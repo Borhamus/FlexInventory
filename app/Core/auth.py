@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
-from app.Core.models import Users, UserRole
+from app.Core.models import Users, UserRole, RolePermission
 from app.db_config import get_db
 
 
@@ -165,15 +165,15 @@ async def get_me(user: user_dependency):
 
 @router.get("/me/profile", status_code=200)
 async def get_my_profile(user: user_dependency, db: db_dependency):
-    """Devuelve el perfil completo del usuario autenticado."""
     db_user = db.query(Users).filter(Users.id == user["id"]).first()
     if not db_user:
         raise HTTPException(status_code=404, detail="Usuario no encontrado.")
     return {
-        "id": db_user.id,
-        "username": db_user.username,
-        "email": db_user.email,
-        "role": db_user.role,
+        "id":             db_user.id,
+        "username":       db_user.username,
+        "email":          db_user.email,
+        "role":           db_user.role,
+        "custom_role_id": db_user.custom_role_id,  # ← esta línea
     }
 
 @router.patch("/me/username", status_code=200)
@@ -207,3 +207,21 @@ async def change_my_password(
         raise HTTPException(400, detail="La contraseña actual es incorrecta.")
     db_user.hashed_password = bcrypt_context.hash(body.new_password)
     db.commit()
+
+@router.get("/me/permissions", status_code=200)
+async def get_my_permissions(user: user_dependency, db: db_dependency):
+    """Devuelve los permisos del usuario autenticado según su rol asignado."""
+    db_user = db.query(Users).filter(Users.id == user["id"]).first()
+    if not db_user or not db_user.custom_role_id:
+        return {"permissions": []}
+    
+    perms = db.query(RolePermission).filter(
+        RolePermission.role_id == db_user.custom_role_id
+    ).all()
+    
+    return {
+        "permissions": [
+            {"resource": p.resource, "action": p.action}
+            for p in perms
+        ]
+    }

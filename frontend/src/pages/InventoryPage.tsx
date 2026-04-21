@@ -1,22 +1,34 @@
 import React, { useState } from 'react';
 import { useInventory, useDeleteInventory } from '../hooks/useInventory';
 import dayjs from 'dayjs';
-import { Alert, Card, Spin, Table, Tag, Typography, Button, Space, Popconfirm, message, Input, Tooltip } from 'antd';
+import { Alert, Card, Spin, Table, Tag, Typography, Button, Space, Popconfirm, message, Input, Tooltip, Result } from 'antd';
 import { useParams, useNavigate } from 'react-router-dom';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined } from '@ant-design/icons';
 import { ModalAddItem } from '../components/ModalAddItem';
 import { ModalEditInventory } from '../components/ModalEditInventory';
+import { useAuthContext } from '../context/AuthContext';
 
 const { Title } = Typography;
 
 const InventoryPage: React.FC = () => {
-
+  const { hasPermission, isTenant } = useAuthContext();
   const { id } = useParams();
   const { data, isLoading, error } = useInventory(Number(id));
   const { mutate: deleteInventory, isPending } = useDeleteInventory();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const navigate = useNavigate();
+
+  // Verificar permiso de artículos antes de mostrar contenido
+  if (!isTenant && !hasPermission('items', 'read')) {
+    return (
+      <Result
+        status="403"
+        title="Sin acceso"
+        subTitle="No tenés permiso para ver los artículos. Hablá con el administrador."
+      />
+    );
+  }
 
   const datosFicticios = [
     {
@@ -122,24 +134,23 @@ const InventoryPage: React.FC = () => {
     title: 'Acciones',
     key: 'acciones',
     align: 'center',
-    // 1. Agregamos '_', 'record' como parámetros de la función
-    render: (_: any, record: any) => (
-      <Space size="small">
-        <Button
-          type="text"
-          icon={<EditOutlined />}
-          // 2. Le pasamos el ID específico de esta fila al onClick
-          onClick={() => console.log('Editar item:', record.id)}
-        />
-        <Button
-          type="text"
-          danger
-          icon={<DeleteOutlined />}
-          // 3. Lo mismo para eliminar
-          onClick={() => console.log('Eliminar item:', record.id)}
-        />
-      </Space>
-    )
+    render: (_: any, record: any) => {
+      const canEdit   = isTenant || hasPermission('items', 'update');
+      const canDelete = isTenant || hasPermission('items', 'delete');
+      if (!canEdit && !canDelete) return null;
+      return (
+        <Space size="small">
+          {canEdit && (
+            <Button type="text" icon={<EditOutlined />}
+              onClick={() => console.log('Editar item:', record.id)} />
+          )}
+          {canDelete && (
+            <Button type="text" danger icon={<DeleteOutlined />}
+              onClick={() => console.log('Eliminar item:', record.id)} />
+          )}
+        </Space>
+      );
+    }
   });
 
   const handleDelete = () => {
@@ -223,11 +234,16 @@ const InventoryPage: React.FC = () => {
             style: { marginBottom: 0, marginTop: 15 }
           }}
           scroll={{ y: 'calc(90vh - 200px)' }}
-          footer={() => (
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}> Agregar Artículo </Button>
-            </div>
-          )}
+          footer={() => {
+            const canAddItems = isTenant || hasPermission('items', 'create');
+            return canAddItems ? (
+              <div style={{ display: 'flex', justifyContent: 'center' }}>
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
+                  Agregar Artículo
+                </Button>
+              </div>
+            ) : null;
+          }}
         />
 
       </Card>

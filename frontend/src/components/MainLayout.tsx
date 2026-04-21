@@ -1,11 +1,11 @@
 import React from 'react';
-import { Layout, Button, Typography } from 'antd';
+import { Layout, Button, Typography, Spin } from 'antd';
 import {
   LogoutOutlined,
   DashboardOutlined,
   TeamOutlined,
-  DatabaseOutlined, // Para Inventarios
-  AppstoreOutlined, // Para Catálogos
+  DatabaseOutlined,
+  AppstoreOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
@@ -17,15 +17,42 @@ const { Text } = Typography;
 const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { logout } = useAuthContext();
+  const { logout, hasPermission, isTenant, loadingPermissions } = useAuthContext();
 
-  const navItems = [
-    { key: '/dashboard', icon: <DashboardOutlined />, label: 'Inicio' },
-    { key: '/dashboard/inventario', icon: <DatabaseOutlined />, label: 'Inventarios' },
-    { key: '/dashboard/catalogos', icon: <AppstoreOutlined />, label: 'Catálogos' },
-    { key: '/dashboard/usuarios', icon: <TeamOutlined />, label: 'Usuarios' },
-    { key: '/dashboard/config', icon: <SettingOutlined />, label: 'Ajustes' },
+  const allNavItems = [
+    {
+      key:     '/dashboard',
+      icon:    <DashboardOutlined />,
+      label:   'Inicio',
+      visible: true,
+    },
+    {
+      key:     '/dashboard/inventario',
+      icon:    <DatabaseOutlined />,
+      label:   'Inventarios',
+      visible: isTenant || hasPermission('inventarios', 'read'),
+    },
+    {
+      key:     '/dashboard/catalogos',
+      icon:    <AppstoreOutlined />,
+      label:   'Catálogos',
+      visible: isTenant || hasPermission('catalogos', 'read'),
+    },
+    {
+      key:     '/dashboard/usuarios',
+      icon:    <TeamOutlined />,
+      label:   'Usuarios',
+      visible: isTenant || hasPermission('empleados', 'read'),
+    },
+    {
+      key:     '/dashboard/config',
+      icon:    <SettingOutlined />,
+      label:   'Ajustes',
+      visible: true,
+    },
   ];
+
+  const navItems = allNavItems.filter((item) => item.visible);
 
   return (
     <Layout style={{ minHeight: '100vh' }}>
@@ -46,40 +73,49 @@ const MainLayout: React.FC = () => {
           flexDirection: 'column',
           height: '100%',
           paddingTop: 20,
-          paddingBottom: 20
+          paddingBottom: 20,
         }}>
 
+          {/* Nav items — spinner mientras cargan los permisos */}
           <div style={{ flex: 1 }}>
-            {navItems.map((item) => {
-              const isActive = item.key === '/dashboard'
-                ? location.pathname === '/dashboard'
-                : location.pathname.startsWith(item.key);
+            {loadingPermissions ? (
+              <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
+                <Spin size="small" />
+              </div>
+            ) : (
+              navItems.map((item) => {
+                const isActive = item.key === '/dashboard'
+                  ? location.pathname === '/dashboard'
+                  : location.pathname.startsWith(item.key);
 
-              return (
-                <div
-                  key={item.key}
-                  onClick={() => navigate(item.key)}
-                  className={`nav-item-rail ${isActive ? 'active' : ''}`}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    padding: '16px 0',
-                    cursor: 'pointer',
-                    backgroundColor: isActive ? '#1677ff' : 'transparent',
-                    color: 'white',
-                    marginBottom: 4,
-                    borderLeft: isActive ? '3px solid #fff' : '3px solid transparent',
-                  }}
-                >
-                  <span style={{ fontSize: '24px' }}>{item.icon}</span>
-                  <Text style={{ color: 'white', fontSize: '10px', marginTop: 4, textTransform: 'uppercase' }}>
-                    {item.label}
-                  </Text>
-                </div>
-              );
-            })}
+                return (
+                  <div
+                    key={item.key}
+                    onClick={() => navigate(item.key)}
+                    className={`nav-item-rail ${isActive ? 'active' : ''}`}
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      padding: '16px 0',
+                      cursor: 'pointer',
+                      backgroundColor: isActive ? '#1677ff' : 'transparent',
+                      color: 'white',
+                      marginBottom: 4,
+                      borderLeft: isActive ? '3px solid #fff' : '3px solid transparent',
+                    }}
+                  >
+                    <span style={{ fontSize: '24px' }}>{item.icon}</span>
+                    <Text style={{ color: 'white', fontSize: '10px', marginTop: 4, textTransform: 'uppercase' }}>
+                      {item.label}
+                    </Text>
+                  </div>
+                );
+              })
+            )}
           </div>
+
+          {/* Salir — siempre visible */}
           <div className="logout-btn-rail" style={{ textAlign: 'center' }}>
             <Button
               type="text"
@@ -94,6 +130,7 @@ const MainLayout: React.FC = () => {
 
         </div>
       </Sider>
+
       <Layout>
         <Content style={{ minHeight: '100vh', display: 'flex' }}>
           <Outlet />
