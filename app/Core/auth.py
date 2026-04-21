@@ -9,7 +9,7 @@ from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
-from app.Core.models import Users, UserRole, RolePermission
+from app.Core.models import Users, UserRole, RolePermission, Tenant
 from app.db_config import get_db
 
 
@@ -224,4 +224,42 @@ async def get_my_permissions(user: user_dependency, db: db_dependency):
             {"resource": p.resource, "action": p.action}
             for p in perms
         ]
+    }
+
+@router.get("/me/stats", status_code=200)
+async def get_dashboard_stats(
+    user: user_dependency,
+    db: db_dependency,
+):
+    """
+    Devuelve estadísticas generales del tenant para el dashboard de inicio.
+    Accesible por cualquier usuario autenticado.
+    """
+    from app.tenant.models import Inventario, Item, Catalogo
+    from app.db_config import get_tenant_db_context
+
+    db_user = db.query(Users).filter(Users.id == user["id"]).first()
+    if not db_user:
+        raise HTTPException(404, detail="Usuario no encontrado.")
+
+    tenant = db.query(Tenant).filter(Tenant.id == db_user.tenant_id).first()
+
+    # Contar empleados en schema public
+    total_empleados = db.query(Users).filter(
+        Users.tenant_id == db_user.tenant_id,
+        Users.role      != "tenant",
+    ).count()
+
+    # Contar inventarios, items y catálogos en el schema del tenant
+    with get_tenant_db_context(tenant.schema_name) as tenant_db:
+        total_inventarios = tenant_db.query(Inventario).count()
+        total_items       = tenant_db.query(Item).count()
+        total_catalogos   = tenant_db.query(Catalogo).count()
+
+    return {
+        "username":          db_user.username,
+        "total_inventarios": total_inventarios,
+        "total_items":       total_items,
+        "total_catalogos":   total_catalogos,
+        "total_empleados":   total_empleados,
     }
