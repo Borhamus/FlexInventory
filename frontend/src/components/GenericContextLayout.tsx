@@ -11,10 +11,11 @@ interface GenericContextLayoutProps {
   isLoading: boolean;
   basePath: string;
   onAddClick?: () => void;
+  canAdd?:   boolean;
 }
 
 const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
-  title, items, isLoading, basePath, onAddClick
+  title, items, isLoading, basePath, onAddClick, canAdd = true  // ← default true
 }) => {
   const navigate = useNavigate();
   const location = useLocation();
@@ -61,9 +62,11 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
               ))}
             </div>
             <div style={{ padding: '20px 16px' }}>
-              <Button type="dashed" block onClick={onAddClick}>
-                + Crear Nuevo
-              </Button>
+              {canAdd && (
+                <Button type="dashed" block onClick={onAddClick}>
+                  + Crear Nuevo
+                </Button>
+              )}
             </div>
           </div>
         )}

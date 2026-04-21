@@ -97,7 +97,15 @@ export const useUpdateUsername = () => {
 // ── Roles ─────────────────────────────────────────────────
 
 export const useRoles = () =>
-  useQuery({ queryKey: ROLES_KEY, queryFn: usuariosService.listRoles });
+  useQuery({
+    queryKey: ROLES_KEY,
+    queryFn:  usuariosService.listRoles,
+    retry: (failureCount, error: any) => {
+      // Si es 403 no reintentamos — el usuario no tiene permiso
+      if (error?.response?.status === 403) return false;
+      return failureCount < 3;
+    },
+  });
 
 export const useCreateRole = () => {
   const qc = useQueryClient();
@@ -109,6 +117,20 @@ export const useCreateRole = () => {
     },
     onError: (e: any) =>
       notification.error({ message: e.response?.data?.detail || 'Error al crear rol.' }),
+  });
+};
+
+export const useRenameRole = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, name }: { id: number; name: string }) =>
+      usuariosService.renameRole(id, name),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ROLES_KEY });
+      notification.success({ message: 'Rol renombrado correctamente.' });
+    },
+    onError: (e: any) =>
+      notification.error({ message: e.response?.data?.detail || 'Error al renombrar rol.' }),
   });
 };
 
@@ -133,9 +155,9 @@ export const useTogglePermission = () => {
       permission,
       active,
     }: {
-      roleId: number;
+      roleId:     number;
       permission: PermissionIn;
-      active: boolean;
+      active:     boolean;
     }) =>
       active
         ? usuariosService.addPermission(roleId, permission)
