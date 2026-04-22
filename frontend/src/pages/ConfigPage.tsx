@@ -5,22 +5,21 @@ import {
   Form,
   Input,
   Button,
-  Switch,
   Divider,
   Space,
   Spin,
+  Row,
+  Col,
+  notification
 } from 'antd';
 import {
   UserOutlined,
   LockOutlined,
-  BulbOutlined,
 } from '@ant-design/icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { notification } from 'antd';
-import { useTheme } from '../context/ThemeContext';
 import api from '../api/axios.config';
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 // ─── API calls ────────────────────────────────────────────────────────────────
 
@@ -34,19 +33,17 @@ const updateMyUsername = (username: string) =>
 const changeMyPassword = (data: { current_password: string; new_password: string }) =>
   api.patch('/auth/me/password', data).then((r) => r.data);
 
-// ─── Sección: Mi Perfil ───────────────────────────────────────────────────────
+// ─── Lado Izquierdo: Info y Username ──────────────────────────────────────────
 
 const ProfileSection: React.FC = () => {
   const qc = useQueryClient();
   const [usernameForm] = Form.useForm();
-  const [passwordForm] = Form.useForm();
 
   const { data: profile, isLoading } = useQuery({
     queryKey: ['my-profile'],
     queryFn: fetchMyProfile,
   });
 
-  // Inicializar el form cuando carguen los datos
   useEffect(() => {
     if (profile) {
       usernameForm.setFieldsValue({ username: profile.username });
@@ -63,17 +60,6 @@ const ProfileSection: React.FC = () => {
       notification.error({ message: e.response?.data?.detail || 'Error al actualizar nombre.' }),
   });
 
-  const { mutate: savePassword, isPending: savingPassword } = useMutation({
-    mutationFn: (data: { current_password: string; new_password: string }) =>
-      changeMyPassword(data),
-    onSuccess: () => {
-      passwordForm.resetFields();
-      notification.success({ message: 'Contraseña cambiada correctamente.' });
-    },
-    onError: (e: any) =>
-      notification.error({ message: e.response?.data?.detail || 'Error al cambiar contraseña.' }),
-  });
-
   const handleUsernameSubmit = () => {
     usernameForm.validateFields().then(({ username }) => {
       if (username !== profile?.username) {
@@ -82,20 +68,10 @@ const ProfileSection: React.FC = () => {
     });
   };
 
-  const handlePasswordSubmit = () => {
-    passwordForm.validateFields().then((values) => {
-      savePassword({
-        current_password: values.current_password,
-        new_password: values.new_password,
-      });
-    });
-  };
-
   if (isLoading) return <Spin />;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: 24 }}>
-      {/* Info de solo lectura */}
       <div>
         <Text type="secondary" style={{ fontSize: 12, textTransform: 'uppercase', letterSpacing: 1 }}>
           Rol
@@ -121,7 +97,6 @@ const ProfileSection: React.FC = () => {
 
       <Divider style={{ margin: '4px 0' }} />
 
-      {/* Cambiar username */}
       <div>
         <Text strong style={{ display: 'block', marginBottom: 12 }}>
           Cambiar nombre de usuario
@@ -145,84 +120,88 @@ const ProfileSection: React.FC = () => {
           </Button>
         </Form>
       </div>
-
-      <Divider style={{ margin: '4px 0' }} />
-
-      {/* Cambiar contraseña */}
-      <div>
-        <Text strong style={{ display: 'block', marginBottom: 12 }}>
-          Cambiar contraseña
-        </Text>
-        <Form form={passwordForm} layout="vertical">
-          <Form.Item
-            name="current_password"
-            label="Contraseña actual"
-            rules={[{ required: true, message: 'Ingresá tu contraseña actual' }]}
-          >
-            <Input.Password prefix={<LockOutlined />} placeholder="Contraseña actual" />
-          </Form.Item>
-
-          <Form.Item
-            name="new_password"
-            label="Nueva contraseña"
-            rules={[
-              { required: true, message: 'Ingresá la nueva contraseña' },
-              { min: 8, message: 'Mínimo 8 caracteres' },
-            ]}
-          >
-            <Input.Password prefix={<LockOutlined />} placeholder="Mínimo 8 caracteres" />
-          </Form.Item>
-
-          <Form.Item
-            name="confirm_password"
-            label="Confirmar nueva contraseña"
-            dependencies={['new_password']}
-            rules={[
-              { required: true, message: 'Confirmá la nueva contraseña' },
-              ({ getFieldValue }) => ({
-                validator(_, value) {
-                  if (!value || getFieldValue('new_password') === value) {
-                    return Promise.resolve();
-                  }
-                  return Promise.reject(new Error('Las contraseñas no coinciden'));
-                },
-              }),
-            ]}
-          >
-            <Input.Password prefix={<LockOutlined />} placeholder="Repetí la nueva contraseña" />
-          </Form.Item>
-
-          <Button
-            type="primary"
-            loading={savingPassword}
-            onClick={handlePasswordSubmit}
-          >
-            Cambiar contraseña
-          </Button>
-        </Form>
-      </div>
     </div>
   );
 };
 
-// ─── Sección: Apariencia ──────────────────────────────────────────────────────
+// ─── Lado Derecho: Contraseña ─────────────────────────────────────────────────
 
-const AppearanceSection: React.FC = () => {
-  const { isDark, toggleTheme } = useTheme();
+const PasswordSection: React.FC = () => {
+  const [passwordForm] = Form.useForm();
+
+  const { mutate: savePassword, isPending: savingPassword } = useMutation({
+    mutationFn: (data: { current_password: string; new_password: string }) =>
+      changeMyPassword(data),
+    onSuccess: () => {
+      passwordForm.resetFields();
+      notification.success({ message: 'Contraseña cambiada correctamente.' });
+    },
+    onError: (e: any) =>
+      notification.error({ message: e.response?.data?.detail || 'Error al cambiar contraseña.' }),
+  });
+
+  const handlePasswordSubmit = () => {
+    passwordForm.validateFields().then((values) => {
+      savePassword({
+        current_password: values.current_password,
+        new_password: values.new_password,
+      });
+    });
+  };
 
   return (
-    <Space align="center" style={{ justifyContent: 'space-between', width: '100%' }}>
-      <div>
-        <Text strong style={{ display: 'block' }}>Modo oscuro</Text>
-        <Text type="secondary">Cambia entre el tema claro y oscuro de la aplicación.</Text>
-      </div>
-      <Switch
-        checked={isDark}
-        onChange={toggleTheme}
-        checkedChildren={<BulbOutlined />}
-        unCheckedChildren={<BulbOutlined />}
-      />
-    </Space>
+    <div>
+      <Text strong style={{ display: 'block', marginBottom: 12 }}>
+        Cambiar contraseña
+      </Text>
+      <Form form={passwordForm} layout="vertical">
+        <Form.Item
+          name="current_password"
+          label="Contraseña actual"
+          rules={[{ required: true, message: 'Ingresá tu contraseña actual' }]}
+        >
+          <Input.Password prefix={<LockOutlined />} placeholder="Contraseña actual" />
+        </Form.Item>
+
+        <Form.Item
+          name="new_password"
+          label="Nueva contraseña"
+          rules={[
+            { required: true, message: 'Ingresá la nueva contraseña' },
+            { min: 8, message: 'Mínimo 8 caracteres' },
+          ]}
+        >
+          <Input.Password prefix={<LockOutlined />} placeholder="Mínimo 8 caracteres" />
+        </Form.Item>
+
+        <Form.Item
+          name="confirm_password"
+          label="Confirmar nueva contraseña"
+          dependencies={['new_password']}
+          rules={[
+            { required: true, message: 'Confirmá la nueva contraseña' },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                if (!value || getFieldValue('new_password') === value) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error('Las contraseñas no coinciden'));
+              },
+            }),
+          ]}
+        >
+          <Input.Password prefix={<LockOutlined />} placeholder="Repetí la nueva contraseña" />
+        </Form.Item>
+
+        <Button
+          type="primary"
+          loading={savingPassword}
+          onClick={handlePasswordSubmit}
+        >
+          Actualizar contraseña
+        </Button>
+      </Form>
+    </div>
   );
 };
 
@@ -230,33 +209,31 @@ const AppearanceSection: React.FC = () => {
 
 const ConfigPage: React.FC = () => {
   return (
-    <div style={{ padding: 32, maxWidth: 600, width: '100%' }}>
-      <Title level={3} style={{ marginBottom: 24 }}>
-        Ajustes
-      </Title>
+    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px', width: '100%' }}>
 
-      <Card
-        title={
-          <Space>
-            <UserOutlined />
-            Mi Perfil
-          </Space>
-        }
-        style={{ marginBottom: 24 }}
-      >
-        <ProfileSection />
-      </Card>
+      <Row gutter={[24, 24]}>
+        
+        {/* Tarjeta Única de Perfil (Ocupa todo el ancho disponible) */}
+        <Col span={24}>
+          <Card title={<Space><UserOutlined />Mi Perfil y Seguridad</Space>}>
+            
+            {/* EL SECRETO: Una fila adentro de la tarjeta */}
+            <Row gutter={[64, 24]}> 
+              
+              {/* Mitad Izquierda: Perfil y Username */}
+              <Col xs={24} lg={12}>
+                <ProfileSection />
+              </Col>
 
-      <Card
-        title={
-          <Space>
-            <BulbOutlined />
-            Apariencia
-          </Space>
-        }
-      >
-        <AppearanceSection />
-      </Card>
+              {/* Mitad Derecha: Contraseña */}
+              <Col xs={24} lg={12}>
+                <PasswordSection />
+              </Col>
+
+            </Row>
+          </Card>
+        </Col>
+      </Row>
     </div>
   );
 };

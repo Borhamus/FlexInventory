@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Button, Typography, Spin } from 'antd';
+import { Layout, Button, Typography, Spin, Switch } from 'antd';
 import {
   LogoutOutlined,
   DashboardOutlined,
@@ -7,9 +7,11 @@ import {
   DatabaseOutlined,
   AppstoreOutlined,
   SettingOutlined,
+  BulbOutlined
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext'; 
 
 const { Sider, Content } = Layout;
 const { Text } = Typography;
@@ -18,6 +20,7 @@ const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, hasPermission, isTenant, loadingPermissions } = useAuthContext();
+  const { isDark, toggleTheme } = useTheme();
 
   const allNavItems = [
     {
@@ -113,6 +116,17 @@ const MainLayout: React.FC = () => {
                 );
               })
             )}
+          </div>
+
+          {/* --- MODO OSCURO --- */}
+          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+            <Switch
+              checked={isDark}
+              onChange={toggleTheme}
+              checkedChildren={<BulbOutlined />}
+              unCheckedChildren={<BulbOutlined />}
+              size="small" // Le ponemos tamaño small para que no desentone en la barra finita
+            />
           </div>
 
           {/* Salir — siempre visible */}
