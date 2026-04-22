@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Layout, Button, Typography, Spin, theme } from 'antd';
+import { RightOutlined, LeftOutlined } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 const { Sider, Content } = Layout;
@@ -11,7 +12,7 @@ interface GenericContextLayoutProps {
   isLoading: boolean;
   basePath: string;
   onAddClick?: () => void;
-  canAdd?:   boolean;
+  canAdd?: boolean;
 }
 
 const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
@@ -21,26 +22,45 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
   const location = useLocation();
   const { token } = theme.useToken();
 
+  const [collapsed, setCollapsed] = useState(false);
   const isActive = (id: number) => location.pathname === `${basePath}/${id}`;
 
   return (
     <Layout style={{ height: '100%' }}>
       <Sider
-        width={250}
-        theme="light"
+        width={200}
+        collapsible
+        collapsed={collapsed}
+        onCollapse={(value) => setCollapsed(value)}
+        collapsedWidth={0}
+        trigger={collapsed ? <RightOutlined /> : <LeftOutlined />}
+        zeroWidthTriggerStyle={{
+          top: 300,                     
+          transform: 'translateY(-50%)',  
+          right: -15, 
+          height: '50px',                 
+          width: '15px',                  
+          background: token.colorPrimary, 
+          borderRadius: '0 8px 8px 0',    
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          boxShadow: '2px 0 8px rgba(0,0,0,0.15)' 
+        }}
         style={{
           borderRight: `1px solid ${token.colorBorderSecondary}`,
           background: token.colorBgContainer,
+          height: '100vh'
         }}
       >
-        <div style={{ padding: '20px' }}>
+        <div style={{ padding: '20px', textAlign: 'center' }}>
           <Text strong type="secondary">{title}</Text>
         </div>
         {isLoading ? (
           <div style={{ textAlign: 'center', marginTop: 20 }}><Spin /></div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
-            <div style={{ height: '75vh', overflowY: 'scroll' }}>
+            <div style={{ height: '75vh', overflowY: 'auto', overflowX: 'hidden' }}>
               {items?.map(item => (
                 <Button
                   key={item.id}
@@ -57,7 +77,22 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
                   }}
                   onClick={() => navigate(`${basePath}/${item.id}`)}
                 >
-                  {item.nombre}
+                  <Text
+                    style={{
+                      color: 'inherit', 
+                      width: '100%',    
+                      textAlign: 'left',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center'
+                    }}
+                    ellipsis={{
+                      tooltip: { title: item.nombre, placement: 'bottom' }
+                    }}
+                  >
+
+                    {item.nombre}
+                  </Text>
                 </Button>
               ))}
             </div>
