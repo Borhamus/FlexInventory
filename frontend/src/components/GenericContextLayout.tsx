@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Layout, Button, Typography, Spin, theme } from 'antd';
-import { RightOutlined, LeftOutlined } from '@ant-design/icons';
+import { Layout, Button, Typography, Spin, theme, Input } from 'antd';
+import { RightOutlined, LeftOutlined, SearchOutlined } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 
 const { Sider, Content } = Layout;
@@ -25,6 +25,12 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
   const [collapsed, setCollapsed] = useState(false);
   const isActive = (id: number) => location.pathname === `${basePath}/${id}`;
   const sortedItems = items ? [...items].sort((a, b) => a.id - b.id) : [];
+
+  const [menuSearch, setMenuSearch] = useState('');
+
+  const filteredItems = sortedItems.filter(item => 
+    item.nombre.toLowerCase().includes(menuSearch.toLowerCase())
+  );
 
   return (
     <Layout style={{ height: '100%' }}>
@@ -54,15 +60,28 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
           height: '100vh'
         }}
       >
+        {/* TITULO */}
         <div style={{ padding: '20px', textAlign: 'center' }}>
           <Text strong type="secondary">{title}</Text>
         </div>
+
+        {/* BARRA DE BUSQUEDA */}
+        <div style={{ padding: '0 16px 12px 16px' }}>
+          <Input
+            placeholder="Buscar..."
+            prefix={<SearchOutlined style={{ color: token.colorTextQuaternary }} />}
+            value={menuSearch}
+            onChange={(e) => setMenuSearch(e.target.value)}
+            allowClear
+          />
+        </div>
+
         {isLoading ? (
           <div style={{ textAlign: 'center', marginTop: 20 }}><Spin /></div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ height: '75vh', overflowY: 'auto', overflowX: 'hidden' }}>
-              {sortedItems.map(item => (
+              {filteredItems.map(item => (
                 <Button
                   key={item.id}
                   type="text"
@@ -99,7 +118,7 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
             </div>
             <div style={{ padding: '20px 16px' }}>
               {canAdd && (
-                <Button type="dashed" block onClick={onAddClick}>
+                <Button block onClick={onAddClick}>
                   + Crear Nuevo
                 </Button>
               )}

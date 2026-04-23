@@ -37,21 +37,6 @@ export const ModalEditItemInventory: React.FC<Props> = ({
           });
         }
       }, [open, item, form]);
-  
-    const onOk = () => {
-      form.validateFields().then((values) => {
-        // 2. Llamamos a la mutación pasando el ID y los valores del form
-        updateItem({ 
-          id: item.id, 
-          payload: {
-            ...values,
-            inventario_id: item.inventario_id // Mantenemos la relación
-          } 
-        }, {
-          onSuccess: () => onClose() // Cerramos solo si salió bien
-        });
-      });
-    };
 
     const renderizarInput = (tipo: string) => {
       switch (tipo) {
