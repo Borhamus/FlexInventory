@@ -20,7 +20,7 @@ const MainLayout: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const { logout, hasPermission, isTenant, loadingPermissions } = useAuthContext();
-  const { isDark, toggleTheme } = useTheme();
+  const { isDark, toggleTheme, primaryColor } = useTheme();
 
   const allNavItems = [
     {
@@ -67,8 +67,8 @@ const MainLayout: React.FC = () => {
           position: 'sticky',
           top: 0,
           left: 0,
-          backgroundColor: '#001529',
-          borderRight: '1px solid #002140',
+          backgroundColor: `color-mix(in srgb, ${primaryColor}, black 50%)`,
+          borderRight: 'none',
         }}
       >
         <div style={{
@@ -102,7 +102,7 @@ const MainLayout: React.FC = () => {
                       alignItems: 'center',
                       padding: '16px 0',
                       cursor: 'pointer',
-                      backgroundColor: isActive ? '#1677ff' : 'transparent',
+                      backgroundColor: isActive ? `${primaryColor} !important` : 'transparent',
                       color: 'white',
                       marginBottom: 4,
                       borderLeft: isActive ? '3px solid #fff' : '3px solid transparent',

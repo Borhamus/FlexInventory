@@ -10,12 +10,17 @@ import {
   Spin,
   Row,
   Col,
-  notification
+  notification,
+  Tooltip
 } from 'antd';
 import {
   UserOutlined,
   LockOutlined,
+  BgColorsOutlined,
+  CheckOutlined,
 } from '@ant-design/icons';
+import { useTheme } from '../context/ThemeContext';
+
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import api from '../api/axios.config';
 
@@ -32,6 +37,66 @@ const updateMyUsername = (username: string) =>
 
 const changeMyPassword = (data: { current_password: string; new_password: string }) =>
   api.patch('/auth/me/password', data).then((r) => r.data);
+
+// PALETA DE COLORES PARA LOS TEMAS
+const PRESET_COLORS = [
+  { name: 'Azul', hex: '#1677ff' },
+  { name: 'Añil / Indigo', hex: '#2f54eb' },
+  { name: 'Azul Marino', hex: '#003eb3' },
+  { name: 'Violeta', hex: '#722ed1' },
+  { name: 'Lima', hex: '#a0d911' },
+  { name: 'Verde', hex: '#52c41a' },
+  { name: 'Verde Esmeralda', hex: '#08979c' },
+  { name: 'Oro / Mostaza', hex: '#faad14' },
+  { name: 'Naranja', hex: '#fa8c16' },
+  { name: 'Terracota', hex: '#fa541c' },    
+  { name: 'Rojo', hex: '#f5222d' },
+  { name: 'Cian', hex: '#13c2c2' },
+  { name: 'Rosa', hex: '#eb2f96' },
+  { name: 'Magenta', hex: '#c41d7f' },            
+  { name: 'Gris Pizarra', hex: '#595959' },
+  { name: 'negro', hex: '#000000'}
+];
+
+const ThemeSettingsCard: React.FC = () => {
+  const { primaryColor, setPrimaryColor } = useTheme();
+
+  return (
+    <Card title={<Space><BgColorsOutlined />Tema y Apariencia</Space>}>
+      <Text type="secondary" style={{ display: 'block', marginBottom: 16 }}>
+        Elegí el color principal para tu espacio de trabajo.
+      </Text>
+      <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
+        {PRESET_COLORS.map((color) => {
+          const isSelected = primaryColor === color.hex;
+          return (
+            <Tooltip title={color.name} key={color.hex}>
+              <div
+                onClick={() => setPrimaryColor(color.hex)}
+                style={{
+                  width: 32,
+                  height: 32,
+                  borderRadius: '50%',
+                  backgroundColor: color.hex,
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  transition: 'all 0.2s',
+                  boxShadow: isSelected ? `0 0 0 3px ${color.hex}33` : 'none',
+                  border: isSelected ? `2px solid ${color.hex}` : '2px solid transparent',
+                  transform: isSelected ? 'scale(1.1)' : 'scale(1)',
+                }}
+              >
+                {isSelected && <CheckOutlined style={{ color: '#fff', fontSize: 16 }} />}
+              </div>
+            </Tooltip>
+          );
+        })}
+      </div>
+    </Card>
+  );
+};
 
 // ─── Lado Izquierdo: Info y Username ──────────────────────────────────────────
 
@@ -212,14 +277,18 @@ const ConfigPage: React.FC = () => {
     <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px', width: '100%' }}>
 
       <Row gutter={[24, 24]}>
-        
+
+        <Col span={24}>
+          <ThemeSettingsCard />
+        </Col>
+
         {/* Tarjeta Única de Perfil (Ocupa todo el ancho disponible) */}
         <Col span={24}>
           <Card title={<Space><UserOutlined />Mi Perfil y Seguridad</Space>}>
-            
+
             {/* EL SECRETO: Una fila adentro de la tarjeta */}
-            <Row gutter={[64, 24]}> 
-              
+            <Row gutter={[64, 24]}>
+
               {/* Mitad Izquierda: Perfil y Username */}
               <Col xs={24} lg={12}>
                 <ProfileSection />
