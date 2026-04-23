@@ -24,7 +24,6 @@ export const ModalEditItemInventory: React.FC<Props> = ({
           form.setFieldsValue({
             nombre: item.nombre,
             cantidad: item.cantidad,
-            precio: item.precio,
             // Importante: si tu backend manda los atributos anidados, Ant los mapea solos
             atributos: item.atributos 
           });

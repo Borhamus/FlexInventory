@@ -64,9 +64,6 @@ export const ModalAddItemInventory: React.FC<Props> = ({
         <Form.Item name="nombre" label="Nombre del Artículo" rules={[{ required: true }]}>
           <Input placeholder="Ej: Remera Básica" />
         </Form.Item>
-        <Form.Item name="precio" label="Precio" rules={[{ required: true }]}>
-          <InputNumber prefix="$" style={{ width: '100%' }} min={0} />
-        </Form.Item>
         <Form.Item name="cantidad" label="Cantidad Inicial" rules={[{ required: true }]}>
           <InputNumber style={{ width: '100%' }} min={0} />
         </Form.Item>

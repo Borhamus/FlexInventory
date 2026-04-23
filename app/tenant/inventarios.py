@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -94,7 +95,17 @@ def update_inventario(
     inv = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
     if not inv:
         raise HTTPException(404, detail="Inventario no encontrado")
-    for field, value in inventario.model_dump(exclude_unset=True).items():
+    update_data = inventario.model_dump(exclude_unset=True)
+    if "atributos" in update_data:
+        old_keys = set(inv.atributos.keys()) if inv.atributos else set()
+        new_keys = set(update_data["atributos"].keys())
+        removed = list(old_keys - new_keys)
+        if removed:
+            db.execute(
+                text("UPDATE item SET atributos = atributos - CAST(:keys AS text[]) WHERE inventario_id = :inv_id"),
+                {"keys": removed, "inv_id": inventario_id},
+            )
+    for field, value in update_data.items():
         setattr(inv, field, value)
     db.commit()
     db.refresh(inv)
