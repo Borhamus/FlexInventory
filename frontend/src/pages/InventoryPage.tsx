@@ -131,6 +131,15 @@ const InventoryPage: React.FC = () => {
 
     let itemsAFiltrar = data.items;
 
+    if (searchTerm.trim()) {
+      const lowerSearch = searchTerm.toLowerCase();
+      itemsAFiltrar = itemsAFiltrar.filter((item: any) => {
+        const matchNombre = item.nombre?.toLowerCase().includes(lowerSearch);
+        const matchId = item.id?.toString().includes(lowerSearch);
+        return matchNombre || matchId;
+      });
+    }
+
     return [...itemsAFiltrar].sort((a: any, b: any) => a.id - b.id);
   }, [data?.items, searchTerm]);
 
