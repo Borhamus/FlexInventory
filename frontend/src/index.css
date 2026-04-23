@@ -29,14 +29,10 @@ body {
   opacity: 1 !important;
 }
 
-.nav-item-rail.active {
-  background-color: #1677ff !important;
-  opacity: 1 !important;
-}
 
 /* Efecto para el botón de Logout */
 .logout-btn-rail:hover {
-  background-color: rgba(255, 77, 79, 0.2) !important; /* Un rojo suave al pasar el mouse */
+  background-color: rgba(255, 0, 4, 0.2) !important; /* Un rojo suave al pasar el mouse */
 }
 
 /* Efecto para los botones de la lista (Sider blanco) */
@@ -44,7 +40,3 @@ body {
   transition: background-color 0.2s;
 }
 
-.context-menu-item:hover {
-  background-color: #1677ff !important;
-  color: white !important;
-}

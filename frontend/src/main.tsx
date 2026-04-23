@@ -6,8 +6,8 @@ import { ConfigProvider, theme } from 'antd';
 import esES from 'antd/locale/es_ES';
 import App from './App';
 import { AuthProvider } from './context/AuthContext';
-import { ThemeProvider, useTheme } from './context/ThemeContext';
 import './index.css';
+import { ThemeProvider, useTheme } from './context/ThemeContext';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -23,13 +23,17 @@ const queryClient = new QueryClient({
 
 // Componente interno que lee el tema y lo aplica al ConfigProvider
 const ThemedApp: React.FC = () => {
-  const { isDark } = useTheme();
+  const { isDark, primaryColor } = useTheme();
 
   return (
     <ConfigProvider
       locale={esES}
       theme={{
         algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
+        // ¡ACÁ ESTÁ LA MAGIA! Le pasamos el color a Ant Design
+        token: {
+          colorPrimary: primaryColor,
+        }
       }}
     >
       <QueryClientProvider client={queryClient}>
