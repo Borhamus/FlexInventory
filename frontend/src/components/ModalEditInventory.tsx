@@ -5,9 +5,9 @@ import { useUpdateInventory } from '../hooks/useInventory';
 
 const TIPO_OPTIONS = [
   { value: 'string',  label: 'Texto' },
-  { value: 'integer', label: 'Número entero' },
-  { value: 'float',   label: 'Número decimal' },
-  { value: 'boolean', label: 'Booleano' },
+  { value: 'integer', label: 'Entero' },
+  { value: 'float',   label: 'Decimal' },
+  { value: 'boolean', label: 'Casilla' },
   { value: 'date',    label: 'Fecha' },
 ];
 

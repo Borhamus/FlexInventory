@@ -38,7 +38,7 @@ const InventoryPage: React.FC = () => {
     // 1. Columnas estáticas iniciales
     const cols: any[] = [
       { title: 'ID', dataIndex: 'id', key: 'id', width: 70, align: 'center' },
-      { title: 'Nombre', dataIndex: 'nombre', key: 'nombre' },
+      { title: 'Nombre', dataIndex: 'nombre', key: 'nombre', align: 'center' },
       { title: 'Cantidad', dataIndex: 'cantidad', key: 'cantidad', align: 'center' },
     ];
 
@@ -47,12 +47,19 @@ const InventoryPage: React.FC = () => {
       Object.keys(data.atributos).forEach((key) => {
         cols.push({
           title: key.charAt(0).toUpperCase() + key.slice(1),
-          dataIndex: ['atributos', key], // Busca dentro del JSON de la DB
+          dataIndex: ['atributos', key], 
           key: key,
-          render: (value: any) =>
-            (value !== undefined && value !== null && value !== '')
-              ? value
-              : <Tag color="default">N/A</Tag>,
+          align: 'center',
+          render: (value: any) => { 
+            
+            if (typeof value === 'boolean') {
+              return <Tag color={value ? 'green' : 'red'}>{value ? 'Sí' : 'No'}</Tag>;
+            }
+            
+            return (value !== undefined && value !== null && value !== '') 
+              ? String(value) 
+              : <Tag color="default">N/A</Tag>;
+          }
         });
       });
     }
@@ -62,6 +69,7 @@ const InventoryPage: React.FC = () => {
       title: 'Creado el',
       dataIndex: 'creado_en',
       key: 'creado_en',
+      align: 'center',
       render: (date: string) => dayjs(date).format('DD/MM/YYYY HH:mm'),
     });
 
@@ -121,16 +129,9 @@ const InventoryPage: React.FC = () => {
   const filteredItems = useMemo(() => {
     if (!data?.items) return [];
 
-    if (!searchTerm.trim()) return data.items;
+    let itemsAFiltrar = data.items;
 
-    const lowerSearch = searchTerm.toLowerCase();
-
-    return data.items.filter((item: any) => {
-      const matchNombre = item.nombre?.toLowerCase().includes(lowerSearch);
-      const matchId = item.id?.toString().includes(lowerSearch);
-
-      return matchNombre || matchId;
-    });
+    return [...itemsAFiltrar].sort((a: any, b: any) => a.id - b.id);
   }, [data?.items, searchTerm]);
 
   const handleDelete = () => {
@@ -326,7 +327,7 @@ const InventoryPage: React.FC = () => {
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         inventoryId={Number(id)}
-        atributosRequeridos={Object.keys(data?.atributos || {})}
+        atributosRequeridos={data?.atributos || {}}
       />
 
       <ModalEditInventory
@@ -344,7 +345,7 @@ const InventoryPage: React.FC = () => {
           setSelectedItem(null);
         }}
         item={selectedItem}
-        atributosRequeridos={Object.keys(data?.atributos || {})}
+        atributosRequeridos={data?.atributos || {}}
       />
 
     </div>

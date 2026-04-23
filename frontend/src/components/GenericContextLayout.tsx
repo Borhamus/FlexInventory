@@ -24,6 +24,7 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
 
   const [collapsed, setCollapsed] = useState(false);
   const isActive = (id: number) => location.pathname === `${basePath}/${id}`;
+  const sortedItems = items ? [...items].sort((a, b) => a.id - b.id) : [];
 
   return (
     <Layout style={{ height: '100%' }}>
@@ -61,7 +62,7 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column' }}>
             <div style={{ height: '75vh', overflowY: 'auto', overflowX: 'hidden' }}>
-              {items?.map(item => (
+              {sortedItems.map(item => (
                 <Button
                   key={item.id}
                   type="text"
