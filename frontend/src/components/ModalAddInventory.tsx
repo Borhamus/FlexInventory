@@ -1,7 +1,15 @@
 import React from 'react';
-import { Modal, Form, Input, Button, Space, theme } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, theme } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useCreateInventory } from '../hooks/useInventory';
+
+const TIPO_OPTIONS = [
+  { value: 'string',  label: 'Texto' },
+  { value: 'integer', label: 'Número entero' },
+  { value: 'float',   label: 'Número decimal' },
+  { value: 'boolean', label: 'Booleano' },
+  { value: 'date',    label: 'Fecha' },
+];
 
 interface Props {
   open: boolean;
@@ -17,12 +25,11 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
   const handleSubmit = () => {
     form.validateFields().then((values) => {
 
-      const atributosFormateados: Record<string, any> = {};
-      
+      const atributosFormateados: Record<string, string> = {};
       if (values.atributos_dinamicos) {
-        values.atributos_dinamicos.forEach((item: any) => {
-          if (item && item.llave) {
-            atributosFormateados[item.llave] = "";
+        values.atributos_dinamicos.forEach((item: { llave: string; tipo: string }) => {
+          if (item?.llave) {
+            atributosFormateados[item.llave] = item.tipo;
           }
         });
       }
@@ -33,8 +40,6 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
         atributos:   atributosFormateados,
       };
 
-      console.log("JSON empaquetado y listo para FastAPI:", payloadFinal);
-      
       createInventory(payloadFinal, {
         onSuccess: () => {
           form.resetFields();
@@ -44,9 +49,6 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
           console.error("Falló el POST", error);
         }
       });
-      
-      form.resetFields();
-      onClose();
     }).catch((error) => {
       console.log("Validación fallida", error);
     });
@@ -66,7 +68,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
       <p style={{ marginBottom: 20, color: token.colorTextSecondary }}>
         Define los detalles del inventario y los atributos base que tendrán sus artículos.
       </p>
-      
+
       <Form form={form} layout="vertical">
         <Form.Item
           label="Nombre del Inventario"
@@ -75,7 +77,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
         >
           <Input placeholder="Ej: Depósito Central" size="large" />
         </Form.Item>
-        
+
         <Form.Item label="Descripción" name="descripcion">
           <Input.TextArea rows={2} placeholder="Detalles opcionales..." />
         </Form.Item>
@@ -93,7 +95,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
           <p style={{ fontSize: '12px', color: token.colorTextTertiary, marginBottom: 16 }}>
             Definí qué datos se le pedirán a cada artículo (ej: Color, Talle, Material).
           </p>
-        
+
           <Form.List name="atributos_dinamicos">
             {(fields, { add, remove }) => (
               <>
@@ -102,11 +104,24 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
                     <Form.Item
                       {...restField}
                       name={[name, 'llave']}
-                      rules={[{ required: true, message: 'Nombre del Atributo' }]}
+                      rules={[{ required: true, message: 'Ingresá el nombre' }]}
+                      style={{ margin: 0 }}
                     >
                       <Input
-                        placeholder="Nombre del atributo (ej: Color)"
-                        style={{ width: '350px' }}
+                        placeholder="Nombre (ej: Color)"
+                        style={{ width: '220px' }}
+                      />
+                    </Form.Item>
+                    <Form.Item
+                      {...restField}
+                      name={[name, 'tipo']}
+                      rules={[{ required: true, message: 'Elegí un tipo' }]}
+                      style={{ margin: 0 }}
+                    >
+                      <Select
+                        placeholder="Tipo"
+                        style={{ width: '150px' }}
+                        options={TIPO_OPTIONS}
                       />
                     </Form.Item>
                     <MinusCircleOutlined
@@ -115,10 +130,10 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
                     />
                   </Space>
                 ))}
-                
-                <Form.Item style={{ marginBottom: 0 }}>
+
+                <Form.Item style={{ marginBottom: 0, marginTop: fields.length ? 8 : 0 }}>
                   <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
-                     Agregar Atributo
+                    Agregar Atributo
                   </Button>
                 </Form.Item>
               </>

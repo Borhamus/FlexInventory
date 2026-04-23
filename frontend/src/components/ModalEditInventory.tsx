@@ -1,21 +1,29 @@
 import React, { useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, message } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, message } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useUpdateInventory } from '../hooks/useInventory';
+
+const TIPO_OPTIONS = [
+  { value: 'string',  label: 'Texto' },
+  { value: 'integer', label: 'Número entero' },
+  { value: 'float',   label: 'Número decimal' },
+  { value: 'boolean', label: 'Booleano' },
+  { value: 'date',    label: 'Fecha' },
+];
 
 interface ModalEditInventoryProps {
   isOpen: boolean;
   onClose: () => void;
   inventoryId: number;
-  currentName: string; 
+  currentName: string;
   currentAtributos: Record<string, string>;
 }
 
-export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({ 
-  isOpen, 
-  onClose, 
-  inventoryId, 
-  currentName, 
+export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
+  isOpen,
+  onClose,
+  inventoryId,
+  currentName,
   currentAtributos = {}
 }) => {
   const [form] = Form.useForm();
@@ -23,37 +31,26 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      // Extraemos solo las llaves ["Color", "Talle"] para mostrarlas en la lista
-      const atributosArray = Object.keys(currentAtributos);
-      
-      form.setFieldsValue({ 
+      form.setFieldsValue({
         nombre: currentName,
-        atributos: atributosArray 
+        atributos: Object.entries(currentAtributos).map(([nombre, tipo]) => ({ nombre, tipo })),
       });
     }
   }, [isOpen, currentName, currentAtributos, form]);
 
-  // Este hook es vital: Llena el input con el nombre actual cada vez que se abre el modal
   const handleSubmit = () => {
     form.validateFields().then((values) => {
-      
-      // Si tu backend sigue esperando un objeto como {"Color": "", "Talle": ""}
       const atributosFormateados: Record<string, string> = {};
       if (values.atributos) {
-        values.atributos.forEach((attr: string) => {
-          if (attr) atributosFormateados[attr] = ""; // Le ponemos un string vacío de valor
+        values.atributos.forEach((attr: { nombre: string; tipo: string }) => {
+          if (attr?.nombre) {
+            atributosFormateados[attr.nombre] = attr.tipo;
+          }
         });
       }
 
-      // IMPORTANTE: Si ya arreglaste tu backend para que acepte un array ["Color", "Talle"], 
-      // borrá lo de arriba y pasale directamente `values.atributos` al payload.
-      const payloadCompleto = {
-        nombre: values.nombre,
-        atributos: atributosFormateados 
-      };
-
       updateInventory(
-        { id: inventoryId, payload: payloadCompleto },
+        { id: inventoryId, payload: { nombre: values.nombre, atributos: atributosFormateados } },
         {
           onSuccess: () => {
             message.success('Inventario y atributos actualizados');
@@ -81,7 +78,7 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
       destroyOnClose
     >
       <Form form={form} layout="vertical">
-        
+
         <Form.Item
           name="nombre"
           label="Nombre del Inventario"
@@ -98,22 +95,30 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
                 {fields.map((field) => (
                   <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
                     <Form.Item
-                      {...field}
-                      rules={[{ required: true, message: 'El nombre del atributo no puede estar vacío' }]}
+                      name={[field.name, 'nombre']}
+                      rules={[{ required: true, message: 'El nombre no puede estar vacío' }]}
                       style={{ margin: 0 }}
                     >
-                      <Input placeholder="Ej: Marca, Tamaño, Peso" style={{ width: 300 }} />
+                      <Input placeholder="Ej: Marca, Tamaño, Peso" style={{ width: '200px' }} />
                     </Form.Item>
-                    
-                    {/* Botón rojo para eliminar esta fila */}
-                    <MinusCircleOutlined 
-                      style={{ color: 'red', fontSize: '18px' }} 
-                      onClick={() => remove(field.name)} 
+                    <Form.Item
+                      name={[field.name, 'tipo']}
+                      rules={[{ required: true, message: 'Elegí un tipo' }]}
+                      style={{ margin: 0 }}
+                    >
+                      <Select
+                        placeholder="Tipo"
+                        style={{ width: '150px' }}
+                        options={TIPO_OPTIONS}
+                      />
+                    </Form.Item>
+                    <MinusCircleOutlined
+                      style={{ color: 'red', fontSize: '18px' }}
+                      onClick={() => remove(field.name)}
                     />
                   </Space>
                 ))}
-                
-                {/* Botón para agregar una nueva fila */}
+
                 <Form.Item style={{ marginTop: 16 }}>
                   <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
                     Agregar nuevo atributo

@@ -43,7 +43,7 @@ export const inventoryService = {
     return response.data;
   },
 
-  updateInventory: async (id: number, payload: { nombre: string }) => {
+  updateInventory: async (id: number, payload: { nombre?: string; atributos?: Record<string, string> }) => {
     const response = await api.put(`/inventarios/${id}`, payload);
     return response.data;
   },
