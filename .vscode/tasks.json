@@ -2,42 +2,40 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Backend: uvicorn",
+      "label": "Docker up",
       "type": "shell",
-      "command": ".\\venv\\Scripts\\Activate.ps1; uvicorn app.main:app --reload",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
+      "command": "docker compose up -d",
+      "group": "build",
       "presentation": {
-        "panel": "dedicated",
-        "group": "flexinventory",
-        "reveal": "always"
-      },
-      "problemMatcher": []
+        "reveal": "always",
+        "panel": "new"
+      }
     },
     {
-      "label": "Frontend: npm run dev",
+      "label": "Uvicorn",
       "type": "shell",
-      "command": "npm run dev",
-      "options": {
-        "cwd": "${workspaceFolder}/frontend"
-      },
+      "command": "source venv/bin/activate && uvicorn app.main:app --reload",
       "presentation": {
-        "panel": "dedicated",
-        "group": "flexinventory",
-        "reveal": "always"
-      },
-      "problemMatcher": []
+        "reveal": "always",
+        "panel": "new"
+      }
     },
     {
-      "label": "FlexInventory: iniciar todo",
-      "dependsOn": ["Backend: uvicorn", "Frontend: npm run dev"],
-      "dependsOrder": "parallel",
+      "label": "NPM dev",
+      "type": "shell",
+      "command": "cd frontend && npm run dev",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Start all",
+      "dependsOn": ["Docker up", "Uvicorn", "NPM dev"],
       "group": {
         "kind": "build",
         "isDefault": true
-      },
-      "problemMatcher": []
+      }
     }
   ]
 }
