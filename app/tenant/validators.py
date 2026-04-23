@@ -15,6 +15,18 @@ from datetime import datetime
 
 ALLOWED_TYPES = {"string", "str", "integer", "int", "float", "number", "boolean", "bool", "date"}
 
+TYPE_DEFAULTS = {
+    "string": "",
+    "str": "",
+    "integer": 0,
+    "int": 0,
+    "float": 0.0,
+    "number": 0.0,
+    "boolean": False,
+    "bool": False,
+    "date": None,
+}
+
 TYPE_EXAMPLES = {
     "string": "ejemplo_texto",
     "str": "ejemplo_texto",

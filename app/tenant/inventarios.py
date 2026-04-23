@@ -3,8 +3,11 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from typing import List
 
+import json
+
 from app.tenant import schemas, models
 from app.tenant.dependencies import get_tenant_db, require_permission
+from app.tenant.validators import TYPE_DEFAULTS
 
 router = APIRouter(prefix="/inventarios", tags=["Inventarios"])
 
@@ -104,6 +107,13 @@ def update_inventario(
             db.execute(
                 text("UPDATE item SET atributos = atributos - CAST(:keys AS text[]) WHERE inventario_id = :inv_id"),
                 {"keys": removed, "inv_id": inventario_id},
+            )
+        added = {k: update_data["atributos"][k] for k in new_keys - old_keys}
+        if added:
+            defaults = {k: TYPE_DEFAULTS.get(v, "") for k, v in added.items()}
+            db.execute(
+                text("UPDATE item SET atributos = CAST(:defaults AS jsonb) || atributos WHERE inventario_id = :inv_id"),
+                {"defaults": json.dumps(defaults), "inv_id": inventario_id},
             )
     for field, value in update_data.items():
         setattr(inv, field, value)

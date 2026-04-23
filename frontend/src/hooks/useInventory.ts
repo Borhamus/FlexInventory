@@ -29,7 +29,7 @@ export const useCreateInventory = () => {
 export const useUpdateInventory = () => {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: number; payload: { nombre: string } }) =>
+    mutationFn: ({ id, payload }: { id: number; payload: { nombre?: string; atributos?: Record<string, string> } }) =>
       inventoryService.updateInventory(id, payload),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['inventories'] });
