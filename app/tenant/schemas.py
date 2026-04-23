@@ -14,6 +14,7 @@ class InventarioCreate(InventarioBase):
 class InventarioUpdate(BaseModel):
     nombre: Optional[str] = Field(None, min_length=1, max_length=255)
     atributos: Optional[Dict[str, Any]] = None
+    defaults: Optional[Dict[str, Any]] = None
 
 class InventarioResponse(InventarioBase):
     id: int
@@ -76,3 +77,12 @@ class CatalogoWithItems(CatalogoResponse):
 
 class CatalogoItemAdd(BaseModel):
     item_ids: List[int] = Field(..., min_length=1)
+
+# ==================== Schemas para operaciones masivas de Items ====================
+
+class ItemBulkUpdate(BaseModel):
+    item_ids: List[int] = Field(..., min_length=1)
+    atributos: Dict[str, Any] = Field(..., min_length=1)
+
+class BulkUpdateResponse(BaseModel):
+    actualizados: int
