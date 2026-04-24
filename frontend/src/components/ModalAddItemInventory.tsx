@@ -14,7 +14,7 @@ export const ModalAddItemInventory: React.FC<Props> = ({
     open, 
     onClose, 
     inventoryId, 
-    atributosRequeridos = [] // Por defecto un array vacío por si no requiere nada
+    atributosRequeridos = [] 
   }) => {
   const [form] = Form.useForm();
   const { mutate: createItem, isPending } = useCreateItem();
@@ -26,12 +26,10 @@ export const ModalAddItemInventory: React.FC<Props> = ({
       case 'float':
         return <InputNumber step={0.1} style={{ width: '100%' }} />;
       case 'boolean':
-        // El Switch es el botoncito tipo iPhone (encendido/apagado), queda mucho más lindo que un Checkbox
         return <Switch checkedChildren="Sí" unCheckedChildren="No" />;
       case 'date':
         return <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />;
       case 'list':
-        // Si elegís implementar listas, tendrías que guardar las opciones en la configuración también
         return (
           <Select>
             <Select.Option value="opcion1">Opción 1</Select.Option>
@@ -92,15 +90,15 @@ export const ModalAddItemInventory: React.FC<Props> = ({
       confirmLoading={isPending}
       okText="Guardar"
       cancelText="Cancelar"
-      destroyOnClose // Muy importante para limpiar los inputs al cerrar
+      destroyOnClose 
     >
       <Form form={form} layout="vertical">
         
         {/* --- CAMPOS ESTÁTICOS (Siempre están) --- */}
-        <Form.Item name="nombre" label="Nombre del Artículo" rules={[{ required: true }]}>
+        <Form.Item name="nombre" label="Nombre del Artículo">
           <Input placeholder="Ej: Remera Básica" />
         </Form.Item>
-        <Form.Item name="cantidad" label="Cantidad Inicial" rules={[{ required: true }]}>
+        <Form.Item name="cantidad" label="Cantidad Inicial">
           <InputNumber style={{ width: '100%' }} min={0} />
         </Form.Item>
 
@@ -110,16 +108,12 @@ export const ModalAddItemInventory: React.FC<Props> = ({
             key={nombreAtributo}
             name={['atributos', nombreAtributo]} 
             label={`Atributo: ${nombreAtributo}`}
-            // CAMBIO 4: Si el tipo es boolean, Ant Design necesita saber que lee el "checked" y no el "value"
             valuePropName={tipoAtributo === 'boolean' ? 'checked' : 'value'}
             initialValue={tipoAtributo === 'boolean' ? false : undefined}
-            rules={[{ 
-              // Los booleanos casi siempre empiezan en false, así que no requieren validación estricta de "vacío"
-              required: tipoAtributo !== 'boolean', 
+            rules={[{  
               message: `El campo ${nombreAtributo} es obligatorio` 
             }]}
           >
-            {/* Le pasamos el tipo real ('string', 'float', etc.) al renderizador */}
             {renderizarInput(tipoAtributo)} 
           </Form.Item>
         ))}
