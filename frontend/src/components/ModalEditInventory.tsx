@@ -33,7 +33,7 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
     if (isOpen) {
       form.setFieldsValue({
         nombre: currentName,
-        atributos: Object.entries(currentAtributos).map(([nombre, tipo]) => ({ nombre, tipo })),
+        atributos: Object.entries(currentAtributos).map(([nombre, tipo]) => ({ nombre, tipo, isNew: false })),
       });
     }
   }, [isOpen, currentName, currentAtributos, form]);
@@ -129,42 +129,50 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
           <Form.List name="atributos">
             {(fields, { add, remove }) => (
               <>
-                {fields.map((field) => (
-                  <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
-                    <Form.Item
-                      name={[field.name, 'nombre']}
-                      rules={[{ required: true, message: 'El nombre no puede estar vacío' }]}
-                      style={{ margin: 0 }}
-                    >
-                      <Input placeholder="Ej: Marca, Tamaño" style={{ width: '160px' }} />
-                    </Form.Item>
-                    <Form.Item
-                      name={[field.name, 'tipo']}
-                      rules={[{ required: true, message: 'Elegí un tipo' }]}
-                      style={{ margin: 0 }}
-                    >
-                      <Select
-                        placeholder="Tipo"
-                        style={{ width: '120px' }}
-                        options={TIPO_OPTIONS}
+                {fields.map((field) => {
+                  const isNew = form.getFieldValue(['atributos', field.name, 'isNew']);
+                  return (
+                    <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                      <Form.Item
+                        name={[field.name, 'nombre']}
+                        rules={[{ required: true, message: 'El nombre no puede estar vacío' }]}
+                        style={{ margin: 0 }}
+                      >
+                        <Input placeholder="Ej: Marca, Tamaño" style={{ width: '160px' }} />
+                      </Form.Item>
+                      
+                      <Form.Item
+                        name={[field.name, 'tipo']}
+                        rules={[{ required: true, message: 'Elegí un tipo' }]}
+                        style={{ margin: 0 }}
+                      >
+                        <Select
+                          placeholder="Tipo"
+                          style={{ width: '120px' }}
+                          options={TIPO_OPTIONS}
+                        />
+                      </Form.Item>
+                      
+                      {isNew && (
+                        <Form.Item
+                          name={[field.name, 'default']}
+                          rules={[makeDefaultValidator(field.name)]}
+                          style={{ margin: 0 }}
+                        >
+                          <Input placeholder="Default (opcional)" style={{ width: '160px' }} />
+                        </Form.Item>
+                      )}
+                      
+                      <MinusCircleOutlined
+                        style={{ color: 'red', fontSize: '18px' }}
+                        onClick={() => remove(field.name)}
                       />
-                    </Form.Item>
-                    <Form.Item
-                      name={[field.name, 'default']}
-                      rules={[makeDefaultValidator(field.name)]}
-                      style={{ margin: 0 }}
-                    >
-                      <Input placeholder="Default (opcional)" style={{ width: '160px' }} />
-                    </Form.Item>
-                    <MinusCircleOutlined
-                      style={{ color: 'red', fontSize: '18px' }}
-                      onClick={() => remove(field.name)}
-                    />
-                  </Space>
-                ))}
+                    </Space>
+                  );
+                })}
 
                 <Form.Item style={{ marginTop: 16 }}>
-                  <Button type="dashed" onClick={() => add()} block icon={<PlusOutlined />}>
+                <Button type="dashed" onClick={() => add({ isNew: true })} block icon={<PlusOutlined />}>
                     Agregar nuevo atributo
                   </Button>
                 </Form.Item>

@@ -59,7 +59,6 @@ export const ModalEditItemInventory: React.FC<Props> = ({
         
         const atributosLimpios = { ...values.atributos };
   
-        // Si editamos una fecha, la volvemos a pasar a texto (YYYY-MM-DD) para el backend
         if (atributosLimpios) {
           Object.keys(atributosLimpios).forEach((key) => {
             if (dayjs.isDayjs(atributosLimpios[key])) {
@@ -110,10 +109,10 @@ export const ModalEditItemInventory: React.FC<Props> = ({
       >
         <Form form={form} layout="vertical">
           
-          <Form.Item name="nombre" label="Nombre del Artículo" rules={[{ required: true }]}>
+          <Form.Item name="nombre" label="Nombre del Artículo" >
             <Input />
           </Form.Item>
-          <Form.Item name="cantidad" label="Cantidad" rules={[{ required: true }]}>
+          <Form.Item name="cantidad" label="Cantidad">
             <InputNumber style={{ width: '100%' }} min={0} />
           </Form.Item>
   
@@ -122,12 +121,8 @@ export const ModalEditItemInventory: React.FC<Props> = ({
               key={nombreAtributo}
               name={['atributos', nombreAtributo]} 
               label={nombreAtributo}
-              // Clave para que los booleanos enganchen bien el Switch al editar:
               valuePropName={tipoAtributo === 'boolean' ? 'checked' : 'value'}
-              rules={[{ 
-                required: tipoAtributo !== 'boolean', 
-                message: `El campo ${nombreAtributo} es obligatorio` 
-              }]}
+              rules={[]}
             >
               {renderizarInput(tipoAtributo)}
             </Form.Item>

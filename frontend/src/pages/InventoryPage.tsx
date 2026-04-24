@@ -8,13 +8,15 @@ import { ModalAddItemInventory } from '../components/ModalAddItemInventory';
 import { ModalEditItemInventory } from '../components/ModalEditItemInventory';
 import { ModalEditInventory } from '../components/ModalEditInventory';
 import { useAuthContext } from '../context/AuthContext';
+import ModalBulkEdit from '../components/ModalBulkEditItems';
+
 
 const { Title, Text } = Typography;
 
 const InventoryPage: React.FC = () => {
   const { hasPermission, isTenant } = useAuthContext();
   const { id } = useParams();
-  const { data, isLoading, error } = useInventory(Number(id));
+  const { data, isLoading, error, refetch } = useInventory(Number(id));
   const { mutate: deleteInventory, isPending } = useDeleteInventory();
   const { mutate: deleteItem } = useDeleteItem();
 
@@ -27,6 +29,16 @@ const InventoryPage: React.FC = () => {
   const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [columnSearch, setColumnSearch] = useState('');
+  const [isBulkModalVisible, setIsBulkModalVisible] = useState(false);
+
+  const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  const rowSelection = {
+    selectedRowKeys,
+    onChange: (nuevosIdsSeleccionados: React.Key[]) => {
+      setSelectedRowKeys(nuevosIdsSeleccionados);
+    },
+  };
 
   const navigate = useNavigate();
 
@@ -45,20 +57,28 @@ const InventoryPage: React.FC = () => {
     // 2. Columnas dinámicas (Tus atributos: Color, Vencimiento, etc.)
     if (data?.atributos) {
       Object.keys(data.atributos).forEach((key) => {
+        const tipoAtributo = data.atributos[key];
         cols.push({
           title: key.charAt(0).toUpperCase() + key.slice(1),
-          dataIndex: ['atributos', key], 
+          dataIndex: ['atributos', key],
           key: key,
           align: 'center',
-          render: (value: any) => { 
-            
-            if (typeof value === 'boolean') {
-              return <Tag color={value ? 'green' : 'red'}>{value ? 'Sí' : 'No'}</Tag>;
+          render: (value: any) => {
+
+            if (value === undefined || value === null || value === '') {
+              return <Tag color="default">N/A</Tag>;
             }
-            
-            return (value !== undefined && value !== null && value !== '') 
-              ? String(value) 
-              : <Tag color="default">N/A</Tag>;
+
+            if (tipoAtributo === 'boolean' || typeof value === 'boolean' || value === 'true' || value === 'false') {
+              const esVerdadero = value === true || String(value).toLowerCase() === 'true';
+              return <Tag color={esVerdadero ? 'green' : 'red'}>{esVerdadero ? 'Sí' : 'No'}</Tag>;
+            }
+
+            if (tipoAtributo === 'date') {
+              return dayjs(value).format('DD/MM/YYYY');
+            }
+
+            return String(value);
           }
         });
       });
@@ -169,7 +189,7 @@ const InventoryPage: React.FC = () => {
   if (isLoading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
   if (error) return <Alert message="Error" description="No se pudo cargar el inventario" type="error" showIcon />;
 
-
+  const canAddItems = isTenant || hasPermission('items', 'create');
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -230,7 +250,7 @@ const InventoryPage: React.FC = () => {
             <Popover
               title="Columnas visibles"
               trigger="click"
-              placement="bottomLeft"
+              placement="right"
               content={
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 220 }}>
 
@@ -302,10 +322,38 @@ const InventoryPage: React.FC = () => {
                 />
               </Tooltip>
             </Popover>
+            {canAddItems && (
+              <Tooltip title="Agregar Artículo">
+                <Button 
+                  type='primary'
+                  icon={<PlusOutlined />} 
+                  onClick={() => setIsModalOpen(true)} 
+                />
+              </Tooltip>
+            )}
           </div>
         </div>
 
+        {selectedRowKeys.length > 0 && (
+          <div style={{
+            padding: '16px',
+            marginBottom: '16px',
+            borderRadius: '8px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <span>
+              Seleccionaste <b>{selectedRowKeys.length}</b> artículos.
+            </span>
+            <Button type="primary" onClick={() => setIsBulkModalVisible(true)}>
+              Editar Atributo Masivamente
+            </Button>
+          </div>
+        )}
+
         <Table
+          rowSelection={rowSelection}
           columns={columns}
           dataSource={filteredItems}
           rowKey="id"
@@ -318,16 +366,7 @@ const InventoryPage: React.FC = () => {
             y: 'calc(90vh - 200px)',
             x: 'max-content'
           }}
-          footer={() => {
-            const canAddItems = isTenant || hasPermission('items', 'create');
-            return canAddItems ? (
-              <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
-                  Agregar Artículo
-                </Button>
-              </div>
-            ) : null;
-          }}
+          
         />
 
       </Card>
@@ -355,6 +394,20 @@ const InventoryPage: React.FC = () => {
         }}
         item={selectedItem}
         atributosRequeridos={data?.atributos || {}}
+      />
+
+      <ModalBulkEdit
+        visible={isBulkModalVisible}
+        onClose={() => setIsBulkModalVisible(false)}
+        selectedIds={selectedRowKeys}
+        atributosInventario={Object.entries(data?.atributos || {}).map(([key, val]: any) => ({
+          nombre: key,
+          tipo: val 
+        }))}
+        onSuccess={() => {
+          refetch();              
+          setSelectedRowKeys([]); 
+        }}
       />
 
     </div>
