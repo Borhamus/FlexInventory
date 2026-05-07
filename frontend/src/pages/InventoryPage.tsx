@@ -194,8 +194,7 @@ const InventoryPage: React.FC = () => {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
 
-      <Card style={{ flexGrow: 1, borderRadius: 8, boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
-
+      <div style={{ padding: '40px' }}>
         <Space size="small">
 
           <Title level={3} style={{ margin: 0 }}>
@@ -324,10 +323,10 @@ const InventoryPage: React.FC = () => {
             </Popover>
             {canAddItems && (
               <Tooltip title="Agregar Artículo">
-                <Button 
+                <Button
                   type='primary'
-                  icon={<PlusOutlined />} 
-                  onClick={() => setIsModalOpen(true)} 
+                  icon={<PlusOutlined />}
+                  onClick={() => setIsModalOpen(true)}
                 />
               </Tooltip>
             )}
@@ -366,10 +365,10 @@ const InventoryPage: React.FC = () => {
             y: 'calc(90vh - 200px)',
             x: 'max-content'
           }}
-          
+
         />
 
-      </Card>
+      </div>
 
       <ModalAddItemInventory
         open={isModalOpen}
@@ -402,11 +401,11 @@ const InventoryPage: React.FC = () => {
         selectedIds={selectedRowKeys}
         atributosInventario={Object.entries(data?.atributos || {}).map(([key, val]: any) => ({
           nombre: key,
-          tipo: val 
+          tipo: val
         }))}
         onSuccess={() => {
-          refetch();              
-          setSelectedRowKeys([]); 
+          refetch();
+          setSelectedRowKeys([]);
         }}
       />
 
