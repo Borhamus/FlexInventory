@@ -67,6 +67,7 @@ class CatalogoResponse(CatalogoBase):
     id: int
     creado_en: datetime
     actualizado_en: datetime
+    total_items: int
 
     model_config = ConfigDict(from_attributes=True)
 
