@@ -15,6 +15,7 @@ export const catalogoSchema = z.object({
     .nullable(),
   // Aquí definimos que las claves son strings y los valores tipos (ej: "string", "number")
   items: z.array(itemSchema).default([]),
+  total_items: z.int().readonly(),
   creado_en: z.string(),
   actualizado_en: z.string(),
 });

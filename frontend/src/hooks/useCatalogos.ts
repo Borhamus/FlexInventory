@@ -36,3 +36,31 @@ export const useCreateCatalogo = () => {
     },
   });
 };
+
+export const useUpdateCatalogo = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: catalogosService.updateCatalogo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['catalogos'] });
+      notification.success({ message: 'Catálogo actualizado' });
+    },
+    onError: (error: any) => {
+      notification.error({ message: 'Error al actualizar', description: error.response?.data?.detail });
+    }
+  });
+};
+
+export const useDeleteCatalogo = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: catalogosService.deleteCatalogo,
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['catalogos'] });
+      notification.success({ message: 'Catálogo eliminado correctamente' });
+    },
+    onError: (error: any) => {
+      notification.error({ message: 'No se pudo eliminar el catálogo' });
+    }
+  });
+};
