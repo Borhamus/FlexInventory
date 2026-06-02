@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Card, Row, Col, Statistic, Empty, Button, Space, Typography, Tooltip, Modal, Form, List, Avatar, Result } from 'antd';
 import {
   BoxPlotOutlined,
@@ -10,18 +10,22 @@ import {
   BlockOutlined,
   FolderOutlined
 } from '@ant-design/icons';
-import { useCatalogos, useCreateCatalogo } from '../hooks/useCatalogos';
+import { useCatalogos, useCreateCatalogo, useDeleteCatalogo, useUpdateCatalogo } from '../hooks/useCatalogos';
 import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { CatalogForm } from '../forms/CatalogForm';
 import { useAuthContext } from '../context/AuthContext';
+import { Modal as AntModal } from 'antd';
 
 const { Title, Text } = Typography;
 
 export const CatalogoDashboard = () => {
   const { data: catalogos, isLoading } = useCatalogos();
-  const { mutate: createCatalogo, isPending } = useCreateCatalogo();
+  const { mutate: createCatalogo, isPending: isCreating } = useCreateCatalogo();
+  const { mutate: updateCatalogo, isPending: isUpdating } = useUpdateCatalogo(); // Nuevo
+  const { mutate: deleteCatalogo } = useDeleteCatalogo(); // Nuevo
   const { hasPermission, isTenant } = useAuthContext();
+  const [editingCatalogo, setEditingCatalogo] = useState<any | null>(null); // Nuevo estado
   const navigate = useNavigate();
 
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -29,9 +33,9 @@ export const CatalogoDashboard = () => {
 
   // Permisos de catálogos
   const canCreate = isTenant || hasPermission('catalogos', 'create');
-  const canEdit   = isTenant || hasPermission('catalogos', 'update');
+  const canEdit = isTenant || hasPermission('catalogos', 'update');
   const canDelete = isTenant || hasPermission('catalogos', 'delete');
-  const canRead   = isTenant || hasPermission('catalogos', 'read');
+  const canRead = isTenant || hasPermission('catalogos', 'read');
 
   // Permisos de artículos — necesarios para ver el contenido del catálogo
   const canReadItems = isTenant || hasPermission('items', 'read');
@@ -60,6 +64,41 @@ export const CatalogoDashboard = () => {
     });
   };
 
+  const handleOpenEdit = (cat: any) => {
+    setEditingCatalogo(cat);
+    form.setFieldsValue(cat); // Cargamos los datos del catálogo en el form
+    setIsModalOpen(true);
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setEditingCatalogo(null);
+    form.resetFields();
+  };
+
+  const handleSubmit = (values: any) => {
+    if (editingCatalogo) {
+      updateCatalogo({ id: editingCatalogo.id, data: values }, {
+        onSuccess: handleCloseModal
+      });
+    } else {
+      createCatalogo(values, {
+        onSuccess: handleCloseModal
+      });
+    }
+  };
+
+  const showDeleteConfirm = (id: number, nombre: string) => {
+    AntModal.confirm({
+      title: '¿Estás seguro de eliminar este catálogo?',
+      content: `El catálogo "${nombre}" será borrado. Los artículos no se eliminarán, solo se desvincularán.`,
+      okText: 'Sí, eliminar',
+      okType: 'danger',
+      cancelText: 'Cancelar',
+      onOk: () => deleteCatalogo(id),
+    });
+  };
+
   return (
     <div style={{ padding: '24px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
@@ -78,25 +117,6 @@ export const CatalogoDashboard = () => {
                 value={catalogos?.length || 0}
                 prefix={<BoxPlotOutlined />}
                 valueStyle={{ color: '#1677ff' }}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Card bordered={false} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-              <Statistic
-                title="Items Totales (Estimado)"
-                value={catalogos?.length ? catalogos.length * 12 : 0}
-                prefix={<BlockOutlined />}
-                valueStyle={{ color: '#52c41a' }}
-              />
-            </Card>
-          </Col>
-          <Col xs={24} sm={8}>
-            <Card bordered={false} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-              <Statistic
-                title="Última Actividad"
-                value={hasCatalogos ? 'Hoy' : 'N/A'}
-                prefix={<CalendarOutlined />}
               />
             </Card>
           </Col>
@@ -151,7 +171,7 @@ export const CatalogoDashboard = () => {
                         <CalendarOutlined /> Editado: {dayjs(cat.actualizado_en).format('DD/MM/YYYY')}
                       </Text>
                       <Text type="secondary" style={{ fontSize: '12px' }}>
-                        <BlockOutlined /> 12 artículos (placeholder)
+                        <BlockOutlined /> {cat.total_items} artículos
                       </Text>
                     </Space>
                   </Col>
@@ -160,22 +180,16 @@ export const CatalogoDashboard = () => {
                   <Col flex="none">
                     <Space>
                       {canReadItems && (
-                        <Tooltip title="Ver detalles">
-                          <Button
-                            type="text"
-                            icon={<EyeOutlined />}
-                            onClick={() => navigate(`/dashboard/catalogos/${cat.id}`)}
-                          />
-                        </Tooltip>
+                        <Button type="text" icon={<EyeOutlined />} onClick={() => navigate(`/dashboard/catalogos/${cat.id}`)} />
                       )}
                       {canEdit && (
                         <Tooltip title="Editar">
-                          <Button type="text" icon={<EditOutlined />} />
+                          <Button type="text" icon={<EditOutlined />} onClick={() => handleOpenEdit(cat)} />
                         </Tooltip>
                       )}
                       {canDelete && (
                         <Tooltip title="Eliminar">
-                          <Button type="text" danger icon={<DeleteOutlined />} />
+                          <Button type="text" danger icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(cat.id, cat.nombre)} />
                         </Tooltip>
                       )}
                     </Space>
@@ -187,20 +201,18 @@ export const CatalogoDashboard = () => {
         )}
       </div>
 
-      {/* MODAL CREACIÓN */}
-      {canCreate && (
-        <Modal
-          title="Nuevo Catálogo"
-          open={isModalOpen}
-          onCancel={() => setIsModalOpen(false)}
-          confirmLoading={isPending}
-          onOk={() => form.submit()}
-          okText="Crear Catálogo"
-          destroyOnClose
-        >
-          <CatalogForm form={form} onFinish={handleCreate} />
-        </Modal>
-      )}
+      {/* MODAL ÚNICO PARA CREAR/EDITAR */}
+      <Modal
+        title={editingCatalogo ? "Editar Catálogo" : "Nuevo Catálogo"}
+        open={isModalOpen}
+        onCancel={handleCloseModal}
+        confirmLoading={isCreating || isUpdating}
+        onOk={() => form.submit()}
+        okText={editingCatalogo ? "Guardar Cambios" : "Crear Catálogo"}
+        destroyOnClose
+      >
+        <CatalogForm form={form} onFinish={handleSubmit} />
+      </Modal>
     </div>
   );
 };

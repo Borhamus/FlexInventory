@@ -14,4 +14,12 @@ export const catalogosService = {
     const response = await api.post('/catalogos/', data);
     return response.data;
   },
+  updateCatalogo: async ({ id, data }: { id: number; data: any }) => {
+    const response = await api.put(`/catalogos/${id}`, data);
+    return response.data;
+  },
+  deleteCatalogo: async (id: number) => {
+    await api.delete(`/catalogos/${id}`);
+    return id;
+  },
 };
