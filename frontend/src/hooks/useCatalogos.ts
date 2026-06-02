@@ -6,7 +6,7 @@ import { itemsService } from '../api/item.service';
 
 export const useCatalogo = (id: number) => {
   return useQuery({
-    queryKey: ['catalogos', id],
+    queryKey: ['catalogo', id],
     queryFn: () => catalogosService.getCatalogo(id),
   });
 };

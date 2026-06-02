@@ -28,4 +28,14 @@ export const itemsService = {
         await api.delete(`/catalogos/${catalogoId}/items/${itemId}`);
         return itemId;
     },
+    // Actualizar un ítem específico
+    updateItem: async (id: number, itemData: Partial<Item>): Promise<Item> => {
+        const response = await api.put(`/items/${id}`, itemData);
+        return response.data;
+    },
+
+    // Eliminar permanentemente un ítem
+    deleteItem: async (id: number): Promise<void> => {
+        await api.delete(`/items/${id}`);
+    }
 };

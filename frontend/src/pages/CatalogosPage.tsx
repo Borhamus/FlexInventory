@@ -16,7 +16,11 @@ import {
   Tooltip,
   Badge,
   Descriptions,
-  theme, // Importamos el motor de temas
+  theme,
+  Modal, // <-- Añadido para confirmaciones y edición
+  Form,  // <-- Añadido para edición de datos
+  Input, // <-- Añadido
+  InputNumber, // <-- Añadido
 } from 'antd';
 import {
   PlusOutlined,
@@ -26,24 +30,87 @@ import {
   InboxOutlined,
   DatabaseOutlined,
   GlobalOutlined,
+  EditOutlined
 } from '@ant-design/icons';
-import { Statistic } from 'antd'; // Asegurate de añadir Statistic a los imports de 'antd'
+import { Statistic } from 'antd';
 import { AddItemModal } from '../components/AddItemModal';
+// IMPORTAMOS TUS NUEVOS HOOKS
+import { useUpdateItem, useDeleteItem } from '../hooks/useItems';
 
 const { Title, Text, Paragraph } = Typography;
 
 const CatalogosPage: React.FC = () => {
   const { id } = useParams();
-  const { token } = theme.useToken(); // Extraemos los tokens activos
-  const { data, isLoading, error } = useCatalogo(Number(id));
+  const catalogoId = Number(id);
+  const { token } = theme.useToken();
+  const { data, isLoading, error } = useCatalogo(catalogoId);
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  
+  // ESTADOS PARA EDICIÓN DE ATRIBUTOS
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [form] = Form.useForm();
+
+  // HOOKS DE REACT QUERY
+  const updateItemMutation = useUpdateItem(catalogoId);
+  const deleteItemMutation = useDeleteItem(catalogoId);
 
   if (isLoading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
   if (error) return <Alert message="Error" description="No se pudo cargar el catálogo" type="error" showIcon />;
+  
   const currentItemIds = data?.items.map((i: any) => i.id) || [];
   const selectedItem = data?.items.find((i: any) => i.id === selectedItemId);
   const hasItems = data?.items && data.items.length > 0;
+
+  // CONTROLADOR AL DAR DE BAJA (DELETE)
+  const handleDelete = (itemId: number) => {
+    Modal.confirm({
+      title: '¿Estás seguro de eliminar este artículo?',
+      content: 'Esta acción eliminará el ítem permanentemente del sistema e inventario asociado.',
+      okText: 'Sí, eliminar',
+      okType: 'danger',
+      cancelText: 'Cancelar',
+      onOk: async () => {
+        await deleteItemMutation.mutateAsync(itemId);
+        setSelectedItemId(null); // Limpiamos la selección del panel lateral
+      },
+    });
+  };
+
+  // CONTROLADOR PARA ABRIR MODAL EDICIÓN CON VALORES PREVIOS
+  const openEditModal = () => {
+    if (!selectedItem) return;
+    form.setFieldsValue({
+      nombre: selectedItem.nombre,
+      cantidad: selectedItem.cantidad,
+      ...selectedItem.atributos // Carga dinámica de los atributos JSON
+    });
+    setIsEditModalOpen(true);
+  };
+
+  // CONTROLADOR PARA GUARDAR LOS DATOS ACTUALIZADOS (PUT)
+  const handleUpdateSubmit = async () => {
+    try {
+      const values = await form.validateFields();
+      const { nombre, cantidad, ...atributos } = values;
+      
+      if(!selectedItem){
+        return;
+      }
+
+      await updateItemMutation.mutateAsync({
+        id: selectedItem.id,
+        data: {
+          nombre,
+          cantidad,
+          atributos // Mapea los campos extras de vuelta al JSON de atributos
+        }
+      });
+      setIsEditModalOpen(false);
+    } catch (info) {
+      console.log('Validación fallida:', info);
+    }
+  };
 
   return (
     <div style={{
@@ -51,7 +118,7 @@ const CatalogosPage: React.FC = () => {
       display: 'flex',
       flexDirection: 'column',
       padding: '24px',
-      backgroundColor: token.colorBgLayout // Usamos el color de fondo del layout del tema
+      backgroundColor: token.colorBgLayout
     }}>
 
       {/* HEADER COMPACTO */}
@@ -63,15 +130,11 @@ const CatalogosPage: React.FC = () => {
       }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Space size="large" align="center">
-            {/* Información del Catálogo */}
             <div>
               <Title level={3} style={{ margin: 0 }}>{data?.nombre}</Title>
               <Text type="secondary">{data?.descripcion}</Text>
             </div>
-
             <Divider type="vertical" style={{ height: 40, margin: '0 24px' }} />
-
-            {/* Estadística Pasiva (No es un botón) */}
             <Statistic
               title="Total Artículos"
               value={data?.total_items}
@@ -79,15 +142,8 @@ const CatalogosPage: React.FC = () => {
               valueStyle={{ fontSize: '20px', fontWeight: 'bold' }}
             />
           </Space>
-
-          {/* Acciones Globales */}
           <Space>
-            <Button icon={<ArrowRightOutlined />}>Migrar Ítems</Button>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={() => setIsModalOpen(true)} // ABRIR MODAL
-            >
+            <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
               Nuevo Artículo
             </Button>
           </Space>
@@ -95,7 +151,6 @@ const CatalogosPage: React.FC = () => {
       </Card>
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-
         {/* GRILLA DE ITEMS */}
         <div style={{ flex: 1, overflowY: 'auto', paddingRight: 12 }}>
           {hasItems ? (
@@ -149,7 +204,6 @@ const CatalogosPage: React.FC = () => {
                           </div>
                         ))}
 
-                        {/* INDICADOR DE MÁS ATRIBUTOS */}
                         {Object.keys(item.atributos || {}).length > 2 && (
                           <div style={{ marginTop: 4 }}>
                             <Text type="secondary" style={{ fontSize: 10, fontStyle: 'italic', color: token.colorPrimary }}>
@@ -158,9 +212,7 @@ const CatalogosPage: React.FC = () => {
                           </div>
                         )}
                       </div>
-
                       <Divider style={{ margin: '8px 0' }} />
-
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text strong style={{ color: item.cantidad < 10 ? token.colorError : token.colorSuccess }}>
                           Stock: {item.cantidad}
@@ -224,14 +276,30 @@ const CatalogosPage: React.FC = () => {
                 )}
               </div>
 
+              {/* FOOTER DEL ACCIONES LATERALES */}
               <div style={{
                 padding: 20,
                 borderTop: `1px solid ${token.colorBorderSecondary}`,
-                backgroundColor: token.colorFillAlter // Color sutil para diferenciar el footer del panel
+                backgroundColor: token.colorFillAlter
               }}>
                 <Space direction="vertical" style={{ width: '100%' }}>
-                  <Button type="primary" block icon={<PlusOutlined />} size="large">Actualizar Datos</Button>
-                  <Button danger block icon={<DeleteOutlined />} size="large">
+                  <Button 
+                    type="primary" 
+                    block 
+                    icon={<EditOutlined />} 
+                    size="large"
+                    onClick={openEditModal} // ACCIÓN ACTUALIZAR
+                  >
+                    Actualizar Datos
+                  </Button>
+                  <Button 
+                    danger 
+                    block 
+                    icon={<DeleteOutlined />} 
+                    size="large"
+                    loading={deleteItemMutation.isPending}
+                    onClick={() => handleDelete(selectedItem.id)} // ACCIÓN BORRAR
+                  >
                     {selectedItem.inventario_id ? "Dar de baja en Inventario" : "Eliminar del Catálogo"}
                   </Button>
                 </Space>
@@ -240,9 +308,42 @@ const CatalogosPage: React.FC = () => {
           </div>
         )}
       </div>
-      {/* COMPONENTE MODAL */}
+
+      {/* MODAL INYECTADO PARA ACTUALIZAR DATOS DINÁMICAMENTE */}
+      <Modal
+        title="Actualizar Datos del Artículo"
+        open={isEditModalOpen}
+        onOk={handleUpdateSubmit}
+        onCancel={() => setIsEditModalOpen(false)}
+        confirmLoading={updateItemMutation.isPending}
+        destroyOnClose
+      >
+        <Form form={form} layout="vertical" style={{ marginTop: 16 }}>
+          <Form.Item name="nombre" label="Nombre del Artículo" rules={[{ required: true, message: 'Ingrese el nombre' }]}>
+            <Input />
+          </Form.Item>
+          
+          <Form.Item name="cantidad" label="Stock / Cantidad" rules={[{ required: true, message: 'Ingrese la cantidad' }]}>
+            <InputNumber min={0} style={{ width: '100%' }} />
+          </Form.Item>
+
+          {/* Generación dinámica de inputs basados en los atributos actuales de este item */}
+          {selectedItem && Object.keys(selectedItem.atributos || {}).length > 0 && (
+            <>
+              <Divider style={{ fontSize: 12, margin: '12px 0' }}>Atributos específicos</Divider>
+              {Object.keys(selectedItem.atributos).map((key) => (
+                <Form.Item key={key} name={key} label={key.toUpperCase()}>
+                  <Input />
+                </Form.Item>
+              ))}
+            </>
+          )}
+        </Form>
+      </Modal>
+
+      {/* COMPONENTE MODAL EXISTENTE */}
       <AddItemModal
-        catalogoId={Number(id)}
+        catalogoId={catalogoId}
         open={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         itemsActualesIds={currentItemIds}
