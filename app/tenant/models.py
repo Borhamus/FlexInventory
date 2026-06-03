@@ -1,7 +1,7 @@
 from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, ForeignKey, Table, Numeric
 from sqlalchemy.dialects.postgresql import JSONB
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+from sqlalchemy.orm import relationship, column_property
+from sqlalchemy.sql import func, select
 from app.db_config import TenantBase  # IMPORTANTE: cambiar Base por TenantBase
 
 # Tabla intermedia para la relación many-to-many entre Catalogo e Item
@@ -51,3 +51,10 @@ class Catalogo(TenantBase):
     
     # Relación: Un catálogo puede tener muchos items (de cualquier inventario)
     items = relationship("Item", secondary=catalogo_item, back_populates="catalogos")
+
+    total_items = column_property(
+        select(func.count(catalogo_item.c.item_id))
+        .where(catalogo_item.c.catalogo_id == id)
+        .correlate_except(catalogo_item)
+        .scalar_subquery()
+    )

@@ -1,4 +1,7 @@
+import json
+
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from typing import List
 
@@ -45,6 +48,58 @@ def create_item(
     db.commit()
     db.refresh(new_item)
     return new_item
+
+
+@router.patch("/bulk-update", response_model=schemas.BulkUpdateResponse)
+def bulk_update_items(
+    payload: schemas.ItemBulkUpdate,
+    _: dict = _perm("items", "update"),
+    db: Session = Depends(get_tenant_db),
+):
+    """
+    Actualiza masivamente atributos de una lista de items del mismo inventario.
+
+    Requiere permiso `items:update` (o ser tenant owner).
+
+    **Ejemplo de request:**
+    ```json
+    {
+      "item_ids": [1, 2, 3],
+      "atributos": { "Marca": "Samsung" }
+    }
+    ```
+    """
+    found = db.query(models.Item.id, models.Item.inventario_id).filter(
+        models.Item.id.in_(payload.item_ids)
+    ).all()
+    found_ids = {row.id for row in found}
+    missing = set(payload.item_ids) - found_ids
+    if missing:
+        raise HTTPException(404, detail={"message": "Items no encontrados", "ids": sorted(missing)})
+
+    inventory_ids = {row.inventario_id for row in found}
+    if len(inventory_ids) > 1:
+        raise HTTPException(400, detail="Todos los items deben pertenecer al mismo inventario")
+
+    inventario_id = inventory_ids.pop()
+    atributos_inv = db.query(models.Inventario.atributos).filter(
+        models.Inventario.id == inventario_id
+    ).scalar()
+    inv_keys = set(atributos_inv.keys()) if atributos_inv else set()
+    unknown_keys = set(payload.atributos.keys()) - inv_keys
+    if unknown_keys:
+        raise HTTPException(400, detail={
+            "message": "Atributos no definidos en el inventario",
+            "atributos_invalidos": sorted(unknown_keys),
+            "atributos_disponibles": sorted(inv_keys),
+        })
+
+    db.execute(
+        text("UPDATE item SET atributos = atributos || CAST(:new_attrs AS jsonb) WHERE id = ANY(:ids)"),
+        {"new_attrs": json.dumps(payload.atributos), "ids": list(found_ids)},
+    )
+    db.commit()
+    return {"actualizados": len(found_ids)}
 
 
 @router.get("/", response_model=List[schemas.ItemResponse])

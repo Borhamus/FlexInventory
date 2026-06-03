@@ -80,3 +80,16 @@ class UserResponse(BaseModel):
     created_at:     datetime
     updated_at:     datetime
     model_config = ConfigDict(from_attributes=True)
+
+# ==================== Cambio de Contraseña ====================
+class ChangePasswordRequest(BaseModel):
+    new_password: str = Field(..., min_length=8)
+
+
+# ==================== Cambio de Nombre ====================
+class UpdateUsernameRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+
+# ==================== Cambio de Correo a los employee ====================
+class UpdateEmailRequest(BaseModel):
+    email: Optional[EmailStr] = None

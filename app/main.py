@@ -10,11 +10,26 @@ from app.tenant.inventarios import router as inventarios_router
 from app.tenant.items import router as items_router
 from app.tenant.catalogos import router as catalogos_router
 from app.Core import models as core_models  # registra modelos en Base
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI(
     title="Stock Manager API — Multi-tenant",
     description="API para gestión de inventarios con soporte multi-tenant",
     version="3.0.0",
+)
+
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+# 2. Agrega el middleware a la aplicación
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,            # Permite el acceso desde tu frontend
+    allow_credentials=True,           # Permite el envío de cookies/auth headers
+    allow_methods=["*"],               # Permite todos los métodos (GET, POST, etc.)
+    allow_headers=["*"],               # Permite todos los encabezados
 )
 
 app.include_router(auth_router)        # /auth/*

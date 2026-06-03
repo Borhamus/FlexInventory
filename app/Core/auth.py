@@ -2,14 +2,14 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 import os
 from fastapi import APIRouter, Depends, HTTPException
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
-from app.Core.models import Users, UserRole
+from app.Core.models import Users, UserRole, RolePermission, Tenant
 from app.db_config import get_db
 
 
@@ -38,6 +38,13 @@ class Token(BaseModel):
 class LoginRequest(BaseModel):
     username: str
     password: str
+
+class UpdateProfileRequest(BaseModel):
+    username: str = Field(..., min_length=3, max_length=50)
+
+class ChangeOwnPasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(..., min_length=8)
 
 
 # ==========================================
@@ -155,3 +162,104 @@ async def get_me(user: user_dependency):
     ```
     """
     return user
+
+@router.get("/me/profile", status_code=200)
+async def get_my_profile(user: user_dependency, db: db_dependency):
+    db_user = db.query(Users).filter(Users.id == user["id"]).first()
+    if not db_user:
+        raise HTTPException(status_code=404, detail="Usuario no encontrado.")
+    return {
+        "id":             db_user.id,
+        "username":       db_user.username,
+        "email":          db_user.email,
+        "role":           db_user.role,
+        "custom_role_id": db_user.custom_role_id,  # ← esta línea
+    }
+
+@router.patch("/me/username", status_code=200)
+async def update_my_username(
+    body: UpdateProfileRequest,
+    user: user_dependency,
+    db: db_dependency,
+):
+    """Cambia el username del usuario autenticado."""
+    db_user = db.query(Users).filter(Users.id == user["id"]).first()
+    if not db_user:
+        raise HTTPException(404, detail="Usuario no encontrado.")
+    if db.query(Users).filter(Users.username == body.username, Users.id != user["id"]).first():
+        raise HTTPException(400, detail="Ese nombre de usuario ya está en uso.")
+    db_user.username = body.username
+    db.commit()
+    db.refresh(db_user)
+    return {"username": db_user.username}
+
+@router.patch("/me/password", status_code=204)
+async def change_my_password(
+    body: ChangeOwnPasswordRequest,
+    user: user_dependency,
+    db: db_dependency,
+):
+    """Cambia la contraseña del usuario autenticado verificando la contraseña actual."""
+    db_user = db.query(Users).filter(Users.id == user["id"]).first()
+    if not db_user:
+        raise HTTPException(404, detail="Usuario no encontrado.")
+    if not bcrypt_context.verify(body.current_password, db_user.hashed_password):
+        raise HTTPException(400, detail="La contraseña actual es incorrecta.")
+    db_user.hashed_password = bcrypt_context.hash(body.new_password)
+    db.commit()
+
+@router.get("/me/permissions", status_code=200)
+async def get_my_permissions(user: user_dependency, db: db_dependency):
+    """Devuelve los permisos del usuario autenticado según su rol asignado."""
+    db_user = db.query(Users).filter(Users.id == user["id"]).first()
+    if not db_user or not db_user.custom_role_id:
+        return {"permissions": []}
+    
+    perms = db.query(RolePermission).filter(
+        RolePermission.role_id == db_user.custom_role_id
+    ).all()
+    
+    return {
+        "permissions": [
+            {"resource": p.resource, "action": p.action}
+            for p in perms
+        ]
+    }
+
+@router.get("/me/stats", status_code=200)
+async def get_dashboard_stats(
+    user: user_dependency,
+    db: db_dependency,
+):
+    """
+    Devuelve estadísticas generales del tenant para el dashboard de inicio.
+    Accesible por cualquier usuario autenticado.
+    """
+    from app.tenant.models import Inventario, Item, Catalogo
+    from app.db_config import get_tenant_db_context
+
+    db_user = db.query(Users).filter(Users.id == user["id"]).first()
+    if not db_user:
+        raise HTTPException(404, detail="Usuario no encontrado.")
+
+    tenant = db.query(Tenant).filter(Tenant.id == db_user.tenant_id).first()
+
+    # Contar empleados en schema public
+    total_empleados = db.query(Users).filter(
+        Users.tenant_id == db_user.tenant_id,
+        Users.role      != "tenant",
+    ).count()
+
+    # Contar inventarios, items y catálogos en el schema del tenant
+    with get_tenant_db_context(tenant.schema_name) as tenant_db:
+        total_inventarios = tenant_db.query(Inventario).count()
+        total_items       = tenant_db.query(Item).count()
+        total_catalogos   = tenant_db.query(Catalogo).count()
+
+    return {
+        "username":          db_user.username,
+        "total_inventarios": total_inventarios,
+        "total_items":       total_items,
+        "total_catalogos":   total_catalogos,
+        "total_empleados":   total_empleados,
+    }

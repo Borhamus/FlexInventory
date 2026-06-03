@@ -1,0 +1,42 @@
+/* src/index.css */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+    'Noto Color Emoji';
+  background-color: transparent;
+}
+
+/* Ant Design ya maneja el box-sizing, pero esto ayuda a evitar sorpresas */
+* {
+  box-sizing: border-box;
+}
+
+/* EFECTOS DE HOVER PARA DIV */
+/* Efecto para los items del Rail (Oscuro) */
+.nav-item-rail {
+  transition: all 0.2s ease;
+  opacity: 0.7;
+}
+
+.nav-item-rail:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+  opacity: 1 !important;
+}
+
+
+/* Efecto para el botón de Logout */
+.logout-btn-rail:hover {
+  background-color: rgba(255, 0, 4, 0.2) !important; /* Un rojo suave al pasar el mouse */
+}
+
+/* Efecto para los botones de la lista (Sider blanco) */
+.context-menu-item {
+  transition: background-color 0.2s;
+}
+

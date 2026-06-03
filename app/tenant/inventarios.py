@@ -1,9 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from typing import List
 
+import json
+
 from app.tenant import schemas, models
 from app.tenant.dependencies import get_tenant_db, require_permission
+from app.tenant.validators import TYPE_DEFAULTS
 
 router = APIRouter(prefix="/inventarios", tags=["Inventarios"])
 
@@ -37,8 +41,7 @@ def create_inventario(
         raise HTTPException(400, detail="El inventario ya existe")
     new_inv = models.Inventario(**inventario.model_dump())
     db.add(new_inv)
-    db.commit()
-    db.refresh(new_inv)
+    db.flush()
     return new_inv
 
 
@@ -55,7 +58,7 @@ def get_inventarios(
     return db.query(models.Inventario).all()
 
 
-@router.get("/{inventario_id}", response_model=schemas.InventarioResponse)
+@router.get("/{inventario_id}", response_model=schemas.InventarioWithItems)
 def get_inventario(
     inventario_id: int,
     _: dict = _perm("inventarios", "read"),
@@ -95,7 +98,28 @@ def update_inventario(
     inv = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
     if not inv:
         raise HTTPException(404, detail="Inventario no encontrado")
-    for field, value in inventario.model_dump(exclude_unset=True).items():
+    update_data = inventario.model_dump(exclude_unset=True)
+    provided_defaults = update_data.pop("defaults", None) or {}
+    if "atributos" in update_data:
+        old_keys = set(inv.atributos.keys()) if inv.atributos else set()
+        new_keys = set(update_data["atributos"].keys())
+        removed = list(old_keys - new_keys)
+        if removed:
+            db.execute(
+                text("UPDATE item SET atributos = atributos - CAST(:keys AS text[]) WHERE inventario_id = :inv_id"),
+                {"keys": removed, "inv_id": inventario_id},
+            )
+        added = {k: update_data["atributos"][k] for k in new_keys - old_keys}
+        if added:
+            defaults = {
+                k: provided_defaults.get(k, TYPE_DEFAULTS.get(v, ""))
+                for k, v in added.items()
+            }
+            db.execute(
+                text("UPDATE item SET atributos = CAST(:defaults AS jsonb) || atributos WHERE inventario_id = :inv_id"),
+                {"defaults": json.dumps(defaults), "inv_id": inventario_id},
+            )
+    for field, value in update_data.items():
         setattr(inv, field, value)
     db.commit()
     db.refresh(inv)

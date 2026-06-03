@@ -1,0 +1,41 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Docker up",
+      "type": "shell",
+      "command": "docker compose up -d",
+      "group": "build",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Uvicorn",
+      "type": "shell",
+      "command": "source venv/bin/activate && uvicorn app.main:app --reload",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "NPM dev",
+      "type": "shell",
+      "command": "cd frontend && npm run dev",
+      "presentation": {
+        "reveal": "always",
+        "panel": "new"
+      }
+    },
+    {
+      "label": "Start all",
+      "dependsOn": ["Docker up", "Uvicorn", "NPM dev"],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+  ]
+}
