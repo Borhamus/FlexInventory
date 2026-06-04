@@ -11,6 +11,7 @@ import CatalogoDashboard from '../pages/CatalogDashboard';
 import UsuariosPage from '../pages/UsuariosPage';   
 import ConfigPage from '../pages/ConfigPage';
 import DashboardPage from '../pages/DashboardPage';
+import DatabasePage from '../pages/DatabasePage'; 
 
 
 // Placeholder rápido para secciones que aún no creamos
@@ -49,10 +50,14 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'usuarios',
-        element: <UsuariosPage />,   // ← reemplaza el Placeholder
+        element: <UsuariosPage />,   
       },
       { 
         path: 'config', element: <ConfigPage /> 
+      },
+      {
+        path: 'database',        
+        element: <DatabasePage />,
       },
     ],
   },

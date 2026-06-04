@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, UniqueConstraint
+from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, UniqueConstraint, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 from app.db_config import Base
@@ -47,6 +47,22 @@ class Tenant(Base):
     created_at  = Column(TIMESTAMP, server_default=func.current_timestamp())
     updated_at  = Column(TIMESTAMP, server_default=func.current_timestamp(),
                          onupdate=func.current_timestamp())
+
+    # ── Google Drive OAuth ──────────────────────────────────────────────────
+    # refresh_token largo plazo para acceder al Drive del tenant sin re-auth
+    google_refresh_token  = Column(Text, nullable=True)
+    # ID del archivo "current.json" en Drive (para sobreescribir en lugar de duplicar)
+    google_drive_file_id  = Column(String(255), nullable=True)
+    # ID de la carpeta "FlexInventory Storage/backups" en Drive
+    google_drive_folder_id = Column(String(255), nullable=True)
+
+    # ── Configuración de backups automáticos ───────────────────────────────
+    # Frecuencia del backup diario (en horas, default 24)
+    backup_daily_hour     = Column(Integer, default=24, nullable=False)
+    # Día del mes para el backup mensual (1-28, default 1)
+    backup_monthly_day    = Column(Integer, default=1, nullable=False)
+    # Activar/desactivar backups automáticos
+    backup_auto_enabled   = Column(Boolean, default=False, nullable=False)
 
     users        = relationship("Users", back_populates="tenant")
     custom_roles = relationship("CustomRole", back_populates="tenant",

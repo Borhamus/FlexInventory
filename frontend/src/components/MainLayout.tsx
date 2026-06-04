@@ -7,7 +7,8 @@ import {
   DatabaseOutlined,
   AppstoreOutlined,
   SettingOutlined,
-  BulbOutlined
+  BulbOutlined,
+  CloudServerOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
@@ -52,6 +53,13 @@ const MainLayout: React.FC = () => {
       icon:    <SettingOutlined />,
       label:   'Ajustes',
       visible: true,
+    },
+    // ── Solo visible para el tenant owner ───────────────────────────────
+    {
+      key:     '/dashboard/database',
+      icon:    <CloudServerOutlined />,
+      label:   'BD',   
+      visible: isTenant,
     },
   ];
 

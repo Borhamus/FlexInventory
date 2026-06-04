@@ -65,7 +65,7 @@ useEffect(() => {
       setPermissions([]);
       setLoadingPermissions(false);
     });
-}, [token]);
+}, [token, isTenant]);
 
   const hasPermission = (resource: Resource, action: Action): boolean => {
     if (isTenant) return true;
