@@ -110,9 +110,7 @@ export const ModalAddItemInventory: React.FC<Props> = ({
             label={`Atributo: ${nombreAtributo}`}
             valuePropName={tipoAtributo === 'boolean' ? 'checked' : 'value'}
             initialValue={tipoAtributo === 'boolean' ? false : undefined}
-            rules={[{  
-              message: `El campo ${nombreAtributo} es obligatorio` 
-            }]}
+            rules={[]}
           >
             {renderizarInput(tipoAtributo)} 
           </Form.Item>
