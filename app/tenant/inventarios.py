@@ -5,6 +5,7 @@ from typing import List
 
 import json
 
+from app.auditoria.auditor import Auditor
 from app.tenant import schemas, models
 from app.tenant.dependencies import get_tenant_db, require_permission
 from app.tenant.validators import TYPE_DEFAULTS
@@ -16,7 +17,13 @@ def _perm(resource: str, action: str):
     return Depends(require_permission(resource, action))
 
 
-@router.post("/", response_model=schemas.InventarioResponse, status_code=201)
+# ─── DEPENDENCIAS DE AUDITORÍA: INVENTARIOS ─────────────────────────────
+POST   = [Depends(Auditor(accion="Crear Inventario", auditar_payload=True))]
+PUT    = [Depends(Auditor(accion="Editar Inventario", auditar_payload=True))]
+DELETE = [Depends(Auditor(accion="Eliminar Inventario", auditar_payload=True))]
+# ────────────────────────────────────────────────────────────────────────
+
+@router.post("/", response_model=schemas.InventarioResponse, status_code=201, dependencies=POST)
 def create_inventario(
     inventario: schemas.InventarioCreate,
     _: dict = _perm("inventarios", "create"),
@@ -77,7 +84,7 @@ def get_inventario(
     return inv
 
 
-@router.put("/{inventario_id}", response_model=schemas.InventarioResponse)
+@router.put("/{inventario_id}", response_model=schemas.InventarioResponse, dependencies=PUT)
 def update_inventario(
     inventario_id: int,
     inventario: schemas.InventarioUpdate,
@@ -126,7 +133,7 @@ def update_inventario(
     return inv
 
 
-@router.delete("/{inventario_id}", status_code=204)
+@router.delete("/{inventario_id}", status_code=204, dependencies=DELETE)
 def delete_inventario(
     inventario_id: int,
     _: dict = _perm("inventarios", "delete"),

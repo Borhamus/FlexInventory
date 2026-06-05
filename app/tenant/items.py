@@ -5,18 +5,24 @@ from sqlalchemy import text
 from sqlalchemy.orm import Session
 from typing import List
 
+from app.auditoria.auditor import Auditor
 from app.tenant import schemas, models
 from app.tenant.dependencies import get_tenant_db, require_permission
 from app.tenant.validators import validate_item_attributes
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
-
 def _perm(resource: str, action: str):
     return Depends(require_permission(resource, action))
 
+# ─── DEPENDENCIAS DE AUDITORÍA ──────────────────────────────────────────
+POST   = [Depends(Auditor(accion="Crear Nuevo Artículo", auditar_payload=True))]
+PUT    = [Depends(Auditor(accion="Editar Artículo", auditar_payload=True))]
+PATCH  = [Depends(Auditor(accion="Editar Artículo", auditar_payload=True))]
+DELETE = [Depends(Auditor(accion="Eliminar Artículo", auditar_payload=True))]
+# ─────────────────────────────────────────────────────────────────────────
 
-@router.post("/", response_model=schemas.ItemResponse, status_code=201)
+@router.post("/", response_model=schemas.ItemResponse, status_code=201, dependencies=POST)
 def create_item(
     item: schemas.ItemCreate,
     _: dict = _perm("items", "create"),
@@ -50,7 +56,7 @@ def create_item(
     return new_item
 
 
-@router.patch("/bulk-update", response_model=schemas.BulkUpdateResponse)
+@router.patch("/bulk-update", response_model=schemas.BulkUpdateResponse, dependencies=PATCH)
 def bulk_update_items(
     payload: schemas.ItemBulkUpdate,
     _: dict = _perm("items", "update"),
@@ -143,7 +149,7 @@ def get_item(
     return item
 
 
-@router.put("/{item_id}", response_model=schemas.ItemResponse)
+@router.put("/{item_id}", response_model=schemas.ItemResponse, dependencies=PUT)
 def update_item(
     item_id: int,
     item: schemas.ItemUpdate,
@@ -175,7 +181,7 @@ def update_item(
     return db_item
 
 
-@router.delete("/{item_id}", status_code=204)
+@router.delete("/{item_id}", status_code=204, dependencies=DELETE)
 def delete_item(
     item_id: int,
     _: dict = _perm("items", "delete"),
