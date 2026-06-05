@@ -2,41 +2,66 @@ import React, { useEffect, useState } from 'react';
 import {
   Card, Button, Switch, InputNumber, Typography, Divider,
   Alert, Modal, Tag, Spin, Row, Col, Tooltip, notification,
+  List, Radio, Space,
 } from 'antd';
 import {
   CloudUploadOutlined, CloudDownloadOutlined, DeleteOutlined,
   LinkOutlined, DisconnectOutlined, CheckCircleOutlined,
   CloseCircleOutlined, ReloadOutlined, WarningOutlined,
+  FileOutlined, StarOutlined,
 } from '@ant-design/icons';
 import {
-  getDatabaseStatus, getOAuthUrl, backupNow, restoreFromDrive,
-  resetDatabase, updateBackupConfig, disconnectDrive,
-  type DatabaseStatus,
+  getDatabaseStatus, getOAuthUrl, backupNow, listBackups,
+  restoreFromDriveById, resetDatabase, updateBackupConfig, disconnectDrive,
+  type DatabaseStatus, type BackupFile,
 } from '../api/database.service';
 import { useAuthContext } from '../context/AuthContext';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 
 const { Title, Text, Paragraph } = Typography;
 
+// Formatea "2026-06-04T07:40:49.000Z" → "04/06/2026 07:40"
+function formatDate(iso: string | null): string {
+  if (!iso) return '—';
+  const d = new Date(iso);
+  return d.toLocaleString('es-AR', {
+    day: '2-digit', month: '2-digit', year: 'numeric',
+    hour: '2-digit', minute: '2-digit',
+  });
+}
+
+// Formatea bytes → "1.2 MB"
+function formatSize(bytes: string | null): string {
+  if (!bytes) return '—';
+  const n = parseInt(bytes, 10);
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
 const DatabasePage: React.FC = () => {
   const { isTenant } = useAuthContext();
-  const navigate     = useNavigate();
+  const navigate      = useNavigate();
   const [searchParams] = useSearchParams();
 
-  const [status,          setStatus]          = useState<DatabaseStatus | null>(null);
-  const [loading,         setLoading]         = useState(true);
-  const [actionLoading,   setActionLoading]   = useState<string | null>(null);
-  const [dailyHour,       setDailyHour]       = useState<number>(24);
-  const [monthlyDay,      setMonthlyDay]       = useState<number>(1);
-  const [autoEnabled,     setAutoEnabled]     = useState(false);
-  const [api,             contextHolder]      = notification.useNotification();
+  const [status,        setStatus]        = useState<DatabaseStatus | null>(null);
+  const [loading,       setLoading]       = useState(true);
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
+  const [dailyHour,     setDailyHour]     = useState<number>(24);
+  const [monthlyDay,    setMonthlyDay]    = useState<number>(1);
+  const [autoEnabled,   setAutoEnabled]   = useState(false);
+  const [api,           contextHolder]    = notification.useNotification();
 
-  // Redirigir si no es tenant owner
+  // ── Estado del modal de restauración ──────────────────────────────────
+  const [restoreModalOpen,  setRestoreModalOpen]  = useState(false);
+  const [backupList,        setBackupList]        = useState<BackupFile[]>([]);
+  const [loadingBackups,    setLoadingBackups]    = useState(false);
+  const [selectedFileId,    setSelectedFileId]    = useState<string | null>(null);
+
   useEffect(() => {
     if (!isTenant) navigate('/dashboard', { replace: true });
   }, [isTenant]);
 
-  // Notificación si viene del callback OAuth
   useEffect(() => {
     if (searchParams.get('connected') === 'true') {
       api.success({ message: 'Google Drive conectado correctamente.' });
@@ -60,6 +85,38 @@ const DatabasePage: React.FC = () => {
   };
 
   useEffect(() => { fetchStatus(); }, []);
+
+  // ── Abrir modal de restauración y cargar lista ─────────────────────────
+  const handleOpenRestoreModal = async () => {
+    setSelectedFileId(null);
+    setRestoreModalOpen(true);
+    setLoadingBackups(true);
+    try {
+      const list = await listBackups();
+      setBackupList(list);
+      if (list.length > 0) setSelectedFileId(list[0].file_id);
+    } catch (e: any) {
+      api.error({ message: 'No se pudieron cargar los backups', description: e?.response?.data?.detail });
+      setRestoreModalOpen(false);
+    } finally {
+      setLoadingBackups(false);
+    }
+  };
+
+  // ── Confirmar restauración ─────────────────────────────────────────────
+  const handleConfirmRestore = async () => {
+    if (!selectedFileId) return;
+    setActionLoading('restore');
+    try {
+      const res = await restoreFromDriveById(selectedFileId);
+      api.success({ message: res.message });
+      setRestoreModalOpen(false);
+    } catch (e: any) {
+      api.error({ message: 'Error restaurando', description: e?.response?.data?.detail });
+    } finally {
+      setActionLoading(null);
+    }
+  };
 
   const handleConnectDrive = async () => {
     try {
@@ -102,27 +159,6 @@ const DatabasePage: React.FC = () => {
     } finally {
       setActionLoading(null);
     }
-  };
-
-  const handleRestore = () => {
-    Modal.confirm({
-      title:   '¿Restaurar base de datos?',
-      icon:    <WarningOutlined style={{ color: '#faad14' }} />,
-      content: 'Esto reemplazará TODOS los datos actuales con el último backup guardado en Drive. Esta acción es irreversible.',
-      okText:  'Restaurar',
-      okButtonProps: { danger: true },
-      onOk: async () => {
-        setActionLoading('restore');
-        try {
-          const res = await restoreFromDrive();
-          api.success({ message: res.message });
-        } catch (e: any) {
-          api.error({ message: 'Error restaurando', description: e?.response?.data?.detail });
-        } finally {
-          setActionLoading(null);
-        }
-      },
-    });
   };
 
   const handleReset = () => {
@@ -220,22 +256,13 @@ const DatabasePage: React.FC = () => {
         <Row gutter={12}>
           {!driveConnected ? (
             <Col>
-              <Button
-                type="primary"
-                icon={<LinkOutlined />}
-                onClick={handleConnectDrive}
-              >
+              <Button type="primary" icon={<LinkOutlined />} onClick={handleConnectDrive}>
                 Conectar con Google Drive
               </Button>
             </Col>
           ) : (
             <Col>
-              <Button
-                danger
-                icon={<DisconnectOutlined />}
-                onClick={handleDisconnect}
-                loading={actionLoading === 'disconnect'}
-              >
+              <Button danger icon={<DisconnectOutlined />} onClick={handleDisconnect} loading={actionLoading === 'disconnect'}>
                 Desconectar Drive
               </Button>
             </Col>
@@ -251,24 +278,15 @@ const DatabasePage: React.FC = () => {
       {/* ── Acciones de backup ── */}
       <Card title="Acciones" style={{ marginBottom: 24 }}>
         {!driveConnected && (
-          <Alert
-            message="Conectá tu Google Drive para habilitar los backups."
-            type="warning"
-            showIcon
-            style={{ marginBottom: 16 }}
-          />
+          <Alert message="Conectá tu Google Drive para habilitar los backups." type="warning" showIcon style={{ marginBottom: 16 }} />
         )}
 
         <Row gutter={[12, 12]}>
           <Col xs={24} sm={8}>
             <Button
-              block
-              type="primary"
-              icon={<CloudUploadOutlined />}
-              onClick={handleBackupNow}
-              disabled={!driveConnected}
-              loading={actionLoading === 'backup'}
-              style={{ height: 56 }}
+              block type="primary" icon={<CloudUploadOutlined />}
+              onClick={handleBackupNow} disabled={!driveConnected}
+              loading={actionLoading === 'backup'} style={{ height: 56 }}
             >
               Backup ahora
             </Button>
@@ -279,28 +297,22 @@ const DatabasePage: React.FC = () => {
 
           <Col xs={24} sm={8}>
             <Button
-              block
-              icon={<CloudDownloadOutlined />}
-              onClick={handleRestore}
+              block icon={<CloudDownloadOutlined />}
+              onClick={handleOpenRestoreModal}
               disabled={!driveConnected || !status?.drive_file_id}
-              loading={actionLoading === 'restore'}
-              style={{ height: 56 }}
+              loading={actionLoading === 'restore'} style={{ height: 56 }}
             >
               Restaurar desde Drive
             </Button>
             <Text type="secondary" style={{ fontSize: 11, display: 'block', textAlign: 'center', marginTop: 4 }}>
-              Reemplaza los datos actuales con el último backup
+              Elegí un backup para restaurar
             </Text>
           </Col>
 
           <Col xs={24} sm={8}>
             <Button
-              block
-              danger
-              icon={<DeleteOutlined />}
-              onClick={handleReset}
-              loading={actionLoading === 'reset'}
-              style={{ height: 56 }}
+              block danger icon={<DeleteOutlined />}
+              onClick={handleReset} loading={actionLoading === 'reset'} style={{ height: 56 }}
             >
               Eliminar base de datos
             </Button>
@@ -322,11 +334,7 @@ const DatabasePage: React.FC = () => {
             </Text>
           </Col>
           <Col>
-            <Switch
-              checked={autoEnabled}
-              onChange={setAutoEnabled}
-              disabled={!driveConnected}
-            />
+            <Switch checked={autoEnabled} onChange={setAutoEnabled} disabled={!driveConnected} />
           </Col>
         </Row>
 
@@ -337,40 +345,118 @@ const DatabasePage: React.FC = () => {
             <Text type="secondary" style={{ fontSize: 12 }}>Cada cuántas horas (1–168)</Text>
             <br />
             <InputNumber
-              min={1} max={168}
-              value={dailyHour}
+              min={1} max={168} value={dailyHour}
               onChange={(v) => setDailyHour(v ?? 24)}
-              disabled={!autoEnabled}
-              addonAfter="horas"
+              disabled={!autoEnabled} addonAfter="horas"
               style={{ marginTop: 8, width: '100%' }}
             />
           </Col>
-
           <Col xs={24} sm={12}>
             <Text strong>Día del backup mensual</Text>
             <br />
             <Text type="secondary" style={{ fontSize: 12 }}>Día del mes (1–28), a las 03:00 UTC</Text>
             <br />
             <InputNumber
-              min={1} max={28}
-              value={monthlyDay}
+              min={1} max={28} value={monthlyDay}
               onChange={(v) => setMonthlyDay(v ?? 1)}
-              disabled={!autoEnabled}
-              addonAfter="del mes"
+              disabled={!autoEnabled} addonAfter="del mes"
               style={{ marginTop: 8, width: '100%' }}
             />
           </Col>
         </Row>
 
-        <Button
-          type="primary"
-          onClick={handleSaveConfig}
-          loading={actionLoading === 'config'}
-          disabled={!driveConnected}
-        >
+        <Button type="primary" onClick={handleSaveConfig} loading={actionLoading === 'config'} disabled={!driveConnected}>
           Guardar configuración
         </Button>
       </Card>
+
+      {/* ══ Modal de selección de backup ══════════════════════════════════ */}
+      <Modal
+        title="Restaurar base de datos"
+        open={restoreModalOpen}
+        onCancel={() => setRestoreModalOpen(false)}
+        footer={[
+          <Button key="cancel" onClick={() => setRestoreModalOpen(false)}>
+            Cancelar
+          </Button>,
+          <Button
+            key="confirm"
+            danger
+            type="primary"
+            disabled={!selectedFileId}
+            loading={actionLoading === 'restore'}
+            onClick={handleConfirmRestore}
+          >
+            Restaurar
+          </Button>,
+        ]}
+        width={560}
+      >
+        <Alert
+          icon={<WarningOutlined />}
+          message="¿Restaurar base de datos?"
+          description="Esto reemplazará TODOS los datos actuales con el backup seleccionado guardado en Drive. Esta acción es irreversible."
+          type="warning"
+          showIcon
+          style={{ marginBottom: 20 }}
+        />
+
+        {loadingBackups ? (
+          <div style={{ textAlign: 'center', padding: '40px 0' }}>
+            <Spin size="large" />
+            <br />
+            <Text type="secondary" style={{ marginTop: 12, display: 'block' }}>Cargando backups desde Drive...</Text>
+          </div>
+        ) : backupList.length === 0 ? (
+          <Text type="secondary">No se encontraron backups en Drive.</Text>
+        ) : (
+          <Radio.Group
+            value={selectedFileId}
+            onChange={(e) => setSelectedFileId(e.target.value)}
+            style={{ width: '100%' }}
+          >
+            <List
+              dataSource={backupList}
+              renderItem={(item) => (
+                <List.Item
+                  style={{
+                    cursor: 'pointer',
+                    padding: '10px 12px',
+                    borderRadius: 8,
+                    marginBottom: 6,
+                    border: selectedFileId === item.file_id ? '1.5px solid #1677ff' : '1.5px solid #f0f0f0',
+                    background: selectedFileId === item.file_id ? '#e6f4ff' : 'transparent',
+                    transition: 'all 0.15s',
+                  }}
+                  onClick={() => setSelectedFileId(item.file_id)}
+                >
+                  <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                    <Space>
+                      <Radio value={item.file_id} />
+                      {item.is_current
+                        ? <StarOutlined style={{ color: '#1677ff' }} />
+                        : <FileOutlined style={{ color: '#8c8c8c' }} />
+                      }
+                      <div>
+                        <Text strong style={{ color: item.is_current ? '#1677ff' : undefined }}>
+                          {item.name}
+                        </Text>
+                        <br />
+                        <Text type="secondary" style={{ fontSize: 12 }}>
+                          {formatDate(item.modified_time)}
+                        </Text>
+                      </div>
+                    </Space>
+                    <Text type="secondary" style={{ fontSize: 12 }}>
+                      {formatSize(item.size)}
+                    </Text>
+                  </Space>
+                </List.Item>
+              )}
+            />
+          </Radio.Group>
+        )}
+      </Modal>
     </div>
   );
 };

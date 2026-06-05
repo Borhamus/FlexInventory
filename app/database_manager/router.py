@@ -308,6 +308,82 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
 # ENDPOINTS
 # ═══════════════════════════════════════════════════════════════════════════
 
+@router.get("/backup/list")
+def list_backups(current_user: user_dep, db: db_dep):
+    """
+    Lista todos los backups disponibles en el Drive del tenant.
+    Devuelve:
+      - El archivo current.json (etiquetado como "Actual")
+      - Todos los archivos de la carpeta backups/, ordenados de más nuevo a más antiguo
+    """
+    user, tenant = _require_tenant_owner(current_user, db)
+    if not tenant.google_refresh_token:
+        raise HTTPException(status_code=400, detail="Drive no conectado.")
+
+    access_token = _get_access_token(tenant.google_refresh_token)
+    headers      = {"Authorization": f"Bearer {access_token}"}
+
+    result = []
+
+    # 1. Archivo actual (current.json)
+    if tenant.google_drive_file_id:
+        resp = requests.get(
+            f"{DRIVE_API_URL}/files/{tenant.google_drive_file_id}",
+            headers=headers,
+            params={"fields": "id,name,modifiedTime,size"}
+        )
+        if resp.status_code == 200:
+            f = resp.json()
+            result.append({
+                "file_id":       f["id"],
+                "name":          "Actual (current.json)",
+                "modified_time": f.get("modifiedTime"),
+                "size":          f.get("size"),
+                "is_current":    True,
+            })
+
+    # 2. Backups históricos de la carpeta backups/
+    if tenant.google_drive_folder_id:
+        resp = requests.get(
+            f"{DRIVE_API_URL}/files",
+            headers=headers,
+            params={
+                "q":       f"'{tenant.google_drive_folder_id}' in parents and trashed=false",
+                "fields":  "files(id,name,modifiedTime,size)",
+                "orderBy": "modifiedTime desc",   # más nuevo primero
+            }
+        )
+        if resp.status_code == 200:
+            for f in resp.json().get("files", []):
+                result.append({
+                    "file_id":       f["id"],
+                    "name":          f["name"],
+                    "modified_time": f.get("modifiedTime"),
+                    "size":          f.get("size"),
+                    "is_current":    False,
+                })
+
+    return {"backups": result}
+
+
+@router.post("/restore/{file_id}")
+def restore_from_drive_by_id(file_id: str, current_user: user_dep, db: db_dep):
+    """
+    Restaura la BD del tenant desde un archivo específico del Drive.
+    Reemplaza el endpoint /restore anterior.
+    ADVERTENCIA: operación destructiva, reemplaza todos los datos actuales.
+    """
+    user, tenant = _require_tenant_owner(current_user, db)
+    if not tenant.google_refresh_token:
+        raise HTTPException(status_code=400, detail="Drive no conectado.")
+
+    access_token = _get_access_token(tenant.google_refresh_token)
+    data         = _download_from_drive(access_token, file_id)
+
+    restore_tenant_data(tenant, data, db)
+    return {"message": "Base de datos restaurada exitosamente desde Drive."}
+
+
 @router.get("/status")
 def get_status(current_user: user_dep, db: db_dep):
     """Estado de la conexión con Drive y configuración de backups."""
@@ -419,24 +495,6 @@ def backup_now(current_user: user_dep, db: db_dep):
 
     return {"message": f"Backup completado correctamente.", "filename": backup_name}
 
-
-@router.post("/restore")
-def restore_from_drive(current_user: user_dep, db: db_dep):
-    """
-    Restaura la BD del tenant desde el archivo current.json en Drive.
-    ADVERTENCIA: operación destructiva, reemplaza todos los datos actuales.
-    """
-    user, tenant = _require_tenant_owner(current_user, db)
-    if not tenant.google_refresh_token:
-        raise HTTPException(status_code=400, detail="Drive no conectado.")
-    if not tenant.google_drive_file_id:
-        raise HTTPException(status_code=400, detail="No hay backup en Drive. Realizá un backup primero.")
-
-    access_token = _get_access_token(tenant.google_refresh_token)
-    data         = _download_from_drive(access_token, tenant.google_drive_file_id)
-
-    restore_tenant_data(tenant, data, db)
-    return {"message": "Base de datos restaurada exitosamente desde Drive."}
 
 
 @router.delete("/reset")
