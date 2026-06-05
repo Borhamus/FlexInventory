@@ -12,6 +12,7 @@ import UsuariosPage from '../pages/UsuariosPage';
 import ConfigPage from '../pages/ConfigPage';
 import DashboardPage from '../pages/DashboardPage';
 import DatabasePage from '../pages/DatabasePage'; 
+import AuditoriaPage from '../pages/AuditoriaPage';
 
 
 // Placeholder rápido para secciones que aún no creamos
@@ -58,6 +59,10 @@ export const routes: RouteObject[] = [
       {
         path: 'database',        
         element: <DatabasePage />,
+      },
+      {
+        path: 'historial',
+        element: <AuditoriaPage />,
       },
     ],
   },

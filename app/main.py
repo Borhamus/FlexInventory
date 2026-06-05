@@ -11,6 +11,7 @@ from app.tenant.items import router as items_router
 from app.tenant.catalogos import router as catalogos_router
 from app.database_manager.router import router as database_router
 from app.Core import models as core_models  # registra modelos en Base
+from app.auditoria.router import router as auditoria_router
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
@@ -53,11 +54,7 @@ app.include_router(inventarios_router) # /inventarios/*
 app.include_router(items_router)       # /items/*
 app.include_router(catalogos_router)   # /catalogos/*
 app.include_router(database_router)    # /database/*
+app.include_router(auditoria_router)   # /auditoria/*
 
 # Crea tablas del schema public: tenants, users, custom_roles, role_permissions
 Base.metadata.create_all(bind=engine)
-
-
-@app.get("/", tags=["Health"])
-def read_root():
-    return {"message": "Stock Manager API Multi-tenant v3", "docs": "/docs"}
