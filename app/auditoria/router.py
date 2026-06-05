@@ -44,10 +44,10 @@ def obtener_auditorias(
         # Traemos los registros ordenados del más nuevo al más viejo
         logs = (
             tdb.query(AuditLog)
-            .order_by(desc(AuditLog.creado_en))
+            .order_by(desc(AuditLog.fecha))
             .offset(skip)
             .limit(limit)
             .all()
         )
         
-        return logs
+        return [AuditLogResponse.model_validate(log) for log in logs]

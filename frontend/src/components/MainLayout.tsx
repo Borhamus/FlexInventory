@@ -9,6 +9,7 @@ import {
   SettingOutlined,
   BulbOutlined,
   CloudServerOutlined,
+  EyeOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
@@ -60,6 +61,12 @@ const MainLayout: React.FC = () => {
       icon:    <CloudServerOutlined />,
       label:   'BD',   
       visible: isTenant,
+    },
+    {
+      key:     '/dashboard/historial',  
+      icon:    <EyeOutlined />,         
+      label:   'Historial',
+      visible: isTenant,                
     },
   ];
 
