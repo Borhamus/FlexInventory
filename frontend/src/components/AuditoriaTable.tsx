@@ -1,21 +1,12 @@
 import React from 'react';
-import { Table, Tag, Typography } from 'antd';
+import { Table, Tag, Typography, Button, Popconfirm, message } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
+import { DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
+import { useAuthContext } from '../context/AuthContext';
+import { auditoriaService, type AuditLog } from '../api/auditoria.service'; 
 
 const { Text } = Typography;
-
-export interface AuditLog {
-  id: number;
-  usuario_id: number;
-  usuario: string;
-  endpoint: string;
-  metodo: string;
-  accion: string;
-  payload_cambios: any;
-  fecha: string;
-  entidad: string;
-}
 
 interface AuditoriaTableProps {
   data: AuditLog[];
@@ -35,12 +26,24 @@ const traduccionMetodos: Record<string, string> = {
 
 const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, pagination, onChange }) => {
 
+  const { isTenant } = useAuthContext();
+
+  const handleVaciarHistorial = async () => {
+    try {
+      await auditoriaService.vaciarHistorial();
+      message.success('Historial de operaciones vaciado correctamente');
+    } catch (error) {
+      console.error(error);
+      message.error('No se pudo vaciar el historial');
+    }
+  };
+
   const columns: ColumnsType<AuditLog> = [
     {
       title: 'Fecha y Hora',
       dataIndex: 'fecha',
       key: 'fecha',
-      render: (text) => dayjs(text).format('DD/MM/YYYY HH:mm:ss'),
+      render: (text) => dayjs(text).format('DD/MM/YYYY HH:mm'),
       width: 160,
     },
     {
@@ -97,9 +100,9 @@ const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, paginati
         if (metodo === 'POST') color = 'green';
         if (metodo === 'PUT' || metodo === 'PATCH') color = 'orange';
         if (metodo === 'DELETE') color = 'volcano';
-        
+
         const textoLegible = traduccionMetodos[metodo] || metodo;
-        
+
         return <Tag color={color}>{textoLegible}</Tag>;
       },
       width: 160,
@@ -107,6 +110,8 @@ const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, paginati
   ];
 
   return (
+    <>
+
     <Table
       columns={columns}
       dataSource={data}
@@ -116,6 +121,33 @@ const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, paginati
       pagination={pagination}
       onChange={onChange}
     />
+
+    <div style={{ 
+          display: 'flex', 
+          justifyContent: 'space-between', 
+          alignItems: 'center', 
+          marginBottom: 16 
+        }}
+    >
+
+      {isTenant && (
+        <Popconfirm
+          title="¿Vaciar historial completo?"
+          description="Esta acción es irreversible y eliminará todos los registros."
+          onConfirm={handleVaciarHistorial}
+          okText="Sí, vaciar"
+          cancelText="Cancelar"
+          okButtonProps={{ danger: true }}
+          placement="left"
+        >
+          <Button type="primary" danger icon={<DeleteOutlined />}>
+            Vaciar Historial
+          </Button>
+        </Popconfirm>
+      )}
+    </div>
+
+    </>
   );
 };
 

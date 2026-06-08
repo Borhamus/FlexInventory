@@ -1,6 +1,7 @@
 # app/auditoria/router.py
-from typing import Annotated
+from typing import Annotated, List
 from fastapi import APIRouter, Depends, HTTPException, Query, status
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -11,6 +12,10 @@ from app.auditoria.models import AuditLog
 from app.auditoria.schemas import AuditLogResponse
 
 router = APIRouter(prefix="/auditoria", tags=["Auditoría"])
+
+class PaginatedAuditResponse(BaseModel):
+    items: List[AuditLogResponse]
+    total: int
 
 # Dependencias base
 db_dep = Annotated[Session, Depends(get_db)]
@@ -27,7 +32,7 @@ def _require_tenant_owner(current_user: user_dep, db: db_dep) -> Tenant:
     
     return tenant
 
-@router.get("/", response_model=list[AuditLogResponse])
+@router.get("/", response_model=PaginatedAuditResponse)
 def obtener_auditorias(
     current_user: user_dep, 
     db: db_dep,
@@ -50,7 +55,10 @@ def obtener_auditorias(
             .all()
         )
         
-        return [AuditLogResponse.model_validate(log) for log in logs]
+        return {
+            "items": [AuditLogResponse.model_validate(log) for log in logs],
+            "total": tdb.query(AuditLog).count() 
+        }   
     
 @router.delete("/eliminar", status_code=status.HTTP_200_OK)
 def vaciar_historial_auditoria(

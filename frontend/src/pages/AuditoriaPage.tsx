@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Typography, Card } from 'antd';
 import type { TablePaginationConfig } from 'antd/es/table';
-import AuditoriaTable, { type AuditLog } from '../components/AuditoriaTable';
-import { auditoriaService } from '../api/auditoria.service';
+import AuditoriaTable from '../components/AuditoriaTable';
+import { auditoriaService, type AuditLog } from '../api/auditoria.service';
 
 const { Title } = Typography;
 
@@ -11,7 +11,7 @@ const AuditoriaPage: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(false);
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
-    pageSize: 50,
+    pageSize: 15,
     total: 0, 
   });
 
@@ -20,13 +20,17 @@ const AuditoriaPage: React.FC = () => {
     try {
       const skip = (page - 1) * pageSize;
       
-      const data = await auditoriaService.getHistorial(skip, pageSize)
+      const response = await auditoriaService.getHistorial(skip, pageSize)
       
-      setData(data);
+      console.log("Datos recibidos:", response.items);
+      console.log("Total reportado por backend:", response.total);
+
+      setData(response.items || response);
       setPagination({
         ...pagination,
         current: page,
         pageSize: pageSize,
+        total: response.total
       });
     } catch (error) {
       console.error('Error al cargar el historial:', error);
@@ -36,12 +40,11 @@ const AuditoriaPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchHistorial(pagination.current || 1, pagination.pageSize || 50);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    fetchHistorial(pagination.current || 1, pagination.pageSize || 15);
   }, []);
 
   const handleTableChange = (newPagination: TablePaginationConfig) => {
-    fetchHistorial(newPagination.current || 1, newPagination.pageSize || 50);
+    fetchHistorial(newPagination.current || 1, newPagination.pageSize || 15);
   };
 
   return (

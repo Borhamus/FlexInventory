@@ -15,7 +15,6 @@ class Auditor:
         self.accion = accion
         self.auditar_payload = auditar_payload
 
-    # 🔥 Agregamos entidad_afectada y resumen a los parámetros
     def _guardar_en_db(self, schema_name: str, usuario_id: int, usuario: str, 
                        endpoint: str, metodo: str, payload: dict | None, 
                        entidad_afectada: str, resumen: str | None):
@@ -28,8 +27,8 @@ class Auditor:
                 metodo=metodo,
                 accion=self.accion,
                 payload_cambios=payload,
-                entidad_afectada=entidad_afectada, # 🔥 Nuevo
-                resumen=resumen # 🔥 Nuevo
+                entidad_afectada=entidad_afectada, 
+                resumen=resumen 
             )
             tdb.add(nuevo_log)
             tdb.commit()
@@ -43,21 +42,18 @@ class Auditor:
     ):
         """Convierte la clase en una dependencia de FastAPI"""
         
-        # 1. Obtener información vital del usuario
         usuario_id = current_user.get("id")
         nombre_usuario = current_user.get("username", "Desconocido")
         tenant_id = current_user.get("tenant_id")
 
-        # 2. Buscar el schema_name del tenant en la base de datos pública
         tenant = db_public.query(Tenant).filter(Tenant.id == tenant_id).first()
         if not tenant:
-            return # Seguridad extra: si no hay tenant, ignoramos silenciosamente el log
+            return 
 
         entidad_nombre = "Desconocido"
         resumen = None 
         payload_original = None
 
-        # 🔥 3. Leer el payload de forma segura PRIMERO
         if self.auditar_payload and request.method in ["POST", "PUT", "PATCH"]:
             try:
                 payload_original = await request.json()
@@ -66,12 +62,9 @@ class Auditor:
         elif request.method == "DELETE":
             payload_original = dict(request.path_params)
 
-        # 4. Analizar los cambios según el método HTTP
-       # 4. Analizar los cambios según el método HTTP
         if request.method == "POST" and isinstance(payload_original, dict):
             nombre_base = payload_original.get("nombre", "Desconocido")
             
-            # 🔥 Le agregamos el tipo de entidad mirando la URL
             if "items" in request.url.path:
                 entidad_nombre = f"Artículo: {nombre_base}"
             elif "catalogos" in request.url.path:
@@ -88,10 +81,9 @@ class Auditor:
             entidad_id = path_params.get("item_id") or path_params.get("inventario_id") or path_params.get("catalogo_id")
             
             if entidad_id:
-                # Abrimos conexión al tenant solo para buscar el objeto viejo
                 with get_tenant_db_context(tenant.schema_name) as db_tenant:
                     entidad_db = None
-                    prefijo = "" # 🔥 Preparamos el prefijo
+                    prefijo = ""
                     
                     if "items" in request.url.path:
                         entidad_db = db_tenant.query(Item).filter(Item.id == entidad_id).first()
@@ -105,16 +97,14 @@ class Auditor:
                     
                     if entidad_db:
                         nombre_base = getattr(entidad_db, "nombre", str(entidad_id))
-                        entidad_nombre = f"{prefijo}{nombre_base}" # 🔥 Concatenamos: "Artículo: Pera"
+                        entidad_nombre = f"{prefijo}{nombre_base}" 
                         
-                        # LA MAGIA DEL DIFF
                         if request.method in ["PUT", "PATCH"] and isinstance(payload_original, dict):
                             cambios = []
                             for key, nuevo_valor in payload_original.items():
                                 if hasattr(entidad_db, key):
                                     viejo_valor = getattr(entidad_db, key)
                                     
-                                    # A. Caso especial: Atributos dinámicos (JSONB)
                                     if key == "atributos" and isinstance(viejo_valor, dict) and isinstance(nuevo_valor, dict):
                                         for attr_key, attr_nuevo in nuevo_valor.items():
                                             attr_viejo = viejo_valor.get(attr_key)
@@ -122,18 +112,15 @@ class Auditor:
                                                 cambios.append(f"{attr_key.title()}: {attr_viejo} ➔ {attr_nuevo}")
                                         continue 
 
-                                    # B. Caso general: Columnas normales
                                     if str(viejo_valor) != str(nuevo_valor):
                                         nombre_campo = "Stock" if key == "cantidad" else key.replace("_", " ").title()
                                         cambios.append(f"{nombre_campo}: {viejo_valor} ➔ {nuevo_valor}")
                             
                             resumen = " | ".join(cambios) if cambios else "Sin cambios detectados"
 
-            # Para los DELETE
             if request.method == "DELETE":
                 resumen = "Eliminado permanentemente"
 
-        # 🔥 5. Mandar a BackgroundTasks de forma limpia (Unificado)
         if usuario_id:
             background_tasks.add_task(
                 self._guardar_en_db,
