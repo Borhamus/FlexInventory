@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Tag, Typography, Descriptions } from 'antd';
+import { Table, Tag, Typography } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import dayjs from 'dayjs';
 
@@ -14,6 +14,7 @@ export interface AuditLog {
   accion: string;
   payload_cambios: any;
   fecha: string;
+  entidad: string;
 }
 
 interface AuditoriaTableProps {
@@ -33,11 +34,6 @@ const traduccionMetodos: Record<string, string> = {
 // ───────────────────────────────────────────────────────────────────────
 
 const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, pagination, onChange }) => {
-  
-  // Función helper para capitalizar la primera letra y limpiar guiones bajos
-  const limpiarTexto = (texto: string) => {
-    return texto.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
-  };
 
   const columns: ColumnsType<AuditLog> = [
     {
@@ -54,12 +50,43 @@ const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, paginati
       render: (text) => <Text strong>{text}</Text>,
     },
     {
-      // El "endpoint" lo sacamos de la vista principal porque al tenant no le sirve de mucho,
-      // con la "Acción" (ej: "Editar Artículo") ya entiende qué pasó.
       title: 'Acción Realizada',
       dataIndex: 'accion',
       key: 'accion',
       render: (text) => <Text>{text}</Text>,
+    },
+    {
+      title: 'Afectó a',
+      dataIndex: 'entidad_afectada',
+      key: 'entidad_afectada',
+      render: (text) => <Text strong>{text || '-'}</Text>,
+    },
+    {
+      title: 'Resumen de Cambios',
+      dataIndex: 'resumen',
+      key: 'resumen',
+      render: (text: string) => {
+        if (!text) {
+          return <Text type="secondary" italic>Ver detalle</Text>;
+        }
+        if (text.includes(' | ')) {
+          const cambios = text.split(' | ');
+          return (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+              {cambios.map((cambio, index) => (
+                <Text key={index} type="secondary" italic>
+                  {cambio}
+                </Text>
+              ))}
+            </div>
+          );
+        }
+        return (
+          <Text type="secondary" italic>
+            {text}
+          </Text>
+        );
+      },
     },
     {
       title: 'Tipo de Movimiento',
@@ -71,7 +98,6 @@ const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, paginati
         if (metodo === 'PUT' || metodo === 'PATCH') color = 'orange';
         if (metodo === 'DELETE') color = 'volcano';
         
-        // Buscamos la traducción, si por algún motivo llega algo raro, muestra el original
         const textoLegible = traduccionMetodos[metodo] || metodo;
         
         return <Tag color={color}>{textoLegible}</Tag>;
@@ -89,36 +115,6 @@ const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, paginati
       size="middle"
       pagination={pagination}
       onChange={onChange}
-      expandable={{
-        expandedRowRender: (record) => {
-          const payload = record.payload_cambios;
-          
-          return (
-            <div style={{ backgroundColor: '#fafafa', padding: '16px', borderRadius: '8px', border: '1px solid #f0f0f0' }}>
-              <Text strong style={{ display: 'block', marginBottom: '12px', color: '#1890ff' }}>
-                Detalle de los datos registrados:
-              </Text>
-              
-              {/* Iteramos el JSON y lo mostramos como una lista de descripciones amigable */}
-              <Descriptions size="small" column={{ xxl: 3, xl: 3, lg: 2, md: 1, sm: 1, xs: 1 }} bordered>
-                {Object.entries(payload).map(([key, value]) => {
-                  // Si el valor es un objeto anidado (como los "atributos" dinámicos), lo pasamos a string
-                  const valorMostrar = typeof value === 'object' && value !== null 
-                    ? JSON.stringify(value) 
-                    : String(value);
-
-                  return (
-                    <Descriptions.Item key={key} label={limpiarTexto(key)}>
-                      {valorMostrar}
-                    </Descriptions.Item>
-                  );
-                })}
-              </Descriptions>
-            </div>
-          );
-        },
-        rowExpandable: (record) => record.payload_cambios !== null && Object.keys(record.payload_cambios).length > 0,
-      }}
     />
   );
 };
