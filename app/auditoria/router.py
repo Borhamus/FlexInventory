@@ -1,6 +1,6 @@
 # app/auditoria/router.py
 from typing import Annotated
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 from sqlalchemy import desc
 
@@ -51,3 +51,24 @@ def obtener_auditorias(
         )
         
         return [AuditLogResponse.model_validate(log) for log in logs]
+    
+@router.delete("/eliminar", status_code=status.HTTP_200_OK)
+def vaciar_historial_auditoria(
+    current_user: user_dep,
+    db: db_dep
+):
+    """
+    Elimina permanentemente todos los registros de auditoría del tenant actual.
+    Solo el dueño del tenant puede ejecutar esta acción.
+    """
+
+    tenant = _require_tenant_owner(current_user, db)
+
+    with get_tenant_db_context(tenant.schema_name) as tdb:
+        filas_borradas = tdb.query(AuditLog).delete()
+        tdb.commit()
+        
+    return {
+        "msg": "Historial de auditoría vaciado con éxito", 
+        "registros_eliminados": filas_borradas
+    }
