@@ -12,6 +12,8 @@ class AuditLogResponse(BaseModel):
     accion: str
     payload_cambios: Optional[Any] = None
     fecha: datetime
+    entidad_afectada: Optional[str] = None
+    resumen: Optional[str] = None
 
     class Config:
         from_attributes = True

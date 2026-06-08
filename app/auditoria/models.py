@@ -14,3 +14,5 @@ class AuditLog(TenantBase):
     accion = Column(String) 
     fecha = Column(DateTime, default=lambda: datetime.now(timezone.utc))
     payload_cambios = Column(JSONB, nullable=True)
+    entidad_afectada = Column(String, nullable=True)
+    resumen = Column(String,nullable=True)

@@ -4,6 +4,7 @@ from app.Core.auth import get_current_user
 from app.db_config import get_db, get_tenant_db_context
 from app.Core.models import Tenant
 from app.auditoria.models import AuditLog 
+from app.tenant.models import Item, Inventario, Catalogo 
 
 class Auditor:
     def __init__(self, accion: str, auditar_payload: bool = False):
@@ -14,7 +15,10 @@ class Auditor:
         self.accion = accion
         self.auditar_payload = auditar_payload
 
-    def _guardar_en_db(self, schema_name: str, usuario_id: int, usuario:str, endpoint: str, metodo: str, payload: dict | None):
+    # 🔥 Agregamos entidad_afectada y resumen a los parámetros
+    def _guardar_en_db(self, schema_name: str, usuario_id: int, usuario: str, 
+                       endpoint: str, metodo: str, payload: dict | None, 
+                       entidad_afectada: str, resumen: str | None):
         """Método privado que se ejecuta de fondo usando el context manager del tenant"""
         with get_tenant_db_context(schema_name) as tdb:
             nuevo_log = AuditLog(
@@ -23,7 +27,9 @@ class Auditor:
                 endpoint=endpoint,
                 metodo=metodo,
                 accion=self.accion,
-                payload_cambios=payload
+                payload_cambios=payload,
+                entidad_afectada=entidad_afectada, # 🔥 Nuevo
+                resumen=resumen # 🔥 Nuevo
             )
             tdb.add(nuevo_log)
             tdb.commit()
@@ -39,7 +45,7 @@ class Auditor:
         
         # 1. Obtener información vital del usuario
         usuario_id = current_user.get("id")
-        nombre_usuario = current_user.get("username")
+        nombre_usuario = current_user.get("username", "Desconocido")
         tenant_id = current_user.get("tenant_id")
 
         # 2. Buscar el schema_name del tenant en la base de datos pública
@@ -47,29 +53,96 @@ class Auditor:
         if not tenant:
             return # Seguridad extra: si no hay tenant, ignoramos silenciosamente el log
 
-        # 3. Leer el payload (body) si se solicitó y es una petición de escritura
-        payload = None
+        entidad_nombre = "Desconocido"
+        resumen = None 
+        payload_original = None
+
+        # 🔥 3. Leer el payload de forma segura PRIMERO
         if self.auditar_payload and request.method in ["POST", "PUT", "PATCH"]:
             try:
-                payload = await request.json()
-                if payload:
-                    payload.pop("password", None)
-                    payload.pop("contraseña", None)
-                    payload.pop("token", None)
+                payload_original = await request.json()
             except Exception:
                 pass
         elif request.method == "DELETE":
-            payload = dict(request.path_params)
-            if request.query_params:
-                payload.update(dict(request.query_params))
+            payload_original = dict(request.path_params)
 
-        # 4. Mandar a BackgroundTasks usando la versión moderna de Python
-        background_tasks.add_task(
-            self._guardar_en_db,
-            schema_name=tenant.schema_name,
-            usuario_id=usuario_id,
-            usuario=nombre_usuario,
-            endpoint=request.url.path,
-            metodo=request.method,
-            payload=payload
-        )
+        # 4. Analizar los cambios según el método HTTP
+       # 4. Analizar los cambios según el método HTTP
+        if request.method == "POST" and isinstance(payload_original, dict):
+            nombre_base = payload_original.get("nombre", "Desconocido")
+            
+            # 🔥 Le agregamos el tipo de entidad mirando la URL
+            if "items" in request.url.path:
+                entidad_nombre = f"Artículo: {nombre_base}"
+            elif "catalogos" in request.url.path:
+                entidad_nombre = f"Catálogo: {nombre_base}"
+            elif "inventarios" in request.url.path:
+                entidad_nombre = f"Inventario: {nombre_base}"
+            else:
+                entidad_nombre = nombre_base
+                
+            resumen = "Registro inicial creado"
+
+        elif request.method in ["PUT", "PATCH", "DELETE"]:
+            path_params = request.path_params
+            entidad_id = path_params.get("item_id") or path_params.get("inventario_id") or path_params.get("catalogo_id")
+            
+            if entidad_id:
+                # Abrimos conexión al tenant solo para buscar el objeto viejo
+                with get_tenant_db_context(tenant.schema_name) as db_tenant:
+                    entidad_db = None
+                    prefijo = "" # 🔥 Preparamos el prefijo
+                    
+                    if "items" in request.url.path:
+                        entidad_db = db_tenant.query(Item).filter(Item.id == entidad_id).first()
+                        prefijo = "Artículo: "
+                    elif "inventarios" in request.url.path:
+                        entidad_db = db_tenant.query(Inventario).filter(Inventario.id == entidad_id).first()
+                        prefijo = "Inventario: "
+                    elif "catalogos" in request.url.path:
+                        entidad_db = db_tenant.query(Catalogo).filter(Catalogo.id == entidad_id).first()
+                        prefijo = "Catálogo: "
+                    
+                    if entidad_db:
+                        nombre_base = getattr(entidad_db, "nombre", str(entidad_id))
+                        entidad_nombre = f"{prefijo}{nombre_base}" # 🔥 Concatenamos: "Artículo: Pera"
+                        
+                        # LA MAGIA DEL DIFF
+                        if request.method in ["PUT", "PATCH"] and isinstance(payload_original, dict):
+                            cambios = []
+                            for key, nuevo_valor in payload_original.items():
+                                if hasattr(entidad_db, key):
+                                    viejo_valor = getattr(entidad_db, key)
+                                    
+                                    # A. Caso especial: Atributos dinámicos (JSONB)
+                                    if key == "atributos" and isinstance(viejo_valor, dict) and isinstance(nuevo_valor, dict):
+                                        for attr_key, attr_nuevo in nuevo_valor.items():
+                                            attr_viejo = viejo_valor.get(attr_key)
+                                            if str(attr_viejo) != str(attr_nuevo):
+                                                cambios.append(f"{attr_key.title()}: {attr_viejo} ➔ {attr_nuevo}")
+                                        continue 
+
+                                    # B. Caso general: Columnas normales
+                                    if str(viejo_valor) != str(nuevo_valor):
+                                        nombre_campo = "Stock" if key == "cantidad" else key.replace("_", " ").title()
+                                        cambios.append(f"{nombre_campo}: {viejo_valor} ➔ {nuevo_valor}")
+                            
+                            resumen = " | ".join(cambios) if cambios else "Sin cambios detectados"
+
+            # Para los DELETE
+            if request.method == "DELETE":
+                resumen = "Eliminado permanentemente"
+
+        # 🔥 5. Mandar a BackgroundTasks de forma limpia (Unificado)
+        if usuario_id:
+            background_tasks.add_task(
+                self._guardar_en_db,
+                schema_name=tenant.schema_name,
+                usuario_id=usuario_id,
+                usuario=nombre_usuario,
+                endpoint=request.url.path,
+                metodo=request.method,
+                payload=payload_original,
+                entidad_afectada=entidad_nombre,
+                resumen=resumen
+            )
