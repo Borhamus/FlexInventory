@@ -15,7 +15,8 @@ interface AuthContextType {
   userRole:           string | null;
   permissions:        UserPermission[];
   isTenant:           boolean;
-  loadingPermissions: boolean;          // ← estaba faltando en el interface
+  loadingPermissions: boolean;          
+  user:               Record<string, any> | null;
   hasPermission:      (resource: Resource, action: Action) => boolean;
   setToken:           (token: string) => void;
   logout:             () => void;
@@ -91,6 +92,7 @@ useEffect(() => {
       permissions,
       isTenant,
       loadingPermissions,
+      user: decoded,
       hasPermission,
       setToken,
       logout,
