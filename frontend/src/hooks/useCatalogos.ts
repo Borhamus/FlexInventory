@@ -75,7 +75,7 @@ export const useAddItemsToCatalogo = (catalogoId: number) => {
     mutationFn: (itemIds: number[]) => itemsService.addItemsToCatalogo(catalogoId, itemIds),
     onSuccess: () => {
       // Importante: invalidamos la query del catálogo específico para ver los cambios
-      queryClient.invalidateQueries({ queryKey: ['catalogos', catalogoId] });
+      queryClient.invalidateQueries({ queryKey: ['catalogo', catalogoId] });
       notification.success({ message: 'Ítems vinculados al catálogo' });
     },
     onError: (error: any) => {
@@ -94,7 +94,7 @@ export const useRemoveItemFromCatalogo = (catalogoId: number) => {
     mutationFn: (itemId: number) => itemsService.removeItemFromCatalogo(catalogoId, itemId),
     onSuccess: () => {
       // Refrescamos el catálogo para que el ítem desaparezca de la lista
-      queryClient.invalidateQueries({ queryKey: ['catalogos', catalogoId] });
+      queryClient.invalidateQueries({ queryKey: ['catalogo', catalogoId] });
       notification.success({
         message: 'Ítem quitado',
         description: 'El artículo se desvinculó del catálogo correctamente.'

@@ -4,6 +4,7 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.schema import CreateSchema
 from contextlib import contextmanager
 import os
+import re
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -35,9 +36,19 @@ def get_db():
     finally:
         db.close()
 
+# Solo minúsculas, dígitos y guión bajo (formato que produce generate_schema_name).
+# Defensa en profundidad contra inyección SQL al interpolar el nombre del schema.
+_SCHEMA_NAME_RE = re.compile(r"^[a-z0-9_]{1,63}$")
+
+def _validate_schema_name(tenant_schema: str) -> str:
+    if not _SCHEMA_NAME_RE.match(tenant_schema or ""):
+        raise ValueError(f"Nombre de schema inválido: {tenant_schema!r}")
+    return tenant_schema
+
 @contextmanager
 def get_tenant_db_context(tenant_schema: str):
     """Context manager para operaciones en schema de tenant"""
+    _validate_schema_name(tenant_schema)
     db = SessionLocal()
     try:
         # Establecer search_path al esquema del tenant
@@ -60,6 +71,7 @@ def create_tenant_schema(tenant_schema: str) -> bool:
     # Importar modelos de tenant aquí para asegurar que estén registrados en TenantBase
     from app.tenant import models as tenant_models  # noqa: F401
 
+    _validate_schema_name(tenant_schema)
     try:
         # 1. Crear el schema
         with engine.begin() as conn:

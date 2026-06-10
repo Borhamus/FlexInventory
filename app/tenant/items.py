@@ -1,14 +1,14 @@
 import json
 
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 
 from app.auditoria.auditor import Auditor
 from app.tenant import schemas, models
 from app.tenant.dependencies import get_tenant_db, require_permission
-from app.tenant.validators import validate_item_attributes
+from app.tenant.validators import validate_item_attributes, parse_value_by_type
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
@@ -20,6 +20,7 @@ POST   = [Depends(Auditor(accion="Crear Nuevo Artículo", auditar_payload=True))
 PUT    = [Depends(Auditor(accion="Editar Artículo", auditar_payload=True))]
 PATCH  = [Depends(Auditor(accion="Editar Artículo", auditar_payload=True))]
 DELETE = [Depends(Auditor(accion="Eliminar Artículo", auditar_payload=True))]
+DELETE_BULK = [Depends(Auditor(accion="Eliminar Artículos (Masivo)", auditar_payload=True))]
 # ─────────────────────────────────────────────────────────────────────────
 
 @router.post("/", response_model=schemas.ItemResponse, status_code=201, dependencies=POST)
@@ -46,6 +47,10 @@ def create_item(
     inventario = db.query(models.Inventario).filter(models.Inventario.id == item.inventario_id).first()
     if not inventario:
         raise HTTPException(404, detail="Inventario no encontrado")
+    # Pre-chequeo de nombre duplicado (la columna es UNIQUE; sin esto el
+    # IntegrityError se traduce en un 500 en vez de un 400 claro)
+    if db.query(models.Item).filter(models.Item.nombre == item.nombre).first():
+        raise HTTPException(400, detail=f"Ya existe un item llamado '{item.nombre}'")
     validated = validate_item_attributes(item.atributos, inventario.atributos, inventario.nombre)
     item_data = item.model_dump()
     item_data["atributos"] = validated
@@ -100,33 +105,88 @@ def bulk_update_items(
             "atributos_disponibles": sorted(inv_keys),
         })
 
+    # Convertir/validar los valores según el tipo definido en el inventario
+    # (igual que en la creación de items)
+    validated_attrs = {}
+    type_errors = []
+    for key, value in payload.atributos.items():
+        try:
+            validated_attrs[key] = parse_value_by_type(value, atributos_inv[key])
+        except ValueError as e:
+            type_errors.append(str(e))
+    if type_errors:
+        raise HTTPException(400, detail={"message": "Errores de tipo en atributos", "errors": type_errors})
+
     db.execute(
         text("UPDATE item SET atributos = atributos || CAST(:new_attrs AS jsonb) WHERE id = ANY(:ids)"),
-        {"new_attrs": json.dumps(payload.atributos), "ids": list(found_ids)},
+        {"new_attrs": json.dumps(validated_attrs), "ids": list(found_ids)},
     )
     db.commit()
     return {"actualizados": len(found_ids)}
 
 
+@router.delete("/bulk-delete", response_model=schemas.BulkDeleteResponse, dependencies=DELETE_BULK)
+def bulk_delete_items(
+    payload: schemas.ItemBulkDelete,
+    _: dict = _perm("items", "delete"),
+    db: Session = Depends(get_tenant_db),
+):
+    """
+    Elimina masivamente una lista de items por sus IDs.
+
+    Requiere permiso `items:delete` (o ser tenant owner).
+
+    Si alguno de los IDs no existe, no se elimina nada y se devuelve 404
+    indicando cuáles faltan (operación todo-o-nada).
+
+    **Ejemplo de request:**
+    ```json
+    { "item_ids": [1, 2, 3] }
+    ```
+
+    **Ejemplo de response:**
+    ```json
+    { "eliminados": 3, "ids": [1, 2, 3] }
+    ```
+    """
+    ids = set(payload.item_ids)
+    found = db.query(models.Item.id).filter(models.Item.id.in_(ids)).all()
+    found_ids = {row.id for row in found}
+    missing = ids - found_ids
+    if missing:
+        raise HTTPException(404, detail={"message": "Items no encontrados", "ids": sorted(missing)})
+
+    # Las filas de catalogo_item se eliminan por ON DELETE CASCADE en la BD.
+    db.query(models.Item).filter(models.Item.id.in_(found_ids)).delete(synchronize_session=False)
+    db.commit()
+    return {"eliminados": len(found_ids), "ids": sorted(found_ids)}
+
+
 @router.get("/", response_model=List[schemas.ItemResponse])
 def get_items(
-    inventario_id: int = None,
+    inventario_id: Optional[int] = None,
+    skip: int = Query(0, ge=0, description="Registros a saltar (paginación)"),
+    limit: Optional[int] = Query(None, ge=1, le=1000, description="Máximo de registros (sin límite si se omite)"),
     _: dict = _perm("items", "read"),
     db: Session = Depends(get_tenant_db),
 ):
     """
     Lista todos los items del tenant. Se puede filtrar por inventario usando el
-    query param `inventario_id`.
+    query param `inventario_id` y paginar con `skip`/`limit`.
 
     Requiere permiso `items:read` (o ser tenant owner).
 
     **Ejemplos:**
     - `GET /items/` → todos los items
     - `GET /items/?inventario_id=1` → solo los items del inventario 1
+    - `GET /items/?skip=0&limit=100` → primera página de 100
     """
     query = db.query(models.Item)
-    if inventario_id:
+    if inventario_id is not None:
         query = query.filter(models.Item.inventario_id == inventario_id)
+    query = query.order_by(models.Item.id).offset(skip)
+    if limit is not None:
+        query = query.limit(limit)
     return query.all()
 
 
@@ -171,9 +231,28 @@ def update_item(
     if not db_item:
         raise HTTPException(404, detail="Item no encontrado")
     update_data = item.model_dump(exclude_unset=True)
-    if 'inventario_id' in update_data:
-        if not db.query(models.Inventario).filter(models.Inventario.id == update_data['inventario_id']).first():
-            raise HTTPException(404, detail="Inventario no encontrado")
+
+    # Pre-chequeo de nombre duplicado (columna UNIQUE → evita 500 por IntegrityError)
+    if 'nombre' in update_data and db.query(models.Item).filter(
+        models.Item.nombre == update_data['nombre'],
+        models.Item.id != item_id,
+    ).first():
+        raise HTTPException(400, detail=f"Ya existe un item llamado '{update_data['nombre']}'")
+
+    # Resolver el inventario destino (el nuevo si se cambia, o el actual)
+    target_inv_id = update_data.get('inventario_id', db_item.inventario_id)
+    target_inv = db.query(models.Inventario).filter(models.Inventario.id == target_inv_id).first()
+    if not target_inv:
+        raise HTTPException(404, detail="Inventario no encontrado")
+
+    # Validar atributos contra la definición del inventario destino,
+    # igual que en la creación (antes la edición guardaba el JSONB sin validar)
+    if 'atributos' in update_data or 'inventario_id' in update_data:
+        atributos_final = update_data.get('atributos', db_item.atributos)
+        update_data['atributos'] = validate_item_attributes(
+            atributos_final, target_inv.atributos, target_inv.nombre
+        )
+
     for field, value in update_data.items():
         setattr(db_item, field, value)
     db.commit()

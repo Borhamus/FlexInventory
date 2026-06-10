@@ -1,7 +1,9 @@
 import React from 'react';
+import { Navigate } from 'react-router-dom';
 import { Layout, Card, Form, Input, Button, Typography, theme } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
+import { useAuthContext } from '../context/AuthContext';
 import type { LoginCredentials } from '../schemas/auth.schema';
 
 
@@ -11,6 +13,12 @@ const { Title, Text } = Typography;
 const LoginPage: React.FC = () => {
   const { token } = theme.useToken();
   const { login, isLoading } = useAuth();
+  const { isAuthenticated, initializing } = useAuthContext();
+
+  // Si la sesión se restauró con el refresh token, no mostrar el login
+  if (!initializing && isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
   const onFinish = (values: LoginCredentials) => {
     login(values);

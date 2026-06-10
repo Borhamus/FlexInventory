@@ -101,7 +101,14 @@ def update_catalogo(
     cat = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
     if not cat:
         raise HTTPException(404, detail="Catálogo no encontrado")
-    for field, value in catalogo.model_dump(exclude_unset=True).items():
+    update_data = catalogo.model_dump(exclude_unset=True)
+    # Pre-chequeo de nombre duplicado (columna UNIQUE → evita 500 por IntegrityError)
+    if "nombre" in update_data and db.query(models.Catalogo).filter(
+        models.Catalogo.nombre == update_data["nombre"],
+        models.Catalogo.id != catalogo_id,
+    ).first():
+        raise HTTPException(400, detail=f"Ya existe un catálogo llamado '{update_data['nombre']}'")
+    for field, value in update_data.items():
         setattr(cat, field, value)
     db.commit()
     db.refresh(cat)
@@ -152,11 +159,18 @@ def add_items_to_catalogo(
     cat = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
     if not cat:
         raise HTTPException(404, detail="Catálogo no encontrado")
-    for item_id in data.item_ids:
-        item = db.query(models.Item).filter(models.Item.id == item_id).first()
-        if not item:
-            raise HTTPException(404, detail=f"Item {item_id} no encontrado")
-        if item not in cat.items:
+
+    # Una sola query para todos los items (antes: 1 query por item + carga
+    # completa de cat.items en cada iteración → N+1)
+    ids = set(data.item_ids)
+    items = db.query(models.Item).filter(models.Item.id.in_(ids)).all()
+    missing = ids - {i.id for i in items}
+    if missing:
+        raise HTTPException(404, detail=f"Items no encontrados: {sorted(missing)}")
+
+    existing_ids = {i.id for i in cat.items}
+    for item in items:
+        if item.id not in existing_ids:
             cat.items.append(item)
     db.commit()
     db.refresh(cat)

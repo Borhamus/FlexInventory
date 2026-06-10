@@ -61,6 +61,14 @@ class Auditor:
                 pass
         elif request.method == "DELETE":
             payload_original = dict(request.path_params)
+            if self.auditar_payload:
+                # Soporta DELETEs con body (ej: bulk-delete); si no hay body, quedan los path params
+                try:
+                    body = await request.json()
+                    if body:
+                        payload_original = body
+                except Exception:
+                    pass
 
         if request.method == "POST" and isinstance(payload_original, dict):
             nombre_base = payload_original.get("nombre", "Desconocido")
@@ -119,7 +127,12 @@ class Auditor:
                             resumen = " | ".join(cambios) if cambios else "Sin cambios detectados"
 
             if request.method == "DELETE":
-                resumen = "Eliminado permanentemente"
+                if isinstance(payload_original, dict) and "item_ids" in payload_original:
+                    cantidad = len(payload_original["item_ids"])
+                    entidad_nombre = f"Artículos: {cantidad} ítems"
+                    resumen = f"Eliminación masiva de {cantidad} ítems"
+                else:
+                    resumen = "Eliminado permanentemente"
 
         if usuario_id:
             background_tasks.add_task(
