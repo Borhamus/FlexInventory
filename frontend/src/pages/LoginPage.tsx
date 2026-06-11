@@ -1,5 +1,5 @@
 import React from 'react';
-import { Navigate } from 'react-router-dom';
+import { Link, Navigate } from 'react-router-dom';
 import { Layout, Card, Form, Input, Button, Typography, theme } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
@@ -81,6 +81,12 @@ const LoginPage: React.FC = () => {
 
           <div style={{ textAlign: 'center' }}>
             <Text type="secondary">¿Olvidaste tu contraseña? Contacta al administrador</Text>
+          </div>
+
+          <div style={{ textAlign: 'center', marginTop: 8 }}>
+            <Text type="secondary">
+              ¿Quieres administrar tu propio stock? Entonces <Link to="/registro">haz click aquí</Link>
+            </Text>
           </div>
         </Card>
       </Content>

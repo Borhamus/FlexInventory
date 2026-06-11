@@ -1,5 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
+import RegisterTenantPage from '../pages/RegisterTenantPage';
 import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/MainLayout';
 import InventoryPage from '../pages/InventoryPage';
@@ -24,6 +25,10 @@ export const routes: RouteObject[] = [
   {
     path: '/',
     element: <LoginPage />,
+  },
+  {
+    path: '/registro',
+    element: <RegisterTenantPage />,
   },
   {
     path: '/dashboard',

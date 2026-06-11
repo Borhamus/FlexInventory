@@ -1,6 +1,9 @@
 """
 Endpoints de gestión de tenants.
-Estan Protegidos con X-Developer-Key — solo para el desarrollodores, no accesibles por usuarios logueados normales.
+
+La creación de tenants (POST /) es pública: cualquier usuario puede crear su
+propia cuenta para gestionar su stock. Listar y consultar tenants (GET) sigue
+protegido con X-Developer-Key — solo para los desarrolladores.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Security, status
@@ -41,14 +44,14 @@ def generate_schema_name(tenant_name: str) -> str:
 # Endpoints — requieren developer key
 # ==========================================
 
-@router.post("/", response_model=schemas.TenantResponse, status_code=201,
-             dependencies=[Depends(verify_developer_key)])
+@router.post("/", response_model=schemas.TenantResponse, status_code=201)
 def create_tenant(tenant_data: schemas.TenantCreate, db: Session = Depends(get_db)):
     """
     Registra un nuevo tenant y crea su schema de base de datos aislado.
 
-    Requiere el header `X-Developer-Key` — no es accesible por usuarios finales.
-    Al crearse el tenant, se genera automáticamente un usuario owner con `role=tenant`
+    Endpoint público: cualquier usuario puede crear su propia cuenta para
+    gestionar su stock. Al crearse el tenant, se genera automáticamente un
+    usuario owner con `role=tenant`
     que tiene acceso total y no puede ser modificado por empleados.
 
     **Ejemplo de request:**
