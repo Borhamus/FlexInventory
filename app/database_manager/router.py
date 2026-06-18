@@ -7,7 +7,8 @@ Endpoints:
   GET  /database/oauth/url       → genera URL de autorización Google
   GET  /database/oauth/callback  → recibe code, guarda refresh_token
   POST /database/backup/now      → backup manual → sube a Drive
-  POST /database/restore         → restaura desde el archivo en Drive
+  POST /database/backup/list     → lista backups disponibles en Drive
+  POST /database/restore/{id}    → restaura desde un backup específico
   DELETE /database/reset         → borra todos los datos del tenant
   PATCH /database/config         → actualiza configuración de backups automáticos
   GET  /database/disconnect      → desconecta Drive (borra refresh_token)
@@ -20,7 +21,7 @@ from datetime import datetime, timezone
 from typing import Annotated
 
 import requests
-from fastapi import APIRouter, Depends, HTTPException, Request
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import RedirectResponse
 from pydantic import BaseModel
 from sqlalchemy.orm import Session
@@ -149,17 +150,16 @@ def export_tenant_data(tenant: Tenant, db_public: Session) -> dict:
     - Schema public: users, custom_roles, role_permissions del tenant
     - Schema del tenant: inventarios, items, catálogos, catalogo_item
     """
-    from app.tenant.models import Inventario, Item, Catalogo, catalogo_item
+    from app.tenant.models import Inventario, Item, Catalogo
+    from app.Core.models import CustomRole, RolePermission
 
     # Datos del schema public
-    users = db_public.query(Users).filter(Users.tenant_id == tenant.id).all()
-    roles = db_public.query(__import__('app.Core.models', fromlist=['CustomRole']).CustomRole)\
-                     .filter_by(tenant_id=tenant.id).all()
-
-    from app.Core.models import CustomRole, RolePermission
-    roles     = db_public.query(CustomRole).filter_by(tenant_id=tenant.id).all()
-    role_ids  = [r.id for r in roles]
-    role_perms = db_public.query(RolePermission).filter(RolePermission.role_id.in_(role_ids)).all() if role_ids else []
+    users      = db_public.query(Users).filter(Users.tenant_id == tenant.id).all()
+    roles      = db_public.query(CustomRole).filter_by(tenant_id=tenant.id).all()
+    role_ids   = [r.id for r in roles]
+    role_perms = db_public.query(RolePermission).filter(
+        RolePermission.role_id.in_(role_ids)
+    ).all() if role_ids else []
 
     public_data = {
         "users": [
@@ -186,9 +186,7 @@ def export_tenant_data(tenant: Tenant, db_public: Session) -> dict:
         inventarios = tdb.query(Inventario).all()
         items       = tdb.query(Item).all()
         catalogos   = tdb.query(Catalogo).all()
-
-        # catalogo_item (tabla intermedia)
-        ci_rows = tdb.execute(text("SELECT catalogo_id, item_id FROM catalogo_item")).fetchall()
+        ci_rows     = tdb.execute(text("SELECT catalogo_id, item_id FROM catalogo_item")).fetchall()
 
         tenant_data = {
             "inventarios": [
@@ -231,13 +229,17 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
     """
     Restaura los datos exportados. BORRA TODO primero y reconstruye.
     ADVERTENCIA: operación destructiva e irreversible.
+
+    FIX: usa CAST(:param AS JSONB) en lugar de :param::jsonb para evitar
+    que SQLAlchemy confunda el :: con su sintaxis de parámetros nombrados.
     """
     from app.Core.models import CustomRole, RolePermission
 
-    public  = data.get("public", {})
-    tdata   = data.get("tenant", {})
+    public = data.get("public", {})
+    tdata  = data.get("tenant", {})
 
-    # ── Schema public ──
+    # ── Schema public ──────────────────────────────────────────────────────
+
     # Borrar en orden para respetar FK
     db_public.query(RolePermission).filter(
         RolePermission.role_id.in_(
@@ -250,12 +252,17 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
 
     # Reinsertar roles
     for r in public.get("custom_roles", []):
-        db_public.add(CustomRole(id=r["id"], tenant_id=tenant.id, name=r["name"], description=r.get("description")))
+        db_public.add(CustomRole(
+            id=r["id"], tenant_id=tenant.id,
+            name=r["name"], description=r.get("description")
+        ))
     db_public.flush()
 
     # Reinsertar permisos
     for p in public.get("role_permissions", []):
-        db_public.add(RolePermission(role_id=p["role_id"], resource=p["resource"], action=p["action"]))
+        db_public.add(RolePermission(
+            role_id=p["role_id"], resource=p["resource"], action=p["action"]
+        ))
     db_public.flush()
 
     # Reinsertar usuarios
@@ -267,39 +274,72 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
         ))
     db_public.commit()
 
-    # ── Schema del tenant ──
+    # ── Schema del tenant ──────────────────────────────────────────────────
     with get_tenant_db_context(tenant.schema_name) as tdb:
+
+        # Borrar en orden para respetar FK
         tdb.execute(text("DELETE FROM catalogo_item"))
         tdb.execute(text("DELETE FROM item"))
         tdb.execute(text("DELETE FROM catalogo"))
         tdb.execute(text("DELETE FROM inventario"))
         tdb.flush()
 
+        # Reinsertar inventarios
+        # CAST(:atributos AS JSONB) evita el conflicto de :: con SQLAlchemy
         for inv in tdata.get("inventarios", []):
-            tdb.execute(text(
-                "INSERT INTO inventario (id, nombre, atributos, creado_en) VALUES (:id, :nombre, :atributos::jsonb, :creado_en)"
-            ), {"id": inv["id"], "nombre": inv["nombre"],
-                "atributos": json.dumps(inv.get("atributos", {})),
-                "creado_en": inv.get("creado_en")})
+            tdb.execute(
+                text(
+                    "INSERT INTO inventario (id, nombre, atributos, creado_en) "
+                    "VALUES (:id, :nombre, CAST(:atributos AS JSONB), :creado_en)"
+                ),
+                {
+                    "id":        inv["id"],
+                    "nombre":    inv["nombre"],
+                    "atributos": json.dumps(inv.get("atributos") or {}),
+                    "creado_en": inv.get("creado_en"),
+                }
+            )
 
+        # Reinsertar items
         for it in tdata.get("items", []):
-            tdb.execute(text(
-                "INSERT INTO item (id, nombre, cantidad, inventario_id, atributos, creado_en) "
-                "VALUES (:id, :nombre, :cantidad, :inventario_id, :atributos::jsonb, :creado_en)"
-            ), {"id": it["id"], "nombre": it["nombre"], "cantidad": it["cantidad"],
-                "inventario_id": it["inventario_id"],
-                "atributos": json.dumps(it.get("atributos", {})),
-                "creado_en": it.get("creado_en")})
+            tdb.execute(
+                text(
+                    "INSERT INTO item (id, nombre, cantidad, inventario_id, atributos, creado_en) "
+                    "VALUES (:id, :nombre, :cantidad, :inventario_id, CAST(:atributos AS JSONB), :creado_en)"
+                ),
+                {
+                    "id":            it["id"],
+                    "nombre":        it["nombre"],
+                    "cantidad":      it["cantidad"],
+                    "inventario_id": it["inventario_id"],
+                    "atributos":     json.dumps(it.get("atributos") or {}),
+                    "creado_en":     it.get("creado_en"),
+                }
+            )
 
+        # Reinsertar catálogos
         for cat in tdata.get("catalogos", []):
-            tdb.execute(text(
-                "INSERT INTO catalogo (id, nombre, descripcion) VALUES (:id, :nombre, :descripcion)"
-            ), {"id": cat["id"], "nombre": cat["nombre"], "descripcion": cat.get("descripcion")})
+            tdb.execute(
+                text(
+                    "INSERT INTO catalogo (id, nombre, descripcion) "
+                    "VALUES (:id, :nombre, :descripcion)"
+                ),
+                {
+                    "id":          cat["id"],
+                    "nombre":      cat["nombre"],
+                    "descripcion": cat.get("descripcion"),
+                }
+            )
 
+        # Reinsertar relaciones catálogo-item
         for ci in tdata.get("catalogo_item", []):
-            tdb.execute(text(
-                "INSERT INTO catalogo_item (catalogo_id, item_id) VALUES (:catalogo_id, :item_id)"
-            ), ci)
+            tdb.execute(
+                text(
+                    "INSERT INTO catalogo_item (catalogo_id, item_id) "
+                    "VALUES (:catalogo_id, :item_id)"
+                ),
+                ci
+            )
 
         tdb.commit()
 
@@ -308,13 +348,121 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
 # ENDPOINTS
 # ═══════════════════════════════════════════════════════════════════════════
 
+@router.get("/status")
+def get_status(current_user: user_dep, db: db_dep):
+    """Estado de la conexión con Drive y configuración de backups."""
+    user, tenant = _require_tenant_owner(current_user, db)
+    return {
+        "drive_connected":     bool(tenant.google_refresh_token),
+        "backup_auto_enabled": tenant.backup_auto_enabled,
+        "backup_daily_hour":   tenant.backup_daily_hour,
+        "backup_monthly_day":  tenant.backup_monthly_day,
+        "drive_file_id":       tenant.google_drive_file_id,
+        "drive_folder_id":     tenant.google_drive_folder_id,
+    }
+
+
+@router.get("/oauth/url")
+def get_oauth_url(current_user: user_dep, db: db_dep):
+    """Genera la URL de autorización de Google para conectar Drive."""
+    _require_tenant_owner(current_user, db)
+    if not GOOGLE_CLIENT_ID:
+        raise HTTPException(status_code=500, detail="GOOGLE_CLIENT_ID no configurado en el servidor.")
+
+    params = {
+        "client_id":     GOOGLE_CLIENT_ID,
+        "redirect_uri":  GOOGLE_REDIRECT_URI,
+        "response_type": "code",
+        "scope":         SCOPES,
+        "access_type":   "offline",
+        "prompt":        "consent",
+        "state":         str(current_user["tenant_id"]),
+    }
+    query = "&".join(f"{k}={v}" for k, v in params.items())
+    return {"url": f"{GOOGLE_AUTH_URL}?{query}"}
+
+
+@router.get("/oauth/callback")
+def oauth_callback(code: str, state: str, db: db_dep):
+    """
+    Callback de Google OAuth2. Recibe el code, lo canjea por tokens
+    y guarda el refresh_token en la DB del tenant.
+    Redirige al frontend al finalizar.
+    """
+    resp = requests.post(GOOGLE_TOKEN_URL, data={
+        "code":          code,
+        "client_id":     GOOGLE_CLIENT_ID,
+        "client_secret": GOOGLE_CLIENT_SECRET,
+        "redirect_uri":  GOOGLE_REDIRECT_URI,
+        "grant_type":    "authorization_code",
+    })
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"Error obteniendo tokens de Google: {resp.text}")
+
+    tokens        = resp.json()
+    refresh_token = tokens.get("refresh_token")
+    if not refresh_token:
+        raise HTTPException(
+            status_code=502,
+            detail="Google no devolvió refresh_token. Revocá el acceso en tu cuenta de Google y reintentá."
+        )
+
+    tenant_id = int(state)
+    tenant    = db.query(Tenant).filter(Tenant.id == tenant_id).first()
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant no encontrado.")
+
+    tenant.google_refresh_token = refresh_token
+    db.commit()
+
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    return RedirectResponse(url=f"{frontend_url}/dashboard/database?connected=true")
+
+
+@router.post("/backup/now")
+def backup_now(current_user: user_dep, db: db_dep):
+    """
+    Backup manual: exporta toda la BD del tenant y la sube a Drive.
+    Crea/actualiza dos archivos:
+      - FlexInventory Storage/current.json  (siempre el más reciente)
+      - FlexInventory Storage/backups/backup_YYYY-MM-DD_HH-MM.json
+    """
+    user, tenant = _require_tenant_owner(current_user, db)
+    if not tenant.google_refresh_token:
+        raise HTTPException(status_code=400, detail="Drive no conectado. Conectá tu cuenta de Google primero.")
+
+    access_token      = _get_access_token(tenant.google_refresh_token)
+    root_folder_id    = _get_or_create_folder(access_token, "FlexInventory Storage")
+    backups_folder_id = _get_or_create_folder(access_token, "backups", root_folder_id)
+
+    data    = export_tenant_data(tenant, db)
+    content = json.dumps(data, ensure_ascii=False, indent=2)
+
+    # Actualizar current.json
+    current_file_id = _upload_to_drive(
+        access_token, "current.json", content,
+        root_folder_id, tenant.google_drive_file_id
+    )
+
+    # Crear backup con timestamp
+    ts          = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M")
+    backup_name = f"backup_{ts}.json"
+    _upload_to_drive(access_token, backup_name, content, backups_folder_id)
+
+    tenant.google_drive_file_id   = current_file_id
+    tenant.google_drive_folder_id = backups_folder_id
+    db.commit()
+
+    return {"message": "Backup completado correctamente.", "filename": backup_name}
+
+
 @router.get("/backup/list")
 def list_backups(current_user: user_dep, db: db_dep):
     """
     Lista todos los backups disponibles en el Drive del tenant.
     Devuelve:
-      - El archivo current.json (etiquetado como "Actual")
-      - Todos los archivos de la carpeta backups/, ordenados de más nuevo a más antiguo
+      - El archivo current.json (etiquetado como "Actual"), primero
+      - Todos los archivos de backups/, ordenados de más nuevo a más antiguo
     """
     user, tenant = _require_tenant_owner(current_user, db)
     if not tenant.google_refresh_token:
@@ -322,10 +470,9 @@ def list_backups(current_user: user_dep, db: db_dep):
 
     access_token = _get_access_token(tenant.google_refresh_token)
     headers      = {"Authorization": f"Bearer {access_token}"}
+    result       = []
 
-    result = []
-
-    # 1. Archivo actual (current.json)
+    # 1. Archivo actual
     if tenant.google_drive_file_id:
         resp = requests.get(
             f"{DRIVE_API_URL}/files/{tenant.google_drive_file_id}",
@@ -342,7 +489,7 @@ def list_backups(current_user: user_dep, db: db_dep):
                 "is_current":    True,
             })
 
-    # 2. Backups históricos de la carpeta backups/
+    # 2. Backups históricos
     if tenant.google_drive_folder_id:
         resp = requests.get(
             f"{DRIVE_API_URL}/files",
@@ -350,7 +497,7 @@ def list_backups(current_user: user_dep, db: db_dep):
             params={
                 "q":       f"'{tenant.google_drive_folder_id}' in parents and trashed=false",
                 "fields":  "files(id,name,modifiedTime,size)",
-                "orderBy": "modifiedTime desc",   # más nuevo primero
+                "orderBy": "modifiedTime desc",
             }
         )
         if resp.status_code == 200:
@@ -370,7 +517,6 @@ def list_backups(current_user: user_dep, db: db_dep):
 def restore_from_drive_by_id(file_id: str, current_user: user_dep, db: db_dep):
     """
     Restaura la BD del tenant desde un archivo específico del Drive.
-    Reemplaza el endpoint /restore anterior.
     ADVERTENCIA: operación destructiva, reemplaza todos los datos actuales.
     """
     user, tenant = _require_tenant_owner(current_user, db)
@@ -384,130 +530,16 @@ def restore_from_drive_by_id(file_id: str, current_user: user_dep, db: db_dep):
     return {"message": "Base de datos restaurada exitosamente desde Drive."}
 
 
-@router.get("/status")
-def get_status(current_user: user_dep, db: db_dep):
-    """Estado de la conexión con Drive y configuración de backups."""
-    user, tenant = _require_tenant_owner(current_user, db)
-    return {
-        "drive_connected":    bool(tenant.google_refresh_token),
-        "backup_auto_enabled": tenant.backup_auto_enabled,
-        "backup_daily_hour":  tenant.backup_daily_hour,
-        "backup_monthly_day": tenant.backup_monthly_day,
-        "drive_file_id":      tenant.google_drive_file_id,
-        "drive_folder_id":    tenant.google_drive_folder_id,
-    }
-
-
-@router.get("/oauth/url")
-def get_oauth_url(current_user: user_dep, db: db_dep):
-    """Genera la URL de autorización de Google para conectar Drive."""
-    _require_tenant_owner(current_user, db)
-    if not GOOGLE_CLIENT_ID:
-        raise HTTPException(status_code=500, detail="GOOGLE_CLIENT_ID no configurado en el servidor.")
-
-    params = {
-        "client_id":     GOOGLE_CLIENT_ID,
-        "redirect_uri":  GOOGLE_REDIRECT_URI,
-        "response_type": "code",
-        "scope":         SCOPES,
-        "access_type":   "offline",
-        "prompt":        "consent",          # fuerza siempre devolver refresh_token
-        "state":         str(current_user["tenant_id"]),
-    }
-    query = "&".join(f"{k}={v}" for k, v in params.items())
-    return {"url": f"{GOOGLE_AUTH_URL}?{query}"}
-
-
-@router.get("/oauth/callback")
-def oauth_callback(code: str, state: str, db: db_dep):
-    """
-    Callback de Google OAuth2. Recibe el code, lo canjea por tokens
-    y guarda el refresh_token en la DB del tenant.
-    Redirige al frontend al finalizar.
-    """
-    # Canjear code por tokens
-    resp = requests.post(GOOGLE_TOKEN_URL, data={
-        "code":          code,
-        "client_id":     GOOGLE_CLIENT_ID,
-        "client_secret": GOOGLE_CLIENT_SECRET,
-        "redirect_uri":  GOOGLE_REDIRECT_URI,
-        "grant_type":    "authorization_code",
-    })
-    if resp.status_code != 200:
-        raise HTTPException(status_code=502, detail=f"Error obteniendo tokens de Google: {resp.text}")
-
-    tokens        = resp.json()
-    refresh_token = tokens.get("refresh_token")
-    if not refresh_token:
-        raise HTTPException(status_code=502, detail="Google no devolvió refresh_token. Revocá el acceso en tu cuenta de Google y reintentá.")
-
-    # Guardar en la DB
-    tenant_id = int(state)
-    tenant    = db.query(Tenant).filter(Tenant.id == tenant_id).first()
-    if not tenant:
-        raise HTTPException(status_code=404, detail="Tenant no encontrado.")
-
-    tenant.google_refresh_token = refresh_token
-    db.commit()
-
-    # Redirigir al frontend
-    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
-    return RedirectResponse(url=f"{frontend_url}/dashboard/database?connected=true")
-
-
-@router.post("/backup/now")
-def backup_now(current_user: user_dep, db: db_dep):
-    """
-    Backup manual: exporta toda la BD del tenant y la sube a Drive.
-    Crea/actualiza dos archivos:
-      - FlexInventory Storage/current.json  (siempre el más reciente)
-      - FlexInventory Storage/backups/backup_YYYY-MM-DD_HH-MM.json
-    """
-    user, tenant = _require_tenant_owner(current_user, db)
-    if not tenant.google_refresh_token:
-        raise HTTPException(status_code=400, detail="Drive no conectado. Conectá tu cuenta de Google primero.")
-
-    access_token = _get_access_token(tenant.google_refresh_token)
-
-    # Crear estructura de carpetas si no existe
-    root_folder_id    = _get_or_create_folder(access_token, "FlexInventory Storage")
-    backups_folder_id = _get_or_create_folder(access_token, "backups", root_folder_id)
-
-    # Exportar datos
-    data    = export_tenant_data(tenant, db)
-    content = json.dumps(data, ensure_ascii=False, indent=2)
-
-    # Subir/actualizar current.json
-    current_file_id = _upload_to_drive(
-        access_token, "current.json", content,
-        root_folder_id, tenant.google_drive_file_id
-    )
-
-    # Subir backup con timestamp
-    ts          = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M")
-    backup_name = f"backup_{ts}.json"
-    _upload_to_drive(access_token, backup_name, content, backups_folder_id)
-
-    # Guardar IDs en la DB
-    tenant.google_drive_file_id   = current_file_id
-    tenant.google_drive_folder_id = backups_folder_id
-    db.commit()
-
-    return {"message": f"Backup completado correctamente.", "filename": backup_name}
-
-
-
 @router.delete("/reset")
 def reset_database(current_user: user_dep, db: db_dep):
     """
-    Elimina TODOS los datos del tenant (inventarios, items, catálogos, usuarios empleados, roles).
+    Elimina TODOS los datos del tenant (inventarios, items, catálogos, empleados, roles).
     El tenant owner y el tenant mismo NO se eliminan.
     ADVERTENCIA: irreversible.
     """
     user, tenant = _require_tenant_owner(current_user, db)
     from app.Core.models import CustomRole, RolePermission
 
-    # Borrar schema del tenant
     with get_tenant_db_context(tenant.schema_name) as tdb:
         tdb.execute(text("DELETE FROM catalogo_item"))
         tdb.execute(text("DELETE FROM item"))
@@ -515,7 +547,6 @@ def reset_database(current_user: user_dep, db: db_dep):
         tdb.execute(text("DELETE FROM inventario"))
         tdb.commit()
 
-    # Borrar empleados y roles en schema public (NO borrar el tenant owner)
     employees = db.query(Users).filter(
         Users.tenant_id == tenant.id,
         Users.role      != UserRole.tenant
@@ -533,8 +564,8 @@ def reset_database(current_user: user_dep, db: db_dep):
 
 class BackupConfig(BaseModel):
     backup_auto_enabled: bool
-    backup_daily_hour:   int   # cada cuántas horas (ej: 24 = una vez al día)
-    backup_monthly_day:  int   # día del mes para el backup mensual (1-28)
+    backup_daily_hour:   int
+    backup_monthly_day:  int
 
 
 @router.patch("/config")
@@ -554,7 +585,6 @@ def update_backup_config(body: BackupConfig, current_user: user_dep, db: db_dep)
     tenant.backup_monthly_day  = body.backup_monthly_day
     db.commit()
 
-    # Recargar el scheduler con la nueva config
     from app.database_manager.scheduler import reload_tenant_jobs
     reload_tenant_jobs(tenant)
 
@@ -565,9 +595,9 @@ def update_backup_config(body: BackupConfig, current_user: user_dep, db: db_dep)
 def disconnect_drive(current_user: user_dep, db: db_dep):
     """Desconecta Google Drive del tenant (borra el refresh_token)."""
     user, tenant = _require_tenant_owner(current_user, db)
-    tenant.google_refresh_token  = None
-    tenant.google_drive_file_id  = None
+    tenant.google_refresh_token   = None
+    tenant.google_drive_file_id   = None
     tenant.google_drive_folder_id = None
-    tenant.backup_auto_enabled   = False
+    tenant.backup_auto_enabled    = False
     db.commit()
     return {"message": "Google Drive desconectado."}
