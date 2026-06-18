@@ -25,10 +25,16 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh', background: token.colorBgLayout }}>
+    <Layout style={{ minHeight: '100vh',
+      background: token.colorBgLayout,
+      backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1652743920822-faaabb728dea?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)`,
+      backgroundSize: 'cover',
+      backgroundPosition: 'center',
+      backgroundRepeat: 'no-repeat', 
+    }}>
       <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
         <Card 
-          style={{ width: 400, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px' }}
+          style={{ width: 400, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.90)', backdropFilter: 'blur(10px)' }}
         >
           <div style={{ textAlign: 'center', marginBottom: 24 }}>
             <Title level={2} style={{ marginBottom: 0 }}>FlexInventory</Title>
