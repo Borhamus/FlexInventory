@@ -14,6 +14,7 @@ import ConfigPage from '../pages/ConfigPage';
 import DashboardPage from '../pages/DashboardPage';
 import DatabasePage from '../pages/DatabasePage'; 
 import AuditoriaPage from '../pages/AuditoriaPage';
+import WelcomePage from '../pages/WelcomePage';
 
 
 // Placeholder rápido para secciones que aún no creamos
@@ -24,6 +25,10 @@ const Placeholder = ({ title }: { title: string }) => (
 export const routes: RouteObject[] = [
   {
     path: '/',
+    element: <WelcomePage />, 
+  },
+  {
+    path: '/login',
     element: <LoginPage />,
   },
   {
