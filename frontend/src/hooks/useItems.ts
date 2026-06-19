@@ -43,3 +43,23 @@ export const useDeleteItem = (catalogoId: number) => {
     }
   });
 };
+
+// MUTACIÓN PARA ELIMINACIÓN MASIVA
+export const useDeleteItemsBulk = (inventarioId?: number) => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (itemIds: number[]) => itemsService.deleteItemsBulk(itemIds),
+    onSuccess: (data) => {
+      message.success(`Se eliminaron ${data.eliminados} artículos correctamente`);
+      // Refrescamos la tabla de inventario
+      queryClient.invalidateQueries({ queryKey: ['inventory', inventarioId] });
+      // Por las dudas, también la query general de ítems
+      queryClient.invalidateQueries({ queryKey: ['items'] });
+    },
+    onError: (error: any) => {
+      const errorMsg = error.response?.data?.detail || 'Error al eliminar los artículos';
+      message.error(errorMsg);
+    }
+  });
+};

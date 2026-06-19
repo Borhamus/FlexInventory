@@ -9,7 +9,8 @@ import { ModalAddItemInventory } from '../components/ModalAddItemInventory';
 import { ModalEditItemInventory } from '../components/ModalEditItemInventory';
 import { ModalEditInventory } from '../components/ModalEditInventory';
 import ModalBulkEdit from '../components/ModalBulkEditItems';
-import { InventoryTable } from '../components/InventoryTable'; 
+import { InventoryTable } from '../components/InventoryTable';
+import { useDeleteItemsBulk } from '../hooks/useItems';
 
 const { Title, Text } = Typography;
 
@@ -22,6 +23,7 @@ const InventoryPage: React.FC = () => {
   const { data, isLoading, error, refetch } = useInventory(Number(id));
   const { mutate: deleteInventory, isPending } = useDeleteInventory();
   const { mutate: deleteItem } = useDeleteItem();
+  const { mutate: bulkDelete, isPending: isDeletingBulk } = useDeleteItemsBulk(Number(id));
 
   // Estados de Modales
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -71,7 +73,7 @@ const InventoryPage: React.FC = () => {
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div style={{ padding: '40px' }}>
-        
+
         {/* ENCABEZADO */}
         <Space size="small">
           <Title level={3} style={{ margin: 0 }}>{data?.nombre}</Title>
@@ -159,14 +161,39 @@ const InventoryPage: React.FC = () => {
 
         {/* ACCIONES MASIVAS */}
         {selectedRowKeys.length > 0 && (
-          <div style={{ padding: '16px', marginBottom: '16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <div style={{ padding: '16px', marginBottom: '16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
             <span>Seleccionaste <b>{selectedRowKeys.length}</b> artículos.</span>
-            <Button type="primary" onClick={() => setIsBulkModalVisible(true)}>Editar Atributo Masivamente</Button>
+            <Space>
+
+              {/* BOTON EDICION MASIVA*/}
+              <Button type="default" onClick={() => setIsBulkModalVisible(true)}>
+                Editar Atributo Masivamente
+              </Button>
+
+              {/* BOTON ELIMINACION MASIVA */}
+              <Popconfirm
+                title={`¿Eliminar ${selectedRowKeys.length} artículos?`}
+                description="Esta acción no se puede deshacer."
+                okText="Sí, eliminar"
+                cancelText="No"
+                okButtonProps={{ danger: true }}
+                onConfirm={() => {
+                  const idsNumeric = selectedRowKeys.map(key => Number(key));
+                  bulkDelete(idsNumeric, {
+                    onSuccess: () => setSelectedRowKeys([]) 
+                  });
+                }}
+              >
+                <Button type="primary" danger loading={isDeletingBulk}>
+                  Eliminar Seleccionados
+                </Button>
+              </Popconfirm>
+            </Space>
           </div>
         )}
 
         {/* LLAMAMOS AL COMPONENTE DE LA TABLA */}
-        <InventoryTable 
+        <InventoryTable
           items={data?.items || []}
           atributos={data?.atributos || {}}
           searchTerm={searchTerm}

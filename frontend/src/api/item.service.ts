@@ -37,5 +37,13 @@ export const itemsService = {
     // Eliminar permanentemente un ítem
     deleteItem: async (id: number): Promise<void> => {
         await api.delete(`/items/${id}`);
+    },
+
+    // Eliminar masivamente varios ítems
+    deleteItemsBulk: async (itemIds: number[]): Promise<any> => {
+        const response = await api.delete('/items/bulk-delete', {
+            data: { item_ids: itemIds } 
+        });
+        return response.data;
     }
 };
