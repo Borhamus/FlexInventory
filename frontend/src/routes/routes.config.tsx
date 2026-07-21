@@ -52,13 +52,13 @@ export const routes: RouteObject[] = [
         ],
       },
       {
-        path: 'catalogos',
-        element: <CatalogLayout />,
-        children: [
-          { index: true, element: <CatalogoDashboard /> },
-          { path: ':id', element: <CatalogosPage /> },
-        ],
-      },
+          path: 'catalogos',
+          element: <CatalogoDashboard />,
+        },
+        {
+          path: 'catalogos/:id',
+          element: <CatalogosPage />,
+        },
       {
         path: 'usuarios',
         element: <UsuariosPage />,   
