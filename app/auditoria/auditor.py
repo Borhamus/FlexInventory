@@ -30,9 +30,7 @@ class Auditor:
                 payload_cambios=payload,
                 entidad_afectada=entidad_afectada, 
                 resumen=resumen, 
-                request= Request,                       
-                background_tasks= BackgroundTasks
-            )
+                )
             tdb.add(nuevo_log)
             tdb.commit()
 
