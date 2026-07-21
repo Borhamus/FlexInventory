@@ -1,3 +1,4 @@
+from __future__ import annotations
 from fastapi import Request, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 from app.Core.auth import get_current_user
@@ -28,7 +29,9 @@ class Auditor:
                 accion=self.accion,
                 payload_cambios=payload,
                 entidad_afectada=entidad_afectada, 
-                resumen=resumen 
+                resumen=resumen, 
+                request= Request,                       
+                background_tasks= BackgroundTasks
             )
             tdb.add(nuevo_log)
             tdb.commit()

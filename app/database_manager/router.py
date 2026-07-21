@@ -13,7 +13,7 @@ Endpoints:
   PATCH /database/config         → actualiza configuración de backups automáticos
   GET  /database/disconnect      → desconecta Drive (borra refresh_token)
 """
-
+from __future__ import annotations
 import os
 import json
 import logging
