@@ -75,11 +75,11 @@ def parse_value_by_type(value: Any, expected_type: str) -> Any:
         
         elif expected_type == "date":
             if isinstance(value, str):
-                # Intenta parsear diferentes formatos de fecha
+                # Intenta parsear diferentes formatos y NORMALIZA a ISO (YYYY-MM-DD)
+                # para que las fechas guardadas sean ordenables/filtrables
                 for fmt in ('%Y-%m-%d', '%d-%m-%Y', '%d/%m/%Y', '%Y/%m/%d'):
                     try:
-                        datetime.strptime(value, fmt)
-                        return value
+                        return datetime.strptime(value, fmt).strftime('%Y-%m-%d')
                     except ValueError:
                         continue
                 raise ValueError(f"Formato de fecha inválido: {value}. Use YYYY-MM-DD")
@@ -131,7 +131,7 @@ def validate_inventario_atributos(atributos: Dict[str, str]) -> Dict[str, str]:
         if not isinstance(attr_type, str):
             errors.append(f"El tipo de '{attr_name}' debe ser string")
         # Validar que el tipo esté en los permitidos
-        elif attr_type.lower() not in ALLOWED_TYPES:
+        elif attr_type.lower().strip() not in ALLOWED_TYPES:
             errors.append(
                 f"Tipo inválido para '{attr_name}': '{attr_type}'. "
                 f"Tipos permitidos: {', '.join(sorted(ALLOWED_TYPES))}"

@@ -87,3 +87,10 @@ class ItemBulkUpdate(BaseModel):
 
 class BulkUpdateResponse(BaseModel):
     actualizados: int
+
+class ItemBulkDelete(BaseModel):
+    item_ids: List[int] = Field(..., min_length=1)
+
+class BulkDeleteResponse(BaseModel):
+    eliminados: int
+    ids: List[int]

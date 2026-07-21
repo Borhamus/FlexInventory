@@ -5,9 +5,10 @@ from typing import List
 
 import json
 
+from app.auditoria.auditor import Auditor
 from app.tenant import schemas, models
 from app.tenant.dependencies import get_tenant_db, require_permission
-from app.tenant.validators import TYPE_DEFAULTS
+from app.tenant.validators import TYPE_DEFAULTS, validate_inventario_atributos
 
 router = APIRouter(prefix="/inventarios", tags=["Inventarios"])
 
@@ -16,7 +17,13 @@ def _perm(resource: str, action: str):
     return Depends(require_permission(resource, action))
 
 
-@router.post("/", response_model=schemas.InventarioResponse, status_code=201)
+# ─── DEPENDENCIAS DE AUDITORÍA: INVENTARIOS ─────────────────────────────
+POST   = [Depends(Auditor(accion="Crear Inventario", auditar_payload=True))]
+PUT    = [Depends(Auditor(accion="Editar Inventario", auditar_payload=True))]
+DELETE = [Depends(Auditor(accion="Eliminar Inventario", auditar_payload=True))]
+# ────────────────────────────────────────────────────────────────────────
+
+@router.post("/", response_model=schemas.InventarioResponse, status_code=201, dependencies=POST)
 def create_inventario(
     inventario: schemas.InventarioCreate,
     _: dict = _perm("inventarios", "create"),
@@ -32,14 +39,17 @@ def create_inventario(
     ```json
     {
       "nombre": "Ropa deportiva",
-      "descripcion": "Indumentaria para deporte",
-      "atributos": ["color", "talle"]
+      "atributos": { "color": "string", "talle": "string" }
     }
     ```
     """
     if db.query(models.Inventario).filter(models.Inventario.nombre == inventario.nombre).first():
         raise HTTPException(400, detail="El inventario ya existe")
-    new_inv = models.Inventario(**inventario.model_dump())
+    inv_data = inventario.model_dump()
+    # Validar formato {nombre: tipo} y tipos permitidos (string/int/float/bool/date)
+    if inv_data.get("atributos"):
+        inv_data["atributos"] = validate_inventario_atributos(inv_data["atributos"])
+    new_inv = models.Inventario(**inv_data)
     db.add(new_inv)
     db.flush()
     return new_inv
@@ -77,7 +87,7 @@ def get_inventario(
     return inv
 
 
-@router.put("/{inventario_id}", response_model=schemas.InventarioResponse)
+@router.put("/{inventario_id}", response_model=schemas.InventarioResponse, dependencies=PUT)
 def update_inventario(
     inventario_id: int,
     inventario: schemas.InventarioUpdate,
@@ -100,7 +110,18 @@ def update_inventario(
         raise HTTPException(404, detail="Inventario no encontrado")
     update_data = inventario.model_dump(exclude_unset=True)
     provided_defaults = update_data.pop("defaults", None) or {}
+
+    # Pre-chequeo de nombre duplicado (columna UNIQUE → evita 500 por IntegrityError)
+    if "nombre" in update_data and db.query(models.Inventario).filter(
+        models.Inventario.nombre == update_data["nombre"],
+        models.Inventario.id != inventario_id,
+    ).first():
+        raise HTTPException(400, detail=f"Ya existe un inventario llamado '{update_data['nombre']}'")
+
     if "atributos" in update_data:
+        # Validar formato {nombre: tipo} y tipos permitidos
+        if update_data["atributos"]:
+            update_data["atributos"] = validate_inventario_atributos(update_data["atributos"])
         old_keys = set(inv.atributos.keys()) if inv.atributos else set()
         new_keys = set(update_data["atributos"].keys())
         removed = list(old_keys - new_keys)
@@ -126,7 +147,7 @@ def update_inventario(
     return inv
 
 
-@router.delete("/{inventario_id}", status_code=204)
+@router.delete("/{inventario_id}", status_code=204, dependencies=DELETE)
 def delete_inventario(
     inventario_id: int,
     _: dict = _perm("inventarios", "delete"),

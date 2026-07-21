@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
 
+from app.auditoria.auditor import Auditor
 from app.tenant import schemas, models
 from app.tenant.dependencies import get_tenant_db, require_permission
 
@@ -12,7 +13,15 @@ def _perm(resource: str, action: str):
     return Depends(require_permission(resource, action))
 
 
-@router.post("/", response_model=schemas.CatalogoResponse, status_code=201)
+# ─── DEPENDENCIAS DE AUDITORÍA: CATÁLOGOS ───────────────────────────────
+POST        = [Depends(Auditor(accion="Crear Catálogo", auditar_payload=True))]
+PUT         = [Depends(Auditor(accion="Editar Catálogo", auditar_payload=True))]
+DELETE      = [Depends(Auditor(accion="Eliminar Catálogo", auditar_payload=True))]
+POST_ITEM   = [Depends(Auditor(accion="Agregar Ítem a Catálogo", auditar_payload=True))]
+DELETE_ITEM = [Depends(Auditor(accion="Remover Ítem de Catálogo", auditar_payload=True))]
+# ────────────────────────────────────────────────────────────────────────
+
+@router.post("/", response_model=schemas.CatalogoResponse, status_code=201, dependencies=POST)
 def create_catalogo(
     catalogo: schemas.CatalogoCreate,
     _: dict = _perm("catalogos", "create"),
@@ -72,7 +81,7 @@ def get_catalogo(
     return cat
 
 
-@router.put("/{catalogo_id}", response_model=schemas.CatalogoResponse)
+@router.put("/{catalogo_id}", response_model=schemas.CatalogoResponse, dependencies=PUT)
 def update_catalogo(
     catalogo_id: int,
     catalogo: schemas.CatalogoUpdate,
@@ -92,14 +101,21 @@ def update_catalogo(
     cat = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
     if not cat:
         raise HTTPException(404, detail="Catálogo no encontrado")
-    for field, value in catalogo.model_dump(exclude_unset=True).items():
+    update_data = catalogo.model_dump(exclude_unset=True)
+    # Pre-chequeo de nombre duplicado (columna UNIQUE → evita 500 por IntegrityError)
+    if "nombre" in update_data and db.query(models.Catalogo).filter(
+        models.Catalogo.nombre == update_data["nombre"],
+        models.Catalogo.id != catalogo_id,
+    ).first():
+        raise HTTPException(400, detail=f"Ya existe un catálogo llamado '{update_data['nombre']}'")
+    for field, value in update_data.items():
         setattr(cat, field, value)
     db.commit()
     db.refresh(cat)
     return cat
 
 
-@router.delete("/{catalogo_id}", status_code=204)
+@router.delete("/{catalogo_id}", status_code=204, dependencies=DELETE)
 def delete_catalogo(
     catalogo_id: int,
     _: dict = _perm("catalogos", "delete"),
@@ -120,7 +136,7 @@ def delete_catalogo(
     db.commit()
 
 
-@router.post("/{catalogo_id}/items", response_model=schemas.CatalogoWithItems)
+@router.post("/{catalogo_id}/items", response_model=schemas.CatalogoWithItems, dependencies=POST_ITEM)
 def add_items_to_catalogo(
     catalogo_id: int,
     data: schemas.CatalogoItemAdd,
@@ -143,18 +159,25 @@ def add_items_to_catalogo(
     cat = db.query(models.Catalogo).filter(models.Catalogo.id == catalogo_id).first()
     if not cat:
         raise HTTPException(404, detail="Catálogo no encontrado")
-    for item_id in data.item_ids:
-        item = db.query(models.Item).filter(models.Item.id == item_id).first()
-        if not item:
-            raise HTTPException(404, detail=f"Item {item_id} no encontrado")
-        if item not in cat.items:
+
+    # Una sola query para todos los items (antes: 1 query por item + carga
+    # completa de cat.items en cada iteración → N+1)
+    ids = set(data.item_ids)
+    items = db.query(models.Item).filter(models.Item.id.in_(ids)).all()
+    missing = ids - {i.id for i in items}
+    if missing:
+        raise HTTPException(404, detail=f"Items no encontrados: {sorted(missing)}")
+
+    existing_ids = {i.id for i in cat.items}
+    for item in items:
+        if item.id not in existing_ids:
             cat.items.append(item)
     db.commit()
     db.refresh(cat)
     return cat
 
 
-@router.delete("/{catalogo_id}/items/{item_id}", status_code=204)
+@router.delete("/{catalogo_id}/items/{item_id}", status_code=204, dependencies=DELETE_ITEM)
 def remove_item_from_catalogo(
     catalogo_id: int,
     item_id: int,

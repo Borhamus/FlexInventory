@@ -1,9 +1,16 @@
 import { Card, Row, Col, Statistic, Empty } from 'antd';
 import { BoxPlotOutlined, PartitionOutlined, BuildOutlined } from '@ant-design/icons';
 import { useInventories } from '../hooks/useInventory';
+import { useAuthContext } from '../context/AuthContext';
+import { useEffect } from 'react';
 
 export const InventoryDashboard = () => {
+
   const { data: inventories, isLoading } = useInventories();
+  const { user } = useAuthContext();
+  useEffect(() => {
+    console.log("Contenido del token decodificado:", user);
+  }, [user]);
 
   if (isLoading) return null;
 
@@ -17,7 +24,7 @@ export const InventoryDashboard = () => {
         <Col span={8}>
           <Card bordered={false} style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
             <Statistic
-              title="Total de Depósitos"
+              title="Total de Inventarios"
               value={totalInventarios}
               prefix={<BoxPlotOutlined />}
               valueStyle={{ color: '#1890ff' }}
@@ -37,8 +44,8 @@ export const InventoryDashboard = () => {
         <Col span={8}>
           <Card bordered={false} style={{ boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
             <Statistic
-              title="Tenant"
-              value="Benjamin Dev"
+              title="Usuario"
+              value={user?.sub} 
               prefix={<BuildOutlined />}
             />
           </Card>
@@ -46,9 +53,7 @@ export const InventoryDashboard = () => {
       </Row>
 
       <div style={{ marginTop: '40px', textAlign: 'center', color: '#8c8c8c' }}>
-        <Empty 
-          description="Seleccioná un inventario de la lista lateral para gestionar sus artículos o crear uno nuevo." 
-        />
+        <Empty description="Seleccioná un inventario de la lista lateral para gestionar sus artículos o crear uno nuevo." />
       </div>
     </div>
   );

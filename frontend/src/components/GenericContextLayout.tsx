@@ -22,7 +22,7 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
   const location = useLocation();
   const { token } = theme.useToken();
 
-  const [collapsed, setCollapsed] = useState(true);
+  const [collapsed, setCollapsed] = useState(false);
   const isActive = (id: number) => location.pathname === `${basePath}/${id}`;
   const sortedItems = items ? [...items].sort((a, b) => a.id - b.id) : [];
 

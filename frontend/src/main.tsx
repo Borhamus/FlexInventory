@@ -30,9 +30,9 @@ const ThemedApp: React.FC = () => {
       locale={esES}
       theme={{
         algorithm: isDark ? theme.darkAlgorithm : theme.defaultAlgorithm,
-        // ¡ACÁ ESTÁ LA MAGIA! Le pasamos el color a Ant Design
         token: {
           colorPrimary: primaryColor,
+          fontFamily: '"Elms Sans", sans-serif'
         }
       }}
     >

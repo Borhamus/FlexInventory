@@ -1,5 +1,6 @@
 import { Navigate, type RouteObject } from 'react-router-dom';
 import LoginPage from '../pages/LoginPage';
+import RegisterTenantPage from '../pages/RegisterTenantPage';
 import ProtectedRoute from './ProtectedRoute';
 import MainLayout from '../components/MainLayout';
 import InventoryPage from '../pages/InventoryPage';
@@ -11,6 +12,9 @@ import CatalogoDashboard from '../pages/CatalogDashboard';
 import UsuariosPage from '../pages/UsuariosPage';   
 import ConfigPage from '../pages/ConfigPage';
 import DashboardPage from '../pages/DashboardPage';
+import DatabasePage from '../pages/DatabasePage'; 
+import AuditoriaPage from '../pages/AuditoriaPage';
+import WelcomePage from '../pages/WelcomePage';
 
 
 // Placeholder rápido para secciones que aún no creamos
@@ -21,7 +25,15 @@ const Placeholder = ({ title }: { title: string }) => (
 export const routes: RouteObject[] = [
   {
     path: '/',
+    element: <WelcomePage />, 
+  },
+  {
+    path: '/login',
     element: <LoginPage />,
+  },
+  {
+    path: '/registro',
+    element: <RegisterTenantPage />,
   },
   {
     path: '/dashboard',
@@ -49,10 +61,18 @@ export const routes: RouteObject[] = [
       },
       {
         path: 'usuarios',
-        element: <UsuariosPage />,   // ← reemplaza el Placeholder
+        element: <UsuariosPage />,   
       },
       { 
         path: 'config', element: <ConfigPage /> 
+      },
+      {
+        path: 'database',        
+        element: <DatabasePage />,
+      },
+      {
+        path: 'historial',
+        element: <AuditoriaPage />,
       },
     ],
   },
