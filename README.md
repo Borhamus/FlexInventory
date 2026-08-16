@@ -19,3 +19,7 @@
 
 > [!Paso 3: ] Inicia el proyecto
 > uvicorn app.main:app --reload
+
+> [!Paso 4: ] Inicia el frontend
+> cd frontend
+> npm run dev
