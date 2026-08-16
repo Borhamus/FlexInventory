@@ -114,11 +114,14 @@ const CatalogosPage: React.FC = () => {
 
   return (
     <div style={{
-      height: '100vh',
+      height: '100%',      
+      width: '100%',          
+      flex: 1,                
       display: 'flex',
       flexDirection: 'column',
       padding: '24px',
-      backgroundColor: token.colorBgLayout
+      backgroundColor: token.colorBgLayout,
+      overflow: 'hidden'
     }}>
 
       {/* HEADER COMPACTO */}

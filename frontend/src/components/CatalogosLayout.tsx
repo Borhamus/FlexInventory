@@ -33,6 +33,7 @@ export const CatalogLayout = () => {
         basePath="/dashboard/catalogos"
         onAddClick={canCreate ? () => setIsModalOpen(true) : undefined}
         canAdd={canCreate}
+        collapsible={false}
       />
 
       <Modal

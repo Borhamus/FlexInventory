@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link, Navigate } from 'react-router-dom';
-import { Layout, Card, Form, Input, Button, Typography, theme } from 'antd';
+import { Layout, Card, Form, Input, Button, Typography, theme, ConfigProvider } from 'antd';
 import { UserOutlined, LockOutlined, LoginOutlined } from '@ant-design/icons';
 import { useAuth } from '../hooks/useAuth';
 import { useAuthContext } from '../context/AuthContext';
@@ -25,78 +25,76 @@ const LoginPage: React.FC = () => {
   };
 
   return (
-    <Layout style={{ minHeight: '100vh',
-      background: token.colorBgLayout,
-      backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1652743920822-faaabb728dea?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)`,
-      backgroundSize: 'cover',
-      backgroundPosition: 'center',
-      backgroundRepeat: 'no-repeat', 
-    }}>
-      <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
-        <Card 
-          style={{ width: 400, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.90)', backdropFilter: 'blur(10px)' }}
-        >
-          <div style={{ textAlign: 'center', marginBottom: 24 }}>
-            <Title level={2} style={{ marginBottom: 0 }}>FlexInventory</Title>
-            <Text type="secondary">Inicia sesión para gestionar el personal</Text>
-          </div>
-
-          <Form
-            name="login_form"
-            layout="vertical"
-            onFinish={onFinish}
-            autoComplete="off"
+    <ConfigProvider theme={{ algorithm: theme.defaultAlgorithm }}>
+      <Layout style={{ minHeight: '100vh',
+        background: token.colorBgLayout,
+        backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1652743920822-faaabb728dea?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D)`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center',
+        backgroundRepeat: 'no-repeat', 
+      }}>
+        <Content style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+          <Card 
+            style={{ width: 400, boxShadow: '0 4px 12px rgba(0,0,0,0.1)', borderRadius: '8px', backgroundColor: 'rgba(255, 255, 255, 0.90)', backdropFilter: 'blur(10px)' }}
           >
-            <Form.Item
-              label="Usuario"
-              name="username"
-              rules={[{ required: true, message: 'Por favor, ingresa tu usuario' }]}
-            >
-              <Input 
-                prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} 
-                placeholder="Ej: milton" 
-                size="large"
-              />
-            </Form.Item>
+            <div style={{ textAlign: 'center', marginBottom: 24 }}>
+              <Title level={2} style={{ marginBottom: 0 }}>FlexInventory</Title>
+              <Text type="secondary">Inicia sesión para gestionar el personal</Text>
+            </div>
 
-            <Form.Item
-              label="Contraseña"
-              name="password"
-              rules={[{ required: true, message: 'La contraseña es obligatoria' }]}
+            <Form
+              name="login_form"
+              layout="vertical"
+              onFinish={onFinish}
+              autoComplete="off"
             >
-              <Input.Password 
-                prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} 
-                placeholder="********" 
-                size="large"
-              />
-            </Form.Item>
-
-            <Form.Item>
-              <Button 
-                type="primary" 
-                htmlType="submit" 
-                block 
-                size="large" 
-                icon={<LoginOutlined />}
-                loading={isLoading}
+              <Form.Item
+                label="Usuario"
+                name="username"
+                rules={[{ required: true, message: 'Por favor, ingresa tu usuario' }]}
               >
-                Entrar al sistema
-              </Button>
-            </Form.Item>
-          </Form>
+                <Input 
+                  prefix={<UserOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                  placeholder="Ej: milton" 
+                  size="large"
+                />
+              </Form.Item>
 
-          <div style={{ textAlign: 'center' }}>
-            <Text type="secondary">¿Olvidaste tu contraseña? Contacta al administrador</Text>
-          </div>
+              <Form.Item
+                label="Contraseña"
+                name="password"
+                rules={[{ required: true, message: 'La contraseña es obligatoria' }]}
+              >
+                <Input.Password 
+                  prefix={<LockOutlined style={{ color: 'rgba(0,0,0,.25)' }} />} 
+                  placeholder="********" 
+                  size="large"
+                />
+              </Form.Item>
 
-          <div style={{ textAlign: 'center', marginTop: 8 }}>
-            <Text type="secondary">
-              ¿Quieres administrar tu propio stock? Entonces <Link to="/registro">haz click aquí</Link>
-            </Text>
-          </div>
-        </Card>
-      </Content>
-    </Layout>
+              <Form.Item>
+                <Button 
+                  type="primary" 
+                  htmlType="submit" 
+                  block 
+                  size="large" 
+                  icon={<LoginOutlined />}
+                  loading={isLoading}
+                >
+                  Entrar al sistema
+                </Button>
+              </Form.Item>
+            </Form>
+
+<div style={{ textAlign: 'center', marginTop: 8 }}>
+                <Text type="secondary">
+                  ¿Quieres administrar tu propio stock? Entonces <Link to="/registro">haz click aquí</Link>
+                </Text>
+              </div>
+          </Card>
+        </Content>
+      </Layout>
+    </ConfigProvider>
   );
 };
 
