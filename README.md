@@ -23,3 +23,9 @@
 > [!Paso 4: ] Inicia el frontend
 > cd frontend
 > npm run dev
+
+
+> [!Dato: ] Como restaurar el docker.
+> docker compose down -v
+> docker compose up -d
+> recorda que necesitas el docker desktop abierto para correr. si estas en win.
