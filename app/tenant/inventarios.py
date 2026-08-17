@@ -9,6 +9,7 @@ from app.auditoria.auditor import Auditor
 from app.tenant import schemas, models
 from app.tenant.dependencies import get_tenant_db, require_permission
 from app.tenant.validators import TYPE_DEFAULTS, validate_inventario_atributos
+from app.tenant.roles_atributos import validate_roles_atributos, clean_orphan_roles
 
 router = APIRouter(prefix="/inventarios", tags=["Inventarios"])
 
@@ -18,9 +19,10 @@ def _perm(resource: str, action: str):
 
 
 # ─── DEPENDENCIAS DE AUDITORÍA: INVENTARIOS ─────────────────────────────
-POST   = [Depends(Auditor(accion="Crear Inventario", auditar_payload=True))]
-PUT    = [Depends(Auditor(accion="Editar Inventario", auditar_payload=True))]
-DELETE = [Depends(Auditor(accion="Eliminar Inventario", auditar_payload=True))]
+POST        = [Depends(Auditor(accion="Crear Inventario", auditar_payload=True))]
+PUT         = [Depends(Auditor(accion="Editar Inventario", auditar_payload=True))]
+DELETE      = [Depends(Auditor(accion="Eliminar Inventario", auditar_payload=True))]
+PATCH_ROLES = [Depends(Auditor(accion="Configurar Roles de Atributos", auditar_payload=True))]
 # ────────────────────────────────────────────────────────────────────────
 
 @router.post("/", response_model=schemas.InventarioResponse, status_code=201, dependencies=POST)
@@ -140,8 +142,42 @@ def update_inventario(
                 text("UPDATE item SET atributos = CAST(:defaults AS jsonb) || atributos WHERE inventario_id = :inv_id"),
                 {"defaults": json.dumps(defaults), "inv_id": inventario_id},
             )
+        # Si se borró o renombró un atributo que estaba configurado como rol
+        # especial (ej. volumen_unitario), esa referencia queda colgando —
+        # se limpia sola para que roles_atributos nunca apunte a algo inexistente.
+        if inv.roles_atributos:
+            update_data["roles_atributos"] = clean_orphan_roles(inv.roles_atributos, update_data["atributos"])
     for field, value in update_data.items():
         setattr(inv, field, value)
+    db.commit()
+    db.refresh(inv)
+    return inv
+
+
+@router.patch("/{inventario_id}/roles", response_model=schemas.InventarioResponse, dependencies=PATCH_ROLES)
+def configurar_roles_atributos(
+    inventario_id: int,
+    payload: schemas.RolesAtributosUpdate,
+    _: dict = _perm("inventarios", "update"),
+    db: Session = Depends(get_tenant_db),
+):
+    """
+    Configura qué atributo del inventario cumple cada rol especial (ej:
+    volumen_unitario, fecha_reposicion, proveedor). Reemplaza por completo
+    el mapa de roles vigente — para quitar un rol, mandalo sin esa clave.
+
+    Requiere permiso `inventarios:update` (o ser tenant owner).
+
+    **Ejemplo de request** (inventario con atributos `{peso_m3: float}`):
+    ```json
+    { "roles_atributos": { "volumen_unitario": "peso_m3" } }
+    ```
+    """
+    inv = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
+    if not inv:
+        raise HTTPException(404, detail="Inventario no encontrado")
+
+    inv.roles_atributos = validate_roles_atributos(payload.roles_atributos, inv.atributos or {})
     db.commit()
     db.refresh(inv)
     return inv

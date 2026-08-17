@@ -7,6 +7,7 @@ from app.Core.endpoints import router as tenant_router
 from app.Core.auth import router as auth_router
 from app.Core.roles import router as roles_router
 from app.tenant.inventarios import router as inventarios_router
+from app.tenant.estadisticas import router as estadisticas_router
 from app.tenant.items import router as items_router
 from app.tenant.catalogos import router as catalogos_router
 from app.database_manager.router import router as database_router
@@ -16,11 +17,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
 from app.database_manager.scheduler import init_scheduler, shutdown_scheduler
+from app.database_manager.migraciones import run_migrations
 
 
-# ── Lifespan: arranca y apaga el scheduler junto con FastAPI ────────────────
+# ── Lifespan: migra schemas de tenants, arranca y apaga el scheduler ────────
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    run_migrations()       # agrega columnas nuevas a tenants ya existentes
     init_scheduler()       # arranca APScheduler y carga los jobs
     yield
     shutdown_scheduler()   # apaga APScheduler limpiamente
@@ -50,7 +53,8 @@ app.add_middleware(
 app.include_router(auth_router)        # /auth/*
 app.include_router(tenant_router)      # /tenants/*       ← requiere X-Developer-Key
 app.include_router(roles_router)       # /roles/*, /empleados/*
-app.include_router(inventarios_router) # /inventarios/*
+app.include_router(inventarios_router)  # /inventarios/*
+app.include_router(estadisticas_router) # /inventarios/{id}/stats
 app.include_router(items_router)       # /items/*
 app.include_router(catalogos_router)   # /catalogos/*
 app.include_router(database_router)    # /database/*

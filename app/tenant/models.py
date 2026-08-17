@@ -19,6 +19,9 @@ class Inventario(TenantBase):
     id = Column(Integer, primary_key=True, index=True)
     nombre = Column(String(50), unique=True, index=True, nullable=False)
     atributos = Column(JSONB, default={})
+    # Mapa {rol: nombre_de_atributo}, ej: {"volumen_unitario": "peso_m3"}.
+    # Ver app/tenant/roles_atributos.py (Registry Pattern) para los roles válidos.
+    roles_atributos = Column(JSONB, default={})
     creado_en = Column(TIMESTAMP, server_default=func.current_timestamp())
     actualizado_en = Column(TIMESTAMP, server_default=func.current_timestamp(), onupdate=func.current_timestamp())
     items = relationship("Item", back_populates="inventario", cascade="all, delete-orphan") #esto indica la relacion uno a muchos de inventario e items

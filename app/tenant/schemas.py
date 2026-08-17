@@ -18,6 +18,7 @@ class InventarioUpdate(BaseModel):
 
 class InventarioResponse(InventarioBase):
     id: int
+    roles_atributos: Dict[str, str] = Field(default_factory=dict)
     creado_en: datetime
     actualizado_en: datetime
 
@@ -25,6 +26,73 @@ class InventarioResponse(InventarioBase):
 
 class InventarioWithItems(InventarioResponse):
     items: List["ItemResponse"] = []
+
+# ==================== Schema para roles de atributo ====================
+# Configura qué atributo del inventario cumple un rol especial (ej: volumen
+# unitario, fecha de reposición). Es un reemplazo completo del mapa vigente,
+# no un merge parcial — mismo criterio que ya usa "atributos" en
+# InventarioUpdate: se manda el estado completo que se quiere dejar.
+
+class RolesAtributosUpdate(BaseModel):
+    roles_atributos: Dict[str, str] = Field(default_factory=dict)
+
+# ==================== Schemas para estadísticas de inventario ====================
+# Todos los campos numéricos/fecha son opcionales porque cada tipo de atributo
+# solo llena el subconjunto que le corresponde (un string no tiene "promedio",
+# un boolean no tiene "proxima_fecha").
+
+class AtributoStats(BaseModel):
+    tipo: str
+    con_valor: int
+    # numérico (integer/float)
+    promedio: Optional[float] = None
+    suma: Optional[float] = None
+    minimo: Optional[float] = None
+    maximo: Optional[float] = None
+    # boolean
+    verdaderos: Optional[int] = None
+    falsos: Optional[int] = None
+    # date
+    proxima_fecha: Optional[str] = None
+    ultima_fecha: Optional[str] = None
+    dias_restantes: Optional[int] = None
+
+class VolumenTotalStats(BaseModel):
+    atributo: str
+    volumen_total: Optional[float] = None
+    items_con_valor: int
+
+class InventarioStatsResponse(BaseModel):
+    total_items: int
+    atributos: Dict[str, AtributoStats]
+    # Solo presente si el inventario tiene configurado el rol volumen_unitario (Fase 1).
+    # Sin unidad hardcodeada: el sistema es genérico, la unidad (m³ u otra) la
+    # define el usuario al elegir qué atributo cumple ese rol.
+    volumen_total: Optional[VolumenTotalStats] = None
+
+# ==================== Schemas para mediana/histograma (Fase 3) ====================
+
+class HistogramaBucket(BaseModel):
+    desde: float
+    hasta: float
+    frecuencia: int
+
+class HistogramaMedianaResponse(BaseModel):
+    atributo: str
+    con_valor: int
+    minimo: Optional[float] = None
+    maximo: Optional[float] = None
+    mediana: Optional[float] = None
+    n_intervalos: int
+    ancho_intervalo: Optional[float] = None
+    histograma: List[HistogramaBucket]
+
+class PromedioRangoResponse(BaseModel):
+    atributo: str
+    desde: float
+    hasta: float
+    promedio: Optional[float] = None
+    cantidad: int
 
 # ==================== Schemas para Item ====================
 
