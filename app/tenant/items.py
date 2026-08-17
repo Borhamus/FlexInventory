@@ -162,29 +162,117 @@ def bulk_delete_items(
     return {"eliminados": len(found_ids), "ids": sorted(found_ids)}
 
 
+# ─── ORDEN Y FILTRO POR ATRIBUTO (Fase 5) ───────────────────────────────
+# No comparte el registro ESTRATEGIAS de estadisticas.py a propósito: ese
+# motor ya está probado end-to-end y esto es una necesidad más chica (un
+# nombre de cast por tipo). Duplicar 2 diccionarios chicos es más barato y
+# más seguro que acoplar este endpoint a los internos de otro módulo.
+
+# Tipo declarado en el inventario → tipo SQL para castear. None = sin cast
+# (comparación de texto directa), válido para ordenar pero no para filtrar
+# por rango ("desde-hasta" no tiene sentido pedido para string/boolean).
+_TIPO_SQL_ORDEN = {
+    "integer": "float8", "int": "float8", "float": "float8", "number": "float8",
+    "date": "date",
+    "boolean": "boolean", "bool": "boolean",
+    "string": None, "str": None,
+}
+_TIPOS_FILTRABLES = {"integer", "int", "float", "number", "date"}
+
+
+def _resolver_atributo_orden(inventario_atributos: dict, atributo: str) -> Optional[str]:
+    tipo = (inventario_atributos or {}).get(atributo)
+    if tipo is None:
+        raise HTTPException(404, detail=f"El atributo '{atributo}' no existe en este inventario")
+    tipo_norm = tipo.lower().strip()
+    if tipo_norm not in _TIPO_SQL_ORDEN:
+        raise HTTPException(400, detail=f"Tipo de atributo no soportado para ordenar: '{tipo}'")
+    return _TIPO_SQL_ORDEN[tipo_norm]
+
+
+def _resolver_atributo_filtro(inventario_atributos: dict, atributo: str) -> str:
+    tipo = (inventario_atributos or {}).get(atributo)
+    if tipo is None:
+        raise HTTPException(404, detail=f"El atributo '{atributo}' no existe en este inventario")
+    tipo_norm = tipo.lower().strip()
+    if tipo_norm not in _TIPOS_FILTRABLES:
+        raise HTTPException(
+            400,
+            detail=f"El atributo '{atributo}' es de tipo '{tipo}'; filtro_desde/filtro_hasta solo aplica a numérico o date",
+        )
+    return _TIPO_SQL_ORDEN[tipo_norm]
+
+
 @router.get("/", response_model=List[schemas.ItemResponse])
 def get_items(
     inventario_id: Optional[int] = None,
     skip: int = Query(0, ge=0, description="Registros a saltar (paginación)"),
     limit: Optional[int] = Query(None, ge=1, le=1000, description="Máximo de registros (sin límite si se omite)"),
+    sort_by: Optional[str] = Query(None, description="Nombre de un atributo del inventario por el que ordenar"),
+    order: str = Query("asc", pattern="^(asc|desc)$", description="Dirección del orden: asc o desc"),
+    filtro_atributo: Optional[str] = Query(None, description="Atributo numérico o date sobre el que aplicar filtro_desde/filtro_hasta"),
+    filtro_desde: Optional[str] = Query(None, description="Límite inferior (inclusive) del filtro por rango"),
+    filtro_hasta: Optional[str] = Query(None, description="Límite superior (inclusive) del filtro por rango"),
     _: dict = _perm("items", "read"),
     db: Session = Depends(get_tenant_db),
 ):
     """
-    Lista todos los items del tenant. Se puede filtrar por inventario usando el
-    query param `inventario_id` y paginar con `skip`/`limit`.
+    Lista los items del tenant. Se puede filtrar por inventario (`inventario_id`),
+    paginar (`skip`/`limit`), ordenar por un atributo del inventario (`sort_by`
+    + `order`) y filtrar por rango sobre un atributo numérico o de fecha
+    (`filtro_atributo` + `filtro_desde`/`filtro_hasta`).
+
+    `sort_by` y `filtro_atributo` requieren `inventario_id` (para resolver el
+    tipo del atributo contra el schema de ESE inventario). `filtro_atributo`
+    solo acepta atributos `integer`/`float`/`date` — para `string`/`boolean`
+    no hay semántica de "rango" pedida por la consigna.
 
     Requiere permiso `items:read` (o ser tenant owner).
 
     **Ejemplos:**
-    - `GET /items/` → todos los items
-    - `GET /items/?inventario_id=1` → solo los items del inventario 1
-    - `GET /items/?skip=0&limit=100` → primera página de 100
+    - `GET /items/?inventario_id=1&sort_by=vence&order=desc`
+    - `GET /items/?inventario_id=1&filtro_atributo=precio&filtro_desde=10&filtro_hasta=50`
     """
+    if (sort_by or filtro_atributo) and inventario_id is None:
+        raise HTTPException(400, detail="inventario_id es requerido para ordenar o filtrar por atributo")
+    if (filtro_desde is not None or filtro_hasta is not None) and filtro_atributo is None:
+        raise HTTPException(400, detail="filtro_atributo es requerido para usar filtro_desde/filtro_hasta")
+    if filtro_atributo is not None and filtro_desde is None and filtro_hasta is None:
+        raise HTTPException(400, detail="Debe indicar filtro_desde y/o filtro_hasta junto con filtro_atributo")
+
+    inventario_atributos = {}
+    if sort_by or filtro_atributo:
+        inventario = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
+        if not inventario:
+            raise HTTPException(404, detail="Inventario no encontrado")
+        inventario_atributos = inventario.atributos or {}
+
     query = db.query(models.Item)
     if inventario_id is not None:
         query = query.filter(models.Item.inventario_id == inventario_id)
-    query = query.order_by(models.Item.id).offset(skip)
+
+    if filtro_atributo:
+        tipo_sql = _resolver_atributo_filtro(inventario_atributos, filtro_atributo)
+        expr = f"(atributos ->> :filtro_key)::{tipo_sql}"
+        condiciones = []
+        params = {"filtro_key": filtro_atributo}
+        if filtro_desde is not None:
+            condiciones.append(f"{expr} >= CAST(:filtro_desde AS {tipo_sql})")
+            params["filtro_desde"] = filtro_desde
+        if filtro_hasta is not None:
+            condiciones.append(f"{expr} <= CAST(:filtro_hasta AS {tipo_sql})")
+            params["filtro_hasta"] = filtro_hasta
+        query = query.filter(text(" AND ".join(condiciones))).params(**params)
+
+    if sort_by:
+        tipo_sql = _resolver_atributo_orden(inventario_atributos, sort_by)
+        expr = f"(atributos ->> :sort_key)" + (f"::{tipo_sql}" if tipo_sql else "")
+        direccion = "DESC" if order == "desc" else "ASC"
+        query = query.order_by(text(f"{expr} {direccion}")).params(sort_key=sort_by)
+    else:
+        query = query.order_by(models.Item.id)
+
+    query = query.offset(skip)
     if limit is not None:
         query = query.limit(limit)
     return query.all()

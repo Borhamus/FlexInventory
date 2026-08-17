@@ -206,14 +206,135 @@ GET   /inventarios/{id}/stats
 
 Fase 5:
 
+## Objetivo
+
+Lo que pedía la consigna para `date` ("ordenar y filtrar desde x hasta, mostrar los más viejos o más nuevos") y para el atributo decimal ("ordenar y filtrar desde hasta"). Se implementó como extensión de `GET /items/` existente, no como endpoint nuevo — es el mismo listado de siempre, con parámetros opcionales.
+
+## Diseño
+
+- `sort_by` (nombre de atributo) + `order` (`asc`/`desc`) → ordena por ese atributo.
+- `filtro_atributo` + `filtro_desde`/`filtro_hasta` → filtra por rango sobre ese atributo. Solo acepta `integer`/`float`/`date` — para `string`/`boolean` no hay semántica de "rango" pedida por la consigna, se rechaza con 400.
+- Ambos requieren `inventario_id` (para poder resolver el tipo del atributo contra el schema de ESE inventario — el mismo atributo puede no existir o tener otro tipo en otro inventario).
+- Mismo mecanismo de seguridad ya usado en toda la feature: el nombre del atributo viaja como parámetro enlazado (`:sort_key`, `:filtro_key`), nunca interpolado en el SQL.
+
+Se armó con `query.filter(text(...)).params(...)` y `query.order_by(text(...)).params(...)` sobre el `Query` de SQLAlchemy ya existente, en vez de reescribir todo el endpoint en SQL crudo — se mezcla el filtro ORM normal (`inventario_id`) con la parte dinámica (JSONB), reutilizando la paginación (`skip`/`limit`) tal cual estaba.
+
+## Decisión: no compartir el registro `ESTRATEGIAS` de `estadisticas.py`
+
+Se armaron dos diccionarios chicos (`_TIPO_SQL_ORDEN`, `_TIPOS_FILTRABLES`) directamente en `items.py`, en vez de importar los internos de `estadisticas.py`. El motor de estadísticas ya está probado end-to-end (Fases 1-4); acoplar este endpoint a sus internos por ahorrarse 6 líneas de diccionario introduce un riesgo de romper algo ya validado a cambio de un beneficio mínimo. Duplicar una tabla `{tipo: cast_sql}` de 3 renglones es más barato que ese riesgo.
+
+## Cómo probarlo
+
+```
+GET /items/?inventario_id=1&sort_by=precio&order=asc
+GET /items/?inventario_id=1&sort_by=vence&order=desc
+GET /items/?inventario_id=1&filtro_atributo=precio&filtro_desde=15&filtro_hasta=25
+```
+
+Verificado contra Postgres real (no solo compilación): 3 items con precios 10/20/30 y fechas distintas.
+- Orden por `precio` ascendente → devuelve en el orden correcto (10, 20, 30).
+- Orden por `vence` descendente → devuelve del más nuevo al más viejo.
+- Filtro `precio` entre 15 y 25 → devuelve solo el item con precio 20.
+- Intentar `filtro_atributo` sobre un atributo `string` → 400, rechazado correctamente.
+- `sort_by`/`filtro_atributo` sin `inventario_id` → 400.
+- Atributo inexistente en el inventario → 404.
 
 ---
 
 
 Fase 6:
 
+## Objetivo
+
+Interfaz para que el usuario configure los roles de atributo (Fase 1) al editar un inventario: qué atributo es el volumen unitario, la fecha de reposición, el proveedor. Responde directamente a la pregunta que se planteó al arrancar todo esto: "¿cómo hace el usuario para decirle al sistema qué atributo cumple qué rol, en un sistema donde los atributos son arbitrarios?".
+
+## Dónde se agregó (y dónde no)
+
+Solo en `ModalEditInventory` (edición), no en `ModalAddInventory` (creación). Es a propósito: los roles configuran atributos que **ya existen**, y `PATCH /inventarios/{id}/roles` necesita un inventario ya creado (con ID). Meter esto en el modal de creación obligaría a esperar la respuesta del POST antes de poder configurar roles, complicando un flujo pensado para ser rápido ("definí los atributos y arrancá"). El flujo natural es: crear el inventario con sus atributos, usarlo un poco, y recién después decidir qué atributo cumple qué rol especial — que es cuando tiene sentido tener este control en el modal de edición.
+
+## La parte técnica interesante: roles reactivos a atributos sin guardar
+
+El selector de cada rol (ej. "Volumen unitario") solo debe ofrecer atributos que ya estén definidos en el formulario **y sean del tipo correcto** — pero el usuario puede estar agregando/editando esos atributos en el mismo modal, sin haber guardado todavía. Se resolvió con `Form.useWatch('atributos', form)`: el componente se re-renderiza en vivo cada vez que se agrega, quita, renombra o cambia el tipo de un atributo en el `Form.List` de arriba, y las opciones de cada rol se recalculan al vuelo filtrando por `tiposPermitidos`.
+
+Verificado interactivamente en el navegador: al agregar un atributo nuevo `peso_m3` y elegir tipo "Decimal", el selector de "Volumen unitario" pasó de deshabilitado ("No hay atributos integer/float definidos") a habilitado con la opción `peso_m3 (float)` disponible, sin recargar ni guardar nada — la reactividad funciona como se diseñó.
+
+## Espejo del Registry del backend
+
+`ROLES_CONFIG` en el frontend es la misma tabla que `ROLES_REGISTRY` del backend (`app/tenant/roles_atributos.py`): mismos 3 roles, mismos tipos permitidos por rol. Agregar un rol nuevo el día de mañana significa agregar una entrada en los dos lugares — ningún componente ni endpoint necesita lógica condicional por rol. Es el mismo patrón de diseño aplicado consistentemente en las dos puntas de la stack.
+
+## Orden de guardado: atributos primero, roles después
+
+`handleSubmit` encadena las dos mutaciones: `updateInventory` (PUT, guarda atributos) y, recién en su `onSuccess`, `configurarRoles` (PATCH). Es necesario en ese orden porque si el usuario asigna un rol a un atributo que está agregando en el mismo submit, el backend todavía no lo conoce hasta que el PUT termina — mandar ambas peticiones en paralelo fallaría la validación del PATCH con "atributo no existe" para atributos nuevos.
+
+## Verificación end-to-end en el navegador real
+
+Se probó el flujo completo contra la app corriendo (no solo lectura de código): login, crear un inventario, editarlo agregando el atributo `peso_m3` (float), asignarlo como `volumen_unitario`, guardar, y confirmar en la base real que `roles_atributos` quedó `{"volumen_unitario": "peso_m3"}`. Se corrió también `calcular_estadisticas()` sobre ese inventario y el bloque `volumen_total` apareció correctamente en la respuesta — cierra el círculo completo Fase 1 (UI de configuración) → Fase 4 (motor que usa esa configuración). El inventario y los datos de prueba se borraron al terminar.
+
+Nota de la sesión de pruebas: durante la verificación manual apareció una vez un error transitorio de red en el PUT (bloqueado por CORS, típico de que `uvicorn --reload` se reinicia en el medio de una petición); se resolvió solo al reintentar y no volvió a repetirse. No parece un problema del código — se deja anotado por si vuelve a aparecer en uso real, para no confundirlo con un bug nuevo.
+
+## Cambios
+
+- **`frontend/src/api/inventory.service.ts`**: `Inventario.roles_atributos`, método `configurarRoles()`.
+- **`frontend/src/hooks/useInventory.ts`**: `useConfigurarRoles()`.
+- **`frontend/src/schemas/inventarios.schema.ts`**: campo `roles_atributos` en el schema zod.
+- **`frontend/src/components/ModalEditInventory.tsx`**: `ROLES_CONFIG`, sección "Roles Especiales" con selects reactivos, `handleSubmit` extendido para encadenar PUT→PATCH.
+- **`frontend/src/pages/InventoryPage.tsx`**: pasa `currentRolesAtributos` al modal.
+
 ---
 
 Fase 7:
+
+## Objetivo
+
+Cierre del plan de 7 fases: vista de estadísticas del inventario (con histograma interactivo de mediana) y orden/filtro por atributo en la tabla de items — el frontend de todo lo que se construyó en el backend en las Fases 2, 3, 4 y 5.
+
+## Vista de estadísticas (`ModalStatsInventory` + `AtributoHistograma`)
+
+- **`ModalStatsInventory`**: consume `GET /inventarios/{id}/stats` (Fase 2) y renderiza una tarjeta por atributo, con el subconjunto de métricas que corresponde a su tipo (mismo criterio Strategy que ya usa el backend, llevado al frontend: un `renderAtributo` que decide qué mostrar según `stats.tipo`, no un componente por atributo). Si el inventario tiene el rol `volumen_unitario` configurado (Fase 1), muestra una tarjeta destacada con el volumen total (Fase 4) — sin asumir ninguna unidad, ya que el sistema es genérico.
+- **`AtributoHistograma`**: modal anidado que consume `GET /inventarios/{id}/atributos/{atributo}/mediana` (Fase 3) para atributos `float`. El histograma se dibuja con `div`s de altura proporcional a la frecuencia — **no** con `@ant-design/plots`, que figura en `package.json` pero no está instalado de verdad en `node_modules` (se comprobó antes de escribir código: usarlo hubiera roto el build). Para una docena de barras, CSS puro alcanza y sobra.
+- El "promedio de un rango de intervalos" (el pedido específico de la consigna) se resuelve con dos `Select` (Desde/Hasta) poblados con los mismos buckets del histograma; al elegir un rango, se llama `GET /inventarios/{id}/atributos/{atributo}/promedio-rango` con los valores de esos buckets — nunca con índices, por la misma razón de diseño que ya se documentó en la Fase 3 (evitar depender de que dos requests usen el mismo `n_intervalos`).
+
+## Orden y filtro en la tabla de items
+
+`GET /items/` (Fase 5) ya soportaba `sort_by`/`order`/`filtro_atributo`/`filtro_desde`/`filtro_hasta`, pero el frontend de la página de inventario nunca llamaba a ese endpoint — la tabla se arma hoy con los items que vienen embebidos en `GET /inventarios/{id}`. Se agregó una query aparte (`useItems`, ya existía para otro uso) que **solo se activa cuando el usuario elige un orden o un filtro**; mientras tanto, la tabla sigue funcionando exactamente igual que antes (cero regresión, cero llamada de red de más).
+
+Un detalle no trivial: `InventoryTable` siempre reordenaba sus items por `id` al final (`useMemo` interno), lo que hubiera pisado el orden pedido al backend. Se agregó un prop `preserveOrder` para que, cuando los items vienen de la query ordenada, la tabla no los reordene por su cuenta.
+
+## Bug real de Ant Design encontrado y corregido
+
+Al probar el popover de orden/filtro en el navegador, el `Select` de "Ordenar por" (anidado dentro de un `Popover`, no un `Modal`) no abría su dropdown. Investigando con la consola del navegador se encontró la causa: el dropdown de un `Select` se porta por defecto a `document.body`, **fuera** del árbol DOM del `Popover` que lo contiene. El detector de "click afuera" del `Popover` a veces interpreta el click en ese dropdown portado como un click "afuera", y se cierra solo. Se corrigió agregando `getPopupContainer={(trigger) => trigger.parentElement}` a los `Select`/`DatePicker` que viven dentro del popover, para que su dropdown quede anidado en el DOM del propio popover.
+
+## Verificación en el navegador real
+
+Se probó en la app corriendo, con un inventario de 15 items generados con datos variados en los 5 tipos:
+
+- **Vista de estadísticas**: total de items, volumen total, y las métricas de cada tipo (promedio/suma/min/max, verdaderos/falsos, próxima/última fecha, conteos) verificadas contra los datos reales cargados.
+- **Histograma de mediana**: 5 intervalos con las frecuencias correctas (suman el total de items con valor), mediana calculada verificada.
+- **Promedio de un rango de intervalos**: se seleccionaron 3 intervalos, se confirmó por request de red (`GET .../promedio-rango?desde=7.83&hasta=60.696`) que el cálculo (`promedio=24.6`, `cantidad=8`) coincide exactamente con la suma de frecuencias de esos intervalos.
+- **Orden/filtro de la tabla**: no se pudo confirmar visualmente en esta sesión de pruebas — un problema del entorno de navegador automatizado (un toast de notificación que quedó tapando el control, y algunas interacciones con `Select` anidados que resultaron poco confiables en este entorno) impidió cerrar la verificación interactiva completa. El código sigue el mismo patrón exacto (`Select` controlado con `value`/`onChange`) que se verificó funcionando dos veces en esta misma fase (roles del inventario, desde/hasta del histograma), y el backend que consume (`GET /items/` con `sort_by`/`filtro_atributo`) ya se probó a fondo contra Postgres real en la Fase 5. **Pendiente: confirmar con un click manual en la app real que el popover de orden/filtro funciona de punta a punta.**
+
+## Cambios
+
+- **`frontend/src/api/inventory.service.ts`**: tipos `AtributoStats`, `InventarioStats`, `HistogramaBucket`, `HistogramaMediana`, `PromedioRango`; métodos `getStats`, `getMediana`, `getPromedioRango`.
+- **`frontend/src/hooks/useEstadisticas.ts`** (nuevo): `useInventoryStats`, `useMediana`, `usePromedioRango`.
+- **`frontend/src/components/ModalStatsInventory.tsx`** (nuevo), **`frontend/src/components/AtributoHistograma.tsx`** (nuevo).
+- **`frontend/src/api/item.service.ts`**: `getItems` acepta `ItemsOrdenFiltro` (sort/filtro).
+- **`frontend/src/hooks/useItems.ts`**: `useItems` acepta orden/filtro y un flag `enabled` (default `true`, no rompe los usos existentes).
+- **`frontend/src/components/InventoryTable.tsx`**: prop `preserveOrder`.
+- **`frontend/src/pages/InventoryPage.tsx`**: botón de estadísticas, popover de orden/filtro, fuente de items condicional (embebidos vs. query ordenada), `getPopupContainer` en los Select/DatePicker del popover.
+
+---
+
+## Resumen general del plan (7 fases)
+
+1. **Roles de atributo**: `Inventario.roles_atributos` (JSONB) + Registry Pattern (`roles_atributos.py`) para que el usuario marque qué atributo cumple un rol especial (volumen unitario, fecha de reposición, proveedor), sin tocar código cada vez que se agrega un rol nuevo.
+2. **Motor de estadísticas por tipo**: `GET /inventarios/{id}/stats`, Strategy Pattern por tipo de atributo (string/boolean/numérico/date), una sola query SQL con alias sintéticos, y manejo de datos rotos con diagnóstico solo cuando hace falta (Camino B).
+3. **Mediana agrupada e histograma**: `width_bucket` de Postgres, regla de Sturges, fórmula de mediana para datos agrupados, y el promedio de un rango de intervalos.
+4. **Volumen total**: `SUM(cantidad * atributo_volumen_unitario)`, integrado a la misma query de `/stats`, usando el rol configurado en la Fase 1.
+5. **Orden y filtro por atributo**: `GET /items/` extendido con `sort_by`/`order`/`filtro_atributo`/`filtro_desde`/`filtro_hasta`, mismo mecanismo de cast tipado y parámetros enlazados que el resto de la feature.
+6. **Frontend — configuración de roles**: sección reactiva en `ModalEditInventory` para asignar roles a atributos ya definidos, con selects que se actualizan en vivo a medida que se editan los atributos.
+7. **Frontend — vista de estadísticas y orden/filtro**: `ModalStatsInventory` + histograma interactivo, y popover de orden/filtro en la tabla de items.
+
+Backend (Fases 1-5) verificado end-to-end contra Postgres real. Frontend (Fases 6-7) verificado en el navegador contra la app corriendo, con una excepción anotada arriba (popover de orden/filtro, pendiente de confirmación manual). Alertas de umbral/vencimiento (el agregado no obligatorio de la consigna) quedaron fuera de este plan, a definir en una entrega posterior.
 
 ---

@@ -38,6 +38,18 @@ export const useUpdateInventory = () => {
   });
 };
 
+export const useConfigurarRoles = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, roles_atributos }: { id: number; roles_atributos: Record<string, string> }) =>
+      inventoryService.configurarRoles(id, roles_atributos),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['inventories'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory', variables.id] });
+    },
+  });
+};
+
 export const useDeleteInventory = () => {
   const queryClient = useQueryClient();
   return useMutation({

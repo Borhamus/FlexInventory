@@ -1,7 +1,7 @@
 import React, { useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Select, message } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, message, theme } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { useUpdateInventory } from '../hooks/useInventory';
+import { useUpdateInventory, useConfigurarRoles } from '../hooks/useInventory';
 
 const TIPO_OPTIONS = [
   { value: 'string',  label: 'Texto' },
@@ -11,12 +11,28 @@ const TIPO_OPTIONS = [
   { value: 'date',    label: 'Fecha' },
 ];
 
+// Espejo del Registry del backend (app/tenant/roles_atributos.py): mismos
+// roles, mismos tipos permitidos. Agregar un rol acá y allá es el único
+// cambio necesario para soportar uno nuevo — ni este componente ni el
+// backend necesitan lógica condicional por rol.
+const ROLES_CONFIG: { key: string; label: string; tiposPermitidos: string[] }[] = [
+  { key: 'volumen_unitario', label: 'Volumen unitario (para calcular el volumen total ocupado)', tiposPermitidos: ['integer', 'float'] },
+  { key: 'fecha_reposicion', label: 'Fecha de reposición', tiposPermitidos: ['date'] },
+  { key: 'proveedor',        label: 'Proveedor',           tiposPermitidos: ['string'] },
+];
+
+interface AtributoFormValue {
+  nombre?: string;
+  tipo?: string;
+}
+
 interface ModalEditInventoryProps {
   isOpen: boolean;
   onClose: () => void;
   inventoryId: number;
   currentName: string;
   currentAtributos: Record<string, string>;
+  currentRolesAtributos?: Record<string, string>;
 }
 
 export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
@@ -24,19 +40,29 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
   onClose,
   inventoryId,
   currentName,
-  currentAtributos = {}
+  currentAtributos = {},
+  currentRolesAtributos = {},
 }) => {
   const [form] = Form.useForm();
+  const { token } = theme.useToken();
   const { mutate: updateInventory, isPending } = useUpdateInventory();
+  const { mutate: configurarRoles, isPending: isPendingRoles } = useConfigurarRoles();
+
+  // Se re-renderiza cada vez que se agrega/quita/renombra/cambia el tipo de
+  // un atributo en el Form.List de abajo — así los Select de roles siempre
+  // ofrecen, en vivo, los atributos que existen EN ESTE MOMENTO del form
+  // (incluidos los que el usuario acaba de agregar sin guardar todavía).
+  const atributosWatch: AtributoFormValue[] = Form.useWatch('atributos', form) || [];
 
   useEffect(() => {
     if (isOpen) {
       form.setFieldsValue({
         nombre: currentName,
         atributos: Object.entries(currentAtributos).map(([nombre, tipo]) => ({ nombre, tipo, isNew: false })),
+        roles: currentRolesAtributos,
       });
     }
-  }, [isOpen, currentName, currentAtributos, form]);
+  }, [isOpen, currentName, currentAtributos, currentRolesAtributos, form]);
 
   const makeDefaultValidator = (fieldName: number) => ({
     validator(_: unknown, value: string) {
@@ -86,13 +112,38 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
       };
       if (Object.keys(defaults).length > 0) payload.defaults = defaults;
 
+      // roles_atributos es un reemplazo completo (mismo criterio que
+      // "atributos" acá arriba): se manda el estado completo del form,
+      // descartando los roles que el usuario dejó sin asignar (allowClear).
+      const rolesAtributos: Record<string, string> = {};
+      if (values.roles) {
+        Object.entries(values.roles as Record<string, string | undefined>).forEach(([rol, atributo]) => {
+          if (atributo) rolesAtributos[rol] = atributo;
+        });
+      }
+
       updateInventory(
         { id: inventoryId, payload },
         {
           onSuccess: () => {
-            message.success('Inventario y atributos actualizados');
-            form.resetFields();
-            onClose();
+            // Los roles se configuran DESPUÉS de que los atributos ya se
+            // guardaron: si el usuario asignó un rol a un atributo que
+            // recién está agregando en este mismo submit, el backend
+            // todavía no lo conoce hasta que este PUT termina.
+            configurarRoles(
+              { id: inventoryId, roles_atributos: rolesAtributos },
+              {
+                onSuccess: () => {
+                  message.success('Inventario, atributos y roles actualizados');
+                  form.resetFields();
+                  onClose();
+                },
+                onError: (error) => {
+                  console.error(error);
+                  message.error('Los atributos se guardaron, pero falló la configuración de roles especiales');
+                },
+              }
+            );
           },
           onError: (error) => {
             console.error(error);
@@ -109,7 +160,7 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
       open={isOpen}
       onCancel={onClose}
       onOk={handleSubmit}
-      confirmLoading={isPending}
+      confirmLoading={isPending || isPendingRoles}
       okText="Guardar Cambios"
       cancelText="Cancelar"
       destroyOnClose
@@ -179,6 +230,42 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
               </>
             )}
           </Form.List>
+        </div>
+
+        <div style={{
+          padding:      '16px',
+          background:   token.colorFillAlter,
+          borderRadius: token.borderRadiusLG,
+          border:       `1px solid ${token.colorBorderSecondary}`,
+        }}>
+          <h4 style={{ marginTop: 0, marginBottom: 4, color: token.colorText }}>
+            Roles Especiales (opcional)
+          </h4>
+          <p style={{ fontSize: '12px', color: token.colorTextTertiary, marginBottom: 16 }}>
+            Marcá qué atributo cumple cada rol. Solo se ofrecen los atributos ya definidos arriba que tengan el tipo que ese rol necesita.
+          </p>
+
+          {ROLES_CONFIG.map((rol) => {
+            const opciones = atributosWatch
+              .filter((a) => a?.nombre && a?.tipo && rol.tiposPermitidos.includes(a.tipo))
+              .map((a) => ({ value: a.nombre as string, label: `${a.nombre} (${a.tipo})` }));
+
+            return (
+              <Form.Item
+                key={rol.key}
+                name={['roles', rol.key]}
+                label={rol.label}
+                style={{ marginBottom: 12 }}
+              >
+                <Select
+                  allowClear
+                  placeholder={opciones.length ? 'Sin asignar' : `No hay atributos ${rol.tiposPermitidos.join('/')} definidos`}
+                  options={opciones}
+                  disabled={opciones.length === 0}
+                />
+              </Form.Item>
+            );
+          })}
         </div>
 
       </Form>

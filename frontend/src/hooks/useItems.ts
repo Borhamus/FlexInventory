@@ -1,13 +1,20 @@
 // hooks/useItems.ts
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { itemsService } from '../api/item.service';
+import type { ItemsOrdenFiltro } from '../api/item.service';
 import { message } from 'antd';
 
-export const useItems = (inventarioId?: number) => {
+// `enabled` default true para no cambiar el comportamiento de los usos
+// existentes (ej. AddItemModal, que llama useItems() sin argumentos y
+// espera que cargue de una). La vista de inventario la pasa en false hasta
+// que el usuario activa un orden/filtro, para no duplicar el fetch de items
+// que ya vienen embebidos en GET /inventarios/{id}.
+export const useItems = (inventarioId?: number, ordenFiltro: ItemsOrdenFiltro = {}, enabled = true) => {
   return useQuery({
-    queryKey: ['items', inventarioId],
-    queryFn: () => itemsService.getItems(inventarioId),
+    queryKey: ['items', inventarioId, ordenFiltro],
+    queryFn: () => itemsService.getItems(inventarioId, ordenFiltro),
     initialData: [],
+    enabled,
   });
 };
 

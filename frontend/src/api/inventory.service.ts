@@ -14,9 +14,59 @@ export interface Inventario {
   id: number;
   nombre: string;
   atributos: Record<string, string>; // schema: {"color": "string", "talle": "string"}
+  roles_atributos: Record<string, string>; // {"volumen_unitario": "peso_m3", ...}
   items: Item[];
   creado_en: string;
   actualizado_en: string;
+}
+
+export interface AtributoStats {
+  tipo: string;
+  con_valor: number;
+  promedio?: number | null;
+  suma?: number | null;
+  minimo?: number | null;
+  maximo?: number | null;
+  verdaderos?: number | null;
+  falsos?: number | null;
+  proxima_fecha?: string | null;
+  ultima_fecha?: string | null;
+  dias_restantes?: number | null;
+}
+
+export interface InventarioStats {
+  total_items: number;
+  atributos: Record<string, AtributoStats>;
+  volumen_total?: {
+    atributo: string;
+    volumen_total: number | null;
+    items_con_valor: number;
+  } | null;
+}
+
+export interface HistogramaBucket {
+  desde: number;
+  hasta: number;
+  frecuencia: number;
+}
+
+export interface HistogramaMediana {
+  atributo: string;
+  con_valor: number;
+  minimo: number | null;
+  maximo: number | null;
+  mediana: number | null;
+  n_intervalos: number;
+  ancho_intervalo: number | null;
+  histograma: HistogramaBucket[];
+}
+
+export interface PromedioRango {
+  atributo: string;
+  desde: number;
+  hasta: number;
+  promedio: number | null;
+  cantidad: number;
 }
 
 export const inventoryService = {
@@ -45,6 +95,30 @@ export const inventoryService = {
 
   updateInventory: async (id: number, payload: { nombre?: string; atributos?: Record<string, string>; defaults?: Record<string, unknown> }) => {
     const response = await api.put(`/inventarios/${id}`, payload);
+    return response.data;
+  },
+
+  configurarRoles: async (id: number, roles_atributos: Record<string, string>) => {
+    const response = await api.patch(`/inventarios/${id}/roles`, { roles_atributos });
+    return response.data;
+  },
+
+  getStats: async (id: number): Promise<InventarioStats> => {
+    const response = await api.get(`/inventarios/${id}/stats`);
+    return response.data;
+  },
+
+  getMediana: async (id: number, atributo: string, intervalos?: number): Promise<HistogramaMediana> => {
+    const response = await api.get(`/inventarios/${id}/atributos/${encodeURIComponent(atributo)}/mediana`, {
+      params: intervalos ? { intervalos } : {},
+    });
+    return response.data;
+  },
+
+  getPromedioRango: async (id: number, atributo: string, desde: number, hasta: number): Promise<PromedioRango> => {
+    const response = await api.get(`/inventarios/${id}/atributos/${encodeURIComponent(atributo)}/promedio-rango`, {
+      params: { desde, hasta },
+    });
     return response.data;
   },
 

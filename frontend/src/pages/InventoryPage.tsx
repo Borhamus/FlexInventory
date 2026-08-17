@@ -1,16 +1,20 @@
 import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Alert, Spin, Tag, Typography, Button, Space, Popconfirm, message, Input, Result, Popover, Checkbox, Divider, Tooltip } from 'antd';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ControlOutlined } from '@ant-design/icons';
+import { Alert, Spin, Tag, Typography, Button, Space, Popconfirm, message, Input, Result, Popover, Checkbox, Divider, Tooltip, Select, DatePicker } from 'antd';
+import type { Dayjs } from 'dayjs';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ControlOutlined, BarChartOutlined, SortAscendingOutlined } from '@ant-design/icons';
 import { useInventory, useDeleteInventory, useDeleteItem } from '../hooks/useInventory';
 import { useAuthContext } from '../context/AuthContext';
 
 import { ModalAddItemInventory } from '../components/ModalAddItemInventory';
 import { ModalEditItemInventory } from '../components/ModalEditItemInventory';
 import { ModalEditInventory } from '../components/ModalEditInventory';
+import { ModalStatsInventory } from '../components/ModalStatsInventory';
 import ModalBulkEdit from '../components/ModalBulkEditItems';
 import { InventoryTable } from '../components/InventoryTable';
-import { useDeleteItemsBulk } from '../hooks/useItems';
+import { useDeleteItemsBulk, useItems } from '../hooks/useItems';
+
+const ATRIBUTOS_FILTRABLES = ['integer', 'int', 'float', 'number', 'date'];
 
 const { Title, Text } = Typography;
 
@@ -30,6 +34,7 @@ const InventoryPage: React.FC = () => {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isEditItemModalOpen, setIsEditItemModalOpen] = useState(false);
   const [isBulkModalVisible, setIsBulkModalVisible] = useState(false);
+  const [isStatsModalOpen, setIsStatsModalOpen] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
   // Estados de la Tabla
@@ -37,6 +42,34 @@ const InventoryPage: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [columnSearch, setColumnSearch] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  // Estados de orden y filtro por atributo (Fase 5 del backend). Mientras no
+  // se use ninguno, la tabla sigue usando los items que ya vienen embebidos
+  // en useInventory (comportamiento sin cambios); apenas se elige un orden o
+  // filtro, se activa esta query aparte contra GET /items/.
+  const [sortBy, setSortBy] = useState<string | undefined>(undefined);
+  const [order, setOrder] = useState<'asc' | 'desc'>('asc');
+  const [filtroAtributo, setFiltroAtributo] = useState<string | undefined>(undefined);
+  const [filtroDesde, setFiltroDesde] = useState<string | undefined>(undefined);
+  const [filtroHasta, setFiltroHasta] = useState<string | undefined>(undefined);
+
+  const ordenFiltroActivo = Boolean(sortBy || filtroAtributo);
+  const { data: itemsOrdenados, isFetching: isFetchingOrden } = useItems(
+    Number(id),
+    { sortBy, order, filtroAtributo, filtroDesde, filtroHasta },
+    ordenFiltroActivo
+  );
+  const itemsParaTabla = ordenFiltroActivo ? itemsOrdenados : (data?.items || []);
+
+  const tipoFiltroSeleccionado = filtroAtributo ? data?.atributos?.[filtroAtributo] : undefined;
+  const esFiltroFecha = tipoFiltroSeleccionado === 'date';
+
+  const limpiarOrdenFiltro = () => {
+    setSortBy(undefined);
+    setFiltroAtributo(undefined);
+    setFiltroDesde(undefined);
+    setFiltroHasta(undefined);
+  };
 
   const handleDeleteInventory = () => {
     deleteInventory(Number(id), {
@@ -77,6 +110,9 @@ const InventoryPage: React.FC = () => {
         {/* ENCABEZADO */}
         <Space size="small">
           <Title level={3} style={{ margin: 0 }}>{data?.nombre}</Title>
+          <Tooltip title="Ver estadísticas">
+            <Button type="default" shape="circle" icon={<BarChartOutlined />} onClick={() => setIsStatsModalOpen(true)} />
+          </Tooltip>
           <Button type="default" shape="circle" icon={<EditOutlined />} onClick={() => setIsEditModalOpen(true)} />
           <Popconfirm
             title="Eliminar Inventario"
@@ -151,6 +187,72 @@ const InventoryPage: React.FC = () => {
                 <Button icon={<ControlOutlined />} />
               </Tooltip>
             </Popover>
+            <Popover
+              title="Ordenar y filtrar por atributo"
+              trigger="click"
+              placement="right"
+              content={
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 300 }}>
+                  <Text strong style={{ fontSize: 12 }}>Ordenar por</Text>
+                  <div style={{ display: 'flex', gap: 8 }}>
+                    <Select
+                      allowClear
+                      placeholder="Sin ordenar"
+                      style={{ flex: 1 }}
+                      value={sortBy}
+                      onChange={(v) => setSortBy(v)}
+                      getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
+                      options={Object.entries(data?.atributos || {}).map(([nombre, tipo]) => ({ value: nombre, label: `${nombre} (${tipo})` }))}
+                    />
+                    <Select
+                      style={{ width: 90 }}
+                      value={order}
+                      onChange={setOrder}
+                      disabled={!sortBy}
+                      getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
+                      options={[{ value: 'asc', label: 'Asc' }, { value: 'desc', label: 'Desc' }]}
+                    />
+                  </div>
+
+                  <Divider style={{ margin: '4px 0' }} />
+
+                  <Text strong style={{ fontSize: 12 }}>Filtrar por rango (numérico o fecha)</Text>
+                  <Select
+                    allowClear
+                    placeholder="Sin filtro"
+                    value={filtroAtributo}
+                    onChange={(v) => { setFiltroAtributo(v); setFiltroDesde(undefined); setFiltroHasta(undefined); }}
+                    getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
+                    options={Object.entries(data?.atributos || {})
+                      .filter(([, tipo]) => ATRIBUTOS_FILTRABLES.includes(tipo))
+                      .map(([nombre, tipo]) => ({ value: nombre, label: `${nombre} (${tipo})` }))}
+                  />
+                  {filtroAtributo && (
+                    esFiltroFecha ? (
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <DatePicker placeholder="Desde" style={{ flex: 1 }} getPopupContainer={(trigger) => trigger.parentElement as HTMLElement} onChange={(d: Dayjs | null) => setFiltroDesde(d ? d.format('YYYY-MM-DD') : undefined)} />
+                        <DatePicker placeholder="Hasta" style={{ flex: 1 }} getPopupContainer={(trigger) => trigger.parentElement as HTMLElement} onChange={(d: Dayjs | null) => setFiltroHasta(d ? d.format('YYYY-MM-DD') : undefined)} />
+                      </div>
+                    ) : (
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Input placeholder="Desde" style={{ flex: 1 }} onChange={(e) => setFiltroDesde(e.target.value || undefined)} />
+                        <Input placeholder="Hasta" style={{ flex: 1 }} onChange={(e) => setFiltroHasta(e.target.value || undefined)} />
+                      </div>
+                    )
+                  )}
+
+                  {ordenFiltroActivo && (
+                    <Button size="small" onClick={limpiarOrdenFiltro} style={{ marginTop: 4 }}>
+                      Limpiar orden y filtro
+                    </Button>
+                  )}
+                </div>
+              }
+            >
+              <Tooltip title="Ordenar / filtrar por atributo">
+                <Button icon={<SortAscendingOutlined />} loading={ordenFiltroActivo && isFetchingOrden} />
+              </Tooltip>
+            </Popover>
             {canAddItems && (
               <Tooltip title="Agregar Artículo">
                 <Button type='primary' icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)} />
@@ -194,7 +296,7 @@ const InventoryPage: React.FC = () => {
 
         {/* LLAMAMOS AL COMPONENTE DE LA TABLA */}
         <InventoryTable
-          items={data?.items || []}
+          items={itemsParaTabla || []}
           atributos={data?.atributos || {}}
           searchTerm={searchTerm}
           hiddenColumns={hiddenColumns}
@@ -202,15 +304,17 @@ const InventoryPage: React.FC = () => {
           setSelectedRowKeys={setSelectedRowKeys}
           onEditItem={handleEditItem}
           onDeleteItem={handleDeleteItem}
+          preserveOrder={ordenFiltroActivo}
         />
 
       </div>
 
       {/* MODALES */}
       <ModalAddItemInventory open={isModalOpen} onClose={() => setIsModalOpen(false)} inventoryId={Number(id)} atributosRequeridos={data?.atributos || {}} />
-      <ModalEditInventory isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} inventoryId={Number(id)} currentName={data?.nombre || ''} currentAtributos={data?.atributos || {}} />
+      <ModalEditInventory isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} inventoryId={Number(id)} currentName={data?.nombre || ''} currentAtributos={data?.atributos || {}} currentRolesAtributos={data?.roles_atributos || {}} />
       <ModalEditItemInventory open={isEditItemModalOpen} onClose={() => { setIsEditItemModalOpen(false); setSelectedItem(null); }} item={selectedItem} atributosRequeridos={data?.atributos || {}} />
       <ModalBulkEdit visible={isBulkModalVisible} onClose={() => setIsBulkModalVisible(false)} selectedIds={selectedRowKeys} atributosInventario={Object.entries(data?.atributos || {}).map(([key, val]: any) => ({ nombre: key, tipo: val }))} onSuccess={() => { refetch(); setSelectedRowKeys([]); }} />
+      <ModalStatsInventory open={isStatsModalOpen} onClose={() => setIsStatsModalOpen(false)} inventoryId={Number(id)} />
     </div>
   );
 };

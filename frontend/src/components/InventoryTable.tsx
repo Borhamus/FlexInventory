@@ -13,6 +13,9 @@ interface InventoryTableProps {
   setSelectedRowKeys: (keys: React.Key[]) => void;
   onEditItem: (item: any) => void;
   onDeleteItem: (id: number) => void;
+  // true cuando `items` ya viene ordenado por el backend (sort_by de
+  // GET /items/, Fase 5) — evita que el re-orden por id de más abajo lo pise.
+  preserveOrder?: boolean;
 }
 
 export const InventoryTable: React.FC<InventoryTableProps> = ({
@@ -23,7 +26,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   selectedRowKeys,
   setSelectedRowKeys,
   onEditItem,
-  onDeleteItem
+  onDeleteItem,
+  preserveOrder = false,
 }) => {
   const { hasPermission, isTenant } = useAuthContext();
 
@@ -119,8 +123,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
         return matchNombre || matchId;
       });
     }
-    return [...itemsAFiltrar].sort((a: any, b: any) => a.id - b.id);
-  }, [items, searchTerm]);
+    return preserveOrder ? itemsAFiltrar : [...itemsAFiltrar].sort((a: any, b: any) => a.id - b.id);
+  }, [items, searchTerm, preserveOrder]);
 
   const rowSelection = {
     selectedRowKeys,
