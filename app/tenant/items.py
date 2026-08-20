@@ -1,3 +1,8 @@
+"""
+Endpoints CRUD de items más operación de bulk update. Al crear un item, valida sus atributos
+contra la definición de su inventario. El bulk update verifica que todos los items pertenezcan
+al mismo inventario y que los atributos estén definidos en él.
+"""
 import json
 
 from fastapi import APIRouter, Depends, HTTPException

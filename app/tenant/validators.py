@@ -1,9 +1,7 @@
 """
-Validadores para la gestión de inventarios y items.
-
-Este módulo contiene la lógica de validación para:
-- Atributos de inventarios (tipos permitidos, formato)
-- Atributos de items (concordancia con inventario, conversión de tipos)
+Sistema de validación de tipos para atributos JSONB. Los inventarios definen esquemas tipados
+(ej: {"color": "string", "peso": "float"}) y este módulo valida que los items cumplan con esos
+tipos. Soporta: string, integer, float, boolean, date.
 """
 
 from typing import Dict, Any

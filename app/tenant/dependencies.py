@@ -1,16 +1,7 @@
 """
-Dependencias de tenant y permisos.
-
-Flujo base:
-  JWT → tenant_id → Tenant → schema DB session
-
-Flujo con permisos:
-  JWT → usuario activo → verificar resource+action en su custom_role
-  El tenant owner bypasea toda verificación de permisos.
-
-Reglas inamovibles (hardcoded, no delegables a permisos):
-  - Ningún empleado puede tocar al usuario tenant owner
-  - Ningún empleado puede quitarse su propio custom_role
+Dependencias de tenant y permisos. Define el flujo completo: JWT → buscar tenant activo →
+verificar usuario activo → abrir sesión en schema del tenant → verificar permiso.
+require_permission() es un factory que retorna dependencias FastAPI para proteger endpoints.
 """
 
 from typing import Annotated

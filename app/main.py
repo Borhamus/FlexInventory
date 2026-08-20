@@ -1,3 +1,8 @@
+"""
+Punto de entrada de la aplicación FastAPI. Configura CORS para el frontend (Vite, localhost:5173),
+incluye los 6 routers (auth, tenants, roles, inventarios, items, catálogos), crea las tablas del
+schema public al iniciar, y expone un health check en GET /.
+"""
 from dotenv import load_dotenv
 load_dotenv()
 

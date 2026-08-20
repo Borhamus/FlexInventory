@@ -1,3 +1,8 @@
+"""
+Endpoints de autenticación y gestión de perfil propio. Maneja login con JWT (HS256, 30 min),
+decodificación del token, y endpoints para consultar/editar el perfil del usuario autenticado.
+El endpoint GET /auth/me/stats devuelve estadísticas del dashboard del tenant.
+"""
 from datetime import datetime, timedelta, timezone
 from typing import Annotated
 import os

@@ -1,3 +1,7 @@
+"""
+Modelos ORM del schema public. Define los enums UserRole (tenant/employee), Resource y Action
+para el sistema de permisos. Tablas: tenants, users, custom_roles y role_permissions.
+"""
 from sqlalchemy import Column, Integer, String, Boolean, TIMESTAMP, ForeignKey, UniqueConstraint
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func

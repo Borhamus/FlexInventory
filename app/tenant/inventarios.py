@@ -1,3 +1,8 @@
+"""
+Endpoints CRUD de inventarios. Al actualizar atributos, detecta atributos eliminados
+(los borra de todos los items con SQL raw) y atributos nuevos (agrega valores por defecto
+a todos los items existentes).
+"""
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import text
 from sqlalchemy.orm import Session

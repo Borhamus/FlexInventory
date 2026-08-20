@@ -1,3 +1,7 @@
+"""
+Schemas Pydantic para la capa central. Define la estructura de request/response para tenants,
+roles, permisos, empleados, y operaciones de perfil (cambio de contraseña, username, email).
+"""
 from pydantic import BaseModel, EmailStr, Field, ConfigDict
 from typing import Optional, List
 from datetime import datetime

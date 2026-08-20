@@ -1,6 +1,7 @@
 """
-Endpoints de gestión de tenants.
-Estan Protegidos con X-Developer-Key — solo para el desarrollodores, no accesibles por usuarios logueados normales.
+Endpoints de gestión de tenants, protegidos con header X-Developer-Key. Solo accesibles por
+desarrolladores, no por usuarios normales. Al crear un tenant, se genera su schema en la BD
+y un usuario owner automáticamente.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Security, status

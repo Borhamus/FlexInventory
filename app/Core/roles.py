@@ -1,12 +1,7 @@
 """
-Endpoints de gestión de roles y empleados.
-
-Todos los endpoints usan require_permission() — cualquier empleado con el
-permiso correspondiente puede ejecutarlos, igual que el tenant owner.
-
-Reglas inamovibles (validadas en código, no bypasseables por permisos):
-  - Nadie puede tocar al usuario con role='tenant' (ni desactivarlo, ni quitarle rol)
-  - Nadie puede quitarse su propio custom_role
+Endpoints de CRUD de roles personalizados y empleados. Los roles definen qué permisos tiene
+cada empleado. Reglas inamovibles: nadie puede tocar al owner, y nadie puede quitarse su
+propio rol o desactivarse a sí mismo.
 """
 
 from typing import Annotated, List, Optional

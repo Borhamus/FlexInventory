@@ -1,3 +1,8 @@
+"""
+Configuración de base de datos. Crea el engine con pool de conexiones (size=10, overflow=20).
+Define dos declarative_base separadas: Base (schema public) y TenantBase (schemas de tenants).
+Expone get_db(), get_tenant_db_context() y create_tenant_schema().
+"""
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker

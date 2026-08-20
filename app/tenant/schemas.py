@@ -1,3 +1,7 @@
+"""
+Schemas Pydantic para inventarios, items y catálogos. Define Create, Update, Response y
+variantes con items anidados. También incluye schemas para operaciones masivas (ItemBulkUpdate).
+"""
 from pydantic import BaseModel, Field, ConfigDict
 from typing import Dict, Any, Optional, List
 from datetime import datetime

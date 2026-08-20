@@ -1,3 +1,8 @@
+"""
+Modelos ORM de la capa de negocio. Inventario define la estructura de atributos (JSONB),
+Item almacena los valores concretos, y Catalogo es una colección de items de distintos
+inventarios (relación N:N a través de catalogo_item).
+"""
 from sqlalchemy import Column, Integer, String, Text, TIMESTAMP, ForeignKey, Table, Numeric
 from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship, column_property

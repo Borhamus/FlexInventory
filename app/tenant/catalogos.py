@@ -1,3 +1,7 @@
+"""
+Endpoints CRUD de catálogos. Permite agregar y quitar items individuales o en lote.
+Eliminar un catálogo no elimina sus items, solo los desvincula.
+"""
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from typing import List
