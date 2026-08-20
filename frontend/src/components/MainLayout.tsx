@@ -7,7 +7,9 @@ import {
   DatabaseOutlined,
   AppstoreOutlined,
   SettingOutlined,
-  BulbOutlined
+  BulbOutlined,
+  CloudServerOutlined,
+  EyeOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
@@ -47,6 +49,20 @@ const MainLayout: React.FC = () => {
       label:   'Usuarios',
       visible: isTenant || hasPermission('empleados', 'read'),
     },
+    // ── Solo visible para el tenant owner ───────────────────────────────
+    {
+      key:     '/dashboard/database',
+      icon:    <CloudServerOutlined />,
+      label:   'Recuperación',   
+      visible: isTenant,
+    },
+    {
+      key:     '/dashboard/historial',  
+      icon:    <EyeOutlined />,         
+      label:   'Historial',
+      visible: isTenant,                
+    },
+    // ───────────────────────────────────────────────────────────────────
     {
       key:     '/dashboard/config',
       icon:    <SettingOutlined />,
@@ -146,7 +162,7 @@ const MainLayout: React.FC = () => {
       </Sider>
 
       <Layout>
-        <Content style={{ minHeight: '100vh', display: 'flex' }}>
+        <Content style={{ height: '100vh', overflow: 'hidden', display: 'flex' }}>
           <Outlet />
         </Content>
       </Layout>

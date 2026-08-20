@@ -1,189 +1,68 @@
-import React, { useMemo, useState } from 'react';
-import { useInventory, useDeleteInventory, useDeleteItem } from '../hooks/useInventory';
-import dayjs from 'dayjs';
-import { Alert, Card, Spin, Table, Tag, Typography, Button, Space, Popconfirm, message, Input, Result, Popover, Checkbox, Divider, Tooltip } from 'antd';
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { Alert, Spin, Tag, Typography, Button, Space, Popconfirm, message, Input, Result, Popover, Checkbox, Divider, Tooltip } from 'antd';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ControlOutlined } from '@ant-design/icons';
+import { useInventory, useDeleteInventory, useDeleteItem } from '../hooks/useInventory';
+import { useAuthContext } from '../context/AuthContext';
+
 import { ModalAddItemInventory } from '../components/ModalAddItemInventory';
 import { ModalEditItemInventory } from '../components/ModalEditItemInventory';
 import { ModalEditInventory } from '../components/ModalEditInventory';
-import { useAuthContext } from '../context/AuthContext';
 import ModalBulkEdit from '../components/ModalBulkEditItems';
-
+import { InventoryTable } from '../components/InventoryTable';
+import { useDeleteItemsBulk } from '../hooks/useItems';
 
 const { Title, Text } = Typography;
 
 const InventoryPage: React.FC = () => {
   const { hasPermission, isTenant } = useAuthContext();
   const { id } = useParams();
+  const navigate = useNavigate();
+
+  // Queries y Mutations
   const { data, isLoading, error, refetch } = useInventory(Number(id));
   const { mutate: deleteInventory, isPending } = useDeleteInventory();
   const { mutate: deleteItem } = useDeleteItem();
+  const { mutate: bulkDelete, isPending: isDeletingBulk } = useDeleteItemsBulk(Number(id));
 
-
+  // Estados de Modales
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isEditItemModalOpen, setIsEditItemModalOpen] = useState(false);
+  const [isBulkModalVisible, setIsBulkModalVisible] = useState(false);
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
+  // Estados de la Tabla
   const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
   const [columnSearch, setColumnSearch] = useState('');
-  const [isBulkModalVisible, setIsBulkModalVisible] = useState(false);
-
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
 
-  const rowSelection = {
-    selectedRowKeys,
-    onChange: (nuevosIdsSeleccionados: React.Key[]) => {
-      setSelectedRowKeys(nuevosIdsSeleccionados);
-    },
-  };
-
-  const navigate = useNavigate();
-
-
-  const columns = useMemo(() => {
-
-    if (!data?.items) return [];
-
-    // 1. Columnas estáticas iniciales
-    const cols: any[] = [
-      { title: 'ID', dataIndex: 'id', key: 'id', width: 70, align: 'center' },
-      { title: 'Nombre', dataIndex: 'nombre', key: 'nombre', align: 'center' },
-      { title: 'Cantidad', dataIndex: 'cantidad', key: 'cantidad', align: 'center' },
-    ];
-
-    // 2. Columnas dinámicas (Tus atributos: Color, Vencimiento, etc.)
-    if (data?.atributos) {
-      Object.keys(data.atributos).forEach((key) => {
-        const tipoAtributo = data.atributos[key];
-        cols.push({
-          title: key.charAt(0).toUpperCase() + key.slice(1),
-          dataIndex: ['atributos', key],
-          key: key,
-          align: 'center',
-          render: (value: any) => {
-
-            if (value === undefined || value === null || value === '') {
-              return <Tag color="default">N/A</Tag>;
-            }
-
-            if (tipoAtributo === 'boolean' || typeof value === 'boolean' || value === 'true' || value === 'false') {
-              const esVerdadero = value === true || String(value).toLowerCase() === 'true';
-              return <Tag color={esVerdadero ? 'green' : 'red'}>{esVerdadero ? 'Sí' : 'No'}</Tag>;
-            }
-
-            if (tipoAtributo === 'date') {
-              return dayjs(value).format('DD/MM/YYYY');
-            }
-
-            return String(value);
-          }
-        });
-      });
-    }
-
-    // 3. Columna de fecha 
-    cols.push({
-      title: 'Creado el',
-      dataIndex: 'creado_en',
-      key: 'creado_en',
-      align: 'center',
-      render: (date: string) => dayjs(date).format('DD/MM/YYYY HH:mm'),
-    });
-
-    // 4. Columna de Acciones
-    cols.push({
-      title: 'Acciones',
-      key: 'acciones',
-      align: 'center',
-      fixed: 'right',
-      width: 100,
-      render: (_: any, record: any) => {
-        const canEdit = isTenant || hasPermission('items', 'update');
-        const canDelete = isTenant || hasPermission('items', 'delete');
-
-        if (!canEdit && !canDelete) return null;
-
-        return (
-          <Space size="small">
-            {canEdit && (
-              <Button
-                type="text"
-                icon={<EditOutlined />}
-                onClick={() => {
-                  setSelectedItem(record);
-                  setIsEditItemModalOpen(true);
-                }}
-              />
-            )}
-            {canDelete && (
-              <Popconfirm
-                title="¿Eliminar artículo?"
-                onConfirm={() => {
-                  if (deleteItem) {
-                    deleteItem(record.id);
-                  }
-                }
-                }
-                okText="Sí"
-                cancelText="No"
-                okButtonProps={{ danger: true }}
-              >
-                <Button type="text" danger icon={<DeleteOutlined />} />
-              </Popconfirm>
-            )}
-          </Space>
-        );
-      }
-    });
-
-    const columnasVisibles = cols.filter(
-      (col) => !hiddenColumns.includes(col.key as string) || ['id', 'nombre', 'acciones'].includes(col.key as string)
-    );
-
-    return columnasVisibles;
-  }, [data, isTenant, hasPermission, hiddenColumns]); // Se recalcula si cambian los datos o permisos
-
-  const filteredItems = useMemo(() => {
-    if (!data?.items) return [];
-
-    let itemsAFiltrar = data.items;
-
-    if (searchTerm.trim()) {
-      const lowerSearch = searchTerm.toLowerCase();
-      itemsAFiltrar = itemsAFiltrar.filter((item: any) => {
-        const matchNombre = item.nombre?.toLowerCase().includes(lowerSearch);
-        const matchId = item.id?.toString().includes(lowerSearch);
-        return matchNombre || matchId;
-      });
-    }
-
-    return [...itemsAFiltrar].sort((a: any, b: any) => a.id - b.id);
-  }, [data?.items, searchTerm]);
-
-  const handleDelete = () => {
+  const handleDeleteInventory = () => {
     deleteInventory(Number(id), {
       onSuccess: () => {
         message.success('Inventario eliminado correctamente');
         navigate('/dashboard/inventario');
       },
-      onError: (error) => {
-        console.error("Error al borrar:", error);
+      onError: (err) => {
+        console.error("Error al borrar:", err);
         message.error('No se pudo eliminar el inventario. Verificá que esté vacío.');
       }
     });
   }
 
+  // Manejadores para pasarle a la tabla
+  const handleEditItem = (item: any) => {
+    setSelectedItem(item);
+    setIsEditItemModalOpen(true);
+  };
+
+  const handleDeleteItem = (itemId: number) => {
+    if (deleteItem) deleteItem(itemId);
+  };
+
   if (!isTenant && !hasPermission('items', 'read')) {
-    return (
-      <Result
-        status="403"
-        title="Sin acceso"
-        subTitle="No tenés permiso para ver los artículos. Hablá con el administrador."
-      />
-    );
+    return <Result status="403" title="Sin acceso" subTitle="No tenés permiso para ver los artículos." />;
   }
 
   if (isLoading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
@@ -193,51 +72,27 @@ const InventoryPage: React.FC = () => {
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-
       <div style={{ padding: '40px' }}>
+
+        {/* ENCABEZADO */}
         <Space size="small">
-
-          <Title level={3} style={{ margin: 0 }}>
-            {data?.nombre}
-          </Title>
-
-          {/* EDITAR INVENTARIO*/}
-          <Button
-            type="default"
-            shape="circle"
-            icon={<EditOutlined />}
-            onClick={() => setIsEditModalOpen(true)}
-          />
-
-          {/* ELIMINAR INVENTARIO*/}
+          <Title level={3} style={{ margin: 0 }}>{data?.nombre}</Title>
+          <Button type="default" shape="circle" icon={<EditOutlined />} onClick={() => setIsEditModalOpen(true)} />
           <Popconfirm
             title="Eliminar Inventario"
-            description="¿Estás seguro de que querés borrar este inventario? Esta operacion es irreversible! "
-            onConfirm={handleDelete}
+            description="¿Estás seguro de que querés borrar este inventario? Esta operacion es irreversible!"
+            onConfirm={handleDeleteInventory}
             okText="Sí, eliminar"
             cancelText="Cancelar"
             okButtonProps={{ danger: true, loading: isPending }}
           >
-            <Button
-              danger
-              type="primary"
-              shape="circle"
-              icon={<DeleteOutlined />}
-            />
+            <Button danger type="primary" shape="circle" icon={<DeleteOutlined />} />
           </Popconfirm>
-
-          {/* ID DEL INVENTARIO */}
-          <Tag color="blue" style={{ margin: 0, padding: '4px 8px', fontSize: '14px' }}>
-            ID: {data?.id}
-          </Tag>
-
+          <Tag color="blue" style={{ margin: 0, padding: '4px 8px', fontSize: '14px' }}>ID: {data?.id}</Tag>
         </Space>
 
-
-
-        {/* --- BARRA DE HERRAMIENTAS SUPERIOR --- */}
+        {/* BARRA DE HERRAMIENTAS SUPERIOR */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 10 }}>
-          {/* 1. IZQUIERDA: Buscador */}
           <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start', gap: 16 }}>
             <Input
               placeholder="Buscar artículo..."
@@ -252,18 +107,14 @@ const InventoryPage: React.FC = () => {
               placement="right"
               content={
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 220 }}>
-
-                  {/* 1. EL BUSCADOR INTERNO (Exclusivo para las columnas) */}
                   <Input
                     placeholder="Buscar columna..."
                     prefix={<SearchOutlined />}
                     value={columnSearch}
                     onChange={(e) => setColumnSearch(e.target.value)}
                     allowClear
-                    size="small" // Clave para que se vea como un sub-buscador
+                    size="small"
                   />
-
-                  {/* 2. FECHA DE CREACIÓN */}
                   {(!columnSearch || 'fecha de creación'.includes(columnSearch.toLowerCase())) && (
                     <Checkbox
                       checked={!hiddenColumns.includes('creado_en')}
@@ -275,20 +126,9 @@ const InventoryPage: React.FC = () => {
                       Fecha de Creación
                     </Checkbox>
                   )}
-
                   <Divider style={{ margin: '4px 0' }} />
                   <Text type="secondary" style={{ fontSize: 12 }}>Atributos dinámicos</Text>
-
-                  {/* 3. CONTENEDOR CON SCROLL */}
-                  <div style={{
-                    maxHeight: 250,
-                    overflowY: 'auto',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    gap: 8,
-                    paddingRight: 4
-                  }}>
-                    {/* Renderizamos solo los atributos que coinciden con el mini-buscador */}
+                  <div style={{ maxHeight: 250, overflowY: 'auto', display: 'flex', flexDirection: 'column', gap: 8, paddingRight: 4 }}>
                     {data?.atributos && Object.keys(data.atributos)
                       .filter((key) => key.toLowerCase().includes(columnSearch.toLowerCase()))
                       .map((key) => (
@@ -303,112 +143,74 @@ const InventoryPage: React.FC = () => {
                           {key.charAt(0).toUpperCase() + key.slice(1)}
                         </Checkbox>
                       ))}
-
-                    {/* Mensaje de "No encontrado" si tipea algo que no existe */}
-                    {data?.atributos &&
-                      Object.keys(data.atributos).filter(k => k.toLowerCase().includes(columnSearch.toLowerCase())).length === 0 && (
-                        <Text type="secondary" style={{ fontSize: 12, textAlign: 'center' }}>
-                          No hay coincidencias
-                        </Text>
-                      )}
                   </div>
                 </div>
               }
             >
               <Tooltip title="Configurar columnas">
-                <Button
-                  icon={<ControlOutlined />}
-                />
+                <Button icon={<ControlOutlined />} />
               </Tooltip>
             </Popover>
             {canAddItems && (
               <Tooltip title="Agregar Artículo">
-                <Button
-                  type='primary'
-                  icon={<PlusOutlined />}
-                  onClick={() => setIsModalOpen(true)}
-                />
+                <Button type='primary' icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)} />
               </Tooltip>
             )}
           </div>
         </div>
 
+        {/* ACCIONES MASIVAS */}
         {selectedRowKeys.length > 0 && (
-          <div style={{
-            padding: '16px',
-            marginBottom: '16px',
-            borderRadius: '8px',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center'
-          }}>
-            <span>
-              Seleccionaste <b>{selectedRowKeys.length}</b> artículos.
-            </span>
-            <Button type="primary" onClick={() => setIsBulkModalVisible(true)}>
-              Editar Atributo Masivamente
-            </Button>
+          <div style={{ padding: '16px', marginBottom: '16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
+            <span>Seleccionaste <b>{selectedRowKeys.length}</b> artículos.</span>
+            <Space>
+
+              {/* BOTON EDICION MASIVA*/}
+              <Button type="default" onClick={() => setIsBulkModalVisible(true)}>
+                Editar Atributo Masivamente
+              </Button>
+
+              {/* BOTON ELIMINACION MASIVA */}
+              <Popconfirm
+                title={`¿Eliminar ${selectedRowKeys.length} artículos?`}
+                description="Esta acción no se puede deshacer."
+                okText="Sí, eliminar"
+                cancelText="No"
+                okButtonProps={{ danger: true }}
+                onConfirm={() => {
+                  const idsNumeric = selectedRowKeys.map(key => Number(key));
+                  bulkDelete(idsNumeric, {
+                    onSuccess: () => setSelectedRowKeys([]) 
+                  });
+                }}
+              >
+                <Button type="primary" danger loading={isDeletingBulk}>
+                  Eliminar Seleccionados
+                </Button>
+              </Popconfirm>
+            </Space>
           </div>
         )}
 
-        <Table
-          rowSelection={rowSelection}
-          columns={columns}
-          dataSource={filteredItems}
-          rowKey="id"
-          bordered
-          pagination={{
-            pageSize: 10,
-            style: { marginBottom: 0, marginTop: 15 }
-          }}
-          scroll={{
-            y: 'calc(90vh - 200px)',
-            x: 'max-content'
-          }}
-
+        {/* LLAMAMOS AL COMPONENTE DE LA TABLA */}
+        <InventoryTable
+          items={data?.items || []}
+          atributos={data?.atributos || {}}
+          searchTerm={searchTerm}
+          hiddenColumns={hiddenColumns}
+          selectedRowKeys={selectedRowKeys}
+          setSelectedRowKeys={setSelectedRowKeys}
+          onEditItem={handleEditItem}
+          onDeleteItem={handleDeleteItem}
         />
 
       </div>
 
-      <ModalAddItemInventory
-        open={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        inventoryId={Number(id)}
-        atributosRequeridos={data?.atributos || {}}
-      />
-
-      <ModalEditInventory
-        isOpen={isEditModalOpen}
-        onClose={() => setIsEditModalOpen(false)}
-        inventoryId={Number(id)}
-        currentName={data?.nombre || ''}
-        currentAtributos={data?.atributos || {}}
-      />
-
-      <ModalEditItemInventory
-        open={isEditItemModalOpen}
-        onClose={() => {
-          setIsEditItemModalOpen(false);
-          setSelectedItem(null);
-        }}
-        item={selectedItem}
-        atributosRequeridos={data?.atributos || {}}
-      />
-
-      <ModalBulkEdit
-        visible={isBulkModalVisible}
-        onClose={() => setIsBulkModalVisible(false)}
-        selectedIds={selectedRowKeys}
-        atributosInventario={Object.entries(data?.atributos || {}).map(([key, val]: any) => ({
-          nombre: key,
-          tipo: val
-        }))}
-        onSuccess={() => {
-          refetch();
-          setSelectedRowKeys([]);
-        }}
-      />
-
+      {/* MODALES */}
+      <ModalAddItemInventory open={isModalOpen} onClose={() => setIsModalOpen(false)} inventoryId={Number(id)} atributosRequeridos={data?.atributos || {}} />
+      <ModalEditInventory isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} inventoryId={Number(id)} currentName={data?.nombre || ''} currentAtributos={data?.atributos || {}} />
+      <ModalEditItemInventory open={isEditItemModalOpen} onClose={() => { setIsEditItemModalOpen(false); setSelectedItem(null); }} item={selectedItem} atributosRequeridos={data?.atributos || {}} />
+      <ModalBulkEdit visible={isBulkModalVisible} onClose={() => setIsBulkModalVisible(false)} selectedIds={selectedRowKeys} atributosInventario={Object.entries(data?.atributos || {}).map(([key, val]: any) => ({ nombre: key, tipo: val }))} onSuccess={() => { refetch(); setSelectedRowKeys([]); }} />
     </div>
   );
 };

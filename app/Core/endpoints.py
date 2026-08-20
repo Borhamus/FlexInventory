@@ -1,16 +1,20 @@
 """
-Endpoints de gestión de tenants, protegidos con header X-Developer-Key. Solo accesibles por
-desarrolladores, no por usuarios normales. Al crear un tenant, se genera su schema en la BD
-y un usuario owner automáticamente.
+Endpoints de gestión de tenants.
+
+La creación de tenants (POST /) es pública: cualquier usuario puede crear su
+propia cuenta para gestionar su stock. Listar y consultar tenants (GET) sigue
+protegido con X-Developer-Key — solo para los desarrolladores.
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Security, status
 from fastapi.security.api_key import APIKeyHeader
+from sqlalchemy import text
 from sqlalchemy.orm import Session
 from typing import List
 import re
 import os
-from app.db_config import get_db, create_tenant_schema
+import secrets
+from app.db_config import get_db, create_tenant_schema, engine
 from app.Core import models, schemas
 from app.Core.auth import bcrypt_context
 
@@ -20,7 +24,10 @@ router = APIRouter(prefix="/tenants", tags=["Tenants (Developer)"])
 api_key_header = APIKeyHeader(name="X-Developer-Key", auto_error=False)
 
 def verify_developer_key(key: str = Security(api_key_header)):
-    if key != os.getenv("DEVELOPER_API_KEY"):
+    expected = os.getenv("DEVELOPER_API_KEY")
+    # Falla cerrado: si la env no está configurada o no llegó el header, denegar.
+    # secrets.compare_digest evita timing attacks en la comparación.
+    if not expected or not key or not secrets.compare_digest(key, expected):
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Acceso restringido. Se requiere X-Developer-Key válida.",
@@ -37,14 +44,14 @@ def generate_schema_name(tenant_name: str) -> str:
 # Endpoints — requieren developer key
 # ==========================================
 
-@router.post("/", response_model=schemas.TenantResponse, status_code=201,
-             dependencies=[Depends(verify_developer_key)])
+@router.post("/", response_model=schemas.TenantResponse, status_code=201)
 def create_tenant(tenant_data: schemas.TenantCreate, db: Session = Depends(get_db)):
     """
     Registra un nuevo tenant y crea su schema de base de datos aislado.
 
-    Requiere el header `X-Developer-Key` — no es accesible por usuarios finales.
-    Al crearse el tenant, se genera automáticamente un usuario owner con `role=tenant`
+    Endpoint público: cualquier usuario puede crear su propia cuenta para
+    gestionar su stock. Al crearse el tenant, se genera automáticamente un
+    usuario owner con `role=tenant`
     que tiene acceso total y no puede ser modificado por empleados.
 
     **Ejemplo de request:**
@@ -93,14 +100,24 @@ def create_tenant(tenant_data: schemas.TenantCreate, db: Session = Depends(get_d
             is_active       = True,
         )
         db.add(owner)
-        db.commit()
 
+        # Crear el schema ANTES del commit: si falla, el rollback revierte
+        # tenant + owner y no queda un tenant huérfano en public.
         create_tenant_schema(schema_name)
+        db.commit()
         db.refresh(new_tenant)
         return new_tenant
 
     except Exception as e:
         db.rollback()
+        # Compensación: si el schema llegó a crearse pero el commit falló,
+        # eliminarlo para no dejar un schema huérfano. (schema_name ya fue
+        # verificado como inexistente más arriba y está sanitizado.)
+        try:
+            with engine.begin() as conn:
+                conn.execute(text(f'DROP SCHEMA IF EXISTS "{schema_name}" CASCADE'))
+        except Exception:
+            pass
         raise HTTPException(500, detail=f"Error al crear tenant: {str(e)}")
 
 

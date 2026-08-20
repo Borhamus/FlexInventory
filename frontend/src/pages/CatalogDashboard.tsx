@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Row, Col, Statistic, Empty, Button, Space, Typography, Tooltip, Modal, Form, List, Avatar, Result } from 'antd';
+import { Card, Row, Col, Statistic, Empty, Button, Space, Typography, Tooltip, Modal, Form, List, Avatar, Result, Flex, Input } from 'antd';
 import {
   BoxPlotOutlined,
   PlusOutlined,
@@ -8,7 +8,8 @@ import {
   DeleteOutlined,
   CalendarOutlined,
   BlockOutlined,
-  FolderOutlined
+  FolderOutlined,
+  SearchOutlined
 } from '@ant-design/icons';
 import { useCatalogos, useCreateCatalogo, useDeleteCatalogo, useUpdateCatalogo } from '../hooks/useCatalogos';
 import { useNavigate } from 'react-router-dom';
@@ -30,6 +31,8 @@ export const CatalogoDashboard = () => {
 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
+  // estado para barra de busqueda
+  const [searchText, setSearchText] = useState('');
 
   // Permisos de catálogos
   const canCreate = isTenant || hasPermission('catalogos', 'create');
@@ -99,36 +102,46 @@ export const CatalogoDashboard = () => {
     });
   };
 
+  // filtrado en vivo
+  const filteredCatalogos = catalogos?.filter(cat => 
+    cat.nombre.toLowerCase().includes(searchText.toLowerCase())
+  );
+
   return (
     <div style={{ padding: '24px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
 
-      {/* HEADER */}
-      <div style={{ marginBottom: '24px', flex: 'none' }}>
-        <Title level={2} style={{ margin: 0 }}>Resumen de Catálogos</Title>
+      <Title level={2} style={{ margin: 0, marginBottom: '16px' }}>Catálogos</Title> 
+
+      {/* NUEVO HEADER ESTILO INVENTARIO */}
+      <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center' }}>
+        
+        <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+          <Input
+            placeholder="Buscar catálogo..."
+            size="large"
+            allowClear
+            prefix={<SearchOutlined style={{ color: 'rgba(255,255,255,0.45)' }} />} // Ajustá el color según tu tema oscuro
+            onChange={(e) => setSearchText(e.target.value)}
+            style={{ maxWidth: '300px' }}
+          />
+          
+          {canCreate && (
+            <Button 
+              type="primary" 
+              size="large" 
+              icon={<PlusOutlined />} 
+              onClick={() => setIsModalOpen(true)}
+            />
+          )}
+        </div>
       </div>
 
-      {/* ESTADÍSTICAS */}
-      <div style={{ flex: 'none' }}>
-        <Row gutter={[16, 16]} style={{ marginBottom: '32px' }}>
-          <Col xs={24} sm={8}>
-            <Card bordered={false} style={{ boxShadow: '0 2px 8px rgba(0,0,0,0.06)' }}>
-              <Statistic
-                title="Total de Catálogos"
-                value={catalogos?.length || 0}
-                prefix={<BoxPlotOutlined />}
-                valueStyle={{ color: '#1677ff' }}
-              />
-            </Card>
-          </Col>
-        </Row>
-      </div>
-
-      {/* LISTA DE CATÁLOGOS */}
+      {/* LISTA DE CATÁLOGOS FILTRADA */}
       <div style={{ flex: '1', overflowY: 'auto' }}>
         {!hasCatalogos ? (
-          <div style={{ padding: '100px 0', textAlign: 'center', borderRadius: '8px', border: '1px dashed #d9d9d9' }}>
-            <Empty description="No hay catálogos creados todavía.">
-              {canCreate && (
+          <div style={{ padding: '100px 0', textAlign: 'center', borderRadius: '8px', border: '1px dashed #444' }}>
+            <Empty description={searchText ? "No se encontraron catálogos con ese nombre." : "No hay catálogos creados todavía."}>
+              {!searchText && canCreate && (
                 <Button type="primary" size="large" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
                   Crear mi primer catálogo
                 </Button>
@@ -137,14 +150,16 @@ export const CatalogoDashboard = () => {
           </div>
         ) : (
           <List
-            dataSource={catalogos}
+            // 5. Le pasamos la lista filtrada en lugar de la original
+            dataSource={filteredCatalogos} 
             renderItem={(cat) => (
               <Card
                 hoverable
                 style={{ marginBottom: 12, width: '100%' }}
                 styles={{ body: { padding: '16px 24px' } }}
               >
-                <Row align="middle" gutter={24}>
+               {/* ... El interior de la Card queda idéntico a lo que ya tenías ... */}
+               <Row align="middle" gutter={24}>
                   <Col flex="none">
                     <Avatar
                       size={48}
@@ -162,6 +177,7 @@ export const CatalogoDashboard = () => {
                     </div>
                   </Col>
 
+                  {/* FECHAS Y ESTADÍSTICAS */}
                   <Col flex="none" style={{ minWidth: '150px' }}>
                     <Space direction="vertical" size={0}>
                       <Text type="secondary" style={{ fontSize: '12px' }}>
@@ -176,20 +192,33 @@ export const CatalogoDashboard = () => {
                     </Space>
                   </Col>
 
-                  {/* Acciones según permisos */}
+                  {/* BOTONES DE ACCIÓN (Ver, Editar, Eliminar) */}
                   <Col flex="none">
                     <Space>
                       {canReadItems && (
-                        <Button type="text" icon={<EyeOutlined />} onClick={() => navigate(`/dashboard/catalogos/${cat.id}`)} />
+                        <Button 
+                          type="text" 
+                          icon={<EyeOutlined />} 
+                          onClick={() => navigate(`/dashboard/catalogos/${cat.id}`)} 
+                        />
                       )}
                       {canEdit && (
                         <Tooltip title="Editar">
-                          <Button type="text" icon={<EditOutlined />} onClick={() => handleOpenEdit(cat)} />
+                          <Button 
+                            type="text" 
+                            icon={<EditOutlined />} 
+                            onClick={() => handleOpenEdit(cat)} 
+                          />
                         </Tooltip>
                       )}
                       {canDelete && (
                         <Tooltip title="Eliminar">
-                          <Button type="text" danger icon={<DeleteOutlined />} onClick={() => showDeleteConfirm(cat.id, cat.nombre)} />
+                          <Button 
+                            type="text" 
+                            danger 
+                            icon={<DeleteOutlined />} 
+                            onClick={() => showDeleteConfirm(cat.id, cat.nombre)} 
+                          />
                         </Tooltip>
                       )}
                     </Space>
