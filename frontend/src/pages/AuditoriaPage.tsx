@@ -9,29 +9,37 @@ const { Title } = Typography;
 const AuditoriaPage: React.FC = () => {
   const [data, setData] = useState<AuditLog[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  // Tamaños de página que el usuario puede elegir con el selector de la
+  // tabla (showSizeChanger): 5, 10, 20, y de ahí de 10 en 10 hasta 100 —
+  // el mismo techo que el backend acepta por request (app/auditoria/router.py).
+  const PAGE_SIZE_OPTIONS = ['5', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'];
+  const DEFAULT_PAGE_SIZE = 10;
+
   const [pagination, setPagination] = useState<TablePaginationConfig>({
     current: 1,
-    pageSize: 15,
-    total: 0, 
+    pageSize: DEFAULT_PAGE_SIZE,
+    total: 0,
+    showSizeChanger: true,
+    pageSizeOptions: PAGE_SIZE_OPTIONS,
   });
 
   const fetchHistorial = async (page: number, pageSize: number) => {
     setLoading(true);
     try {
       const skip = (page - 1) * pageSize;
-      
+
       const response = await auditoriaService.getHistorial(skip, pageSize)
-      
+
       console.log("Datos recibidos:", response.items);
       console.log("Total reportado por backend:", response.total);
 
       setData(response.items || response);
-      setPagination({
-        ...pagination,
+      setPagination((prev) => ({
+        ...prev,
         current: page,
         pageSize: pageSize,
         total: response.total
-      });
+      }));
     } catch (error) {
       console.error('Error al cargar el historial:', error);
     } finally {
@@ -40,11 +48,14 @@ const AuditoriaPage: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchHistorial(pagination.current || 1, pagination.pageSize || 15);
+    fetchHistorial(1, DEFAULT_PAGE_SIZE);
   }, []);
 
   const handleTableChange = (newPagination: TablePaginationConfig) => {
-    fetchHistorial(newPagination.current || 1, newPagination.pageSize || 15);
+    // Si el usuario cambia el tamaño de página, "current" que manda antd ya
+    // viene recalculado para seguir mostrando aproximadamente los mismos
+    // registros — solo hace falta pedirle al backend la página nueva.
+    fetchHistorial(newPagination.current || 1, newPagination.pageSize || DEFAULT_PAGE_SIZE);
   };
 
   return (
