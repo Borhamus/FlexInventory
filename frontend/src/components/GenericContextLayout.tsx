@@ -47,16 +47,23 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
           style={{
             borderRight: `1px solid ${token.colorBorderSecondary}`,
             background: token.colorBgContainer,
-            height: '100%'
+            height: '100%',
+            // Flex column en vez de un "height: 75vh" fijo en la lista de
+            // abajo: así la lista ocupa exactamente el espacio que sobra
+            // después del título/buscador/botón, sea cual sea el alto real
+            // de la ventana, en vez de un número mágico que puede no
+            // coincidir (la misma familia de bug que el del scroll roto).
+            display: 'flex',
+            flexDirection: 'column',
           }}
         >
           {/* TITULO */}
-          <div style={{ padding: '20px', textAlign: 'center' }}>
+          <div style={{ padding: '20px', textAlign: 'center', flexShrink: 0 }}>
             <Text strong type="secondary">{title}</Text>
           </div>
 
           {/* BARRA DE BUSQUEDA */}
-          <div style={{ padding: '0 16px 12px 16px' }}>
+          <div style={{ padding: '0 16px 12px 16px', flexShrink: 0 }}>
             <Input
               placeholder="Buscar..."
               prefix={<SearchOutlined style={{ color: token.colorTextQuaternary }} />}
@@ -69,8 +76,12 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
           {isLoading ? (
             <div style={{ textAlign: 'center', marginTop: 20 }}><Spin /></div>
           ) : (
-            <div style={{ display: 'flex', flexDirection: 'column' }}>
-              <div style={{ height: '75vh', overflowY: 'auto', overflowX: 'hidden' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', flex: 1, minHeight: 0 }}>
+              {/* flex:1 + minHeight:0 (no "height: 75vh"): minHeight:0 es
+                  necesario porque por default un hijo flex no se achica
+                  más allá de su contenido — sin esto, overflowY:auto no
+                  hace nada y la lista larga empuja todo hacia abajo. */}
+              <div style={{ flex: 1, minHeight: 0, overflowY: 'auto', overflowX: 'hidden' }}>
                 {filteredItems.map(item => (
                   <Button
                     key={item.id}
@@ -106,7 +117,10 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
                   </Button>
                 ))}
               </div>
-              <div style={{ padding: '20px 16px' }}>
+              {/* Padding inferior extra a propósito: sin esto el botón queda
+                  pegado al borde de abajo de la ventana en pantallas más
+                  chicas o con barra de tareas visible. */}
+              <div style={{ padding: '20px 16px 32px 16px', flexShrink: 0 }}>
                 {canAdd && (
                   <Button block onClick={onAddClick}>
                     + Crear Nuevo
@@ -134,9 +148,12 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
               alignItems: 'center',
               justifyContent: 'center',
               fontSize: 11,
-              color: hovered ? token.colorText : token.colorTextSecondary,
-              background: hovered ? token.colorFillSecondary : token.colorBgElevated,
-              border: `1px solid ${token.colorBorderSecondary}`,
+              // Usa el color del tema (colorPrimary, cableado a lo que el
+              // usuario elige en Ajustes) en vez de grises neutros — antes
+              // se perdía contra el fondo, ahora se nota que es un control.
+              color: hovered ? '#fff' : token.colorPrimary,
+              background: hovered ? token.colorPrimary : token.colorPrimaryBg,
+              border: `1px solid ${token.colorPrimary}`,
               borderLeft: 'none',
               borderRadius: '0 6px 6px 0',
               cursor: 'pointer',
@@ -149,7 +166,7 @@ const GenericContextLayout: React.FC<GenericContextLayoutProps> = ({
         )}
       </div>
 
-      <Content style={{ height: 'calc(100vh)', overflow: 'hidden' }}>
+      <Content style={{ height: '100%', overflow: 'hidden' }}>
         <Outlet />
       </Content>
     </Layout>

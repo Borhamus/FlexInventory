@@ -17,7 +17,7 @@ export const InventoryDashboard = () => {
   const totalInventarios = inventories?.length || 0;
 
   return (
-    <div style={{ padding: '40px' }}>
+    <div style={{ height: '100%', overflowY: 'auto', padding: '40px' }}>
       <h2 style={{ marginBottom: '24px' }}>Resumen General de Inventarios</h2>
       
       <Row gutter={16}>

@@ -220,7 +220,10 @@ const DatabasePage: React.FC = () => {
   const driveConnected = status?.drive_connected ?? false;
 
   return (
-    <div style={{ padding: '32px', maxWidth: 800, margin: '0 auto', width: '100%' }}>
+    // height:100% + overflowY:auto: mismo motivo que en las otras páginas —
+    // el documento ya no scrollea solo, cada página tiene que encargarse
+    // de su propio scroll interno cuando el contenido no entra.
+    <div style={{ height: '100%', overflowY: 'auto', padding: '32px', maxWidth: 800, margin: '0 auto', width: '100%' }}>
       {contextHolder}
 
       <Title level={3} style={{ marginBottom: 4 }}>Base de Datos</Title>

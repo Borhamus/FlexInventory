@@ -48,13 +48,16 @@ const AuditoriaPage: React.FC = () => {
   };
 
   return (
-    <div style={{ padding: '24px', width: '100%' }}>
+    // height:100% + overflowY:auto: sin esto el panel de historial quedaba
+    // sin forma de scrollear cuando la tabla + paginado eran más altos que
+    // la ventana (el documento ya no scrollea, cada panel scrollea solo).
+    <div style={{ height: '100%', overflowY: 'auto', padding: '24px', width: '100%' }}>
       <Card title={<Title level={4} style={{ margin: 0 }}>Historial de Movimientos</Title>} bordered={false}>
-        <AuditoriaTable 
-          data={data} 
-          loading={loading} 
-          pagination={pagination} 
-          onChange={handleTableChange} 
+        <AuditoriaTable
+          data={data}
+          loading={loading}
+          pagination={pagination}
+          onChange={handleTableChange}
         />
       </Card>
     </div>

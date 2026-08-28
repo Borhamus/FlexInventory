@@ -74,12 +74,18 @@ const MainLayout: React.FC = () => {
   const navItems = allNavItems.filter((item) => item.visible);
 
   return (
-    <Layout style={{ minHeight: '100vh' }}>
+    // height:'100%' (no minHeight:'100vh'): html/body/#root ya están fijados
+    // en height:100% en index.css de forma confiable. 100vh puede no
+    // coincidir con el alto real disponible (pasa en navegadores de celular
+    // con la barra de direcciones, y en algunos entornos de testing) —
+    // usar % en toda la cadena evita ese desfasaje en vez de solo tapar el
+    // síntoma con overflow:hidden en el body.
+    <Layout style={{ height: '100%' }}>
       <Sider
         width={110}
         theme="dark"
         style={{
-          height: '100vh',
+          height: '100%',
           position: 'sticky',
           top: 0,
           left: 0,
@@ -161,8 +167,8 @@ const MainLayout: React.FC = () => {
         </div>
       </Sider>
 
-      <Layout>
-        <Content style={{ height: '100vh', overflow: 'hidden', display: 'flex' }}>
+      <Layout style={{ height: '100%' }}>
+        <Content style={{ height: '100%', overflow: 'hidden', display: 'flex' }}>
           <Outlet />
         </Content>
       </Layout>

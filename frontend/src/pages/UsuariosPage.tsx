@@ -414,8 +414,11 @@ const UsuariosPage: React.FC = () => {
   ];
 
   return (
-    <Layout style={{ minHeight: '100vh', background: token.colorBgLayout }}>
-      <Content style={{ padding: 32 }}>
+    // height:'100%' en vez de minHeight:'100vh': mismo motivo que en
+    // DashboardPage — sin esto la tabla de empleados quedaba sin forma de
+    // scrollear cuando no entraba entera en el viewport.
+    <Layout style={{ height: '100%', background: token.colorBgLayout }}>
+      <Content style={{ padding: 32, overflowY: 'auto' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
           <Space>
             <TeamOutlined style={{ fontSize: 24, color: '#1677ff' }} />

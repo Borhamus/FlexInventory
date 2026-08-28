@@ -274,7 +274,12 @@ const PasswordSection: React.FC = () => {
 
 const ConfigPage: React.FC = () => {
   return (
-    <div style={{ maxWidth: 1200, margin: '0 auto', padding: '32px 24px', width: '100%' }}>
+    // height:100% + overflowY:auto: el contenedor padre (Content de MainLayout)
+    // recorta en 100vh sin scroll propio — sin esto, en pantallas más bajas
+    // o con zoom, el contenido de más abajo quedaba inalcanzable (no había
+    // forma de verlo ni con scroll ni de otra manera).
+    <div style={{ height: '100%', overflowY: 'auto', width: '100%' }}>
+      <div style={{ maxWidth: 1200, margin: '0 auto', padding: '24px', width: '100%' }}>
 
       <Row gutter={[24, 24]}>
 
@@ -303,6 +308,7 @@ const ConfigPage: React.FC = () => {
           </Card>
         </Col>
       </Row>
+      </div>
     </div>
   );
 };

@@ -95,10 +95,15 @@ const DashboardPage: React.FC = () => {
   const fechaFormateada = fechaHoy.charAt(0).toUpperCase() + fechaHoy.slice(1);
 
   return (
+    // height:'100%' + overflowY:'auto' en vez de minHeight:'100vh' — ese
+    // patrón fue justamente lo que causó el bug del scroll roto: dejaba
+    // que la página creciera más allá del viewport y se apoyaba en que el
+    // documento entero scrolleara, cosa que ya no pasa (a propósito).
     <div style={{
+      height:     '100%',
+      overflowY:  'auto',
       padding:    32,
       width:      '100%',
-      minHeight:  '100vh',
       background: token.colorBgLayout,
     }}>
 

@@ -1,10 +1,17 @@
 @import url('https://fonts.googleapis.com/css2?family=Elms+Sans:ital,wght@0,100..900;1,100..900&display=swap');
 
 /* src/index.css */
+/* El layout está armado como una SPA de altura fija (100vh): cada panel
+   scrollea por su cuenta (Sider, listas, tablas). El documento en sí NUNCA
+   debería scrollear — si algo lo empuja unos px más allá del viewport
+   (redondeo entre los varios 100vh/calc() anidados, zoom, fuentes), sin este
+   overflow:hidden la rueda del mouse scrollea el <body> y desalinea la
+   sidebar `position: sticky` respecto al resto, "rompiendo" la interfaz. */
 html, body, #root {
   height: 100%;
   margin: 0;
   padding: 0;
+  overflow: hidden;
 }
 
 body {
