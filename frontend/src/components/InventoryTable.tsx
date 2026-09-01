@@ -1,4 +1,4 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Table, Tag, Button, Space, Popconfirm } from 'antd';
 import { EditOutlined, DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -30,6 +30,14 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   preserveOrder = false,
 }) => {
   const { hasPermission, isTenant } = useAuthContext();
+
+  // El tamaño de página tiene que vivir en un estado propio: si le
+  // pasáramos a <Table> un objeto de pagination armado de cero en cada
+  // render (como estaba antes), Ant Design lo toma como una configuración
+  // nueva en cada render y pisa el "20 / page" que acaba de elegir el
+  // usuario, volviendo siempre a 10 — mismo criterio que Historial
+  // (AuditoriaPage), 5/10/20 y de ahí de 10 en 10 hasta 100.
+  const [pageSize, setPageSize] = useState(10);
 
   const columns = useMemo(() => {
     if (!items) return [];
@@ -141,7 +149,14 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       rowKey="id"
       bordered
       pagination={{
-        pageSize: 10,
+        pageSize,
+        showSizeChanger: true,
+        // Mismo criterio que Historial (AuditoriaPage): 5, 10, 20, y de ahí
+        // de 10 en 10 hasta 100 — acá es paginado 100% del lado del cliente
+        // (los items ya vienen todos cargados), así que no hace falta tocar
+        // el backend para esto.
+        pageSizeOptions: ['5', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'],
+        onChange: (_page, nuevoPageSize) => setPageSize(nuevoPageSize),
         style: { marginBottom: 0, marginTop: 15 }
       }}
       scroll={{

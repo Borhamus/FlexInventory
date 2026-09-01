@@ -20,7 +20,7 @@ const WelcomePage: React.FC = () => {
           type="primary" 
           size="large" 
           style={styles.ctaButton}
-          onClick={() => navigate('/registro')} 
+          onClick={() => navigate('/login')}
           className='boton-latido'
         >
           Comenzar
