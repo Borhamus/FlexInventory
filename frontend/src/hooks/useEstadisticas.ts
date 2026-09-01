@@ -1,5 +1,6 @@
-import { useQuery, useMutation } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryService } from '../api/inventory.service';
+import type { BloquePersonalizado } from '../api/inventory.service';
 
 export const useInventoryStats = (id: number, enabled: boolean) => {
   return useQuery({
@@ -34,5 +35,27 @@ export const usePromedioRango = (id: number) => {
   return useMutation({
     mutationFn: ({ atributo, desde, hasta }: { atributo: string; desde: number; hasta: number }) =>
       inventoryService.getPromedioRango(id, atributo, desde, hasta),
+  });
+};
+
+// Bloques personalizados: el usuario arma sus propios cálculos (Fase de
+// "estadísticas armadas por el usuario").
+export const useBloquesPersonalizados = (id: number, enabled: boolean) => {
+  return useQuery({
+    queryKey: ['bloques-personalizados', id],
+    queryFn: () => inventoryService.getBloques(id),
+    enabled,
+  });
+};
+
+export const useConfigurarBloques = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, bloques }: { id: number; bloques: BloquePersonalizado[] }) =>
+      inventoryService.configurarBloques(id, bloques),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['bloques-personalizados', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['inventory', variables.id] });
+    },
   });
 };

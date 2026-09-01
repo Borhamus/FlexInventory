@@ -11,6 +11,7 @@ from app.tenant.dependencies import get_tenant_db, require_permission
 from app.tenant.validators import TYPE_DEFAULTS, validate_inventario_atributos
 from app.tenant.roles_atributos import validate_roles_atributos, clean_orphan_roles
 from app.tenant.alertas import calcular_alertas
+from app.tenant.bloques_personalizados import validar_bloques_personalizados, calcular_bloques, limpiar_bloques_huerfanos
 
 router = APIRouter(prefix="/inventarios", tags=["Inventarios"])
 
@@ -24,6 +25,7 @@ POST        = [Depends(Auditor(accion="Crear Inventario", auditar_payload=True))
 PUT         = [Depends(Auditor(accion="Editar Inventario", auditar_payload=True))]
 DELETE      = [Depends(Auditor(accion="Eliminar Inventario", auditar_payload=True))]
 PATCH_ROLES = [Depends(Auditor(accion="Configurar Roles de Atributos", auditar_payload=True))]
+PATCH_BLOQUES = [Depends(Auditor(accion="Configurar Bloques Personalizados", auditar_payload=True))]
 # ────────────────────────────────────────────────────────────────────────
 
 @router.post("/", response_model=schemas.InventarioResponse, status_code=201, dependencies=POST)
@@ -168,6 +170,11 @@ def update_inventario(
         # se limpia sola para que roles_atributos nunca apunte a algo inexistente.
         if inv.roles_atributos:
             update_data["roles_atributos"] = clean_orphan_roles(inv.roles_atributos, update_data["atributos"])
+        # Mismo criterio para los bloques personalizados: si una métrica
+        # quedó apuntando a un atributo borrado/renombrado, se descarta el
+        # bloque entero (ver limpiar_bloques_huerfanos).
+        if inv.bloques_personalizados:
+            update_data["bloques_personalizados"] = limpiar_bloques_huerfanos(inv.bloques_personalizados, update_data["atributos"])
     for field, value in update_data.items():
         setattr(inv, field, value)
     db.commit()
@@ -202,6 +209,49 @@ def configurar_roles_atributos(
     db.commit()
     db.refresh(inv)
     return inv
+
+
+@router.patch("/{inventario_id}/bloques", response_model=schemas.InventarioResponse, dependencies=PATCH_BLOQUES)
+def configurar_bloques_personalizados(
+    inventario_id: int,
+    payload: schemas.BloquesPersonalizadosUpdate,
+    _: dict = _perm("inventarios", "update"),
+    db: Session = Depends(get_tenant_db),
+):
+    """
+    Configura los bloques de estadística personalizados del inventario.
+    Reemplaza por completo la lista vigente (mismo criterio que roles y
+    atributos: se manda el estado completo que se quiere dejar).
+
+    Requiere permiso `inventarios:update` (o ser tenant owner).
+    """
+    inv = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
+    if not inv:
+        raise HTTPException(404, detail="Inventario no encontrado")
+
+    bloques_dict = [b.model_dump() for b in payload.bloques_personalizados]
+    inv.bloques_personalizados = validar_bloques_personalizados(bloques_dict, inv.atributos or {})
+    db.commit()
+    db.refresh(inv)
+    return inv
+
+
+@router.get("/{inventario_id}/bloques", response_model=List[schemas.BloqueCalculado])
+def get_bloques_personalizados(
+    inventario_id: int,
+    _: dict = _perm("inventarios", "read"),
+    db: Session = Depends(get_tenant_db),
+):
+    """
+    Devuelve los bloques personalizados del inventario con sus métricas ya
+    calculadas, listas para interpolar en la plantilla de cada uno.
+
+    Requiere permiso `inventarios:read` (o ser tenant owner).
+    """
+    inv = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
+    if not inv:
+        raise HTTPException(404, detail="Inventario no encontrado")
+    return calcular_bloques(db, inv)
 
 
 @router.delete("/{inventario_id}", status_code=204, dependencies=DELETE)

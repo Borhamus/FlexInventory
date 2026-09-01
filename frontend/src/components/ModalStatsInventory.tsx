@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
-import { Modal, Spin, Empty, Row, Col, Card, Statistic, Tag, Button, Tooltip, theme } from 'antd';
-import { FontSizeOutlined, NumberOutlined, CalendarOutlined, CheckSquareOutlined, InfoCircleOutlined } from '@ant-design/icons';
+import { Modal, Spin, Empty, Row, Col, Card, Statistic, Tag, Button, Tooltip, Popconfirm, Space, theme, message } from 'antd';
+import { FontSizeOutlined, NumberOutlined, CalendarOutlined, CheckSquareOutlined, InfoCircleOutlined, PlusOutlined, EditOutlined, DeleteOutlined, BulbOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useInventoryStats } from '../hooks/useEstadisticas';
+import { useInventoryStats, useBloquesPersonalizados, useConfigurarBloques } from '../hooks/useEstadisticas';
+import { useInventory } from '../hooks/useInventory';
 import { AtributoHistograma } from './AtributoHistograma';
-import type { AtributoStats } from '../api/inventory.service';
+import { ModalBloquePersonalizado } from './ModalBloquePersonalizado';
+import type { AtributoStats, BloquePersonalizado } from '../api/inventory.service';
 
 interface Props {
   open: boolean;
   onClose: () => void;
   inventoryId: number;
+}
+
+// Reemplaza cada {clave} de la plantilla por su valor calculado. Si un
+// valor todavía no llegó (o vino null), muestra "…" en vez de romper el texto.
+function interpolarPlantilla(plantilla: string, valores: Record<string, number | null>): string {
+  return plantilla.replace(/\{([a-zA-Z_][a-zA-Z0-9_]*)\}/g, (_match, clave: string) => {
+    const valor = valores[clave];
+    if (valor === null || valor === undefined) return '…';
+    return typeof valor === 'number' ? valor.toLocaleString('es-AR', { maximumFractionDigits: 2 }) : String(valor);
+  });
 }
 
 const esNumerico = (tipo: string) => ['integer', 'int', 'float', 'number'].includes(tipo);
@@ -64,8 +76,44 @@ const CON_VALOR_EXPLICACION =
 
 export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryId }) => {
   const { data, isLoading, isError } = useInventoryStats(inventoryId, open);
+  const { data: inventario } = useInventory(inventoryId);
+  const { data: bloquesCalculados } = useBloquesPersonalizados(inventoryId, open);
+  const { mutate: configurarBloques, isPending: guardandoBloque } = useConfigurarBloques();
   const [atributoHistograma, setAtributoHistograma] = useState<string | null>(null);
+  const [bloqueEnEdicion, setBloqueEnEdicion] = useState<{ index: number | null; bloque: BloquePersonalizado | null } | null>(null);
   const { token } = theme.useToken();
+
+  const bloquesConfigurados: BloquePersonalizado[] = inventario?.bloques_personalizados ?? [];
+
+  const guardarBloque = (bloque: BloquePersonalizado) => {
+    const nuevaLista = [...bloquesConfigurados];
+    if (bloqueEnEdicion?.index !== null && bloqueEnEdicion?.index !== undefined) {
+      nuevaLista[bloqueEnEdicion.index] = bloque;
+    } else {
+      nuevaLista.push(bloque);
+    }
+    configurarBloques(
+      { id: inventoryId, bloques: nuevaLista },
+      {
+        onSuccess: () => {
+          message.success('Bloque guardado');
+          setBloqueEnEdicion(null);
+        },
+        onError: (error: unknown) => {
+          const detalle = (error as { response?: { data?: { detail?: { message?: string } } } })?.response?.data?.detail?.message;
+          message.error(detalle || 'No se pudo guardar el bloque');
+        },
+      }
+    );
+  };
+
+  const eliminarBloque = (index: number) => {
+    const nuevaLista = bloquesConfigurados.filter((_, i) => i !== index);
+    configurarBloques(
+      { id: inventoryId, bloques: nuevaLista },
+      { onSuccess: () => message.success('Bloque eliminado') }
+    );
+  };
 
   const renderAtributo = (nombre: string, stats: AtributoStats) => {
     const info = TIPO_INFO[stats.tipo] ?? { label: stats.tipo, color: 'default', icono: null, descripcion: 'Tipo de dato de este atributo.' };
@@ -185,8 +233,56 @@ export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryI
         </>
       )}
 
+      <div style={{ marginTop: 24, marginBottom: 8 }}>
+        <div style={{ fontWeight: 500, marginBottom: 4 }}>
+          <BulbOutlined style={{ color: token.colorWarning, marginRight: 6 }} />
+          Bloques Personalizados
+        </div>
+        <p style={{ fontSize: 13, color: token.colorTextSecondary, marginTop: 0, marginBottom: 12 }}>
+          Armá tus propios cálculos con las palabras que quieras — por ejemplo "cuánto me falta gastar para
+          completar la colección".
+        </p>
+
+        {bloquesConfigurados.map((bloque, index) => {
+          const calculado = bloquesCalculados?.find((b) => b.nombre === bloque.nombre);
+          return (
+            <Card
+              key={`${bloque.nombre}-${index}`}
+              size="small"
+              style={{ marginBottom: 12, borderLeft: `3px solid ${token.colorWarning}` }}
+              title={bloque.nombre}
+              extra={
+                <Space size="small">
+                  <Button size="small" icon={<EditOutlined />} onClick={() => setBloqueEnEdicion({ index, bloque })} />
+                  <Popconfirm title="¿Eliminar este bloque?" onConfirm={() => eliminarBloque(index)} okText="Sí" cancelText="No">
+                    <Button size="small" danger icon={<DeleteOutlined />} />
+                  </Popconfirm>
+                </Space>
+              }
+            >
+              {calculado ? interpolarPlantilla(calculado.plantilla, calculado.valores) : <Spin size="small" />}
+            </Card>
+          );
+        })}
+
+        <Button type="dashed" block icon={<PlusOutlined />} onClick={() => setBloqueEnEdicion({ index: null, bloque: null })}>
+          Agregar Bloque Personalizado
+        </Button>
+      </div>
+
       {atributoHistograma && (
         <AtributoHistograma inventoryId={inventoryId} atributo={atributoHistograma} onClose={() => setAtributoHistograma(null)} />
+      )}
+
+      {bloqueEnEdicion && (
+        <ModalBloquePersonalizado
+          open
+          onClose={() => setBloqueEnEdicion(null)}
+          atributos={inventario?.atributos ?? {}}
+          bloqueInicial={bloqueEnEdicion.bloque}
+          onGuardar={guardarBloque}
+          guardando={guardandoBloque}
+        />
       )}
     </Modal>
   );

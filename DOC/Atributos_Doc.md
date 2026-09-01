@@ -338,3 +338,127 @@ Se probó en la app corriendo, con un inventario de 15 items generados con datos
 Backend (Fases 1-5) verificado end-to-end contra Postgres real. Frontend (Fases 6-7) verificado en el navegador contra la app corriendo, con una excepción anotada arriba (popover de orden/filtro, pendiente de confirmación manual). Alertas de umbral/vencimiento (el agregado no obligatorio de la consigna) quedaron fuera de este plan, a definir en una entrega posterior.
 
 ---
+
+## Post-entrega: Bloques Personalizados
+
+Pedido posterior a las 7 fases: que el usuario pueda armar sus propias "tarjetas" de estadística en la ventana de Estadísticas, con un texto editable y cálculos propios — por ejemplo, para una colección de cartas con atributos `la_tiene (bool)` y `costo (float)`: *"Me faltan {N} cartas para completar la colección, y me falta gastar ${M} para conseguirlas"*.
+
+### La decisión de diseño central: armador, no lenguaje de fórmulas
+
+Se descartó explícitamente dejar que el usuario escriba una fórmula de texto libre (tipo `SUM(costo) WHERE la_tiene = false`). Dos razones:
+1. **Seguridad**: evaluar una fórmula escrita a mano termina, en algún punto, ejecutando algo construido a partir de texto del usuario — la puerta de entrada clásica a inyección, y este sistema evita eso desde la Fase 1 (parámetros enlazados, nunca interpolar nombres de atributo).
+2. **Público del software**: el usuario pidió explícitamente que sea simple para gente que no sabe de computación. Un cuadro de texto que espera sintaxis de fórmula es hostil para ese público.
+
+En su lugar: un **bloque** = una plantilla de texto + una o más **métricas**, cada una armada eligiendo de listas (nunca escribiendo): qué calcular (contar / sumar / promediar / mínimo / máximo) y, opcionalmente, un filtro (atributo + operador + valor) para calcular solo sobre algunos items.
+
+### v2: fórmulas que combinan varios atributos (pedido posterior, con caso real de verdulería)
+
+La v1 solo dejaba agregar **un** atributo numérico por métrica (`sum(costo)`, `avg(peso)`...). El usuario trajo un caso que esa versión no podía resolver: en una verdulería, para saber cuánta plata tiene en stock necesita `cantidad × precio_por_kilo` **combinado** por cada item, no cada atributo por separado — 30kg de papa a $500 el kilo más 10kg de cebolla a $300 el kilo, no es "sumar cantidad" ni "sumar precio", es sumar el producto de ambos por línea.
+
+Pedido explícito del usuario para resolverlo: *"Me gusta más una idea donde 'se ven los atributos' y yo puedo agarrar un atributo, ponerlo en la lista, elegir un elemento matemático como un ×, +, /, % y se arme la función así"* — es decir, mismo espíritu de armador visual que v1, pero permitiendo encadenar varios **términos** con operadores aritméticos en vez de un solo atributo.
+
+**Cambio de modelo**: cada métrica pasó de tener un único `atributo` a tener dos listas paralelas:
+- `terminos`: cada uno es `{tipo: "atributo", atributo: "precio_por_kilo"}`, `{tipo: "cantidad"}` (la cantidad nativa del item, sin necesidad de configurarla como atributo aparte) o `{tipo: "constante", valor: 1.5}` (un número fijo, para casos como aplicar un IVA o un descuento).
+- `operadores`: uno menos que la cantidad de términos, cada elemento de `OPERADORES_ARITMETICOS` (`mul`/`div`/`add`/`sub`, es decir ×÷+−) combina el término en esa posición con el siguiente.
+
+**La decisión de orden de evaluación**: una fórmula como `cantidad × precio + descuento` es ambigua si se evalúa con precedencia matemática real (¿primero la multiplicación?) versus si se evalúa en el orden en que el usuario fue agregando los pasos. Para un armador visual apuntado a gente sin conocimientos de programación, meter paréntesis reales en la UI agrega una capa de complejidad (¿cuándo se cierran? ¿anidados?) que contradice el objetivo de simplicidad. Se evaluó la alternativa con el usuario (paréntesis reales y agrupables vs. izquierda-a-derecha estricto con un tooltip aclaratorio) y se optó explícitamente por **izquierda a derecha, sin excepciones** — cada paso se aplica en el orden en que fue agregado a la lista, igual que una calculadora simple — con un ícono "?" al lado del armador que explica esto con un ejemplo, para que el usuario que sí arma fórmulas con varios pasos entienda el orden sin sorpresas.
+
+En SQL esto se construye anidando paréntesis explícitos en el orden de la lista (`((termino_0 OP_0 termino_1) OP_1 termino_2) ...`), así el resultado en Postgres coincide exactamente con lo que el usuario ve armado en pantalla — nunca se deja que la precedencia por defecto de SQL decida.
+
+### v3: todo a clicks — se saca el dropdown de operación (feedback directo sobre la v2)
+
+Probada la v2, el usuario dio feedback concreto con una captura de pantalla: *"Siento que la parte visual de cómo se presenta está mal, no se entiende (...) 'Contar artículos' no sé qué hace, 'Promediar', 'mínimo de', 'máximo de'... esto sacalo directamente porque no le veo sentido"*. Y precisó cómo lo imaginaba: mostrar los atributos del inventario como algo clickeable, y armar la cuenta clickeando atributo → operador matemático → atributo, con un ejemplo concreto (`yalotengo = sí -> cantidad x precio`).
+
+**Decisión de diseño (confirmada con el usuario antes de tocar código)**: quedaba una ambigüedad real — si la fórmula aplica a varios items que cumplen la condición, ¿se suma el resultado de todos o hay que elegir "sumar" vs. "contar"? Se le presentaron dos opciones y eligió la primera: **la operación ya no la elige el usuario, se infiere sola** — si armó una fórmula (tiene términos), se suma su resultado en todos los items que cumplen la condición; si no armó fórmula (fórmula vacía), se cuenta cuántos items cumplen. Esto además elimina de raíz la jerga confusa: promedio/mínimo/máximo se sacaron directamente (no eran necesarios para ningún caso de uso real pedido) y count/sum ni siquiera se muestran como opción — el usuario nunca ve la palabra "operación".
+
+**Cambios concretos en la interacción**:
+- **Condición**: en vez de un checkbox que revela selects, ahora se ve directo la paleta de TODOS los atributos del inventario como chips clickeables (con su tipo en criollo al lado, ej. "yalotengo (sí/no)"). Click en uno lo fija como atributo de la condición — aparece como un chip cerrable (`×`) seguido del selector de operador (filtrado por tipo, igual que antes) y el input de valor. Click en la `×` del chip vuelve a mostrar la paleta completa.
+- **Fórmula**: la fórmula se arma con una máquina de estados de dos fases que se alternan — "esperando un término" muestra chips clickeables de los atributos numéricos + "Cantidad" (la cantidad nativa del item) + "Número fijo…"; "esperando un operador" muestra los 4 chips ×÷+−. Nunca se pueden clickear dos términos ni dos operadores seguidos porque la paleta que corresponde es la única visible en cada momento — así la fórmula queda siempre bien formada sin necesidad de validar combinaciones raras después. Si se deja vacía, un texto lo aclara: "vacía = contar cuántos artículos cumplen la condición".
+- **Nombre del cálculo**: la descripción auto-generada del botón de inserción (ej. "Sumar costo — solo si...") se reemplazó por un campo de texto donde el usuario escribe su propio nombre corto (ej. "Cuánto vengo gastando", el ejemplo que dio el usuario) — ese texto es literalmente lo que aparece en el botón "+ [nombre]" para insertar en la plantilla. Nada se genera solo salvo la clave técnica interna (`calculo_1_xxxx`), que sigue siendo 100% invisible.
+
+**Qué NO cambió**: la clave interna sigue sin ser vista ni escrita por el usuario; el filtro sigue siendo un único atributo + operador + valor (mismo modelo de datos); la evaluación de la fórmula sigue siendo estrictamente izquierda a derecha con el mismo tooltip "?"; la validación de tipos sigue enforced en el backend (solo atributos numéricos entran a la paleta de fórmula, cualquier tipo entra a la de condición).
+
+**Impacto en el backend**: mínimo — el motor de cálculo (`_expr_formula`, `_construir_query_metrica`) no cambió nada, porque ya soportaba fórmulas multi-término desde la v2. Se agregó el campo `etiqueta` (el nombre que ahora escribe el usuario, antes no existía — sin él, el nombre se perdía al recargar el bloque) y se sacaron `avg`/`min`/`max` de `OPERACIONES` porque el frontend nunca más los va a mandar.
+
+### Cómo encaja con lo que ya existía
+
+No es una pieza aislada — reutiliza patrones ya probados en el resto del sistema:
+- El cálculo (`SELECT {AGG}(expr) FROM item WHERE inventario_id = ... AND filtro`) es el mismo mecanismo de cast tipado + parámetros enlazados que ya se usa en el promedio de rango de intervalos (Fase 3) y en las alertas de vencimiento — solo que ahora el filtro lo arma el usuario en vez de estar fijo en el código.
+- Se guarda como un campo JSONB nuevo en el inventario (`bloques_personalizados`, lista), mismo espíritu que `roles_atributos` — nada de tablas nuevas ni EAV.
+- `PATCH /inventarios/{id}/bloques` reemplaza la lista completa (mismo criterio que roles y atributos: se manda el estado completo deseado).
+- Si se borra o renombra un atributo que una métrica usaba, se descarta el **bloque entero** (no la métrica suelta) en `update_inventario` — dejar una métrica rota a mitad de una oración es peor que pedirle al usuario que la rearme. Mismo principio de integridad referencial "a mano" que ya se aplicó a roles.
+
+### Validación (acumula todos los errores, como el resto del sistema)
+
+`app/tenant/bloques_personalizados.py` valida: que la clave de cada métrica sea un identificador válido, que la operación exista, que el atributo (si aplica) sea numérico y exista en el inventario, que el atributo de filtro exista, que el operador de filtro tenga sentido para el tipo de ese atributo (booleano/string solo `=`/`≠`; numérico/fecha además `>`,`<`,`≥`,`≤`), que el valor de filtro convierta a ese tipo (reutiliza `parse_value_by_type` de validators.py), y que la plantilla no tenga `{llaves}` sin una métrica que las respalde.
+
+Se probaron 5 casos de error a propósito (operador inválido para booleano, atributo inexistente, placeholder huérfano, `sum` sobre un atributo no numérico, clave inválida) — los 5 devolvieron 400 con el detalle correcto.
+
+### Verificación end-to-end
+
+Backend probado contra Postgres real con el ejemplo de la colección de cartas (3 cartas con `la_tiene=true`, 2 con `false`, costos 10/15/20/25/30): el bloque "Me faltan {faltantes} cartas..., y me falta gastar ${costo_faltante}..." calculó `faltantes=2`, `costo_faltante=55.0` — coincide exacto con la cuenta a mano.
+
+Probado también en el navegador real armando el bloque a través de la UI (sin tocar la base a mano): elegir "Contar artículos", tildar el filtro, elegir `la_tiene` = `No`, agregar el segundo cálculo "Sumar costo" con el mismo filtro, insertar ambos en el texto con los botones, guardar. Resultado en la tarjeta: *"Me faltan 2 cartas para completar la colección, y me falta gastar $55 para conseguirlas."* — exacto.
+
+### Verificación end-to-end de v2 (caso verdulería)
+
+Backend probado contra Postgres real con un inventario de prueba (`precio_por_kilo: float`, items "papa" cantidad=30/precio_por_kilo=500 y "cebolla" cantidad=10/precio_por_kilo=300): la métrica `sum(cantidad × precio_por_kilo)` calculó `18000.0` — coincide exacto con la cuenta a mano (30×500 + 10×300).
+
+Probado también en el navegador real armando el bloque completo a través de la UI, sin tocar la base a mano: elegir "Sumar", agregar "Cantidad" a la fórmula, cambiar el siguiente término a `precio_por_kilo`, confirmar que el chip de inserción mostró **"Sumar (Cantidad × precio_por_kilo)"**, escribir la plantilla "Tengo $ {calculo}", insertar la referencia con el botón, guardar. Confirmado en tres capas: el `PATCH /inventarios/{id}/bloques` guardó `terminos: [{tipo: cantidad}, {tipo: atributo, atributo: precio_por_kilo}], operadores: [mul]`; el `GET /inventarios/{id}/bloques` devolvió `valores: {calculo: 18000.0}`; y la tarjeta renderizada en el modal de Estadísticas mostró **"Tengo $ 18.000"**. Inventario de prueba borrado después de verificar.
+
+### Verificación end-to-end de v3 (todo a clicks)
+
+Probado en el navegador real, sobre un inventario real del usuario (Depósito de Verduras, item "Papa" con cantidad=50 y Precio x kilo=1000): abrir el armador, escribir el nombre del cálculo "Cuanto vengo gastando", click en el chip "Cantidad" (queda agregado, aparece "Quitar último paso", cambia automáticamente a la paleta de operadores), click en "× Multiplicar" (cambia de vuelta a la paleta de términos), click en el chip "Precio x kilo" — la tira de la fórmula mostró **"Cantidad × Precio x kilo"** construida enteramente a clicks, sin ningún select ni texto escrito. Insertado en la plantilla "Tengo $ {calculo}" y guardado: `PATCH` guardó `{"terminos": [{"tipo":"cantidad"},{"tipo":"atributo","atributo":"Precio x kilo"}], "operadores": ["mul"], "operacion": "sum", "etiqueta": "Cuanto vengo gastando"}` (operación inferida correctamente, sin que el usuario la haya elegido); `GET` devolvió `50000.0` (50 × 1000, exacto); la tarjeta mostró **"Tengo $ 50.000"**.
+
+También se probó el flujo de condición (click en el chip "Precio x kilo" bajo "1. Condición" → aparece el chip cerrable + selector de operador "es igual a" + input de valor; click en la `×` del chip → vuelve a la paleta completa) — funciona igual que la fórmula, todo a clicks.
+
+Un bug real encontrado en esta prueba y corregido en el momento: al elegir un operador, no había ninguna señal visual hasta agregar el próximo término (el chip "×" no aparecía todavía) — se corrigió mostrando el operador elegido como un chip pendiente apenas se clickea, antes de que exista el siguiente término. Bloque de prueba borrado del inventario real después de verificar.
+
+### Cambios (v3)
+
+- **Backend**: `app/tenant/bloques_personalizados.py` (validación + cálculo — motor de fórmulas sin cambios desde v2; en v3 se agregó el campo `etiqueta` obligatorio por métrica y se redujo `OPERACIONES` a `{count, sum}` ya que el frontend nunca manda `avg`/`min`/`max`), columna `Inventario.bloques_personalizados` (JSONB) en `models.py` + migración en `migraciones.py`, endpoints `PATCH` y `GET /inventarios/{id}/bloques` en `inventarios.py`, limpieza de bloques huérfanos en `update_inventario` (revisa cada término de la fórmula), schemas en `schemas.py` (`TerminoFormula`, `OperadorAritmetico`).
+- **Frontend**: `ModalBloquePersonalizado.tsx` (el armador — en v3 el subcomponente `MetricaRow` se reescribió por completo: condición y fórmula se arman con chips clickeables en vez de selects/checkbox, máquina de estados que alterna paleta de términos ↔ paleta de operadores, campo de texto para el nombre de cada cálculo en vez de descripción auto-generada), tipo `MetricaPersonalizada` con el nuevo campo `etiqueta` y `operacion: 'count' | 'sum'` (ya sin avg/min/max) en `inventory.service.ts`, sección "Bloques Personalizados" en `ModalStatsInventory.tsx` (sin cambios en esta iteración), `useBloquesPersonalizados`/`useConfigurarBloques` en `useEstadisticas.ts`.
+- **Bug encontrado y pendiente** (no forma parte de esta feature, preexistente): el `Popconfirm` de "¿Eliminar este bloque?" en `ModalStatsInventory.tsx` se renderiza fuera del viewport — tarea marcada aparte para arreglarlo.
+
+### v4: probado con un caso real del usuario (mazo de Magic desde Moxfield) — dos rondas más de feedback directo
+
+Para poner a prueba el armador con datos reales (no un inventario armado a propósito para el ejemplo), se cargó un mazo real del usuario desde Moxfield (`El Jardín De La Putrefacción`, 60 cartas / 13 nombres distintos) como inventario, con atributos `Precio` (float, consultado a la API de Scryfall) y `La tengo` (boolean) marcado a mitad — 6 cartas en `Sí`, 7 en `No`, reproduciendo el caso de uso original de "colección" con datos de verdad.
+
+Sobre ese inventario real, el usuario probó la v3 en su propio navegador y dio dos rondas de feedback sobre la sección final del armador (la de "escribir el texto"):
+
+**Ronda 1 — "esa parte de abajo no la va a entender un usuario común"**: la sección "Insertar en el texto" (una fila de botones) + "Texto del bloque" (un textarea aparte, mostrando literalmente `{calculo_1_mtj5zwbu}`) eran dos zonas separadas y el id crudo que aparecía en el texto rompía la sensación de simplicidad. Se presentaron 3 alternativas con distinto costo (cambiar solo el formato del id / editor con "píldoras" visuales / sacar la escritura libre por defecto) y el usuario pidió una versión concreta de la opción intermedia.
+
+**Ronda 2 — "el nombre del cálculo tampoco, que no exista ese campo"**: mientras se implementaba la ronda 1, el usuario aclaró que ni siquiera quería un campo de texto para nombrar cada cálculo — "el usuario no debería poder meter mano en eso". Si hacía falta un id interno, tenía que armarse solo a partir de lo que el cálculo ya representa.
+
+**Resultado (lo que quedó armado)**:
+- Se sacó el campo "Nombre de este cálculo" por completo. Cada tarjeta de cálculo ahora tiene, como encabezado, una descripción que se arma sola y en vivo a partir de la condición y la fórmula que se van clickeando (`etiquetaCalculo()`) — ej. clickear `La tengo` → `es igual a` → `No` en la condición y no tocar la fórmula da como encabezado, en el momento, "Cantidad de artículos donde La tengo es igual a No". El usuario nunca escribe ni edita ese texto.
+- El texto del bloque dejó de ser un textarea con `{llaves}` a la vista. Ahora es una sola caja tipo "constructor de oración": el usuario escribe texto libre en un campo, y cuando quiere insertar un cálculo en el medio, toca su botón — el cálculo aparece como una píldora de color dentro de la misma oración que se está armando, y el campo de texto sigue después de la píldora para continuar escribiendo. Nunca se ve un `{clave}` ni un id.
+- El `{clave}` interno (necesario igual del lado del backend, para que la plantilla sepa dónde va cada valor) se arma con `slugify()` a partir de la misma descripción auto-generada — ej. `cantidad_de_articulos_donde_la_tengo_es_igual_a_no` — nunca es un string random, aunque el usuario tampoco lo ve nunca.
+- Internamente, el texto se representa como una lista de "segmentos" (texto libre | referencia a un cálculo por su id interno de React, no por su `{clave}` final) — el `{clave}` real recién se calcula al guardar, momento en el que también se decide `operacion` (count/sum). Esto también hace que, si el usuario reordena o edita la condición/fórmula de un cálculo después de haberlo insertado en el texto, la píldora en la oración se actualice sola (referencia viva al cálculo, no una copia congelada de su nombre).
+- Se sacó el campo `etiqueta` del todo — de la base (`bloques_personalizados.py`), del schema y del tipo TypeScript. No hace falta persistir un nombre: se recalcula siempre desde `terminos`/`operadores`/`filtro_*`.
+
+**Compatibilidad hacia atrás**: un bloque guardado con la v3 (que sí tenía `etiqueta` en la base) se sigue pudiendo abrir y editar sin romperse — el campo `etiqueta` viejo queda ahí sin usarse (JSONB tolera claves extra) y el encabezado se recalcula igual con la descripción automática. Verificado en el navegador real abriendo un bloque que el propio usuario había guardado con la versión anterior.
+
+**Verificación end-to-end de v4**: sobre el inventario real del mazo de Magic, se armó el bloque "Cuánto me falta para completar el mazo" clickeando `La tengo` → `es igual a` → `No` (sin fórmula), escribiendo "Me faltan ", insertando la píldora del cálculo, y completando "cartas para completar el mazo." — guardado quedó `plantilla: "Me faltan {cantidad_de_articulos_donde_la_tengo_es_igual_a_no} cartas para completar el mazo."`, calculado `7` (las 7 cartas marcadas `La tengo = No`), tarjeta final: *"Me faltan 7 cartas para completar el mazo."* — exacto. Un bloque previo del usuario ("Total que gaste de las cartas que ya tengo", cantidad × Precio filtrado por `La tengo = Sí`) siguió funcionando sin tocarlo, mostrando `39` (4+3+4+4+3+21 cartas, con todos los precios puestos en 1 por el propio usuario para chequear la cuenta a mano).
+
+**Gotcha de testing (no bug real)**: un Select de Ant Design (el valor booleano del filtro) no cerraba/confirmaba la opción al clickearla vía coordenadas — mismo tipo de glitch de automatización ya documentado antes en esta sesión con dropdowns anidados; clickeando la opción por su nodo del DOM directamente funcionó bien. Confirmado que la interacción real (con mouse/touch real de un usuario) no tiene este problema.
+
+### Cambios (v4)
+
+- **Backend**: `app/tenant/bloques_personalizados.py` — se sacó la validación y el campo `etiqueta` (ya no existe el concepto de nombre editable por el usuario).
+- **Frontend**: `ModalBloquePersonalizado.tsx` reescrito de nuevo — `etiquetaCalculo()` (descripción auto-generada, reemplaza el campo de texto), `slugify()` (arma el `{clave}` interno a partir de esa descripción), tipo `SegmentoPlantilla` + `parsePlantillaASegmentos()` (el texto del bloque como lista de segmentos texto/cálculo en vez de un string con `{llaves}` editado a mano), quitado el campo `etiqueta` de `MetricaPersonalizada` en `inventory.service.ts`.
+
+### v5: cantidades parciales ("necesito 4, tengo 2, me faltan 2") — sin cambiar código
+
+Pregunta del usuario probando el mazo real: ¿cómo represento que de una carta necesito 4 copias pero solo tengo 2? El modelo hasta acá (`La tengo`, booleano) es todo-o-nada — no puede expresar "2 de 4". Mismo problema en su ejemplo de una feria (```tengo 4 sets de cubiertos, vendí 2```).
+
+**La resolución no necesitó ningún cambio de código** — es un cambio de cómo se *modelan los datos*, no del motor:
+- `Cantidad` (nativo del item) pasa a representar **cuánto necesito** (ej. copias que pide el mazo, o stock inicial).
+- Se agrega un atributo numérico nuevo, `Tengo` (o `Vendidos`, según el caso) — **cuánto tengo/vendí ahora**.
+- La fórmula `Cantidad − Tengo` (el operador Restar ya existía desde v2) sumada sin condición da el total de **unidades** faltantes — no de cartas distintas — en todo el inventario. Con `(Cantidad − Tengo) × Precio` sumado, da directamente cuánta plata falta para completar.
+
+**Limitación real, dicha explícitamente al usuario (no oculta)**: la condición del armador compara un atributo contra un valor fijo que tipea el usuario, no contra otro atributo — no se puede expresar hoy "Tengo es menor que Cantidad" como filtro. Si algún item tuviera `Tengo` mayor que `Cantidad` (sobran copias), esa fila restaría del total en vez de aportar cero, y el resultado quedaría mal. No es un bug: es una limitación conocida, documentada acá para no perderla de vista si en algún momento hace falta comparar dos atributos entre sí en un filtro.
+
+**Verificado end-to-end sobre el mazo real** (`El Jardín De La Putrefacción`, id=15): se migró `La tengo` (booleano) → `Tengo` (integer) con cantidades parciales reales (ej. Llanowar Elves: necesito 4, tengo 2 — el ejemplo exacto que dio el usuario), reconstruyendo los 3 bloques: *"Ya gasté $38 en las cartas que tengo."* (`sum(Tengo × Precio)`), *"Me faltan 22 copias para completar el mazo."* (`sum(Cantidad − Tengo)`), *"Me falta gastar $22 para completar el mazo."* (`sum((Cantidad − Tengo) × Precio)`) — los tres coinciden exacto con la cuenta a mano sobre las 13 cartas migradas.
+
+---

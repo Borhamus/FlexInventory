@@ -69,6 +69,43 @@ export interface PromedioRango {
   cantidad: number;
 }
 
+export interface TerminoFormula {
+  tipo: 'atributo' | 'cantidad' | 'constante';
+  atributo?: string | null;
+  valor?: number | null;
+}
+
+export type OperadorAritmetico = 'mul' | 'div' | 'add' | 'sub';
+
+export interface MetricaPersonalizada {
+  clave: string;
+  // No lo elige el usuario: si terminos tiene algo, es "sum" (se suma la
+  // fórmula en todos los items que matchean el filtro); si terminos está
+  // vacío, es "count" (se cuentan los items que matchean). Se infiere en
+  // ModalBloquePersonalizado antes de guardar.
+  operacion: 'count' | 'sum';
+  // Vacíos = "contar". Se evalúan estrictamente de izquierda a derecha (sin
+  // precedencia matemática): operadores[i] combina terminos[i] con
+  // terminos[i+1], en orden — ver ModalBloquePersonalizado.
+  terminos: TerminoFormula[];
+  operadores: OperadorAritmetico[];
+  filtro_atributo?: string | null;
+  filtro_operador?: 'eq' | 'neq' | 'gt' | 'lt' | 'gte' | 'lte' | null;
+  filtro_valor?: unknown;
+}
+
+export interface BloquePersonalizado {
+  nombre: string;
+  plantilla: string;
+  metricas: MetricaPersonalizada[];
+}
+
+export interface BloqueCalculado {
+  nombre: string;
+  plantilla: string;
+  valores: Record<string, number | null>;
+}
+
 export interface AlertaVencimiento {
   item_id: number;
   item_nombre: string;
@@ -134,6 +171,16 @@ export const inventoryService = {
 
   getAlertas: async (dias: number = 7): Promise<AlertaVencimiento[]> => {
     const response = await api.get('/inventarios/alertas', { params: { dias } });
+    return response.data;
+  },
+
+  getBloques: async (id: number): Promise<BloqueCalculado[]> => {
+    const response = await api.get(`/inventarios/${id}/bloques`);
+    return response.data;
+  },
+
+  configurarBloques: async (id: number, bloques_personalizados: BloquePersonalizado[]) => {
+    const response = await api.patch(`/inventarios/${id}/bloques`, { bloques_personalizados });
     return response.data;
   },
 

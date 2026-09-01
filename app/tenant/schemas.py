@@ -19,6 +19,7 @@ class InventarioUpdate(BaseModel):
 class InventarioResponse(InventarioBase):
     id: int
     roles_atributos: Dict[str, str] = Field(default_factory=dict)
+    bloques_personalizados: List[Dict[str, Any]] = Field(default_factory=list)
     creado_en: datetime
     actualizado_en: datetime
 
@@ -35,6 +36,26 @@ class InventarioWithItems(InventarioResponse):
 
 class RolesAtributosUpdate(BaseModel):
     roles_atributos: Dict[str, str] = Field(default_factory=dict)
+
+# ==================== Schemas para bloques personalizados ====================
+# Un bloque = una plantilla de texto editable + una o más métricas
+# calculadas (contar/sumar/promediar un atributo, con filtro opcional).
+# Se valida en app/tenant/bloques_personalizados.py; acá solo se define la
+# forma laxa del payload (Dict[str, Any] por métrica) porque el shape real
+# depende de la operación (count no lleva "atributo", por ejemplo).
+
+class BloquePersonalizado(BaseModel):
+    nombre: str = Field(..., min_length=1)
+    plantilla: str = Field(..., min_length=1)
+    metricas: List[Dict[str, Any]] = Field(default_factory=list)
+
+class BloquesPersonalizadosUpdate(BaseModel):
+    bloques_personalizados: List[BloquePersonalizado] = Field(default_factory=list)
+
+class BloqueCalculado(BaseModel):
+    nombre: str
+    plantilla: str
+    valores: Dict[str, Any]
 
 # ==================== Schemas para estadísticas de inventario ====================
 # Todos los campos numéricos/fecha son opcionales porque cada tipo de atributo

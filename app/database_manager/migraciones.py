@@ -44,5 +44,9 @@ def run_migrations() -> None:
                 f'ALTER TABLE "{schema}".inventario '
                 f"ADD COLUMN IF NOT EXISTS roles_atributos JSONB DEFAULT '{{}}'::jsonb"
             ))
+            conn.execute(text(
+                f'ALTER TABLE "{schema}".inventario '
+                f"ADD COLUMN IF NOT EXISTS bloques_personalizados JSONB DEFAULT '[]'::jsonb"
+            ))
 
     logger.info(f"[Migraciones] roles_atributos verificado en {len(tenants)} tenant(s).")
