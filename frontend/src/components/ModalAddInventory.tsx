@@ -1,7 +1,12 @@
 import React from 'react';
-import { Modal, Form, Input, Button, Space, Select, theme } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, Checkbox, theme } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
-import { useCreateInventory } from '../hooks/useInventory';
+import { useCreateInventory, useConfigurarRoles } from '../hooks/useInventory';
+
+// Nombre fijo del atributo que arma el checkbox de vencimiento. Si el
+// usuario ya definió a mano un atributo con este mismo nombre, se
+// sobrescribe como "date" — es la intención explícita de tildar la casilla.
+const ATRIBUTO_VENCIMIENTO = 'Vencimiento';
 
 const TIPO_OPTIONS = [
   { value: 'string',  label: 'Texto' },
@@ -21,6 +26,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
   const { token } = theme.useToken();
 
   const { mutate: createInventory, isPending } = useCreateInventory();
+  const { mutate: configurarRoles, isPending: isPendingRoles } = useConfigurarRoles();
 
   const handleSubmit = () => {
     form.validateFields().then((values) => {
@@ -34,16 +40,45 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
         });
       }
 
+      // El checkbox agrega el atributo de vencimiento y, después de crear el
+      // inventario, le asigna el rol fecha_reposicion — es un atajo de UI
+      // sobre dos pasos que ya existían por separado (agregar atributo +
+      // "Roles Especiales" en Editar Inventario), no un concepto nuevo.
+      const tieneVencimiento = Boolean(values.tiene_vencimiento);
+      if (tieneVencimiento) {
+        atributosFormateados[ATRIBUTO_VENCIMIENTO] = 'date';
+      }
+
       const payloadFinal = {
         nombre:      values.nombre,
         descripcion: values.descripcion,
         atributos:   atributosFormateados,
       };
 
+      const finalizar = () => {
+        form.resetFields();
+        onClose();
+      };
+
       createInventory(payloadFinal, {
-        onSuccess: () => {
-          form.resetFields();
-          onClose();
+        onSuccess: (nuevoInventario) => {
+          if (tieneVencimiento && nuevoInventario?.id) {
+            configurarRoles(
+              { id: nuevoInventario.id, roles_atributos: { fecha_reposicion: ATRIBUTO_VENCIMIENTO } },
+              {
+                onSuccess: finalizar,
+                onError: (error) => {
+                  // El inventario ya se creó — solo falló el paso extra de
+                  // asignar el rol. Se puede configurar a mano después desde
+                  // "Roles Especiales" en Editar Inventario.
+                  console.error('El inventario se creó, pero falló configurar el rol de vencimiento', error);
+                  finalizar();
+                },
+              }
+            );
+          } else {
+            finalizar();
+          }
         },
         onError: (error) => {
           console.error("Falló el POST", error);
@@ -60,9 +95,9 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
       open={open}
       onOk={handleSubmit}
       onCancel={onClose}
-      okText={isPending ? "Creando..." : "Crear"}
+      okText={isPending || isPendingRoles ? "Creando..." : "Crear"}
       cancelText="Cancelar"
-      confirmLoading={isPending}
+      confirmLoading={isPending || isPendingRoles}
       destroyOnClose
     >
       <p style={{ marginBottom: 20, color: token.colorTextSecondary }}>
@@ -81,6 +116,15 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
         <Form.Item label="Descripción" name="descripcion">
           <Input.TextArea rows={2} placeholder="Detalles opcionales..." />
         </Form.Item>
+
+        <Form.Item name="tiene_vencimiento" valuePropName="checked" style={{ marginBottom: 4 }}>
+          <Checkbox>
+            Los artículos de este inventario tienen fecha de vencimiento
+          </Checkbox>
+        </Form.Item>
+        <p style={{ fontSize: '12px', color: token.colorTextTertiary, marginTop: 0, marginBottom: 20, paddingLeft: 24 }}>
+          Se va a pedir la fecha de vencimiento a cada artículo que cargues, y vas a poder ver desde el inicio cuáles están por vencer o ya vencieron.
+        </p>
 
         <div style={{
           padding:      '16px',

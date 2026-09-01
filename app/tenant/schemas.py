@@ -70,6 +70,19 @@ class InventarioStatsResponse(BaseModel):
     # define el usuario al elegir qué atributo cumple ese rol.
     volumen_total: Optional[VolumenTotalStats] = None
 
+# ==================== Schema para alertas de vencimiento ====================
+# Reutiliza el rol fecha_reposicion (Fase 1) — no es un concepto nuevo,
+# es la misma configuración leída para armar una vista de "qué está por vencer".
+
+class AlertaVencimiento(BaseModel):
+    item_id: int
+    item_nombre: str
+    inventario_id: int
+    inventario_nombre: str
+    fecha_vencimiento: str
+    dias_restantes: int
+    proveedor: Optional[str] = None
+
 # ==================== Schemas para mediana/histograma (Fase 3) ====================
 
 class HistogramaBucket(BaseModel):

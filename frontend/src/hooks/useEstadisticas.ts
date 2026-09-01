@@ -21,6 +21,15 @@ export const useMediana = (id: number, atributo: string | null, intervalos?: num
 // rango de buckets del histograma y lo consulta), no algo que se calcule
 // solo — por eso es una mutation (se dispara con .mutate()) y no una query
 // automática.
+// Alertas de vencimiento de todo el tenant (dashboard). `dias=7` por defecto,
+// mismo default que el backend.
+export const useAlertasVencimiento = (dias: number = 7) => {
+  return useQuery({
+    queryKey: ['alertas-vencimiento', dias],
+    queryFn: () => inventoryService.getAlertas(dias),
+  });
+};
+
 export const usePromedioRango = (id: number) => {
   return useMutation({
     mutationFn: ({ atributo, desde, hasta }: { atributo: string; desde: number; hasta: number }) =>

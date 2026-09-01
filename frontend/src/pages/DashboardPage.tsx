@@ -10,6 +10,7 @@ import {
 import { useQuery } from '@tanstack/react-query';
 import { useAuthContext } from '../context/AuthContext';
 import api from '../api/axios.config';
+import { AlertasVencimiento } from '../components/AlertasVencimiento';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
 
@@ -169,6 +170,10 @@ const DashboardPage: React.FC = () => {
           </Col>
         )}
       </Row>
+
+      <div style={{ marginTop: 32 }}>
+        <AlertasVencimiento />
+      </div>
 
     </div>
   );

@@ -69,6 +69,16 @@ export interface PromedioRango {
   cantidad: number;
 }
 
+export interface AlertaVencimiento {
+  item_id: number;
+  item_nombre: string;
+  inventario_id: number;
+  inventario_nombre: string;
+  fecha_vencimiento: string;
+  dias_restantes: number;
+  proveedor: string | null;
+}
+
 export const inventoryService = {
 
   getInventario: async (id: number): Promise<Inventario> => {
@@ -119,6 +129,11 @@ export const inventoryService = {
     const response = await api.get(`/inventarios/${id}/atributos/${encodeURIComponent(atributo)}/promedio-rango`, {
       params: { desde, hasta },
     });
+    return response.data;
+  },
+
+  getAlertas: async (dias: number = 7): Promise<AlertaVencimiento[]> => {
+    const response = await api.get('/inventarios/alertas', { params: { dias } });
     return response.data;
   },
 

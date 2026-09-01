@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from typing import List
@@ -10,6 +10,7 @@ from app.tenant import schemas, models
 from app.tenant.dependencies import get_tenant_db, require_permission
 from app.tenant.validators import TYPE_DEFAULTS, validate_inventario_atributos
 from app.tenant.roles_atributos import validate_roles_atributos, clean_orphan_roles
+from app.tenant.alertas import calcular_alertas
 
 router = APIRouter(prefix="/inventarios", tags=["Inventarios"])
 
@@ -68,6 +69,26 @@ def get_inventarios(
     Requiere permiso `inventarios:read` (o ser tenant owner).
     """
     return db.query(models.Inventario).all()
+
+
+@router.get("/alertas", response_model=List[schemas.AlertaVencimiento])
+def get_alertas_vencimiento(
+    dias: int = Query(7, ge=0, description="Ventana de aviso en días"),
+    _: dict = _perm("inventarios", "read"),
+    db: Session = Depends(get_tenant_db),
+):
+    """
+    Items próximos a vencer o ya vencidos, en todos los inventarios del
+    tenant que tengan configurado el rol `fecha_reposicion` (ver
+    `PATCH /inventarios/{id}/roles`). Pensado para el dashboard: una sola
+    llamada trae las alertas de todos los inventarios juntas, ordenadas de
+    más urgente a menos (los vencidos, con días negativos, primero).
+
+    Requiere permiso `inventarios:read` (o ser tenant owner).
+
+    **Ejemplo:** `GET /inventarios/alertas?dias=7`
+    """
+    return calcular_alertas(db, dias)
 
 
 @router.get("/{inventario_id}", response_model=schemas.InventarioWithItems)
