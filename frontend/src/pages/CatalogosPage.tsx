@@ -197,14 +197,28 @@ const CatalogosPage: React.FC = () => {
                       onClick={() => setSelectedItemId(item.id)}
                       cover={
                         item.imagen ? (
-                          <img
-                            src={urlImagen(item.imagen)}
-                            alt={item.nombre}
-                            style={{ height: 140, objectFit: 'cover', borderRadius: `${token.borderRadius}px ${token.borderRadius}px 0 0` }}
-                          />
+                          // "contain" en vez de "cover": con fotos más altas que
+                          // anchas (una carta, una figura de pie) "cover" recorta
+                          // el sobrante para llenar el marco y termina cortando
+                          // parte de la imagen. "contain" siempre muestra la foto
+                          // completa — el fondo relleva el espacio que sobra en
+                          // vez de perder contenido. Mismo criterio que ya usaba
+                          // el panel de detalle de al lado (más abajo en este
+                          // archivo), que quedaba inconsistente con esta tarjeta.
+                          <div style={{
+                            height: 180, backgroundColor: token.colorFillAlter,
+                            borderRadius: `${token.borderRadius}px ${token.borderRadius}px 0 0`,
+                            overflow: 'hidden',
+                          }}>
+                            <img
+                              src={urlImagen(item.imagen)}
+                              alt={item.nombre}
+                              style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                            />
+                          </div>
                         ) : (
                           <div style={{
-                            height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            height: 180, display: 'flex', alignItems: 'center', justifyContent: 'center',
                             backgroundColor: token.colorFillAlter, color: token.colorTextQuaternary,
                             borderRadius: `${token.borderRadius}px ${token.borderRadius}px 0 0`,
                           }}>
