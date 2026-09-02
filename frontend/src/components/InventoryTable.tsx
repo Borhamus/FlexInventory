@@ -177,6 +177,11 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
 }) => {
   const { hasPermission, isTenant } = useAuthContext();
 
+
+  const canEditItems   = isTenant || hasPermission('items', 'update');
+  const canDeleteItems = isTenant || hasPermission('items', 'delete');
+  const canActuar      = canEditItems || canDeleteItems;
+
   // El tamaño de página tiene que vivir en un estado propio: si le
   // pasáramos a <Table> un objeto de pagination armado de cero en cada
   // render (como estaba antes), Ant Design lo toma como una configuración
@@ -266,24 +271,23 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       render: (date: string) => dayjs(date).format('DD/MM/YYYY HH:mm'),
     });
 
-    cols.push({
-      title: 'Acciones',
-      key: 'acciones',
-      align: 'center',
-      fixed: 'right',
-      width: 100,
-      render: (_: any, record: any) => {
-        const canEdit = isTenant || hasPermission('items', 'update');
-        const canDelete = isTenant || hasPermission('items', 'delete');
-
-        if (!canEdit && !canDelete) return null;
-
-        return (
+    // Columna "Acciones" solo si el usuario puede editar o borrar artículos.
+    // Antes se agregaba siempre y los botones de adentro se ocultaban por
+    // permiso, dejando una columna vacía (issue #29): ahora directamente no
+    // se crea la columna si no hay ninguna acción disponible.
+    if (canActuar) {
+      cols.push({
+        title: 'Acciones',
+        key: 'acciones',
+        align: 'center',
+        fixed: 'right',
+        width: 100,
+        render: (_: any, record: any) => (
           <Space size="small">
-            {canEdit && (
+            {canEditItems && (
               <Button type="text" icon={<EditOutlined />} onClick={() => onEditItem(record)} />
             )}
-            {canDelete && (
+            {canDeleteItems && (
               <Popconfirm
                 title="¿Eliminar artículo?"
                 onConfirm={() => onDeleteItem(record.id)}
@@ -295,9 +299,9 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
               </Popconfirm>
             )}
           </Space>
-        );
-      }
-    });
+        )
+      });
+    }
 
     return cols.filter(
       // "id" ahora es ocultable desde "Columnas visibles" (no a todos los
@@ -306,7 +310,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       // los botones de editar/borrar.
       (col) => !hiddenColumns.includes(col.key as string) || ['nombre', 'acciones'].includes(col.key as string)
     );
-  }, [items, atributos, isTenant, hasPermission, hiddenColumns, onEditItem, onDeleteItem, fotosHabilitadas]);
+  }, [items, atributos, canActuar, canEditItems, canDeleteItems, hiddenColumns, onEditItem, onDeleteItem, fotosHabilitadas]);
 
   // Segunda pasada: toma las columnas ya armadas y les aplica el orden y
   // ancho que el usuario haya elegido a mano, más los handlers de drag
@@ -396,7 +400,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
 
   return (
     <Table
-      rowSelection={rowSelection}
+      rowSelection={canActuar ? rowSelection : undefined}
       columns={columns}
       dataSource={filteredItems}
       rowKey="id"

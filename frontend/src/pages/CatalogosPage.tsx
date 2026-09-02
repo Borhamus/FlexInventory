@@ -26,7 +26,6 @@ import {
 import {
   PlusOutlined,
   DeleteOutlined,
-  ArrowRightOutlined,
   CloseOutlined,
   InboxOutlined,
   DatabaseOutlined,
@@ -40,6 +39,7 @@ import { AddItemModal } from '../components/AddItemModal';
 // IMPORTAMOS TUS NUEVOS HOOKS
 import { useUpdateItem, useDeleteItem } from '../hooks/useItems';
 import { useRemoveItemFromCatalogo } from '../hooks/useCatalogos';
+import { useAuthContext } from '../context/AuthContext';
 import { urlImagen } from '../api/axios.config';
 
 const { Title, Text, Paragraph } = Typography;
@@ -60,6 +60,14 @@ const CatalogosPage: React.FC = () => {
   const updateItemMutation = useUpdateItem(catalogoId);
   const deleteItemMutation = useDeleteItem(catalogoId);
   const removeFromCatalogoMutation = useRemoveItemFromCatalogo(catalogoId);
+
+  // Permisos para gatear los botones de acción (mismo criterio que la tabla
+  // de inventario, issue #29). Vincular/desvincular items de un catálogo es
+  // `catalogos:update`; editar/borrar el artículo en sí es sobre `items`.
+  const { hasPermission, isTenant } = useAuthContext();
+  const canLinkItems   = isTenant || hasPermission('catalogos', 'update');
+  const canEditItems   = isTenant || hasPermission('items', 'update');
+  const canDeleteItems = isTenant || hasPermission('items', 'delete');
 
   if (isLoading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
   if (error) return <Alert message="Error" description="No se pudo cargar el catálogo" type="error" showIcon />;
@@ -171,11 +179,13 @@ const CatalogosPage: React.FC = () => {
               valueStyle={{ fontSize: '20px', fontWeight: 'bold' }}
             />
           </Space>
-          <Space>
-            <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
-              Nuevo Artículo
-            </Button>
-          </Space>
+          {canLinkItems && (
+            <Space>
+              <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
+                Nuevo Artículo
+              </Button>
+            </Space>
+          )}
         </div>
       </Card>
 
@@ -352,60 +362,71 @@ const CatalogosPage: React.FC = () => {
                 )}
               </div>
 
-              {/* FOOTER DEL ACCIONES LATERALES */}
-              <div style={{
-                padding: 20,
-                borderTop: `1px solid ${token.colorBorderSecondary}`,
-                backgroundColor: token.colorFillAlter
-              }}>
-                <Space direction="vertical" style={{ width: '100%' }}>
-                  <Button 
-                    type="primary" 
-                    block 
-                    icon={<EditOutlined />} 
-                    size="large"
-                    onClick={openEditModal} // ACCIÓN ACTUALIZAR
-                  >
-                    Actualizar Datos
-                  </Button>
-                  {selectedItem.inventario_id ? (
-                    <>
+              {/* FOOTER DEL ACCIONES LATERALES — solo si el usuario tiene al
+                  menos una acción disponible; si no, no mostramos la barra */}
+              {(canEditItems || canLinkItems || canDeleteItems) && (
+                <div style={{
+                  padding: 20,
+                  borderTop: `1px solid ${token.colorBorderSecondary}`,
+                  backgroundColor: token.colorFillAlter
+                }}>
+                  <Space direction="vertical" style={{ width: '100%' }}>
+                    {canEditItems && (
                       <Button
-                        danger
-                        ghost
+                        type="primary"
                         block
-                        icon={<MinusCircleOutlined />}
+                        icon={<EditOutlined />}
                         size="large"
-                        loading={removeFromCatalogoMutation.isPending}
-                        onClick={() => handleRemoveFromCatalogo(selectedItem)} // SOLO DESVINCULA DEL CATÁLOGO
+                        onClick={openEditModal} // ACCIÓN ACTUALIZAR
                       >
-                        Quitar del catálogo
+                        Actualizar Datos
                       </Button>
-                      <Button
-                        danger
-                        block
-                        icon={<DeleteOutlined />}
-                        size="large"
-                        loading={deleteItemMutation.isPending}
-                        onClick={() => handleDelete(selectedItem)} // BORRA PERMANENTE (SISTEMA + INVENTARIO)
-                      >
-                        Eliminar del inventario
-                      </Button>
-                    </>
-                  ) : (
-                    <Button
-                      danger
-                      block
-                      icon={<DeleteOutlined />}
-                      size="large"
-                      loading={deleteItemMutation.isPending}
-                      onClick={() => handleDelete(selectedItem)} // BORRA PERMANENTE (ítem suelto)
-                    >
-                      Eliminar del Catálogo
-                    </Button>
-                  )}
-                </Space>
-              </div>
+                    )}
+                    {selectedItem.inventario_id ? (
+                      <>
+                        {canLinkItems && (
+                          <Button
+                            danger
+                            ghost
+                            block
+                            icon={<MinusCircleOutlined />}
+                            size="large"
+                            loading={removeFromCatalogoMutation.isPending}
+                            onClick={() => handleRemoveFromCatalogo(selectedItem)} // SOLO DESVINCULA DEL CATÁLOGO
+                          >
+                            Quitar del catálogo
+                          </Button>
+                        )}
+                        {canDeleteItems && (
+                          <Button
+                            danger
+                            block
+                            icon={<DeleteOutlined />}
+                            size="large"
+                            loading={deleteItemMutation.isPending}
+                            onClick={() => handleDelete(selectedItem)} // BORRA PERMANENTE (SISTEMA + INVENTARIO)
+                          >
+                            Eliminar del inventario
+                          </Button>
+                        )}
+                      </>
+                    ) : (
+                      canDeleteItems && (
+                        <Button
+                          danger
+                          block
+                          icon={<DeleteOutlined />}
+                          size="large"
+                          loading={deleteItemMutation.isPending}
+                          onClick={() => handleDelete(selectedItem)} // BORRA PERMANENTE (ítem suelto)
+                        >
+                          Eliminar del Catálogo
+                        </Button>
+                      )
+                    )}
+                  </Space>
+                </div>
+              )}
             </Card>
           </div>
         )}

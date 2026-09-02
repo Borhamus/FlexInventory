@@ -4,6 +4,7 @@ import { FontSizeOutlined, NumberOutlined, CalendarOutlined, CheckSquareOutlined
 import dayjs from 'dayjs';
 import { useInventoryStats, useBloquesPersonalizados, useConfigurarBloques } from '../hooks/useEstadisticas';
 import { useInventory } from '../hooks/useInventory';
+import { useAuthContext } from '../context/AuthContext';
 import { AtributoHistograma } from './AtributoHistograma';
 import { ModalBloquePersonalizado } from './ModalBloquePersonalizado';
 import type { AtributoStats, BloquePersonalizado } from '../api/inventory.service';
@@ -82,6 +83,8 @@ export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryI
   const [atributoHistograma, setAtributoHistograma] = useState<string | null>(null);
   const [bloqueEnEdicion, setBloqueEnEdicion] = useState<{ index: number | null; bloque: BloquePersonalizado | null } | null>(null);
   const { token } = theme.useToken();
+  const { hasPermission, isTenant } = useAuthContext();
+  const canEditInventory = isTenant || hasPermission('inventarios', 'update');
 
   const bloquesConfigurados: BloquePersonalizado[] = inventario?.bloques_personalizados ?? [];
 
@@ -233,6 +236,7 @@ export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryI
         </>
       )}
 
+      {(canEditInventory || bloquesConfigurados.length > 0) && (
       <div style={{ marginTop: 24, marginBottom: 8 }}>
         <div style={{ fontWeight: 500, marginBottom: 4 }}>
           <BulbOutlined style={{ color: token.colorWarning, marginRight: 6 }} />
@@ -252,24 +256,20 @@ export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryI
               style={{ marginBottom: 12, borderLeft: `3px solid ${token.colorWarning}` }}
               title={bloque.nombre}
               extra={
-                <Space size="small">
-                  <Button size="small" icon={<EditOutlined />} onClick={() => setBloqueEnEdicion({ index, bloque })} />
-                  <Popconfirm
-                    title="¿Eliminar este bloque?"
-                    onConfirm={() => eliminarBloque(index)}
-                    okText="Sí"
-                    cancelText="No"
-                    // Sin esto, el popup se monta en document.body y el
-                    // cálculo de posición se rompe adentro de un Card
-                    // dentro de un Modal (mismo gotcha que Select dentro
-                    // de un Popover, ya arreglado en otro lado de este
-                    // proyecto con el mismo patrón: anclar al padre del
-                    // trigger en vez de al body).
-                    getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
-                  >
-                    <Button size="small" danger icon={<DeleteOutlined />} />
-                  </Popconfirm>
-                </Space>
+                canEditInventory ? (
+                  <Space size="small">
+                    <Button size="small" icon={<EditOutlined />} onClick={() => setBloqueEnEdicion({ index, bloque })} />
+                    <Popconfirm
+                      title="¿Eliminar este bloque?"
+                      onConfirm={() => eliminarBloque(index)}
+                      okText="Sí"
+                      cancelText="No"
+                      getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
+                    >
+                      <Button size="small" danger icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                  </Space>
+                ) : undefined
               }
             >
               {calculado ? interpolarPlantilla(calculado.plantilla, calculado.valores) : <Spin size="small" />}
@@ -277,10 +277,13 @@ export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryI
           );
         })}
 
-        <Button type="dashed" block icon={<PlusOutlined />} onClick={() => setBloqueEnEdicion({ index: null, bloque: null })}>
-          Agregar Bloque Personalizado
-        </Button>
+        {canEditInventory && (
+          <Button type="dashed" block icon={<PlusOutlined />} onClick={() => setBloqueEnEdicion({ index: null, bloque: null })}>
+            Agregar Bloque Personalizado
+          </Button>
+        )}
       </div>
+      )}
 
       {atributoHistograma && (
         <AtributoHistograma inventoryId={inventoryId} atributo={atributoHistograma} onClose={() => setAtributoHistograma(null)} />

@@ -141,7 +141,11 @@ const InventoryPage: React.FC = () => {
   if (isLoading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
   if (error) return <Alert message="Error" description="No se pudo cargar el inventario" type="error" showIcon />;
 
-  const canAddItems = isTenant || hasPermission('items', 'create');
+  const canAddItems        = isTenant || hasPermission('items', 'create');
+  const canEditItems       = isTenant || hasPermission('items', 'update');
+  const canDeleteItems     = isTenant || hasPermission('items', 'delete');
+  const canEditInventory   = isTenant || hasPermission('inventarios', 'update');
+  const canDeleteInventory = isTenant || hasPermission('inventarios', 'delete');
 
   return (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -153,17 +157,21 @@ const InventoryPage: React.FC = () => {
           <Tooltip title="Ver estadísticas">
             <Button type="default" shape="circle" icon={<BarChartOutlined />} onClick={() => setIsStatsModalOpen(true)} />
           </Tooltip>
-          <Button type="default" shape="circle" icon={<EditOutlined />} onClick={() => setIsEditModalOpen(true)} />
-          <Popconfirm
-            title="Eliminar Inventario"
-            description="¿Estás seguro de que querés borrar este inventario? Esta operacion es irreversible!"
-            onConfirm={handleDeleteInventory}
-            okText="Sí, eliminar"
-            cancelText="Cancelar"
-            okButtonProps={{ danger: true, loading: isPending }}
-          >
-            <Button danger type="primary" shape="circle" icon={<DeleteOutlined />} />
-          </Popconfirm>
+          {canEditInventory && (
+            <Button type="default" shape="circle" icon={<EditOutlined />} onClick={() => setIsEditModalOpen(true)} />
+          )}
+          {canDeleteInventory && (
+            <Popconfirm
+              title="Eliminar Inventario"
+              description="¿Estás seguro de que querés borrar este inventario? Esta operacion es irreversible!"
+              onConfirm={handleDeleteInventory}
+              okText="Sí, eliminar"
+              cancelText="Cancelar"
+              okButtonProps={{ danger: true, loading: isPending }}
+            >
+              <Button danger type="primary" shape="circle" icon={<DeleteOutlined />} />
+            </Popconfirm>
+          )}
           <Tag color="blue" style={{ margin: 0, padding: '4px 8px', fontSize: '14px' }}>ID: {data?.id}</Tag>
         </Space>
 
@@ -319,28 +327,32 @@ const InventoryPage: React.FC = () => {
             <Space>
 
               {/* BOTON EDICION MASIVA*/}
-              <Button type="default" onClick={() => setIsBulkModalVisible(true)}>
-                Editar Atributo Masivamente
-              </Button>
+              {canEditItems && (
+                <Button type="default" onClick={() => setIsBulkModalVisible(true)}>
+                  Editar Atributo Masivamente
+                </Button>
+              )}
 
               {/* BOTON ELIMINACION MASIVA */}
-              <Popconfirm
-                title={`¿Eliminar ${selectedRowKeys.length} artículos?`}
-                description="Esta acción no se puede deshacer."
-                okText="Sí, eliminar"
-                cancelText="No"
-                okButtonProps={{ danger: true }}
-                onConfirm={() => {
-                  const idsNumeric = selectedRowKeys.map(key => Number(key));
-                  bulkDelete(idsNumeric, {
-                    onSuccess: () => setSelectedRowKeys([]) 
-                  });
-                }}
-              >
-                <Button type="primary" danger loading={isDeletingBulk}>
-                  Eliminar Seleccionados
-                </Button>
-              </Popconfirm>
+              {canDeleteItems && (
+                <Popconfirm
+                  title={`¿Eliminar ${selectedRowKeys.length} artículos?`}
+                  description="Esta acción no se puede deshacer."
+                  okText="Sí, eliminar"
+                  cancelText="No"
+                  okButtonProps={{ danger: true }}
+                  onConfirm={() => {
+                    const idsNumeric = selectedRowKeys.map(key => Number(key));
+                    bulkDelete(idsNumeric, {
+                      onSuccess: () => setSelectedRowKeys([])
+                    });
+                  }}
+                >
+                  <Button type="primary" danger loading={isDeletingBulk}>
+                    Eliminar Seleccionados
+                  </Button>
+                </Popconfirm>
+              )}
             </Space>
           </div>
         )}

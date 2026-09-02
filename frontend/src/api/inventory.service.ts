@@ -20,6 +20,10 @@ export interface Inventario {
   // Si los items de este inventario piden/muestran foto — se elige al
   // crear el inventario (checkbox) y se puede cambiar después editándolo.
   fotos_habilitadas: boolean;
+  // Bloques de estadística a medida configurados en el inventario (ver
+  // ModalStatsInventory / PATCH /inventarios/{id}/bloques). Opcional: un
+  // inventario recién creado no tiene ninguno.
+  bloques_personalizados?: BloquePersonalizado[];
   items: Item[];
   creado_en: string;
   actualizado_en: string;
