@@ -16,9 +16,30 @@ import { useNavigate } from 'react-router-dom';
 import dayjs from 'dayjs';
 import { CatalogForm } from '../forms/CatalogForm';
 import { useAuthContext } from '../context/AuthContext';
+import { EmojiPicker, useEmojiPreference } from '../components/EmojiPicker';
 import { Modal as AntModal } from 'antd';
 
 const { Title, Text } = Typography;
+
+const CatalogoEmojiAvatar = ({ catalogoId }: { catalogoId: number }) => {
+  const [emoji, setEmoji] = useEmojiPreference(`flexinv_emoji_catalogo_${catalogoId}`);
+  return (
+    <EmojiPicker value={emoji} onChange={setEmoji}>
+      <Avatar
+        size={48}
+        icon={emoji ? undefined : <FolderOutlined />}
+        style={{
+          backgroundColor: '#e6f4ff',
+          color:           '#1677ff',
+          cursor:          'pointer',
+          fontSize:        emoji ? 24 : undefined,
+        }}
+      >
+        {emoji}
+      </Avatar>
+    </EmojiPicker>
+  );
+};
 
 export const CatalogoDashboard = () => {
   const { data: catalogos, isLoading } = useCatalogos();
@@ -161,11 +182,7 @@ export const CatalogoDashboard = () => {
                {/* ... El interior de la Card queda idéntico a lo que ya tenías ... */}
                <Row align="middle" gutter={24}>
                   <Col flex="none">
-                    <Avatar
-                      size={48}
-                      icon={<FolderOutlined />}
-                      style={{ backgroundColor: '#e6f4ff', color: '#1677ff' }}
-                    />
+                    <CatalogoEmojiAvatar key={cat.id} catalogoId={cat.id} />
                   </Col>
 
                   <Col flex="auto">

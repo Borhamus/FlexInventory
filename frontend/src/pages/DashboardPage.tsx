@@ -15,6 +15,7 @@ import { useInventories } from '../hooks/useInventory';
 import { useCatalogos } from '../hooks/useCatalogos';
 import { useItems } from '../hooks/useItems';
 import { useEmpleados } from '../hooks/useUsuarios';
+import { EmojiPicker, useEmojiPreference } from '../components/EmojiPicker';
 import api from '../api/axios.config';
 import dayjs from 'dayjs';
 import 'dayjs/locale/es';
@@ -211,12 +212,9 @@ const DashboardPage: React.FC = () => {
   const hora   = dayjs().hour();
   const saludo = hora < 12 ? 'Buenos días' : hora < 20 ? 'Buenas tardes' : 'Buenas noches';
   const inicial = stats?.username?.charAt(0).toUpperCase();
+  const [avatarEmoji, setAvatarEmoji] = useEmojiPreference('flexinv_emoji_avatar');
 
   return (
-    // height:'100%' + overflowY:'auto' en vez de minHeight:'100vh' — ese
-    // patrón fue justamente lo que causó el bug del scroll roto: dejaba
-    // que la página creciera más allá del viewport y se apoyaba en que el
-    // documento entero scrolleara, cosa que ya no pasa (a propósito).
     <div style={{
       height:     '100%',
       overflowY:  'auto',
@@ -227,19 +225,22 @@ const DashboardPage: React.FC = () => {
 
       {/* Encabezado: avatar + saludo por hora + fecha */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 18, marginBottom: 40 }}>
-        <Avatar
-          size={60}
-          icon={<UserOutlined />}
-          style={{
-            flexShrink:      0,
-            fontSize:        26,
-            fontWeight:      600,
-            backgroundColor: token.colorPrimary,
-            boxShadow:       `0 4px 14px ${token.colorPrimary}59`, // ~35% opacidad
-          }}
-        >
-          {inicial}
-        </Avatar>
+        <EmojiPicker value={avatarEmoji} onChange={setAvatarEmoji}>
+          <Avatar
+            size={60}
+            icon={avatarEmoji ? undefined : <UserOutlined />}
+            style={{
+              flexShrink:      0,
+              fontSize:        26,
+              fontWeight:      600,
+              cursor:          'pointer',
+              backgroundColor: token.colorPrimary,
+              boxShadow:       `0 4px 14px ${token.colorPrimary}59`,
+            }}
+          >
+            {avatarEmoji ?? inicial}
+          </Avatar>
+        </EmojiPicker>
 
         <div style={{ minWidth: 0 }}>
           {isLoading ? (
