@@ -300,7 +300,11 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     });
 
     return cols.filter(
-      (col) => !hiddenColumns.includes(col.key as string) || ['id', 'nombre', 'acciones'].includes(col.key as string)
+      // "id" ahora es ocultable desde "Columnas visibles" (no a todos los
+      // usuarios les sirve verlo) — "nombre" y "acciones" quedan siempre
+      // forzados: sin nombre no se identifica la fila, y "acciones" tiene
+      // los botones de editar/borrar.
+      (col) => !hiddenColumns.includes(col.key as string) || ['nombre', 'acciones'].includes(col.key as string)
     );
   }, [items, atributos, isTenant, hasPermission, hiddenColumns, onEditItem, onDeleteItem, fotosHabilitadas]);
 

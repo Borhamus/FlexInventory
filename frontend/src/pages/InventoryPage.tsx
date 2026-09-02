@@ -151,6 +151,17 @@ const InventoryPage: React.FC = () => {
                     allowClear
                     size="small"
                   />
+                  {(!columnSearch || 'id'.includes(columnSearch.toLowerCase())) && (
+                    <Checkbox
+                      checked={!hiddenColumns.includes('id')}
+                      onChange={(e) => {
+                        if (e.target.checked) setHiddenColumns(prev => prev.filter(k => k !== 'id'));
+                        else setHiddenColumns(prev => [...prev, 'id']);
+                      }}
+                    >
+                      ID
+                    </Checkbox>
+                  )}
                   {(!columnSearch || 'fecha de creación'.includes(columnSearch.toLowerCase())) && (
                     <Checkbox
                       checked={!hiddenColumns.includes('creado_en')}
