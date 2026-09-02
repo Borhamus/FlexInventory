@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, Tag, Typography, Button, Popconfirm, message } from 'antd';
+import { Table, Tag, Typography, Button, Popconfirm, message, Descriptions } from 'antd';
 import type { ColumnsType, TablePaginationConfig } from 'antd/es/table';
 import { DeleteOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
@@ -21,6 +21,95 @@ const traduccionMetodos: Record<string, string> = {
   PUT: 'EDICIÓN',
   PATCH: 'EDICIÓN',
   DELETE: 'ELIMINACIÓN',
+};
+// ───────────────────────────────────────────────────────────────────────
+
+const ETIQUETAS: Record<string, string> = {
+  nombre: 'Nombre',
+  cantidad: 'Stock',
+  descripcion: 'Descripción',
+  inventario_id: 'Inventario',
+  catalogo_id: 'Catálogo',
+  item_id: 'Artículo',
+  item_ids: 'Artículos',
+  fotos_habilitadas: 'Fotos habilitadas',
+  roles_atributos: 'Roles de atributos',
+  bloques_personalizados: 'Bloques personalizados',
+  defaults: 'Valores por defecto',
+  atributos: 'Atributos',
+};
+
+const humanizarClave = (k: string): string =>
+  ETIQUETAS[k] ?? k.replace(/_/g, ' ').replace(/^\w/, (c) => c.toUpperCase());
+
+const humanizarValor = (v: unknown): string => {
+  if (v === null || v === undefined || v === '') return '—';
+  if (typeof v === 'boolean') return v ? 'Sí' : 'No';
+  return String(v);
+};
+
+interface FilaDetalle {
+  label: string;
+  value: string;
+}
+
+const formatearDetalle = (payload: unknown): FilaDetalle[] => {
+  if (!payload || typeof payload !== 'object') return [];
+  const filas: FilaDetalle[] = [];
+
+  for (const [k, v] of Object.entries(payload as Record<string, unknown>)) {
+    if (Array.isArray(v)) {
+      const n = v.length;
+      const sustantivo =
+        k === 'item_ids' ? (n === 1 ? 'artículo' : 'artículos')
+        : k === 'bloques_personalizados' ? (n === 1 ? 'bloque' : 'bloques')
+        : (n === 1 ? 'elemento' : 'elementos');
+      filas.push({ label: humanizarClave(k), value: `${n} ${sustantivo}` });
+    } else if (v && typeof v === 'object') {
+      const prefijo = k === 'atributos' ? '' : `${humanizarClave(k)} · `;
+      for (const [nk, nv] of Object.entries(v as Record<string, unknown>)) {
+        filas.push({ label: `${prefijo}${humanizarClave(nk)}`, value: humanizarValor(nv) });
+      }
+    } else {
+      filas.push({ label: humanizarClave(k), value: humanizarValor(v) });
+    }
+  }
+  return filas;
+};
+
+const DetalleAuditoria: React.FC<{ record: AuditLog }> = ({ record }) => {
+  const cambios = record.resumen ? record.resumen.split(' | ') : [];
+  const filas = formatearDetalle(record.payload_cambios);
+
+  if (cambios.length === 0 && filas.length === 0) {
+    return <Text type="secondary" italic>Sin datos adicionales para mostrar.</Text>;
+  }
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 16, maxWidth: 560 }}>
+      {cambios.length > 0 && (
+        <div>
+          <Text strong style={{ display: 'block', marginBottom: 6 }}>Cambios</Text>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 4 }}>
+            {cambios.map((linea, i) => (
+              <Text key={i} type="secondary">{linea}</Text>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {filas.length > 0 && (
+        <div>
+          <Text strong style={{ display: 'block', marginBottom: 6 }}>Datos de la operación</Text>
+          <Descriptions size="small" column={1} bordered style={{ maxWidth: 520 }}>
+            {filas.map((f, i) => (
+              <Descriptions.Item key={i} label={f.label}>{f.value}</Descriptions.Item>
+            ))}
+          </Descriptions>
+        </div>
+      )}
+    </div>
+  );
 };
 // ───────────────────────────────────────────────────────────────────────
 
@@ -65,33 +154,6 @@ const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, paginati
       render: (text) => <Text strong>{text || '-'}</Text>,
     },
     {
-      title: 'Resumen de Cambios',
-      dataIndex: 'resumen',
-      key: 'resumen',
-      render: (text: string) => {
-        if (!text) {
-          return <Text type="secondary" italic>Ver detalle</Text>;
-        }
-        if (text.includes(' | ')) {
-          const cambios = text.split(' | ');
-          return (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
-              {cambios.map((cambio, index) => (
-                <Text key={index} type="secondary" italic>
-                  {cambio}
-                </Text>
-              ))}
-            </div>
-          );
-        }
-        return (
-          <Text type="secondary" italic>
-            {text}
-          </Text>
-        );
-      },
-    },
-    {
       title: 'Tipo de Movimiento',
       dataIndex: 'metodo',
       key: 'metodo',
@@ -120,6 +182,11 @@ const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, paginati
       size="middle"
       pagination={pagination}
       onChange={onChange}
+      expandable={{
+        expandedRowRender: (record) => <DetalleAuditoria record={record} />,
+        rowExpandable: (record) =>
+          Boolean(record.resumen) || formatearDetalle(record.payload_cambios).length > 0,
+      }}
     />
 
     <div style={{ 
