@@ -1,13 +1,14 @@
 import json
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
 from app.auditoria.auditor import Auditor
-from app.tenant import schemas, models
-from app.tenant.dependencies import get_tenant_db, require_permission
+from app.Core.models import Tenant
+from app.tenant import schemas, models, imagenes
+from app.tenant.dependencies import get_tenant_db, get_tenant_from_token, require_permission
 from app.tenant.validators import validate_item_attributes, parse_value_by_type
 
 router = APIRouter(prefix="/items", tags=["Items"])
@@ -21,6 +22,7 @@ PUT    = [Depends(Auditor(accion="Editar Artículo", auditar_payload=True))]
 PATCH  = [Depends(Auditor(accion="Editar Artículo", auditar_payload=True))]
 DELETE = [Depends(Auditor(accion="Eliminar Artículo", auditar_payload=True))]
 DELETE_BULK = [Depends(Auditor(accion="Eliminar Artículos (Masivo)", auditar_payload=True))]
+IMAGEN = [Depends(Auditor(accion="Cambiar Foto de Artículo", auditar_payload=False))]
 # ─────────────────────────────────────────────────────────────────────────
 
 @router.post("/", response_model=schemas.ItemResponse, status_code=201, dependencies=POST)
@@ -366,3 +368,65 @@ def delete_item(
         raise HTTPException(404, detail="Item no encontrado")
     db.delete(item)
     db.commit()
+
+
+# ─── FOTO DEL ITEM ──────────────────────────────────────────────────────
+# El archivo va a disco local (app/tenant/imagenes.py), no a la base — acá
+# solo se guarda la URL pública resultante en Item.imagen. Ver ese módulo
+# para las decisiones de diseño (por qué disco y no bytea/base64, por qué
+# nombre de archivo random).
+
+@router.post("/{item_id}/imagen", response_model=schemas.ItemResponse, dependencies=IMAGEN)
+async def subir_imagen_item(
+    item_id: int,
+    archivo: UploadFile = File(...),
+    _: dict = _perm("items", "update"),
+    tenant: Tenant = Depends(get_tenant_from_token),
+    db: Session = Depends(get_tenant_db),
+):
+    """
+    Sube (o reemplaza) la foto de un item. Acepta JPG, PNG o WEBP, hasta 5 MB.
+
+    Si el item ya tenía una foto, la anterior se borra del disco — nunca
+    quedan archivos huérfanos acumulándose.
+
+    Requiere permiso `items:update` (o ser tenant owner).
+    """
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        raise HTTPException(404, detail="Item no encontrado")
+
+    inventario = db.query(models.Inventario).filter(models.Inventario.id == item.inventario_id).first()
+    if not inventario or not inventario.fotos_habilitadas:
+        # No basta con ocultar el botón en el frontend — si alguien pega
+        # directo a la API, este inventario sigue sin querer fotos.
+        raise HTTPException(400, detail="Este inventario no tiene las fotos habilitadas")
+
+    item.imagen = await imagenes.guardar_imagen(tenant.schema_name, archivo, item.imagen)
+    db.commit()
+    db.refresh(item)
+    return item
+
+
+@router.delete("/{item_id}/imagen", response_model=schemas.ItemResponse, dependencies=IMAGEN)
+def borrar_imagen_item(
+    item_id: int,
+    _: dict = _perm("items", "update"),
+    db: Session = Depends(get_tenant_db),
+):
+    """
+    Quita la foto de un item (borra el archivo del disco y limpia la
+    referencia). No falla si el item no tenía foto.
+
+    Requiere permiso `items:update` (o ser tenant owner).
+    """
+    item = db.query(models.Item).filter(models.Item.id == item_id).first()
+    if not item:
+        raise HTTPException(404, detail="Item no encontrado")
+
+    if item.imagen:
+        imagenes.eliminar_imagen(item.imagen)
+        item.imagen = None
+        db.commit()
+        db.refresh(item)
+    return item

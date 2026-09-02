@@ -7,7 +7,9 @@ export const itemSchema = z.object({
   cantidad: z.number().min(0, 'La cantidad no puede ser negativa'),
   inventario_id: z.number(),
   // Record<string, any> para los atributos dinámicos
-  atributos: z.record(z.any()).default({}), 
+  atributos: z.record(z.any()).default({}),
+  // URL pública lista para usar en un <img src>, o null si no tiene foto.
+  imagen: z.string().nullable().optional(),
   creado_en: z.string(),
   actualizado_en: z.string(),
 });

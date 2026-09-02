@@ -9,15 +9,20 @@ class InventarioBase(BaseModel):
     atributos: Dict[str, Any] = Field(default_factory=dict)
 
 class InventarioCreate(InventarioBase):
-    pass
+    # Si el usuario no tilda el checkbox al crear, arranca en False — no
+    # tiene sentido mostrarle un campo de foto en cada item si nunca lo va
+    # a usar. Se puede prender/apagar después desde Editar Inventario.
+    fotos_habilitadas: bool = False
 
 class InventarioUpdate(BaseModel):
     nombre: Optional[str] = Field(None, min_length=1, max_length=255)
     atributos: Optional[Dict[str, Any]] = None
     defaults: Optional[Dict[str, Any]] = None
+    fotos_habilitadas: Optional[bool] = None
 
 class InventarioResponse(InventarioBase):
     id: int
+    fotos_habilitadas: bool = False
     roles_atributos: Dict[str, str] = Field(default_factory=dict)
     bloques_personalizados: List[Dict[str, Any]] = Field(default_factory=list)
     creado_en: datetime
@@ -147,6 +152,10 @@ class ItemUpdate(BaseModel):
 class ItemResponse(ItemBase):
     id: int
     inventario_id: int
+    # URL pública ya armada (o None si no tiene foto). Se gestiona aparte
+    # con POST/DELETE /items/{id}/imagen — nunca se manda por ItemCreate
+    # ni ItemUpdate (subir un archivo no encaja en un body JSON).
+    imagen: Optional[str] = None
     creado_en: datetime
     actualizado_en: datetime
 

@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Select, message, theme } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, Checkbox, message, theme } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useUpdateInventory, useConfigurarRoles } from '../hooks/useInventory';
 
@@ -33,6 +33,7 @@ interface ModalEditInventoryProps {
   currentName: string;
   currentAtributos: Record<string, string>;
   currentRolesAtributos?: Record<string, string>;
+  currentFotosHabilitadas?: boolean;
 }
 
 export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
@@ -42,6 +43,7 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
   currentName,
   currentAtributos = {},
   currentRolesAtributos = {},
+  currentFotosHabilitadas = false,
 }) => {
   const [form] = Form.useForm();
   const { token } = theme.useToken();
@@ -60,9 +62,10 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
         nombre: currentName,
         atributos: Object.entries(currentAtributos).map(([nombre, tipo]) => ({ nombre, tipo, isNew: false })),
         roles: currentRolesAtributos,
+        fotos_habilitadas: currentFotosHabilitadas,
       });
     }
-  }, [isOpen, currentName, currentAtributos, currentRolesAtributos, form]);
+  }, [isOpen, currentName, currentAtributos, currentRolesAtributos, currentFotosHabilitadas, form]);
 
   const makeDefaultValidator = (fieldName: number) => ({
     validator(_: unknown, value: string) {
@@ -106,9 +109,10 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
         });
       }
 
-      const payload: { nombre: string; atributos: Record<string, string>; defaults?: Record<string, unknown> } = {
+      const payload: { nombre: string; atributos: Record<string, string>; defaults?: Record<string, unknown>; fotos_habilitadas: boolean } = {
         nombre: values.nombre,
         atributos: atributosFormateados,
+        fotos_habilitadas: Boolean(values.fotos_habilitadas),
       };
       if (Object.keys(defaults).length > 0) payload.defaults = defaults;
 
@@ -173,6 +177,12 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
           rules={[{ required: true, message: 'Ingresá un nombre' }]}
         >
           <Input placeholder="Ej: Verdulería" />
+        </Form.Item>
+
+        <Form.Item name="fotos_habilitadas" valuePropName="checked" style={{ marginBottom: 16 }}>
+          <Checkbox>
+            Los artículos de este inventario tienen foto
+          </Checkbox>
         </Form.Item>
 
         <div style={{ marginBottom: 16 }}>

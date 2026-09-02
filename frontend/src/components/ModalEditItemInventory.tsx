@@ -1,23 +1,64 @@
-import React, { useEffect } from 'react';
-import { Modal, Form, Input, InputNumber, Switch, DatePicker, message } from 'antd';
+import React, { useEffect, useState } from 'react';
+import { Modal, Form, Input, InputNumber, Switch, DatePicker, Upload, Button, Avatar, Space, message } from 'antd';
+import type { UploadProps } from 'antd';
+import { UploadOutlined, DeleteOutlined, PictureOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
-import { useUpdateItem } from '../hooks/useInventory'; 
+import { useUpdateItem, useUploadItemImage, useDeleteItemImage } from '../hooks/useInventory';
+import { urlImagen } from '../api/axios.config';
 
 interface Props {
   open: boolean;
   onClose: () => void;
-  item: any; 
+  item: any;
   atributosRequeridos: Record<string,string>
+  // Si el inventario al que pertenece este item tiene la foto habilitada
+  // (checkbox al crear/editar el inventario) — si no, ni se muestra el
+  // campo, no tiene sentido ofrecerlo si nunca lo van a usar.
+  fotosHabilitadas?: boolean
 }
-export const ModalEditItemInventory: React.FC<Props> = ({ 
-    open, 
-    onClose, 
-    item, 
-    atributosRequeridos 
+export const ModalEditItemInventory: React.FC<Props> = ({
+    open,
+    onClose,
+    item,
+    atributosRequeridos,
+    fotosHabilitadas = false,
   }) => {
 
     const [form] = Form.useForm();
     const { mutate: updateItem, isPending } = useUpdateItem();
+    const { mutate: subirImagen, isPending: subiendoImagen } = useUploadItemImage();
+    const { mutate: borrarImagen, isPending: borrandoImagen } = useDeleteItemImage();
+
+    // `item` es una foto congelada del momento en que se abrió el modal —
+    // el padre no la actualiza sola cuando invalidamos la query al subir o
+    // borrar la imagen. Sin este estado propio, el modal seguía mostrando
+    // la foto vieja (o la seguía "teniendo" para el botón Quitar) aunque el
+    // backend y la tabla de atrás ya estuvieran al día.
+    const [imagenActual, setImagenActual] = useState<string | null | undefined>(item?.imagen);
+
+    useEffect(() => {
+      if (open) setImagenActual(item?.imagen);
+    }, [open, item]);
+
+    const handleSubirImagen: UploadProps['customRequest'] = (options) => {
+      const archivo = options.file as File;
+      subirImagen(
+        { id: item.id, archivo },
+        {
+          onSuccess: (itemActualizado) => {
+            setImagenActual(itemActualizado.imagen);
+            options.onSuccess?.({});
+          },
+          onError: (error) => options.onError?.(error as Error),
+        }
+      );
+    };
+
+    const handleQuitarImagen = () => {
+      borrarImagen(item.id, {
+        onSuccess: (itemActualizado) => setImagenActual(itemActualizado.imagen),
+      });
+    };
 
     useEffect(() => {
         if (open && item) {
@@ -107,8 +148,36 @@ export const ModalEditItemInventory: React.FC<Props> = ({
         cancelText="Cancelar"
         destroyOnClose
       >
+        {fotosHabilitadas && (
+          <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 20 }}>
+            <Avatar
+              size={64}
+              shape="square"
+              icon={<PictureOutlined />}
+              src={urlImagen(imagenActual)}
+            />
+            <Space>
+              <Upload showUploadList={false} customRequest={handleSubirImagen} accept="image/jpeg,image/png,image/webp">
+                <Button icon={<UploadOutlined />} loading={subiendoImagen}>
+                  {imagenActual ? 'Cambiar foto' : 'Subir foto'}
+                </Button>
+              </Upload>
+              {imagenActual && (
+                <Button
+                  danger
+                  icon={<DeleteOutlined />}
+                  loading={borrandoImagen}
+                  onClick={handleQuitarImagen}
+                >
+                  Quitar
+                </Button>
+              )}
+            </Space>
+          </div>
+        )}
+
         <Form form={form} layout="vertical">
-          
+
           <Form.Item name="nombre" label="Nombre del Artículo" >
             <Input />
           </Form.Item>

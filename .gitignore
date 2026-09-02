@@ -10,3 +10,5 @@ CLAUDE.md
 .vscode/
 DOC/.obsidian/
 **/node_modules
+# Fotos de items subidas por los usuarios — datos, no código.
+/uploads/

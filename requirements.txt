@@ -32,3 +32,6 @@ requests==2.32.3
 
 # Backups automáticos
 apscheduler==3.10.4
+
+# Fotos de items (validación real del archivo subido, no solo el Content-Type)
+Pillow==12.2.0

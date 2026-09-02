@@ -1,6 +1,15 @@
 import axios from 'axios';
 import type { InternalAxiosRequestConfig } from 'axios';
 
+export const API_BASE_URL: string = import.meta.env.VITE_API_URL;
+
+// Las fotos de items se sirven como archivo estático (/uploads/...), no
+// como respuesta de la API — el backend ya devuelve la ruta completa
+// (ej. "/uploads/tenant_borhamus/items/8f3a1c2e.jpg"), esto solo le pega
+// el origen (http://localhost:8000) adelante para usarla en un <img src>.
+export const urlImagen = (ruta?: string | null): string | undefined =>
+  ruta ? `${API_BASE_URL}${ruta}` : undefined;
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_URL,
   withCredentials: true, // necesario para enviar/recibir la cookie httpOnly del refresh token

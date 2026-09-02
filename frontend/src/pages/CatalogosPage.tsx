@@ -21,6 +21,7 @@ import {
   Form,  // <-- Añadido para edición de datos
   Input, // <-- Añadido
   InputNumber, // <-- Añadido
+  Avatar,
 } from 'antd';
 import {
   PlusOutlined,
@@ -30,12 +31,16 @@ import {
   InboxOutlined,
   DatabaseOutlined,
   GlobalOutlined,
-  EditOutlined
+  EditOutlined,
+  PictureOutlined,
+  MinusCircleOutlined,
 } from '@ant-design/icons';
 import { Statistic } from 'antd';
 import { AddItemModal } from '../components/AddItemModal';
 // IMPORTAMOS TUS NUEVOS HOOKS
 import { useUpdateItem, useDeleteItem } from '../hooks/useItems';
+import { useRemoveItemFromCatalogo } from '../hooks/useCatalogos';
+import { urlImagen } from '../api/axios.config';
 
 const { Title, Text, Paragraph } = Typography;
 
@@ -54,6 +59,7 @@ const CatalogosPage: React.FC = () => {
   // HOOKS DE REACT QUERY
   const updateItemMutation = useUpdateItem(catalogoId);
   const deleteItemMutation = useDeleteItem(catalogoId);
+  const removeFromCatalogoMutation = useRemoveItemFromCatalogo(catalogoId);
 
   if (isLoading) return <Spin size="large" style={{ display: 'block', margin: '100px auto' }} />;
   if (error) return <Alert message="Error" description="No se pudo cargar el catálogo" type="error" showIcon />;
@@ -62,16 +68,36 @@ const CatalogosPage: React.FC = () => {
   const selectedItem = data?.items.find((i: any) => i.id === selectedItemId);
   const hasItems = data?.items && data.items.length > 0;
 
-  // CONTROLADOR AL DAR DE BAJA (DELETE)
-  const handleDelete = (itemId: number) => {
+  // CONTROLADOR PARA BORRADO PERMANENTE (DELETE /items/{id})
+  // OJO: esto NO es "dar de baja", borra el registro del sistema entero.
+  // Si el ítem viene de un inventario, también desaparece de ese inventario.
+  const handleDelete = (item: any) => {
+    const vinculado = item.inventario_id !== null && item.inventario_id !== undefined;
     Modal.confirm({
-      title: '¿Estás seguro de eliminar este artículo?',
-      content: 'Esta acción eliminará el ítem permanentemente del sistema e inventario asociado.',
-      okText: 'Sí, eliminar',
+      title: '¿Eliminar este artículo del sistema?',
+      okText: 'Sí, eliminar definitivamente',
       okType: 'danger',
       cancelText: 'Cancelar',
+      content: vinculado
+        ? `Se borrará el artículo "${item.nombre}" de forma PERMANENTE. Desaparecerá también del inventario #${item.inventario_id} y no se puede deshacer. Si solo querés sacarlo de este catálogo, usá "Quitar del catálogo".`
+        : `Se borrará el artículo "${item.nombre}" de forma PERMANENTE. Esta acción no se puede deshacer.`,
       onOk: async () => {
-        await deleteItemMutation.mutateAsync(itemId);
+        await deleteItemMutation.mutateAsync(item.id);
+        setSelectedItemId(null); // Limpiamos la selección del panel lateral
+      },
+    });
+  };
+
+  // CONTROLADOR PARA DESVINCULAR DEL CATÁLOGO (DELETE /catalogos/{id}/items/{itemId})
+  // El artículo sigue existiendo en su inventario; solo deja de estar en este catálogo.
+  const handleRemoveFromCatalogo = (item: any) => {
+    Modal.confirm({
+      title: '¿Quitar este artículo del catálogo?',
+      okText: 'Sí, quitar del catálogo',
+      cancelText: 'Cancelar',
+      content: `El artículo "${item.nombre}" se desvincula de este catálogo, pero SIGUE existiendo en el inventario #${item.inventario_id} con su stock intacto. Podés volver a agregarlo cuando quieras.`,
+      onOk: async () => {
+        await removeFromCatalogoMutation.mutateAsync(item.id);
         setSelectedItemId(null); // Limpiamos la selección del panel lateral
       },
     });
@@ -169,12 +195,30 @@ const CatalogosPage: React.FC = () => {
                       hoverable
                       size="small"
                       onClick={() => setSelectedItemId(item.id)}
+                      cover={
+                        item.imagen ? (
+                          <img
+                            src={urlImagen(item.imagen)}
+                            alt={item.nombre}
+                            style={{ height: 140, objectFit: 'cover', borderRadius: `${token.borderRadius}px ${token.borderRadius}px 0 0` }}
+                          />
+                        ) : (
+                          <div style={{
+                            height: 140, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                            backgroundColor: token.colorFillAlter, color: token.colorTextQuaternary,
+                            borderRadius: `${token.borderRadius}px ${token.borderRadius}px 0 0`,
+                          }}>
+                            <PictureOutlined style={{ fontSize: 32 }} />
+                          </div>
+                        )
+                      }
                       style={{
                         borderRadius: token.borderRadius,
                         transition: 'all 0.3s',
                         border: `1px solid ${isSelected ? token.colorPrimary : token.colorBorderSecondary}`,
                         backgroundColor: token.colorBgContainer,
-                        boxShadow: isSelected ? token.boxShadow : 'none'
+                        boxShadow: isSelected ? token.boxShadow : 'none',
+                        overflow: 'hidden',
                       }}
                       bodyStyle={{ padding: '12px' }}
                     >
@@ -256,6 +300,21 @@ const CatalogosPage: React.FC = () => {
               <Divider style={{ margin: 0 }} />
 
               <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+                {selectedItem.imagen ? (
+                  <img
+                    src={urlImagen(selectedItem.imagen)}
+                    alt={selectedItem.nombre}
+                    style={{ width: '100%', maxHeight: 260, objectFit: 'contain', borderRadius: token.borderRadiusLG, marginBottom: 20, backgroundColor: token.colorFillAlter }}
+                  />
+                ) : (
+                  <div style={{
+                    width: '100%', height: 160, display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    backgroundColor: token.colorFillAlter, color: token.colorTextQuaternary,
+                    borderRadius: token.borderRadiusLG, marginBottom: 20,
+                  }}>
+                    <Avatar size={48} icon={<PictureOutlined />} style={{ backgroundColor: 'transparent', color: token.colorTextQuaternary }} />
+                  </div>
+                )}
                 <Descriptions title="Ficha Técnica" column={1} bordered size="small">
                   <Descriptions.Item label="ID de Sistema">{selectedItem.id}</Descriptions.Item>
                   <Descriptions.Item label="Stock Actual">
@@ -295,16 +354,42 @@ const CatalogosPage: React.FC = () => {
                   >
                     Actualizar Datos
                   </Button>
-                  <Button 
-                    danger 
-                    block 
-                    icon={<DeleteOutlined />} 
-                    size="large"
-                    loading={deleteItemMutation.isPending}
-                    onClick={() => handleDelete(selectedItem.id)} // ACCIÓN BORRAR
-                  >
-                    {selectedItem.inventario_id ? "Dar de baja en Inventario" : "Eliminar del Catálogo"}
-                  </Button>
+                  {selectedItem.inventario_id ? (
+                    <>
+                      <Button
+                        danger
+                        ghost
+                        block
+                        icon={<MinusCircleOutlined />}
+                        size="large"
+                        loading={removeFromCatalogoMutation.isPending}
+                        onClick={() => handleRemoveFromCatalogo(selectedItem)} // SOLO DESVINCULA DEL CATÁLOGO
+                      >
+                        Quitar del catálogo
+                      </Button>
+                      <Button
+                        danger
+                        block
+                        icon={<DeleteOutlined />}
+                        size="large"
+                        loading={deleteItemMutation.isPending}
+                        onClick={() => handleDelete(selectedItem)} // BORRA PERMANENTE (SISTEMA + INVENTARIO)
+                      >
+                        Eliminar del inventario
+                      </Button>
+                    </>
+                  ) : (
+                    <Button
+                      danger
+                      block
+                      icon={<DeleteOutlined />}
+                      size="large"
+                      loading={deleteItemMutation.isPending}
+                      onClick={() => handleDelete(selectedItem)} // BORRA PERMANENTE (ítem suelto)
+                    >
+                      Eliminar del Catálogo
+                    </Button>
+                  )}
                 </Space>
               </div>
             </Card>

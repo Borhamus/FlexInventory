@@ -2,7 +2,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from fastapi import FastAPI
+from fastapi.staticfiles import StaticFiles
 from app.db_config import engine, Base, TenantBase
+from app.tenant.imagenes import UPLOADS_DIR
 from app.Core.endpoints import router as tenant_router
 from app.Core.auth import router as auth_router
 from app.Core.roles import router as roles_router
@@ -59,6 +61,13 @@ app.include_router(items_router)       # /items/*
 app.include_router(catalogos_router)   # /catalogos/*
 app.include_router(database_router)    # /database/*
 app.include_router(auditoria_router)   # /auditoria/*
+
+# Fotos de items: servidas directo del disco, sin pasar por un endpoint de
+# la API. La URL random (uuid) hace de "difícil de adivinar" ya que este
+# proyecto no usa cookies de sesión — un <img src> no puede mandar el
+# Authorization Bearer que sí usa el resto de la API. Ver app/tenant/imagenes.py.
+UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/uploads", StaticFiles(directory=UPLOADS_DIR), name="uploads")
 
 # Crea tablas del schema public: tenants, users, custom_roles, role_permissions
 Base.metadata.create_all(bind=engine)

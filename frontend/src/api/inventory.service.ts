@@ -6,6 +6,8 @@ export interface Item {
   cantidad: number;
   inventario_id: number;
   atributos: Record<string, any>;
+  // URL pública lista para usar en un <img src>, o null si no tiene foto.
+  imagen?: string | null;
   creado_en: string;
   actualizado_en: string;
 }
@@ -15,6 +17,9 @@ export interface Inventario {
   nombre: string;
   atributos: Record<string, string>; // schema: {"color": "string", "talle": "string"}
   roles_atributos: Record<string, string>; // {"volumen_unitario": "peso_m3", ...}
+  // Si los items de este inventario piden/muestran foto — se elige al
+  // crear el inventario (checkbox) y se puede cambiar después editándolo.
+  fotos_habilitadas: boolean;
   items: Item[];
   creado_en: string;
   actualizado_en: string;
@@ -196,6 +201,20 @@ export const inventoryService = {
 
   updateItem: async (id: number, payload: any) => {
     const { data } = await api.put(`/items/${id}`, payload);
+    return data;
+  },
+
+  subirImagenItem: async (id: number, archivo: File): Promise<Item> => {
+    const formData = new FormData();
+    formData.append('archivo', archivo);
+    const { data } = await api.post(`/items/${id}/imagen`, formData, {
+      headers: { 'Content-Type': 'multipart/form-data' },
+    });
+    return data;
+  },
+
+  eliminarImagenItem: async (id: number): Promise<Item> => {
+    const { data } = await api.delete(`/items/${id}/imagen`);
     return data;
   },
 

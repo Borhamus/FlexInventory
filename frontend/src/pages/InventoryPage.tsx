@@ -305,14 +305,16 @@ const InventoryPage: React.FC = () => {
           onEditItem={handleEditItem}
           onDeleteItem={handleDeleteItem}
           preserveOrder={ordenFiltroActivo}
+          fotosHabilitadas={data?.fotos_habilitadas}
+          inventoryId={Number(id)}
         />
 
       </div>
 
       {/* MODALES */}
-      <ModalAddItemInventory open={isModalOpen} onClose={() => setIsModalOpen(false)} inventoryId={Number(id)} atributosRequeridos={data?.atributos || {}} />
-      <ModalEditInventory isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} inventoryId={Number(id)} currentName={data?.nombre || ''} currentAtributos={data?.atributos || {}} currentRolesAtributos={data?.roles_atributos || {}} />
-      <ModalEditItemInventory open={isEditItemModalOpen} onClose={() => { setIsEditItemModalOpen(false); setSelectedItem(null); }} item={selectedItem} atributosRequeridos={data?.atributos || {}} />
+      <ModalAddItemInventory open={isModalOpen} onClose={() => setIsModalOpen(false)} inventoryId={Number(id)} atributosRequeridos={data?.atributos || {}} fotosHabilitadas={data?.fotos_habilitadas} />
+      <ModalEditInventory isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} inventoryId={Number(id)} currentName={data?.nombre || ''} currentAtributos={data?.atributos || {}} currentRolesAtributos={data?.roles_atributos || {}} currentFotosHabilitadas={data?.fotos_habilitadas} />
+      <ModalEditItemInventory open={isEditItemModalOpen} onClose={() => { setIsEditItemModalOpen(false); setSelectedItem(null); }} item={selectedItem} atributosRequeridos={data?.atributos || {}} fotosHabilitadas={data?.fotos_habilitadas} />
       <ModalBulkEdit visible={isBulkModalVisible} onClose={() => setIsBulkModalVisible(false)} selectedIds={selectedRowKeys} atributosInventario={Object.entries(data?.atributos || {}).map(([key, val]: any) => ({ nombre: key, tipo: val }))} onSuccess={() => { refetch(); setSelectedRowKeys([]); }} />
       <ModalStatsInventory open={isStatsModalOpen} onClose={() => setIsStatsModalOpen(false)} inventoryId={Number(id)} />
     </div>

@@ -103,3 +103,35 @@ export const useUpdateItem = () => {
     }
   });
 };
+
+export const useUploadItemImage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, archivo }: { id: number; archivo: File }) =>
+      inventoryService.subirImagenItem(id, archivo),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      message.success('Foto actualizada');
+    },
+    onError: (error: any) => {
+      const detalle = error?.response?.data?.detail;
+      message.error(typeof detalle === 'string' ? detalle : 'No se pudo subir la foto');
+    },
+  });
+};
+
+export const useDeleteItemImage = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => inventoryService.eliminarImagenItem(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      message.success('Foto eliminada');
+    },
+    onError: () => {
+      message.error('No se pudo eliminar la foto');
+    },
+  });
+};

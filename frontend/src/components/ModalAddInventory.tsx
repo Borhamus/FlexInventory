@@ -53,6 +53,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
         nombre:      values.nombre,
         descripcion: values.descripcion,
         atributos:   atributosFormateados,
+        fotos_habilitadas: Boolean(values.fotos_habilitadas),
       };
 
       const finalizar = () => {
@@ -124,6 +125,15 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
         </Form.Item>
         <p style={{ fontSize: '12px', color: token.colorTextTertiary, marginTop: 0, marginBottom: 20, paddingLeft: 24 }}>
           Se va a pedir la fecha de vencimiento a cada artículo que cargues, y vas a poder ver desde el inicio cuáles están por vencer o ya vencieron.
+        </p>
+
+        <Form.Item name="fotos_habilitadas" valuePropName="checked" style={{ marginBottom: 4 }}>
+          <Checkbox>
+            Los artículos de este inventario van a tener foto
+          </Checkbox>
+        </Form.Item>
+        <p style={{ fontSize: '12px', color: token.colorTextTertiary, marginTop: 0, marginBottom: 20, paddingLeft: 24 }}>
+          Si no lo tildás, no se te va a pedir ni mostrar el campo de foto en los artículos — lo podés cambiar después desde Editar Inventario.
         </p>
 
         <div style={{
