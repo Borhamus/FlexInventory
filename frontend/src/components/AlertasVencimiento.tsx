@@ -44,6 +44,12 @@ export const AlertasVencimiento: React.FC = () => {
       ) : (
         <List
           dataSource={alertas}
+          style={{ paddingBottom: token.paddingLG }}
+          pagination={
+            alertas.length > 5
+              ? { pageSize: 5, size: 'small', align: 'center', showSizeChanger: false }
+              : false
+          }
           renderItem={(alerta) => (
             <List.Item
               style={{ cursor: 'pointer' }}
@@ -61,7 +67,10 @@ export const AlertasVencimiento: React.FC = () => {
                 }
               />
               <div style={{ textAlign: 'right' }}>
-                <Tag color={alerta.dias_restantes < 0 ? 'error' : alerta.dias_restantes <= 2 ? 'warning' : 'default'}>
+                <Tag
+                  color={alerta.dias_restantes < 0 ? 'error' : alerta.dias_restantes <= 2 ? 'warning' : 'default'}
+                  style={{ marginInlineEnd: 0 }}
+                >
                   {alerta.dias_restantes < 0
                     ? `Vencido hace ${Math.abs(alerta.dias_restantes)} día(s)`
                     : alerta.dias_restantes === 0

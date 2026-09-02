@@ -3,6 +3,7 @@ import { BoxPlotOutlined, PartitionOutlined, BuildOutlined } from '@ant-design/i
 import { useInventories } from '../hooks/useInventory';
 import { useAuthContext } from '../context/AuthContext';
 import { useEffect } from 'react';
+import AlertasVencimiento from '../components/AlertasVencimiento';
 
 export const InventoryDashboard = () => {
 
@@ -51,9 +52,8 @@ export const InventoryDashboard = () => {
           </Card>
         </Col>
       </Row>
-
-      <div style={{ marginTop: '40px', textAlign: 'center', color: '#8c8c8c' }}>
-        <Empty description="Seleccioná un inventario de la lista lateral para gestionar sus artículos o crear uno nuevo." />
+      <div style={{ marginTop: 32 }}>
+        <AlertasVencimiento />
       </div>
     </div>
   );

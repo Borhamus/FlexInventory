@@ -14,8 +14,8 @@ const ROLES_KEY     = ['roles'];
 
 // ── Empleados ──────────────────────────────────────────────
 
-export const useEmpleados = () =>
-  useQuery({ queryKey: EMPLEADOS_KEY, queryFn: usuariosService.listEmpleados });
+export const useEmpleados = ({ enabled = true }: { enabled?: boolean } = {}) =>
+  useQuery({ queryKey: EMPLEADOS_KEY, queryFn: usuariosService.listEmpleados, enabled });
 
 export const useCreateEmpleado = () => {
   const qc = useQueryClient();
