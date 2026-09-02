@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, List, Tag, Empty, Spin, Typography, theme } from 'antd';
 import { WarningOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
@@ -17,6 +17,9 @@ export const AlertasVencimiento: React.FC = () => {
   const { data: alertas, isLoading } = useAlertasVencimiento(7);
   const navigate = useNavigate();
   const { token } = theme.useToken();
+  // Cantidad de alertas por página, elegible por el usuario (mismo criterio
+  // que la tabla de inventario y el listado de catálogos).
+  const [pageSize, setPageSize] = useState(5);
 
   const colorPorDias = (dias: number) => {
     if (dias < 0) return token.colorError;
@@ -46,8 +49,17 @@ export const AlertasVencimiento: React.FC = () => {
           dataSource={alertas}
           style={{ paddingBottom: token.paddingLG }}
           pagination={
+            // Paginador visible solo con más de 5 (el mínimo elegible); una
+            // vez visible, incluye el selector de cantidad por página.
             alertas.length > 5
-              ? { pageSize: 5, size: 'small', align: 'center', showSizeChanger: false }
+              ? {
+                  pageSize,
+                  size: 'small',
+                  align: 'center',
+                  showSizeChanger: true,
+                  pageSizeOptions: ['5', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'],
+                  onChange: (_page, nuevoPageSize) => setPageSize(nuevoPageSize),
+                }
               : false
           }
           renderItem={(alerta) => (

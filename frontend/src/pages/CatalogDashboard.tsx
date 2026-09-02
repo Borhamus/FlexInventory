@@ -1,7 +1,6 @@
 import { useState } from 'react';
-import { Card, Row, Col, Statistic, Empty, Button, Space, Typography, Tooltip, Modal, Form, List, Avatar, Result, Flex, Input } from 'antd';
+import { Card, Row, Col, Empty, Button, Space, Typography, Tooltip, Modal, Form, List, Avatar, Result, Flex, Input } from 'antd';
 import {
-  BoxPlotOutlined,
   PlusOutlined,
   EyeOutlined,
   EditOutlined,
@@ -54,6 +53,9 @@ export const CatalogoDashboard = () => {
   const [form] = Form.useForm();
   // estado para barra de busqueda
   const [searchText, setSearchText] = useState('');
+  // Cantidad de catálogos por página, elegible por el usuario (mismo
+  // criterio que la tabla de inventario).
+  const [pageSize, setPageSize] = useState(6);
 
   // Permisos de catálogos
   const canCreate = isTenant || hasPermission('catalogos', 'create');
@@ -171,8 +173,21 @@ export const CatalogoDashboard = () => {
           </div>
         ) : (
           <List
-            // 5. Le pasamos la lista filtrada en lugar de la original
-            dataSource={filteredCatalogos} 
+            dataSource={filteredCatalogos}
+            pagination={
+              // Se muestra el paginador solo si hay más de 5 (el mínimo
+              // elegible); una vez visible, incluye el selector de cantidad.
+              (filteredCatalogos?.length ?? 0) > 5
+                ? {
+                    pageSize,
+                    size: 'small',
+                    align: 'center',
+                    showSizeChanger: true,
+                    pageSizeOptions: ['5', '10', '20', '30', '40', '50', '60', '70', '80', '90', '100'],
+                    onChange: (_page, nuevoPageSize) => setPageSize(nuevoPageSize),
+                  }
+                : false
+            }
             renderItem={(cat) => (
               <Card
                 hoverable
