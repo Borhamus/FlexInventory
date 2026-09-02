@@ -10,9 +10,7 @@ Jobs por tenant:
   - monthly_{tenant_id}: el día D de cada mes a las 03:00 UTC
 """
 
-import json
 import logging
-from datetime import datetime, timezone
 
 from apscheduler.schedulers.background import BackgroundScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -26,13 +24,15 @@ def _run_backup_for_tenant(tenant_id: int):
     """
     Función que ejecuta el backup automático de un tenant.
     Obtiene su propia sesión de DB para no depender del request cycle.
+
+    La lógica del backup en sí (datos + fotos) vive en
+    app.database_manager.router.ejecutar_backup() — la usa tanto este job
+    como el endpoint manual POST /backup/now, para no mantener la misma
+    lógica escrita en dos lugares (antes estaba duplicada acá).
     """
     from app.db_config import SessionLocal
     from app.Core.models import Tenant
-    from app.database_manager.router import (
-        export_tenant_data, _get_access_token,
-        _get_or_create_folder, _upload_to_drive
-    )
+    from app.database_manager.router import ejecutar_backup
 
     db = SessionLocal()
     try:
@@ -41,31 +41,8 @@ def _run_backup_for_tenant(tenant_id: int):
             return
 
         logger.info(f"[Scheduler] Iniciando backup automático para tenant {tenant.name} ({tenant_id})")
-
-        access_token      = _get_access_token(tenant.google_refresh_token)
-        root_folder_id    = _get_or_create_folder(access_token, "FlexInventory Storage")
-        backups_folder_id = _get_or_create_folder(access_token, "backups", root_folder_id)
-
-        data    = export_tenant_data(tenant, db)
-        content = json.dumps(data, ensure_ascii=False, indent=2)
-
-        # Actualizar current.json
-        current_file_id = _upload_to_drive(
-            access_token, "current.json", content,
-            root_folder_id, tenant.google_drive_file_id
-        )
-
-        # Backup con timestamp
-        ts          = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M")
-        backup_name = f"backup_{ts}.json"
-        _upload_to_drive(access_token, backup_name, content, backups_folder_id)
-
-        # Actualizar IDs
-        tenant.google_drive_file_id   = current_file_id
-        tenant.google_drive_folder_id = backups_folder_id
-        db.commit()
-
-        logger.info(f"[Scheduler] Backup automático completado: {backup_name}")
+        resultado = ejecutar_backup(tenant, db)
+        logger.info(f"[Scheduler] Backup automático completado: {resultado['filename']}")
 
     except Exception as e:
         logger.error(f"[Scheduler] Error en backup automático del tenant {tenant_id}: {e}")

@@ -55,6 +55,10 @@ class Tenant(Base):
     google_drive_file_id  = Column(String(255), nullable=True)
     # ID de la carpeta "FlexInventory Storage/backups" en Drive
     google_drive_folder_id = Column(String(255), nullable=True)
+    # ID del archivo "images.zip" en Drive (fotos de items) — solo se
+    # actualiza (nunca duplica), no lleva versionado histórico como
+    # current.json: las fotos cambian mucho menos seguido que los datos.
+    google_drive_images_file_id = Column(String(255), nullable=True)
 
     # ── Configuración de backups automáticos ───────────────────────────────
     # Frecuencia del backup diario (en horas, default 24)

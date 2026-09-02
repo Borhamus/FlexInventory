@@ -26,6 +26,14 @@ def run_migrations() -> None:
     from app.db_config import SessionLocal
     from app.Core.models import Tenant
 
+    # La tabla `tenants` vive en el schema public (una sola, no una por
+    # tenant) — se migra aparte, antes del loop de abajo.
+    with engine.begin() as conn:
+        conn.execute(text(
+            'ALTER TABLE public.tenants '
+            'ADD COLUMN IF NOT EXISTS google_drive_images_file_id VARCHAR(255)'
+        ))
+
     db = SessionLocal()
     try:
         tenants = db.query(Tenant).filter(Tenant.is_active == True).all()
@@ -47,6 +55,14 @@ def run_migrations() -> None:
             conn.execute(text(
                 f'ALTER TABLE "{schema}".inventario '
                 f"ADD COLUMN IF NOT EXISTS bloques_personalizados JSONB DEFAULT '[]'::jsonb"
+            ))
+            conn.execute(text(
+                f'ALTER TABLE "{schema}".item '
+                f"ADD COLUMN IF NOT EXISTS imagen VARCHAR(500)"
+            ))
+            conn.execute(text(
+                f'ALTER TABLE "{schema}".inventario '
+                f"ADD COLUMN IF NOT EXISTS fotos_habilitadas BOOLEAN NOT NULL DEFAULT true"
             ))
 
     logger.info(f"[Migraciones] roles_atributos verificado en {len(tenants)} tenant(s).")

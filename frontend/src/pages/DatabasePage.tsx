@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import {
   Card, Button, Switch, InputNumber, Typography, Divider,
-  Alert, Modal, Tag, Spin, Row, Col, Tooltip, notification,
+  Alert, Modal, Tag, Spin, Row, Col, Tooltip, notification, message,
   List, Radio, Space,
 } from 'antd';
 import {
@@ -107,6 +107,10 @@ const DatabasePage: React.FC = () => {
   const handleConfirmRestore = async () => {
     if (!selectedFileId) return;
     setActionLoading('restore');
+    // message.loading con duration 0 no se cierra sola — se cierra a mano
+    // con hide() cuando termina (éxito o error). Restaura datos y fotos,
+    // puede tardar unos segundos si hay muchas fotos.
+    const hide = message.loading('Restaurando desde Drive… no cierres esta página.', 0);
     try {
       const res = await restoreFromDriveById(selectedFileId);
       api.success({ message: res.message });
@@ -114,6 +118,7 @@ const DatabasePage: React.FC = () => {
     } catch (e: any) {
       api.error({ message: 'Error restaurando', description: e?.response?.data?.detail });
     } finally {
+      hide();
       setActionLoading(null);
     }
   };
@@ -150,6 +155,7 @@ const DatabasePage: React.FC = () => {
 
   const handleBackupNow = async () => {
     setActionLoading('backup');
+    const hide = message.loading('Haciendo el backup… puede tardar unos segundos si tenés fotos.', 0);
     try {
       const res = await backupNow();
       api.success({ message: 'Backup completado', description: `Archivo: ${res.filename}` });
@@ -157,6 +163,7 @@ const DatabasePage: React.FC = () => {
     } catch (e: any) {
       api.error({ message: 'Error en el backup', description: e?.response?.data?.detail });
     } finally {
+      hide();
       setActionLoading(null);
     }
   };
@@ -302,7 +309,13 @@ const DatabasePage: React.FC = () => {
             <Button
               block icon={<CloudDownloadOutlined />}
               onClick={handleOpenRestoreModal}
-              disabled={!driveConnected || !status?.drive_file_id}
+              // Antes también exigía status?.drive_file_id, que solo se
+              // llena DESPUÉS de un backup manual — un tenant recién
+              // conectado (o que reconectó Drive) se quedaba con este
+              // botón deshabilitado para siempre, aunque list_backups ya
+              // resuelve la carpeta por nombre y puede encontrar backups
+              // viejos igual. Alcanza con que Drive esté conectado.
+              disabled={!driveConnected}
               loading={actionLoading === 'restore'} style={{ height: 56 }}
             >
               Restaurar desde Drive

@@ -14,11 +14,15 @@ Endpoints:
   GET  /database/disconnect      → desconecta Drive (borra refresh_token)
 """
 #from __future__ import annotations
+import io
 import os
 import json
 import logging
+import shutil
+import zipfile
 from datetime import datetime, timezone
-from typing import Annotated
+from pathlib import Path
+from typing import Annotated, Optional
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException
@@ -30,6 +34,7 @@ from sqlalchemy import text
 from app.Core.auth import get_current_user
 from app.Core.models import Users, Tenant, UserRole
 from app.db_config import get_db, get_tenant_db_context
+from app.tenant.imagenes import UPLOADS_DIR
 
 logger = logging.getLogger(__name__)
 
@@ -143,6 +148,101 @@ def _download_from_drive(access_token: str, file_id: str) -> dict:
     return resp.json()
 
 
+# ── Helpers binarios (fotos de items) ───────────────────────────────────────
+# _upload_to_drive de arriba arma el multipart como STRING y lo encodea al
+# final — funciona para JSON (texto), pero no sirve para bytes de un .zip
+# (no son texto UTF-8 válido). Estas dos funciones son el equivalente en
+# bytes desde el principio, para el mismo protocolo de Drive.
+
+def _upload_bytes_to_drive(access_token: str, filename: str, content: bytes, mime_type: str, folder_id: str, file_id: Optional[str] = None) -> str:
+    """Igual que _upload_to_drive, pero para contenido binario (ej. un .zip)."""
+    headers  = {"Authorization": f"Bearer {access_token}"}
+    metadata = {"name": filename}
+    if not file_id:
+        metadata["parents"] = [folder_id]
+
+    boundary = b"flexinventory_boundary"
+    body = (
+        b"--" + boundary + b"\r\n"
+        b"Content-Type: application/json; charset=UTF-8\r\n\r\n"
+        + json.dumps(metadata).encode("utf-8") + b"\r\n"
+        b"--" + boundary + b"\r\n"
+        b"Content-Type: " + mime_type.encode("ascii") + b"\r\n\r\n"
+        + content + b"\r\n"
+        b"--" + boundary + b"--"
+    )
+    headers["Content-Type"] = f"multipart/related; boundary={boundary.decode()}"
+
+    if file_id:
+        url  = f"{DRIVE_UPLOAD_URL}/files/{file_id}?uploadType=multipart"
+        resp = requests.patch(url, headers=headers, data=body)
+    else:
+        url  = f"{DRIVE_UPLOAD_URL}/files?uploadType=multipart"
+        resp = requests.post(url, headers=headers, data=body)
+
+    if resp.status_code not in (200, 201):
+        raise HTTPException(status_code=502, detail=f"Error subiendo a Drive: {resp.text}")
+    return resp.json()["id"]
+
+
+def _download_bytes_from_drive(access_token: str, file_id: str) -> bytes:
+    """Igual que _download_from_drive, pero devuelve los bytes crudos (para un .zip)."""
+    headers = {"Authorization": f"Bearer {access_token}"}
+    resp    = requests.get(f"{DRIVE_API_URL}/files/{file_id}?alt=media", headers=headers)
+    if resp.status_code != 200:
+        raise HTTPException(status_code=502, detail="No se pudo descargar las fotos desde Drive.")
+    return resp.content
+
+
+# ── Helpers: fotos del tenant (carpeta local <-> zip) ───────────────────────
+
+def _zip_carpeta_imagenes(tenant_schema: str) -> Optional[bytes]:
+    """
+    Comprime uploads/{tenant_schema}/ entera en un .zip en memoria.
+    Devuelve None si la carpeta no existe o no tiene ningún archivo — no
+    tiene sentido subir un .zip vacío a Drive.
+    """
+    carpeta = UPLOADS_DIR / tenant_schema
+    if not carpeta.is_dir():
+        return None
+
+    archivos = [p for p in carpeta.rglob("*") if p.is_file()]
+    if not archivos:
+        return None
+
+    buffer = io.BytesIO()
+    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
+        for archivo in archivos:
+            # Ruta relativa a la carpeta del tenant, no la ruta absoluta del
+            # disco del servidor — así el zip se puede descomprimir tal cual
+            # adentro de uploads/{tenant_schema}/ sin arrastrar rutas ajenas.
+            zf.write(archivo, arcname=str(archivo.relative_to(carpeta)))
+    return buffer.getvalue()
+
+
+def _restaurar_imagenes_zip(tenant_schema: str, contenido_zip: bytes) -> None:
+    """
+    Reemplaza uploads/{tenant_schema}/ por el contenido del .zip restaurado.
+    Borra la carpeta actual primero — un restore es "volver a este estado
+    exacto", no un merge con lo que hubiera antes.
+    """
+    carpeta = UPLOADS_DIR / tenant_schema
+    if carpeta.exists():
+        shutil.rmtree(carpeta)
+    carpeta.mkdir(parents=True, exist_ok=True)
+
+    with zipfile.ZipFile(io.BytesIO(contenido_zip)) as zf:
+        # Defensa en profundidad contra zip-slip: ningún archivo del zip
+        # puede terminar resolviendo fuera de `carpeta` (mismo criterio que
+        # eliminar_imagen() en app/tenant/imagenes.py). El zip lo genera
+        # este mismo backend, pero viene de Drive — no confiar ciegamente.
+        for miembro in zf.namelist():
+            destino = (carpeta / miembro).resolve()
+            if carpeta.resolve() not in destino.parents and destino != carpeta.resolve():
+                raise HTTPException(status_code=400, detail=f"Zip de fotos con una ruta inválida: {miembro}")
+        zf.extractall(carpeta)
+
+
 # ── Helper: exportar BD del tenant ─────────────────────────────────────────
 def export_tenant_data(tenant: Tenant, db_public: Session) -> dict:
     """
@@ -193,6 +293,9 @@ def export_tenant_data(tenant: Tenant, db_public: Session) -> dict:
                 {
                     "id": i.id, "nombre": i.nombre,
                     "atributos": i.atributos,
+                    "roles_atributos": i.roles_atributos,
+                    "bloques_personalizados": i.bloques_personalizados,
+                    "fotos_habilitadas": i.fotos_habilitadas,
                     "creado_en": i.creado_en.isoformat() if i.creado_en else None,
                 }
                 for i in inventarios
@@ -201,6 +304,7 @@ def export_tenant_data(tenant: Tenant, db_public: Session) -> dict:
                 {
                     "id": it.id, "nombre": it.nombre, "cantidad": it.cantidad,
                     "inventario_id": it.inventario_id, "atributos": it.atributos,
+                    "imagen": it.imagen,
                     "creado_en": it.creado_en.isoformat() if it.creado_en else None,
                 }
                 for it in items
@@ -286,16 +390,27 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
 
         # Reinsertar inventarios
         # CAST(:atributos AS JSONB) evita el conflicto de :: con SQLAlchemy
+        # .get(..., default) en los campos agregados después del primer
+        # backup (roles_atributos, bloques_personalizados,
+        # fotos_habilitadas) — restaurar un backup viejo, hecho antes de que
+        # existieran, no debe romperse ni dejar esos campos en NULL.
+        # fotos_habilitadas default True: mismo criterio que la migración
+        # de la columna, no esconder de golpe fotos que ya hubiera.
         for inv in tdata.get("inventarios", []):
             tdb.execute(
                 text(
-                    "INSERT INTO inventario (id, nombre, atributos, creado_en) "
-                    "VALUES (:id, :nombre, CAST(:atributos AS JSONB), :creado_en)"
+                    "INSERT INTO inventario "
+                    "(id, nombre, atributos, roles_atributos, bloques_personalizados, fotos_habilitadas, creado_en) "
+                    "VALUES (:id, :nombre, CAST(:atributos AS JSONB), CAST(:roles_atributos AS JSONB), "
+                    "CAST(:bloques_personalizados AS JSONB), :fotos_habilitadas, :creado_en)"
                 ),
                 {
                     "id":        inv["id"],
                     "nombre":    inv["nombre"],
                     "atributos": json.dumps(inv.get("atributos") or {}),
+                    "roles_atributos": json.dumps(inv.get("roles_atributos") or {}),
+                    "bloques_personalizados": json.dumps(inv.get("bloques_personalizados") or []),
+                    "fotos_habilitadas": inv.get("fotos_habilitadas", True),
                     "creado_en": inv.get("creado_en"),
                 }
             )
@@ -304,8 +419,8 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
         for it in tdata.get("items", []):
             tdb.execute(
                 text(
-                    "INSERT INTO item (id, nombre, cantidad, inventario_id, atributos, creado_en) "
-                    "VALUES (:id, :nombre, :cantidad, :inventario_id, CAST(:atributos AS JSONB), :creado_en)"
+                    "INSERT INTO item (id, nombre, cantidad, inventario_id, atributos, imagen, creado_en) "
+                    "VALUES (:id, :nombre, :cantidad, :inventario_id, CAST(:atributos AS JSONB), :imagen, :creado_en)"
                 ),
                 {
                     "id":            it["id"],
@@ -313,6 +428,7 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
                     "cantidad":      it["cantidad"],
                     "inventario_id": it["inventario_id"],
                     "atributos":     json.dumps(it.get("atributos") or {}),
+                    "imagen":        it.get("imagen"),
                     "creado_en":     it.get("creado_en"),
                 }
             )
@@ -419,15 +535,20 @@ def oauth_callback(code: str, state: str, db: db_dep):
     return RedirectResponse(url=f"{frontend_url}/dashboard/database?connected=true")
 
 
-@router.post("/backup/now")
-def backup_now(current_user: user_dep, db: db_dep):
+def ejecutar_backup(tenant: Tenant, db: Session) -> dict:
     """
-    Backup manual: exporta toda la BD del tenant y la sube a Drive.
-    Crea/actualiza dos archivos:
-      - FlexInventory Storage/current.json  (siempre el más reciente)
-      - FlexInventory Storage/backups/backup_YYYY-MM-DD_HH-MM.json
+    El backup en sí — datos + fotos — compartido entre el endpoint manual
+    (POST /backup/now) y el job automático del scheduler, para no tener la
+    misma lógica escrita dos veces (antes lo estaba).
+
+    Sube tres cosas a Drive:
+      - FlexInventory Storage/current.json              (siempre el más reciente)
+      - FlexInventory Storage/backups/backup_FECHA.json (histórico, uno por corrida)
+      - FlexInventory Storage/images.zip                (fotos de items — SIN
+        histórico: a diferencia del JSON, no tiene sentido subir 50 fotos
+        iguales de nuevo en cada backup solo porque cambió un precio. Si el
+        tenant no tiene ninguna foto todavía, este paso se saltea entero.)
     """
-    user, tenant = _require_tenant_owner(current_user, db)
     if not tenant.google_refresh_token:
         raise HTTPException(status_code=400, detail="Drive no conectado. Conectá tu cuenta de Google primero.")
 
@@ -451,9 +572,29 @@ def backup_now(current_user: user_dep, db: db_dep):
 
     tenant.google_drive_file_id   = current_file_id
     tenant.google_drive_folder_id = backups_folder_id
+
+    # Fotos de items — mismo criterio "actualizar, no duplicar" que current.json.
+    zip_imagenes = _zip_carpeta_imagenes(tenant.schema_name)
+    if zip_imagenes is not None:
+        images_file_id = _upload_bytes_to_drive(
+            access_token, "images.zip", zip_imagenes, "application/zip",
+            root_folder_id, tenant.google_drive_images_file_id
+        )
+        tenant.google_drive_images_file_id = images_file_id
+
     db.commit()
 
     return {"message": "Backup completado correctamente.", "filename": backup_name}
+
+
+@router.post("/backup/now")
+def backup_now(current_user: user_dep, db: db_dep):
+    """
+    Backup manual: exporta toda la BD del tenant (y sus fotos) y las sube a
+    Drive. Ver ejecutar_backup() para el detalle de qué archivos crea.
+    """
+    user, tenant = _require_tenant_owner(current_user, db)
+    return ejecutar_backup(tenant, db)
 
 
 @router.get("/backup/list")
@@ -463,6 +604,16 @@ def list_backups(current_user: user_dep, db: db_dep):
     Devuelve:
       - El archivo current.json (etiquetado como "Actual"), primero
       - Todos los archivos de backups/, ordenados de más nuevo a más antiguo
+
+    No depende de tenant.google_drive_file_id / google_drive_folder_id —
+    esos campos solo se escriben DESPUÉS del primer backup (en
+    ejecutar_backup), así que un tenant que nunca hizo un backup manual (o
+    que reconectó Drive desde cero — disconnect_drive los vuelve a NULL)
+    se quedaba con la lista siempre vacía y el botón de restaurar
+    deshabilitado en el frontend, aunque ya tuviera backups viejos
+    guardados en Drive de antes. Se resuelve la carpeta buscándola por
+    NOMBRE en Drive (mismo mecanismo que _get_or_create_folder ya usa para
+    crear backups), no por un ID cacheado que puede no existir todavía.
     """
     user, tenant = _require_tenant_owner(current_user, db)
     if not tenant.google_refresh_token:
@@ -472,15 +623,23 @@ def list_backups(current_user: user_dep, db: db_dep):
     headers      = {"Authorization": f"Bearer {access_token}"}
     result       = []
 
-    # 1. Archivo actual
-    if tenant.google_drive_file_id:
-        resp = requests.get(
-            f"{DRIVE_API_URL}/files/{tenant.google_drive_file_id}",
-            headers=headers,
-            params={"fields": "id,name,modifiedTime,size"}
-        )
-        if resp.status_code == 200:
-            f = resp.json()
+    root_folder_id    = _get_or_create_folder(access_token, "FlexInventory Storage")
+    backups_folder_id = _get_or_create_folder(access_token, "backups", root_folder_id)
+
+    # 1. Archivo actual (current.json), buscado por nombre adentro de la
+    # carpeta raíz — no por el file_id guardado en el tenant.
+    resp = requests.get(
+        f"{DRIVE_API_URL}/files",
+        headers=headers,
+        params={
+            "q":      f"name='current.json' and '{root_folder_id}' in parents and trashed=false",
+            "fields": "files(id,name,modifiedTime,size)",
+        }
+    )
+    if resp.status_code == 200:
+        files = resp.json().get("files", [])
+        if files:
+            f = files[0]
             result.append({
                 "file_id":       f["id"],
                 "name":          "Actual (current.json)",
@@ -489,26 +648,35 @@ def list_backups(current_user: user_dep, db: db_dep):
                 "is_current":    True,
             })
 
-    # 2. Backups históricos
-    if tenant.google_drive_folder_id:
-        resp = requests.get(
-            f"{DRIVE_API_URL}/files",
-            headers=headers,
-            params={
-                "q":       f"'{tenant.google_drive_folder_id}' in parents and trashed=false",
-                "fields":  "files(id,name,modifiedTime,size)",
-                "orderBy": "modifiedTime desc",
-            }
-        )
-        if resp.status_code == 200:
-            for f in resp.json().get("files", []):
-                result.append({
-                    "file_id":       f["id"],
-                    "name":          f["name"],
-                    "modified_time": f.get("modifiedTime"),
-                    "size":          f.get("size"),
-                    "is_current":    False,
-                })
+    # 2. Backups históricos, dentro de la subcarpeta "backups"
+    resp = requests.get(
+        f"{DRIVE_API_URL}/files",
+        headers=headers,
+        params={
+            "q":       f"'{backups_folder_id}' in parents and trashed=false",
+            "fields":  "files(id,name,modifiedTime,size)",
+            "orderBy": "modifiedTime desc",
+        }
+    )
+    if resp.status_code == 200:
+        for f in resp.json().get("files", []):
+            result.append({
+                "file_id":       f["id"],
+                "name":          f["name"],
+                "modified_time": f.get("modifiedTime"),
+                "size":          f.get("size"),
+                "is_current":    False,
+            })
+
+    # Ya que estamos acá adentro con el Drive resuelto, aprovechamos para
+    # sincronizar los IDs cacheados del tenant — así backup/restore que sí
+    # los usan (ejecutar_backup, restore_from_drive_by_id) quedan al día
+    # sin esperar al próximo backup manual.
+    if result:
+        tenant.google_drive_folder_id = backups_folder_id
+        if result[0]["is_current"]:
+            tenant.google_drive_file_id = result[0]["file_id"]
+        db.commit()
 
     return {"backups": result}
 
@@ -516,8 +684,9 @@ def list_backups(current_user: user_dep, db: db_dep):
 @router.post("/restore/{file_id}")
 def restore_from_drive_by_id(file_id: str, current_user: user_dep, db: db_dep):
     """
-    Restaura la BD del tenant desde un archivo específico del Drive.
-    ADVERTENCIA: operación destructiva, reemplaza todos los datos actuales.
+    Restaura la BD del tenant (y sus fotos, si hay) desde un archivo
+    específico del Drive. ADVERTENCIA: operación destructiva, reemplaza
+    todos los datos actuales — y también el disco de fotos, si corresponde.
     """
     user, tenant = _require_tenant_owner(current_user, db)
     if not tenant.google_refresh_token:
@@ -527,7 +696,20 @@ def restore_from_drive_by_id(file_id: str, current_user: user_dep, db: db_dep):
     data         = _download_from_drive(access_token, file_id)
 
     restore_tenant_data(tenant, data, db)
-    return {"message": "Base de datos restaurada exitosamente desde Drive."}
+
+    # Las fotos son aparte del JSON: si este tenant tiene un images.zip
+    # guardado, se restaura también — sin esto, un item quedaría con
+    # Item.imagen apuntando a un archivo que no existe en el disco.
+    fotos_restauradas = False
+    if tenant.google_drive_images_file_id:
+        zip_bytes = _download_bytes_from_drive(access_token, tenant.google_drive_images_file_id)
+        _restaurar_imagenes_zip(tenant.schema_name, zip_bytes)
+        fotos_restauradas = True
+
+    mensaje = "Base de datos restaurada exitosamente desde Drive."
+    if fotos_restauradas:
+        mensaje += " Las fotos de los artículos también se restauraron."
+    return {"message": mensaje, "fotos_restauradas": fotos_restauradas}
 
 
 @router.delete("/reset")
