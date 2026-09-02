@@ -97,8 +97,38 @@ class Auditor:
             ids = payload_original.get("item_ids") or []
             attrs = payload_original.get("atributos") or {}
             entidad_nombre = f"Artículos: {len(ids)} ítems"
-            cambios = [f"{_label(k)}: {v}" for k, v in attrs.items()]
-            resumen = " | ".join(cambios) if cambios else "Actualización masiva"
+
+            # El Auditor corre como dependencia, o sea ANTES de que el
+            # endpoint pise los atributos: esta es la única ventana para leer
+            # los valores viejos y poder mostrar "antes ➔ después", igual que
+            # en la edición individual. Antes acá solo se listaba el valor
+            # nuevo, así que la fila del historial nunca mostraba un cambio.
+            cambios = []
+            if ids and attrs:
+                with get_tenant_db_context(tenant.schema_name) as db_t:
+                    # Copiar los atributos a dicts planos acá adentro: al
+                    # salir del context manager hay commit, y eso expira las
+                    # instancias (leerlas después daría DetachedInstanceError).
+                    afectados = [
+                        dict(it.atributos or {})
+                        for it in db_t.query(Item).filter(Item.id.in_(ids)).all()
+                    ]
+
+                for campo, nuevo in attrs.items():
+                    # Agrupado por valor viejo: si los 20 ítems venían todos
+                    # con la misma marca es una línea sola, no veinte iguales.
+                    # Los que ya tenían el valor nuevo no cuentan como cambio.
+                    grupos = {}
+                    for atributos_viejos in afectados:
+                        viejo = atributos_viejos.get(campo)
+                        if str(viejo) != str(nuevo):
+                            grupos[str(viejo)] = grupos.get(str(viejo), 0) + 1
+
+                    for viejo, cuantos in grupos.items():
+                        plural = "ítems" if cuantos != 1 else "ítem"
+                        cambios.append(f"{_label(campo)}: {viejo} ➔ {nuevo} ({cuantos} {plural})")
+
+            resumen = " | ".join(cambios) if cambios else "Sin cambios detectados"
 
         elif path.endswith("/bulk-delete") and isinstance(payload_original, dict):
             ids = payload_original.get("item_ids") or []

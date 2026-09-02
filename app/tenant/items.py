@@ -19,7 +19,7 @@ def _perm(resource: str, action: str):
 # ─── DEPENDENCIAS DE AUDITORÍA ──────────────────────────────────────────
 POST   = [Depends(Auditor(accion="Crear Nuevo Artículo", auditar_payload=True))]
 PUT    = [Depends(Auditor(accion="Editar Artículo", auditar_payload=True))]
-PATCH  = [Depends(Auditor(accion="Editar Artículo", auditar_payload=True))]
+PATCH_BULK = [Depends(Auditor(accion="Editar Artículos (Masivo)", auditar_payload=True))]
 DELETE = [Depends(Auditor(accion="Eliminar Artículo", auditar_payload=True))]
 DELETE_BULK = [Depends(Auditor(accion="Eliminar Artículos (Masivo)", auditar_payload=True))]
 IMAGEN = [Depends(Auditor(accion="Cambiar Foto de Artículo", auditar_payload=False))]
@@ -63,7 +63,7 @@ def create_item(
     return new_item
 
 
-@router.patch("/bulk-update", response_model=schemas.BulkUpdateResponse, dependencies=PATCH)
+@router.patch("/bulk-update", response_model=schemas.BulkUpdateResponse, dependencies=PATCH_BULK)
 def bulk_update_items(
     payload: schemas.ItemBulkUpdate,
     _: dict = _perm("items", "update"),
