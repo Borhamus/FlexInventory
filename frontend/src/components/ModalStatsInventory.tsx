@@ -254,7 +254,19 @@ export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryI
               extra={
                 <Space size="small">
                   <Button size="small" icon={<EditOutlined />} onClick={() => setBloqueEnEdicion({ index, bloque })} />
-                  <Popconfirm title="¿Eliminar este bloque?" onConfirm={() => eliminarBloque(index)} okText="Sí" cancelText="No">
+                  <Popconfirm
+                    title="¿Eliminar este bloque?"
+                    onConfirm={() => eliminarBloque(index)}
+                    okText="Sí"
+                    cancelText="No"
+                    // Sin esto, el popup se monta en document.body y el
+                    // cálculo de posición se rompe adentro de un Card
+                    // dentro de un Modal (mismo gotcha que Select dentro
+                    // de un Popover, ya arreglado en otro lado de este
+                    // proyecto con el mismo patrón: anclar al padre del
+                    // trigger en vez de al body).
+                    getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
+                  >
                     <Button size="small" danger icon={<DeleteOutlined />} />
                   </Popconfirm>
                 </Space>

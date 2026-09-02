@@ -85,6 +85,12 @@ function etiquetaCalculo(m: MetricaEnEdicion): string {
   } else {
     const partes = [terminoLegible(m.terminos[0])];
     m.operadores.forEach((op, i) => {
+      // Mientras se arma la fórmula, puede haber un operador ya elegido
+      // sin su término siguiente todavía (ej. justo después de clickear
+      // "Multiplicar", antes de clickear el próximo atributo) — ese paso
+      // pendiente ya se muestra aparte en la tira de la fórmula (chip
+      // colgando), acá simplemente no se lo suma todavía al resumen.
+      if (i + 1 >= m.terminos.length) return;
       partes.push(OPERADOR_ARITMETICO_SIMBOLOS[op]);
       partes.push(terminoLegible(m.terminos[i + 1]));
     });
