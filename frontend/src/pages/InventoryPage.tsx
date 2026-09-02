@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Alert, Spin, Tag, Typography, Button, Space, Popconfirm, message, Input, Result, Popover, Checkbox, Divider, Tooltip, Select, DatePicker } from 'antd';
 import type { Dayjs } from 'dayjs';
@@ -17,6 +17,28 @@ import { useDeleteItemsBulk, useItems } from '../hooks/useItems';
 const ATRIBUTOS_FILTRABLES = ['integer', 'int', 'float', 'number', 'date'];
 
 const { Title, Text } = Typography;
+
+function claveColumnasOcultas(inventoryId?: number): string | null {
+  return inventoryId ? `flexinv_columnas_ocultas_${inventoryId}` : null;
+}
+
+// Qué columnas tildó ocultar el usuario en "Columnas visibles" — se guarda
+// en localStorage por inventario, mismo criterio que el orden/ancho de
+// columnas en InventoryTable.tsx: sin esto, cambiar de ruta (por ejemplo a
+// Ajustes) y volver desmonta InventoryPage y el useState vuelve a [],
+// mostrando de nuevo columnas que el usuario había ocultado.
+function cargarColumnasOcultas(inventoryId?: number): string[] {
+  const key = claveColumnasOcultas(inventoryId);
+  if (!key) return [];
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
 
 const InventoryPage: React.FC = () => {
   const { hasPermission, isTenant } = useAuthContext();
@@ -38,10 +60,28 @@ const InventoryPage: React.FC = () => {
   const [selectedItem, setSelectedItem] = useState<any>(null);
 
   // Estados de la Tabla
-  const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
+  const [hiddenColumns, setHiddenColumns] = useState<string[]>(() => cargarColumnasOcultas(Number(id)));
   const [searchTerm, setSearchTerm] = useState('');
   const [columnSearch, setColumnSearch] = useState('');
   const [selectedRowKeys, setSelectedRowKeys] = useState<React.Key[]>([]);
+
+  // La ruta no remonta InventoryPage al navegar entre inventarios (mismo
+  // componente, cambia el :id) — sin este efecto, las columnas ocultas del
+  // inventario anterior se quedarían pegadas al entrar a otro.
+  useEffect(() => {
+    setHiddenColumns(cargarColumnasOcultas(Number(id)));
+  }, [id]);
+
+  useEffect(() => {
+    const key = claveColumnasOcultas(Number(id));
+    if (!key) return;
+    try {
+      localStorage.setItem(key, JSON.stringify(hiddenColumns));
+    } catch {
+      // localStorage puede fallar (modo privado, cuota llena) — la
+      // preferencia simplemente no persiste, no rompemos la página por esto.
+    }
+  }, [id, hiddenColumns]);
 
   // Estados de orden y filtro por atributo (Fase 5 del backend). Mientras no
   // se use ninguno, la tabla sigue usando los items que ya vienen embebidos
