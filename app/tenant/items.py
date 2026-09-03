@@ -1,7 +1,8 @@
 import json
+from datetime import datetime
 
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
-from sqlalchemy import text
+from sqlalchemy import nulls_last, text
 from sqlalchemy.orm import Session
 from typing import List, Optional
 
@@ -164,11 +165,20 @@ def bulk_delete_items(
     return {"eliminados": len(found_ids), "ids": sorted(found_ids)}
 
 
-# ─── ORDEN Y FILTRO POR ATRIBUTO (Fase 5) ───────────────────────────────
+# ─── ORDEN Y FILTRO (Fase 5) ────────────────────────────────────────────
 # No comparte el registro ESTRATEGIAS de estadisticas.py a propósito: ese
 # motor ya está probado end-to-end y esto es una necesidad más chica (un
 # nombre de cast por tipo). Duplicar 2 diccionarios chicos es más barato y
 # más seguro que acoplar este endpoint a los internos de otro módulo.
+#
+# Se ordena y filtra sobre dos familias de campos:
+#   1. Columnas nativas de `item` (id, nombre, cantidad, creado_en...): no
+#      dependen del inventario, así que NO exigen `inventario_id`.
+#   2. Atributos del JSONB `atributos`: el tipo se resuelve contra el schema
+#      del inventario, así que ahí sí hace falta `inventario_id`.
+# Si un inventario define un atributo con el mismo nombre que una columna
+# nativa (un atributo llamado "cantidad", por ejemplo), gana la columna
+# nativa: es la que el usuario ve en la tabla bajo ese título.
 
 # Tipo declarado en el inventario → tipo SQL para castear. None = sin cast
 # (comparación de texto directa), válido para ordenar pero no para filtrar
@@ -180,6 +190,56 @@ _TIPO_SQL_ORDEN = {
     "string": None, "str": None,
 }
 _TIPOS_FILTRABLES = {"integer", "int", "float", "number", "date"}
+
+# Columnas reales de la tabla `item` habilitadas para ordenar, y con qué
+# tipo se interpretan los límites si además se filtra por rango sobre ellas.
+# None = ordenable pero no filtrable por rango (mismo criterio que un
+# atributo string: "desde-hasta" sobre un nombre no tiene semántica pedida).
+_COLUMNAS_ORDENABLES = {
+    "id": "integer",
+    "nombre": None,
+    "cantidad": "integer",
+    "creado_en": "timestamp",
+    "actualizado_en": "timestamp",
+}
+
+# Formatos aceptados para un límite de tipo timestamp. El último (solo
+# fecha) es el que manda el frontend desde el DatePicker.
+_FORMATOS_TIMESTAMP = ("%Y-%m-%dT%H:%M:%S", "%Y-%m-%d %H:%M:%S", "%Y-%m-%d")
+
+
+def _parse_limite(valor: str, tipo_sql: str, param: str, fin_de_dia: bool = False):
+    """
+    Convierte un límite del rango (siempre llega como string en la query) al
+    tipo que corresponde. Sin este chequeo el valor viaja crudo al CAST de
+    Postgres y un `filtro_desde=abc` revienta como 500 en vez de 400.
+    """
+    try:
+        if tipo_sql == "float8":
+            return float(valor)
+        if tipo_sql == "integer":
+            return int(valor)
+        if tipo_sql == "date":
+            return datetime.strptime(valor, "%Y-%m-%d").date()
+        if tipo_sql == "timestamp":
+            for fmt in _FORMATOS_TIMESTAMP:
+                try:
+                    parsed = datetime.strptime(valor, fmt)
+                except ValueError:
+                    continue
+                # "hasta el 02/09" tiene que incluir ese día entero, no
+                # cortar a las 00:00 y dejar afuera todo lo cargado durante
+                # la jornada. Solo aplica si el usuario no indicó hora.
+                if fin_de_dia and fmt == "%Y-%m-%d":
+                    parsed = parsed.replace(hour=23, minute=59, second=59, microsecond=999999)
+                return parsed
+            raise ValueError(valor)
+    except (ValueError, TypeError):
+        raise HTTPException(
+            400,
+            detail=f"'{param}' no es un valor válido para este campo: '{valor}'",
+        )
+    return valor
 
 
 def _resolver_atributo_orden(inventario_atributos: dict, atributo: str) -> Optional[str]:
@@ -210,9 +270,9 @@ def get_items(
     inventario_id: Optional[int] = None,
     skip: int = Query(0, ge=0, description="Registros a saltar (paginación)"),
     limit: Optional[int] = Query(None, ge=1, le=1000, description="Máximo de registros (sin límite si se omite)"),
-    sort_by: Optional[str] = Query(None, description="Nombre de un atributo del inventario por el que ordenar"),
+    sort_by: Optional[str] = Query(None, description="Columna nativa (id, nombre, cantidad, creado_en, actualizado_en) o atributo del inventario por el que ordenar"),
     order: str = Query("asc", pattern="^(asc|desc)$", description="Dirección del orden: asc o desc"),
-    filtro_atributo: Optional[str] = Query(None, description="Atributo numérico o date sobre el que aplicar filtro_desde/filtro_hasta"),
+    filtro_atributo: Optional[str] = Query(None, description="Columna nativa numérica/fecha, o atributo numérico o date, sobre el que aplicar filtro_desde/filtro_hasta"),
     filtro_desde: Optional[str] = Query(None, description="Límite inferior (inclusive) del filtro por rango"),
     filtro_hasta: Optional[str] = Query(None, description="Límite superior (inclusive) del filtro por rango"),
     _: dict = _perm("items", "read"),
@@ -220,30 +280,57 @@ def get_items(
 ):
     """
     Lista los items del tenant. Se puede filtrar por inventario (`inventario_id`),
-    paginar (`skip`/`limit`), ordenar por un atributo del inventario (`sort_by`
-    + `order`) y filtrar por rango sobre un atributo numérico o de fecha
+    paginar (`skip`/`limit`), ordenar (`sort_by` + `order`) y filtrar por rango
     (`filtro_atributo` + `filtro_desde`/`filtro_hasta`).
 
-    `sort_by` y `filtro_atributo` requieren `inventario_id` (para resolver el
-    tipo del atributo contra el schema de ESE inventario). `filtro_atributo`
-    solo acepta atributos `integer`/`float`/`date` — para `string`/`boolean`
-    no hay semántica de "rango" pedida por la consigna.
+    Tanto `sort_by` como `filtro_atributo` aceptan dos cosas:
+
+    - **Columnas nativas del item**: `id`, `nombre`, `cantidad`, `creado_en`,
+      `actualizado_en`. No requieren `inventario_id`. Para filtrar por rango
+      valen todas menos `nombre` (es texto, no tiene semántica de rango).
+    - **Atributos del inventario**: requieren `inventario_id` para resolver el
+      tipo contra el schema de ESE inventario. `filtro_atributo` solo acepta
+      atributos `integer`/`float`/`date` — para `string`/`boolean` no hay
+      semántica de "rango" pedida por la consigna.
+
+    Los items sin valor en el atributo por el que se ordena van siempre al
+    final (`NULLS LAST`), tanto en asc como en desc. El desempate es siempre
+    por `id`, para que el paginado sea estable cuando el campo ordenado se
+    repite entre varios items.
 
     Requiere permiso `items:read` (o ser tenant owner).
 
     **Ejemplos:**
+    - `GET /items/?inventario_id=1&sort_by=cantidad&order=desc`
+    - `GET /items/?sort_by=id&order=desc`
+    - `GET /items/?inventario_id=1&filtro_atributo=cantidad&filtro_desde=0&filtro_hasta=5`
     - `GET /items/?inventario_id=1&sort_by=vence&order=desc`
     - `GET /items/?inventario_id=1&filtro_atributo=precio&filtro_desde=10&filtro_hasta=50`
     """
-    if (sort_by or filtro_atributo) and inventario_id is None:
-        raise HTTPException(400, detail="inventario_id es requerido para ordenar o filtrar por atributo")
+    # Un `?sort_by=` vacío en la URL llega como "" y no como None: se
+    # normaliza a None para que valga lo mismo que no mandarlo (era el
+    # comportamiento previo, cuando el chequeo era por truthiness).
+    sort_by = sort_by or None
+    filtro_atributo = filtro_atributo or None
+
+    sort_by_nativo = sort_by is not None and sort_by in _COLUMNAS_ORDENABLES
+    filtro_nativo = filtro_atributo is not None and filtro_atributo in _COLUMNAS_ORDENABLES
+
+    # Solo los atributos del JSONB necesitan el inventario para resolver su
+    # tipo; las columnas nativas se ordenan y filtran sin él.
+    necesita_inventario = (
+        (sort_by is not None and not sort_by_nativo)
+        or (filtro_atributo is not None and not filtro_nativo)
+    )
+    if necesita_inventario and inventario_id is None:
+        raise HTTPException(400, detail="inventario_id es requerido para ordenar o filtrar por un atributo del inventario")
     if (filtro_desde is not None or filtro_hasta is not None) and filtro_atributo is None:
         raise HTTPException(400, detail="filtro_atributo es requerido para usar filtro_desde/filtro_hasta")
     if filtro_atributo is not None and filtro_desde is None and filtro_hasta is None:
         raise HTTPException(400, detail="Debe indicar filtro_desde y/o filtro_hasta junto con filtro_atributo")
 
     inventario_atributos = {}
-    if sort_by or filtro_atributo:
+    if necesita_inventario:
         inventario = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
         if not inventario:
             raise HTTPException(404, detail="Inventario no encontrado")
@@ -253,24 +340,49 @@ def get_items(
     if inventario_id is not None:
         query = query.filter(models.Item.inventario_id == inventario_id)
 
-    if filtro_atributo:
+    if filtro_nativo:
+        tipo_sql = _COLUMNAS_ORDENABLES[filtro_atributo]
+        if tipo_sql is None:
+            raise HTTPException(
+                400,
+                detail=f"'{filtro_atributo}' es un campo de texto; filtro_desde/filtro_hasta solo aplica a numérico o fecha",
+            )
+        columna = getattr(models.Item, filtro_atributo)
+        if filtro_desde is not None:
+            query = query.filter(columna >= _parse_limite(filtro_desde, tipo_sql, "filtro_desde"))
+        if filtro_hasta is not None:
+            query = query.filter(columna <= _parse_limite(filtro_hasta, tipo_sql, "filtro_hasta", fin_de_dia=True))
+    elif filtro_atributo is not None:
         tipo_sql = _resolver_atributo_filtro(inventario_atributos, filtro_atributo)
         expr = f"(atributos ->> :filtro_key)::{tipo_sql}"
         condiciones = []
         params = {"filtro_key": filtro_atributo}
         if filtro_desde is not None:
+            # Se valida acá y se manda el string original al CAST: así un
+            # valor inválido corta con un 400 claro y la consulta que ya
+            # venía andando no cambia.
+            _parse_limite(filtro_desde, tipo_sql, "filtro_desde")
             condiciones.append(f"{expr} >= CAST(:filtro_desde AS {tipo_sql})")
             params["filtro_desde"] = filtro_desde
         if filtro_hasta is not None:
+            _parse_limite(filtro_hasta, tipo_sql, "filtro_hasta")
             condiciones.append(f"{expr} <= CAST(:filtro_hasta AS {tipo_sql})")
             params["filtro_hasta"] = filtro_hasta
         query = query.filter(text(" AND ".join(condiciones))).params(**params)
 
-    if sort_by:
+    if sort_by_nativo:
+        columna = getattr(models.Item, sort_by)
+        direccion = columna.desc() if order == "desc" else columna.asc()
+        query = query.order_by(nulls_last(direccion), models.Item.id)
+    elif sort_by is not None:
         tipo_sql = _resolver_atributo_orden(inventario_atributos, sort_by)
         expr = f"(atributos ->> :sort_key)" + (f"::{tipo_sql}" if tipo_sql else "")
         direccion = "DESC" if order == "desc" else "ASC"
-        query = query.order_by(text(f"{expr} {direccion}")).params(sort_key=sort_by)
+        # NULLS LAST: los items sin valor en ese atributo (típicamente los que
+        # ya existían cuando se agregó el atributo al inventario) van siempre
+        # al final. Sin esto, en DESC Postgres los pone PRIMERO y pedir "los
+        # más nuevos" muestra arriba un bloque de vacíos.
+        query = query.order_by(text(f"{expr} {direccion} NULLS LAST"), models.Item.id).params(sort_key=sort_by)
     else:
         query = query.order_by(models.Item.id)
 

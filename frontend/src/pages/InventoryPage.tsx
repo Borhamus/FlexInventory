@@ -16,6 +16,47 @@ import { useDeleteItemsBulk, useItems } from '../hooks/useItems';
 
 const ATRIBUTOS_FILTRABLES = ['integer', 'int', 'float', 'number', 'date'];
 
+// Columnas nativas del item: no son atributos configurables del inventario,
+// existen siempre, y el backend las acepta en sort_by / filtro_atributo sin
+// pedir inventario_id (ver _COLUMNAS_ORDENABLES en app/tenant/items.py).
+// `tipo` es lo que se le muestra al usuario y lo que decide si el filtro por
+// rango usa DatePicker o Input — creado_en/actualizado_en son timestamps en
+// la base, pero acá alcanza con tratarlas como fecha: el backend estira el
+// límite "hasta" al final del día cuando no viene con hora.
+// `filtrable: false` = ordenable pero sin rango desde-hasta, mismo criterio
+// que un atributo string.
+const COLUMNAS_NATIVAS: { value: string; label: string; tipo: string; filtrable: boolean }[] = [
+  { value: 'id', label: 'ID', tipo: 'integer', filtrable: true },
+  { value: 'nombre', label: 'Nombre', tipo: 'string', filtrable: false },
+  { value: 'cantidad', label: 'Cantidad', tipo: 'integer', filtrable: true },
+  { value: 'creado_en', label: 'Creado el', tipo: 'date', filtrable: true },
+  { value: 'actualizado_en', label: 'Actualizado el', tipo: 'date', filtrable: true },
+];
+
+// Arma las opciones de un Select en dos grupos (campos del item / atributos
+// del inventario), salteando el grupo que quede vacío para no dejar un
+// encabezado colgado sin opciones abajo.
+function opcionesOrdenFiltro(
+  nativas: typeof COLUMNAS_NATIVAS,
+  atributos: Record<string, string>,
+) {
+  const grupos = [];
+  if (nativas.length) {
+    grupos.push({
+      label: 'Campos del artículo',
+      options: nativas.map((c) => ({ value: c.value, label: `${c.label} (${c.tipo})` })),
+    });
+  }
+  const opcionesAtributos = Object.entries(atributos).map(([nombre, tipo]) => ({
+    value: nombre,
+    label: `${nombre} (${tipo})`,
+  }));
+  if (opcionesAtributos.length) {
+    grupos.push({ label: 'Atributos del inventario', options: opcionesAtributos });
+  }
+  return grupos;
+}
+
 const { Title, Text } = Typography;
 
 function claveColumnasOcultas(inventoryId?: number): string | null {
@@ -101,7 +142,13 @@ const InventoryPage: React.FC = () => {
   );
   const itemsParaTabla = ordenFiltroActivo ? itemsOrdenados : (data?.items || []);
 
-  const tipoFiltroSeleccionado = filtroAtributo ? data?.atributos?.[filtroAtributo] : undefined;
+  // El campo elegido para filtrar puede ser una columna nativa o un atributo
+  // del inventario — se busca primero entre las nativas, que tienen prioridad
+  // por nombre igual que en el backend.
+  const nativaFiltro = COLUMNAS_NATIVAS.find((c) => c.value === filtroAtributo);
+  const tipoFiltroSeleccionado = nativaFiltro
+    ? nativaFiltro.tipo
+    : (filtroAtributo ? data?.atributos?.[filtroAtributo] : undefined);
   const esFiltroFecha = tipoFiltroSeleccionado === 'date';
 
   const limpiarOrdenFiltro = () => {
@@ -247,7 +294,7 @@ const InventoryPage: React.FC = () => {
               </Tooltip>
             </Popover>
             <Popover
-              title="Ordenar y filtrar por atributo"
+              title="Ordenar y filtrar"
               trigger="click"
               placement="right"
               content={
@@ -261,7 +308,7 @@ const InventoryPage: React.FC = () => {
                       value={sortBy}
                       onChange={(v) => setSortBy(v)}
                       getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
-                      options={Object.entries(data?.atributos || {}).map(([nombre, tipo]) => ({ value: nombre, label: `${nombre} (${tipo})` }))}
+                      options={opcionesOrdenFiltro(COLUMNAS_NATIVAS, data?.atributos || {})}
                     />
                     <Select
                       style={{ width: 90 }}
@@ -282,9 +329,12 @@ const InventoryPage: React.FC = () => {
                     value={filtroAtributo}
                     onChange={(v) => { setFiltroAtributo(v); setFiltroDesde(undefined); setFiltroHasta(undefined); }}
                     getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
-                    options={Object.entries(data?.atributos || {})
-                      .filter(([, tipo]) => ATRIBUTOS_FILTRABLES.includes(tipo))
-                      .map(([nombre, tipo]) => ({ value: nombre, label: `${nombre} (${tipo})` }))}
+                    options={opcionesOrdenFiltro(
+                      COLUMNAS_NATIVAS.filter((c) => c.filtrable),
+                      Object.fromEntries(
+                        Object.entries(data?.atributos || {}).filter(([, tipo]) => ATRIBUTOS_FILTRABLES.includes(tipo))
+                      ),
+                    )}
                   />
                   {filtroAtributo && (
                     esFiltroFecha ? (
@@ -308,7 +358,7 @@ const InventoryPage: React.FC = () => {
                 </div>
               }
             >
-              <Tooltip title="Ordenar / filtrar por atributo">
+              <Tooltip title="Ordenar / filtrar">
                 <Button icon={<SortAscendingOutlined />} loading={ordenFiltroActivo && isFetchingOrden} />
               </Tooltip>
             </Popover>
