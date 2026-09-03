@@ -24,8 +24,6 @@ def _perm(resource: str, action: str):
 POST        = [Depends(Auditor(accion="Crear Inventario", auditar_payload=True))]
 PUT         = [Depends(Auditor(accion="Editar Inventario", auditar_payload=True))]
 DELETE      = [Depends(Auditor(accion="Eliminar Inventario", auditar_payload=True))]
-PATCH_ROLES = [Depends(Auditor(accion="Configurar Roles de Atributos", auditar_payload=True))]
-PATCH_BLOQUES = [Depends(Auditor(accion="Configurar Bloques Personalizados", auditar_payload=True))]
 # ────────────────────────────────────────────────────────────────────────
 
 @router.post("/", response_model=schemas.InventarioResponse, status_code=201, dependencies=POST)
@@ -182,7 +180,7 @@ def update_inventario(
     return inv
 
 
-@router.patch("/{inventario_id}/roles", response_model=schemas.InventarioResponse, dependencies=PATCH_ROLES)
+@router.patch("/{inventario_id}/roles", response_model=schemas.InventarioResponse)
 def configurar_roles_atributos(
     inventario_id: int,
     payload: schemas.RolesAtributosUpdate,
@@ -211,7 +209,7 @@ def configurar_roles_atributos(
     return inv
 
 
-@router.patch("/{inventario_id}/bloques", response_model=schemas.InventarioResponse, dependencies=PATCH_BLOQUES)
+@router.patch("/{inventario_id}/bloques", response_model=schemas.InventarioResponse)
 def configurar_bloques_personalizados(
     inventario_id: int,
     payload: schemas.BloquesPersonalizadosUpdate,

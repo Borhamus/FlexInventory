@@ -5,7 +5,30 @@ from app.Core.auth import get_current_user
 from app.db_config import get_db, get_tenant_db_context
 from app.Core.models import Tenant
 from app.auditoria.models import AuditLog 
-from app.tenant.models import Item, Inventario, Catalogo 
+from app.tenant.models import Item, Inventario, Catalogo
+from app.tenant.validators import parse_value_by_type
+
+SIN_CAMBIOS = "Sin cambios detectados"
+
+MAX_NOMBRES = 15
+
+
+def _fmt(valor) -> str:
+    if valor is None or valor == "":
+        return "(vacío)"
+    if isinstance(valor, bool):
+        return "Sí" if valor else "No"
+    return str(valor)
+
+
+def _listar_nombres(nombres) -> str:
+    """Lista los nombres afectados por una operación masiva, con tope."""
+    limpios = [_fmt(n) for n in nombres]
+    if len(limpios) <= MAX_NOMBRES:
+        return ", ".join(limpios)
+    visibles = ", ".join(limpios[:MAX_NOMBRES])
+    return f"{visibles} …y {len(limpios) - MAX_NOMBRES} más"
+
 
 class Auditor:
     def __init__(self, accion: str, auditar_payload: bool = False):
@@ -63,7 +86,6 @@ class Auditor:
         elif request.method == "DELETE":
             payload_original = dict(request.path_params)
             if self.auditar_payload:
-                # Soporta DELETEs con body (ej: bulk-delete); si no hay body, quedan los path params
                 try:
                     body = await request.json()
                     if body:
@@ -74,8 +96,6 @@ class Auditor:
         path = request.url.path
         pp = request.path_params
 
-        # Resuelve el nombre "lindo" de una entidad por su id (abre un
-        # contexto corto del tenant). None si no existe (ya borrada, id malo).
         def _nombre(modelo, entidad_id):
             if not entidad_id:
                 return None
@@ -86,8 +106,6 @@ class Auditor:
         def _label(campo: str) -> str:
             return "Stock" if campo == "cantidad" else campo.replace("_", " ").title()
 
-        # ── Sub-recursos y operaciones masivas (rutas que no encajan en el
-        #    patrón crear/editar/borrar y antes caían en "Desconocido") ──
         if path.endswith("/imagen"):
             nombre = _nombre(Item, pp.get("item_id"))
             entidad_nombre = f"Artículo: {nombre}" if nombre else "Artículo"
@@ -96,44 +114,64 @@ class Auditor:
         elif path.endswith("/bulk-update") and isinstance(payload_original, dict):
             ids = payload_original.get("item_ids") or []
             attrs = payload_original.get("atributos") or {}
-            entidad_nombre = f"Artículos: {len(ids)} ítems"
 
-            # El Auditor corre como dependencia, o sea ANTES de que el
-            # endpoint pise los atributos: esta es la única ventana para leer
-            # los valores viejos y poder mostrar "antes ➔ después", igual que
-            # en la edición individual. Antes acá solo se listaba el valor
-            # nuevo, así que la fila del historial nunca mostraba un cambio.
             cambios = []
+            nombres_cambiados = []
             if ids and attrs:
                 with get_tenant_db_context(tenant.schema_name) as db_t:
-                    # Copiar los atributos a dicts planos acá adentro: al
-                    # salir del context manager hay commit, y eso expira las
-                    # instancias (leerlas después daría DetachedInstanceError).
-                    afectados = [
-                        dict(it.atributos or {})
-                        for it in db_t.query(Item).filter(Item.id.in_(ids)).all()
-                    ]
+                    items = db_t.query(Item).filter(Item.id.in_(ids)).all()
+                    filas = [(it.nombre, dict(it.atributos or {})) for it in items]
+                    tipos = {}
+                    if items:
+                        inv = db_t.query(Inventario).filter(Inventario.id == items[0].inventario_id).first()
+                        tipos = dict(inv.atributos or {}) if inv else {}
 
+                attrs_norm = {}
                 for campo, nuevo in attrs.items():
-                    # Agrupado por valor viejo: si los 20 ítems venían todos
-                    # con la misma marca es una línea sola, no veinte iguales.
-                    # Los que ya tenían el valor nuevo no cuentan como cambio.
+                    try:
+                        attrs_norm[campo] = parse_value_by_type(nuevo, tipos[campo]) if campo in tipos else nuevo
+                    except ValueError:
+                        attrs_norm[campo] = nuevo
+
+                nombres_cambiados = [
+                    nombre for nombre, viejos in filas
+                    if any(str(viejos.get(campo)) != str(nuevo) for campo, nuevo in attrs_norm.items())
+                ]
+
+                for campo, nuevo in attrs_norm.items():
                     grupos = {}
-                    for atributos_viejos in afectados:
+                    for _, atributos_viejos in filas:
                         viejo = atributos_viejos.get(campo)
                         if str(viejo) != str(nuevo):
-                            grupos[str(viejo)] = grupos.get(str(viejo), 0) + 1
+                            grupos[viejo] = grupos.get(viejo, 0) + 1
 
                     for viejo, cuantos in grupos.items():
                         plural = "ítems" if cuantos != 1 else "ítem"
-                        cambios.append(f"{_label(campo)}: {viejo} ➔ {nuevo} ({cuantos} {plural})")
+                        cambios.append(f"{_label(campo)}: {_fmt(viejo)} ➔ {_fmt(nuevo)} ({cuantos} {plural})")
 
-            resumen = " | ".join(cambios) if cambios else "Sin cambios detectados"
+            n_cambiados = len(nombres_cambiados)
+            entidad_nombre = f"Artículos: {n_cambiados} {'ítem' if n_cambiados == 1 else 'ítems'}"
+
+            if cambios:
+                cambios.append(f"Artículos: {_listar_nombres(nombres_cambiados)}")
+                resumen = " | ".join(cambios)
+            else:
+                resumen = SIN_CAMBIOS
 
         elif path.endswith("/bulk-delete") and isinstance(payload_original, dict):
             ids = payload_original.get("item_ids") or []
             entidad_nombre = f"Artículos: {len(ids)} ítems"
+
+            nombres_afectados = []
+            if ids:
+                with get_tenant_db_context(tenant.schema_name) as db_t:
+                    nombres_afectados = [
+                        it.nombre for it in db_t.query(Item).filter(Item.id.in_(ids)).all()
+                    ]
+
             resumen = f"Eliminación masiva de {len(ids)} ítems"
+            if nombres_afectados:
+                resumen += f" | Artículos: {_listar_nombres(nombres_afectados)}"
 
         elif "/catalogos/" in path and path.endswith("/items") and request.method == "POST":
             nombre = _nombre(Catalogo, pp.get("catalogo_id"))
@@ -146,17 +184,6 @@ class Auditor:
             entidad_nombre = f"Artículo: {nombre}" if nombre else "Artículo"
             resumen = "Removido del catálogo"
 
-        elif path.endswith("/roles"):
-            nombre = _nombre(Inventario, pp.get("inventario_id"))
-            entidad_nombre = f"Inventario: {nombre}" if nombre else "Inventario"
-            resumen = "Roles de atributos actualizados"
-
-        elif path.endswith("/bloques"):
-            nombre = _nombre(Inventario, pp.get("inventario_id"))
-            entidad_nombre = f"Inventario: {nombre}" if nombre else "Inventario"
-            resumen = "Bloques personalizados actualizados"
-
-        # ── Casos clásicos: crear / editar / borrar una entidad ─────────
         elif request.method == "POST" and isinstance(payload_original, dict):
             nombre_base = payload_original.get("nombre", "Desconocido")
             if "items" in path:
@@ -198,30 +225,35 @@ class Auditor:
                                     continue
                                 viejo_valor = getattr(entidad_db, key)
 
-                                # Atributos dinámicos: diff campo por campo.
                                 if key == "atributos" and isinstance(viejo_valor, dict) and isinstance(nuevo_valor, dict):
                                     for attr_key, attr_nuevo in nuevo_valor.items():
                                         attr_viejo = viejo_valor.get(attr_key)
                                         if str(attr_viejo) != str(attr_nuevo):
-                                            cambios.append(f"{attr_key.title()}: {attr_viejo} ➔ {attr_nuevo}")
+                                            cambios.append(f"{_label(attr_key)}: {_fmt(attr_viejo)} ➔ {_fmt(attr_nuevo)}")
                                     continue
 
-                                # No volcar estructuras (dict/list) como texto
-                                # crudo: mensaje genérico legible.
                                 if isinstance(nuevo_valor, (dict, list)) or isinstance(viejo_valor, (dict, list)):
                                     if str(viejo_valor) != str(nuevo_valor):
-                                        cambios.append(f"{_label(key)} actualizado")
+                                        cambios.append(f"{_label(key)}: actualizado")
                                     continue
 
                                 if str(viejo_valor) != str(nuevo_valor):
-                                    cambios.append(f"{_label(key)}: {viejo_valor} ➔ {nuevo_valor}")
+                                    cambios.append(f"{_label(key)}: {_fmt(viejo_valor)} ➔ {_fmt(nuevo_valor)}")
 
-                            resumen = " | ".join(cambios) if cambios else "Sin cambios detectados"
+                            resumen = " | ".join(cambios) if cambios else SIN_CAMBIOS
 
             if request.method == "DELETE":
                 resumen = "Eliminado permanentemente"
 
-        if usuario_id:
+        if resumen is None:
+            if request.method == "POST":
+                resumen = "Registro creado"
+            elif request.method == "DELETE":
+                resumen = "Registro eliminado"
+            else:
+                resumen = "Registro actualizado"
+
+        if usuario_id and resumen != SIN_CAMBIOS:
             background_tasks.add_task(
                 self._guardar_en_db,
                 schema_name=tenant.schema_name,
