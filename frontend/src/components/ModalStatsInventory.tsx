@@ -26,7 +26,6 @@ function interpolarPlantilla(plantilla: string, valores: Record<string, number |
 }
 
 const esNumerico = (tipo: string) => ['integer', 'int', 'float', 'number'].includes(tipo);
-const esFloat = (tipo: string) => ['float', 'number'].includes(tipo);
 const esBoolean = (tipo: string) => ['boolean', 'bool'].includes(tipo);
 
 // Explicación en criollo de cada tipo, pensada para gente que no
@@ -118,13 +117,26 @@ export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryI
     );
   };
 
-  const renderAtributo = (nombre: string, stats: AtributoStats) => {
+  // `esNativo` marca las columnas propias de la tabla (cantidad): se calculan
+  // igual que un atributo numérico, pero no las definió el usuario al armar el
+  // inventario, así que se aclara en la tarjeta para que no las busque en la
+  // lista de atributos.
+  const renderAtributo = (nombre: string, stats: AtributoStats, esNativo = false) => {
     const info = TIPO_INFO[stats.tipo] ?? { label: stats.tipo, color: 'default', icono: null, descripcion: 'Tipo de dato de este atributo.' };
     return (
     <Card
       key={nombre}
       size="small"
-      title={<span>{info.icono} <span style={{ marginLeft: 6 }}>{nombre}</span></span>}
+      title={
+        <span>
+          {info.icono} <span style={{ marginLeft: 6 }}>{nombre}</span>
+          {esNativo && (
+            <Tooltip title="Campo propio del sistema: lo tiene todo artículo, no hace falta definirlo como atributo del inventario.">
+              <Tag style={{ marginLeft: 8, cursor: 'help' }}>del sistema</Tag>
+            </Tooltip>
+          )}
+        </span>
+      }
       extra={
         <Tooltip title={info.descripcion}>
           <Tag color={info.color} style={{ cursor: 'help' }}>
@@ -157,7 +169,7 @@ export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryI
             <Col span={6}><Statistic title="Mínimo" value={stats.minimo ?? undefined} /></Col>
             <Col span={6}><Statistic title="Máximo" value={stats.maximo ?? undefined} /></Col>
           </Row>
-          {esFloat(stats.tipo) && stats.con_valor > 0 && (
+          {stats.con_valor > 0 && (
             <Button type="link" style={{ paddingLeft: 0, marginTop: 4 }} onClick={() => setAtributoHistograma(nombre)}>
               Ver mediana e histograma
             </Button>
@@ -202,7 +214,7 @@ export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryI
       destroyOnClose
     >
       <p style={{ marginTop: -8, marginBottom: 16, color: token.colorTextSecondary, fontSize: 13 }}>
-        Una tarjeta por cada atributo del inventario, con los cálculos que tienen sentido según su tipo de dato (pasá el mouse sobre la etiqueta de color para ver qué significa cada tipo).
+        Una tarjeta por cada atributo del inventario y por cada campo propio del sistema (como la cantidad), con los cálculos que tienen sentido según su tipo de dato (pasá el mouse sobre la etiqueta de color para ver qué significa cada tipo).
       </p>
 
       {isLoading && <Spin style={{ display: 'block', margin: '40px auto' }} />}
@@ -228,8 +240,10 @@ export const ModalStatsInventory: React.FC<Props> = ({ open, onClose, inventoryI
             </Card>
           )}
 
+          {Object.entries(data.campos_nativos ?? {}).map(([nombre, stats]) => renderAtributo(nombre, stats, true))}
+
           {Object.keys(data.atributos).length === 0 && (
-            <Empty description="Este inventario no tiene atributos definidos" />
+            <Empty description="Este inventario no tiene atributos propios definidos" />
           )}
 
           {Object.entries(data.atributos).map(([nombre, stats]) => renderAtributo(nombre, stats))}

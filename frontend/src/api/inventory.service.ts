@@ -46,6 +46,10 @@ export interface AtributoStats {
 export interface InventarioStats {
   total_items: number;
   atributos: Record<string, AtributoStats>;
+  // Columnas nativas de la tabla item (hoy: cantidad), con las mismas
+  // métricas numéricas que un atributo. Van aparte de `atributos` para no
+  // colisionar con un atributo custom que se llame igual.
+  campos_nativos: Record<string, AtributoStats>;
   volumen_total?: {
     atributo: string;
     volumen_total: number | null;

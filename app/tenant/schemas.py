@@ -91,6 +91,12 @@ class VolumenTotalStats(BaseModel):
 class InventarioStatsResponse(BaseModel):
     total_items: int
     atributos: Dict[str, AtributoStats]
+    # Columnas nativas de la tabla item (hoy: cantidad), calculadas con las
+    # mismas métricas que un atributo numérico pero fuera del JSONB. Van en un
+    # bloque aparte de `atributos` para que no colisionen con un atributo
+    # custom que el usuario haya llamado igual. Ver CAMPOS_NATIVOS en
+    # app/tenant/estadisticas.py.
+    campos_nativos: Dict[str, AtributoStats] = Field(default_factory=dict)
     # Solo presente si el inventario tiene configurado el rol volumen_unitario (Fase 1).
     # Sin unidad hardcodeada: el sistema es genérico, la unidad (m³ u otra) la
     # define el usuario al elegir qué atributo cumple ese rol.

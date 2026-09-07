@@ -174,6 +174,60 @@ class AtributoIndexado(NamedTuple):
     estrategia: EstrategiaAtributo
 
 
+# ==================== Campos nativos ====================
+#
+# `cantidad` es una columna de la tabla item, no una clave del JSONB de
+# atributos: se calcula igual que un atributo numérico pero con otra expresión
+# SQL (sin `->>` y sin cast que pueda fallar). Mismo criterio que ya usa
+# bloques_personalizados.py, que distingue el término "cantidad" del término
+# "atributo".
+#
+# Registro, no un if/elif (mismo principio que ESTRATEGIAS y ROLES_REGISTRY):
+# sumar otro campo nativo numérico es una entrada más acá. Las expresiones
+# salen SIEMPRE de esta tabla fija, nunca del input del usuario — por eso es
+# seguro interpolarlas en el SQL.
+#
+# Deliberadamente NO están `creado_en`/`actualizado_en`: son timestamps, y el
+# motor de mediana/histograma es float puro (width_bucket sobre float8).
+# Soportar fechas necesita otra estrategia de intervalos, no una entrada acá.
+
+class CampoNativo(NamedTuple):
+    nombre: str
+    tipo: str
+    expr: str  # expresión SQL de la columna, sin agregar
+
+
+CAMPOS_NATIVOS: Dict[str, CampoNativo] = {
+    "cantidad": CampoNativo("cantidad", "integer", "cantidad"),
+}
+
+
+def _alias_nativo(nombre: str, sufijo: str) -> str:
+    return f"nativo_{nombre}_{sufijo}"
+
+
+def _sql_campo_nativo(campo: CampoNativo) -> Dict[str, str]:
+    """Agregados del campo nativo, para sumarlos a la query grande de /stats."""
+    return {
+        _alias_nativo(campo.nombre, "avg"): f"AVG({campo.expr})",
+        _alias_nativo(campo.nombre, "sum"): f"SUM({campo.expr})",
+        _alias_nativo(campo.nombre, "min"): f"MIN({campo.expr})",
+        _alias_nativo(campo.nombre, "max"): f"MAX({campo.expr})",
+        _alias_nativo(campo.nombre, "count"): f"COUNT({campo.expr})",
+    }
+
+
+def _parse_campo_nativo(row: Any, campo: CampoNativo) -> Dict[str, Any]:
+    return {
+        "tipo": campo.tipo,
+        "promedio": row[_alias_nativo(campo.nombre, "avg")],
+        "suma": row[_alias_nativo(campo.nombre, "sum")],
+        "minimo": row[_alias_nativo(campo.nombre, "min")],
+        "maximo": row[_alias_nativo(campo.nombre, "max")],
+        "con_valor": row[_alias_nativo(campo.nombre, "count")],
+    }
+
+
 # ==================== Motor ====================
 
 def _indexar_atributos(atributos: Dict[str, str]) -> List[AtributoIndexado]:
@@ -194,6 +248,13 @@ def _construir_query(indexados: List[AtributoIndexado], volumen_atributo: Option
         for alias, expr in item.estrategia.construir_sql(item.indice).items():
             selects.append(f"{expr} AS {alias}")
         params[_key_param(item.indice)] = item.nombre
+
+    # Campos nativos: van en la MISMA query grande, igual que el volumen de
+    # acá abajo. Son columnas de la tabla, no aportan parámetros ni pueden
+    # fallar un cast, así que nunca participan de la pasada de diagnóstico.
+    for campo in CAMPOS_NATIVOS.values():
+        for alias, expr in _sql_campo_nativo(campo).items():
+            selects.append(f"{expr} AS {alias}")
 
     # Volumen total (Fase 4): SUM(cantidad * valor_unitario), solo si el
     # inventario tiene configurado el rol volumen_unitario (Fase 1). Se suma
@@ -277,7 +338,15 @@ def calcular_estadisticas(db: Session, inventario: models.Inventario) -> Dict[st
         datos["tipo"] = item.tipo_declarado
         atributos_resultado[item.nombre] = datos
 
-    resultado = {"total_items": row["total_items"], "atributos": atributos_resultado}
+    campos_nativos_resultado = {
+        campo.nombre: _parse_campo_nativo(row, campo) for campo in CAMPOS_NATIVOS.values()
+    }
+
+    resultado = {
+        "total_items": row["total_items"],
+        "atributos": atributos_resultado,
+        "campos_nativos": campos_nativos_resultado,
+    }
 
     if volumen_atributo:
         resultado["volumen_total"] = {
@@ -312,27 +381,76 @@ def _num_intervalos_sturges(n: int) -> int:
     return max(1, math.ceil(math.log2(n) + 1))
 
 
-def _resolver_atributo_numerico(inventario: models.Inventario, atributo: str) -> str:
-    """Valida que `atributo` exista en el inventario y sea integer/float. Devuelve el tipo declarado."""
-    tipo = (inventario.atributos or {}).get(atributo)
-    if tipo is None:
-        raise HTTPException(404, detail=f"El atributo '{atributo}' no existe en este inventario")
-    if _TIPO_A_ESTRATEGIA.get(tipo.lower().strip()) != "numerico":
-        raise HTTPException(
-            400, detail=f"El atributo '{atributo}' es de tipo '{tipo}', se requiere integer o float"
+class CampoNumerico(NamedTuple):
+    """
+    Un campo sobre el que se puede calcular mediana/histograma, ya resuelto a
+    la expresión SQL que le corresponde: un atributo del JSONB o una columna
+    nativa. El resto del motor no vuelve a preguntar de cuál de los dos se
+    trata — solo interpola `expr` / `expr_no_nulo` y suma `params`.
+    """
+    nombre: str
+    tipo: str
+    expr: str          # valor como float8, listo para agregar o comparar
+    expr_no_nulo: str  # misma columna sin castear, para COUNT / IS NOT NULL
+    params: Dict[str, Any]
+    es_nativo: bool
+
+
+def _resolver_campo_numerico(inventario: models.Inventario, campo: str) -> CampoNumerico:
+    """
+    Resuelve `campo` a su expresión SQL, validando que sea numérico.
+
+    Se busca PRIMERO en los atributos del inventario y después en los campos
+    nativos: nada impide que un inventario tenga un atributo custom llamado
+    'cantidad' (validate_inventario_atributos no reserva nombres), y en ese
+    caso tiene que seguir ganando el del usuario — si no, un inventario que ya
+    funcionaba cambiaría de significado al agregar un campo nativo al registro.
+    """
+    tipo = (inventario.atributos or {}).get(campo)
+    if tipo is not None:
+        if _TIPO_A_ESTRATEGIA.get(tipo.lower().strip()) != "numerico":
+            raise HTTPException(
+                400, detail=f"El atributo '{campo}' es de tipo '{tipo}', se requiere integer o float"
+            )
+        return CampoNumerico(
+            nombre=campo,
+            tipo=tipo,
+            expr="(atributos->>:key)::float8",
+            expr_no_nulo="(atributos->>:key)",
+            params={"key": campo},
+            es_nativo=False,
         )
-    return tipo
+
+    nativo = CAMPOS_NATIVOS.get(campo)
+    if nativo is not None:
+        return CampoNumerico(
+            nombre=nativo.nombre,
+            tipo=nativo.tipo,
+            expr=f"{nativo.expr}::float8",
+            expr_no_nulo=nativo.expr,
+            params={},
+            es_nativo=True,
+        )
+
+    raise HTTPException(404, detail=f"El atributo '{campo}' no existe en este inventario")
 
 
 def _ejecutar_numerico_con_diagnostico(
-    db: Session, sql: str, params: Dict[str, Any], atributo: str, tipo: str, inventario_id: int
+    db: Session, sql: str, params: Dict[str, Any], campo: CampoNumerico, inventario_id: int
 ):
     """
     Igual que el camino optimista de calcular_estadisticas, pero simplificado:
     acá ya sabemos de antemano cuál es el único atributo en juego (no hay que
     iterar buscando cuál falló), así que si el cast explota alcanza con una
     sola query de diagnóstico.
+
+    Un campo nativo es una columna con tipo real en la base: no hay cast que
+    pueda fallar ni valor "roto" que encontrar, así que se ejecuta derecho.
     """
+    if campo.es_nativo:
+        return db.execute(text(sql), params)
+
+    atributo, tipo = campo.nombre, campo.tipo
     try:
         return db.execute(text(sql), params)
     except DBAPIError:
@@ -357,14 +475,14 @@ def calcular_histograma_mediana(
     atributo: str,
     n_intervalos: Optional[int] = None,
 ) -> Dict[str, Any]:
-    tipo = _resolver_atributo_numerico(inventario, atributo)
+    campo = _resolver_campo_numerico(inventario, atributo)
 
     fila = _ejecutar_numerico_con_diagnostico(
         db,
-        "SELECT MIN((atributos->>:key)::float8) AS minimo, MAX((atributos->>:key)::float8) AS maximo, "
-        "COUNT(atributos->>:key) AS con_valor FROM item WHERE inventario_id = :inv_id",
-        {"key": atributo, "inv_id": inventario.id},
-        atributo, tipo, inventario.id,
+        f"SELECT MIN({campo.expr}) AS minimo, MAX({campo.expr}) AS maximo, "
+        f"COUNT({campo.expr_no_nulo}) AS con_valor FROM item WHERE inventario_id = :inv_id",
+        {**campo.params, "inv_id": inventario.id},
+        campo, inventario.id,
     ).mappings().first()
     minimo, maximo, con_valor = fila["minimo"], fila["maximo"], fila["con_valor"]
 
@@ -388,12 +506,12 @@ def calcular_histograma_mediana(
 
     filas = _ejecutar_numerico_con_diagnostico(
         db,
-        "SELECT LEAST(width_bucket((atributos->>:key)::float8, :minimo, :maximo, :n), :n) AS bucket, "
+        f"SELECT LEAST(width_bucket({campo.expr}, :minimo, :maximo, :n), :n) AS bucket, "
         "COUNT(*) AS frecuencia FROM item "
-        "WHERE inventario_id = :inv_id AND (atributos->>:key) IS NOT NULL "
+        f"WHERE inventario_id = :inv_id AND {campo.expr_no_nulo} IS NOT NULL "
         "GROUP BY bucket ORDER BY bucket",
-        {"key": atributo, "minimo": minimo, "maximo": maximo, "n": n, "inv_id": inventario.id},
-        atributo, tipo, inventario.id,
+        {**campo.params, "minimo": minimo, "maximo": maximo, "n": n, "inv_id": inventario.id},
+        campo, inventario.id,
     ).mappings().all()
     frecuencia_por_bucket = {f["bucket"]: f["frecuencia"] for f in filas}
 
@@ -429,17 +547,17 @@ def calcular_histograma_mediana(
 def calcular_promedio_rango(
     db: Session, inventario: models.Inventario, atributo: str, desde: float, hasta: float
 ) -> Dict[str, Any]:
-    tipo = _resolver_atributo_numerico(inventario, atributo)
+    campo = _resolver_campo_numerico(inventario, atributo)
     if desde > hasta:
         raise HTTPException(400, detail="'desde' no puede ser mayor que 'hasta'")
 
     fila = _ejecutar_numerico_con_diagnostico(
         db,
-        "SELECT AVG((atributos->>:key)::float8) AS promedio, COUNT(atributos->>:key) AS cantidad "
+        f"SELECT AVG({campo.expr}) AS promedio, COUNT({campo.expr_no_nulo}) AS cantidad "
         "FROM item WHERE inventario_id = :inv_id "
-        "AND (atributos->>:key)::float8 BETWEEN :desde AND :hasta",
-        {"key": atributo, "inv_id": inventario.id, "desde": desde, "hasta": hasta},
-        atributo, tipo, inventario.id,
+        f"AND {campo.expr} BETWEEN :desde AND :hasta",
+        {**campo.params, "inv_id": inventario.id, "desde": desde, "hasta": hasta},
+        campo, inventario.id,
     ).mappings().first()
 
     return {
@@ -461,6 +579,9 @@ def get_estadisticas_inventario(
     atributo: promedio/suma/min/max para numéricos, conteo de
     verdaderos/falsos para booleanos, próxima/última fecha y días restantes
     para fechas, y cantidad con valor para strings.
+
+    Además devuelve `campos_nativos` con las mismas métricas numéricas sobre
+    las columnas de la tabla item que no viven en el JSONB (hoy: `cantidad`).
 
     Requiere permiso `inventarios:read` (o ser tenant owner).
 
@@ -489,9 +610,14 @@ def get_mediana_atributo(
     (no el percentil 50 exacto), a partir de un histograma armado con
     `width_bucket` de Postgres.
 
+    Acepta tanto un atributo del inventario como un campo nativo de la tabla
+    item (`cantidad`). Si el inventario tiene un atributo custom con el mismo
+    nombre que un campo nativo, gana el atributo custom.
+
     Requiere permiso `inventarios:read` (o ser tenant owner).
 
     **Ejemplo:** `GET /inventarios/1/atributos/precio/mediana?intervalos=8`
+    **Ejemplo (campo nativo):** `GET /inventarios/1/atributos/cantidad/mediana`
     """
     inv = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
     if not inv:
