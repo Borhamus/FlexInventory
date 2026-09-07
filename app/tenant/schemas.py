@@ -1,4 +1,4 @@
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field, ConfigDict, model_validator
 from typing import Dict, Any, Optional, List
 from datetime import datetime
 
@@ -194,7 +194,14 @@ class CatalogoItemAdd(BaseModel):
 
 class ItemBulkUpdate(BaseModel):
     item_ids: List[int] = Field(..., min_length=1)
-    atributos: Dict[str, Any] = Field(..., min_length=1)
+    atributos: Dict[str, Any] = Field(default_factory=dict)
+    cantidad: Optional[int] = Field(None, ge=0)
+
+    @model_validator(mode="after")
+    def _requiere_al_menos_un_campo(self):
+        if not self.atributos and self.cantidad is None:
+            raise ValueError("Debe indicar 'atributos' y/o 'cantidad'")
+        return self
 
 class BulkUpdateResponse(BaseModel):
     actualizados: int

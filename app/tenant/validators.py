@@ -56,6 +56,9 @@ def parse_value_by_type(value: Any, expected_type: str) -> Any:
     Raises:
         ValueError: Si no se puede convertir el valor al tipo esperado
     """
+    if value is None:
+        return None
+
     try:
         if expected_type in ("string", "str"):
             return str(value)

@@ -67,7 +67,8 @@ export const ModalEditItemInventory: React.FC<Props> = ({
 
           Object.entries(atributosRequeridos).forEach(([nombreAtributo, tipoAtributo]) => {
             if (tipoAtributo === 'date' && atributosFormateados[nombreAtributo]) {
-              atributosFormateados[nombreAtributo] = dayjs(atributosFormateados[nombreAtributo]);
+              const fecha = dayjs(atributosFormateados[nombreAtributo]);
+              atributosFormateados[nombreAtributo] = fecha.isValid() ? fecha : undefined;
             }
           });
 

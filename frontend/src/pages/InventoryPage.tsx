@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Alert, Spin, Tag, Typography, Button, Space, Popconfirm, message, Input, Result, Popover, Checkbox, Divider, Tooltip, Select, DatePicker } from 'antd';
+import { Alert, Spin, Tag, Typography, Button, Space, Popconfirm, message, Input, Result, Popover, Checkbox, Divider, Tooltip, Select, DatePicker, theme } from 'antd';
 import type { Dayjs } from 'dayjs';
 import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ControlOutlined, BarChartOutlined, SortAscendingOutlined } from '@ant-design/icons';
 import { useInventory, useDeleteInventory, useDeleteItem } from '../hooks/useInventory';
@@ -44,12 +44,12 @@ function opcionesOrdenFiltro(
   if (nativas.length) {
     grupos.push({
       label: 'Campos del artículo',
-      options: nativas.map((c) => ({ value: c.value, label: `${c.label} (${c.tipo})` })),
+      options: nativas.map((c) => ({ value: c.value, label: c.label })),
     });
   }
-  const opcionesAtributos = Object.entries(atributos).map(([nombre, tipo]) => ({
+  const opcionesAtributos = Object.entries(atributos).map(([nombre]) => ({
     value: nombre,
-    label: `${nombre} (${tipo})`,
+    label: nombre,
   }));
   if (opcionesAtributos.length) {
     grupos.push({ label: 'Atributos del inventario', options: opcionesAtributos });
@@ -85,6 +85,7 @@ const InventoryPage: React.FC = () => {
   const { hasPermission, isTenant } = useAuthContext();
   const { id } = useParams();
   const navigate = useNavigate();
+  const { token } = theme.useToken();
 
   // Queries y Mutations
   const { data, isLoading, error, refetch } = useInventory(Number(id));
@@ -134,7 +135,9 @@ const InventoryPage: React.FC = () => {
   const [filtroDesde, setFiltroDesde] = useState<string | undefined>(undefined);
   const [filtroHasta, setFiltroHasta] = useState<string | undefined>(undefined);
 
-  const ordenFiltroActivo = Boolean(sortBy || filtroAtributo);
+  const rangoFiltroCompleto = Boolean(filtroDesde || filtroHasta);
+  const ordenFiltroActivo = Boolean(sortBy || (filtroAtributo && rangoFiltroCompleto));
+  const hayAlgoQueLimpiar = Boolean(sortBy || filtroAtributo || filtroDesde || filtroHasta);
   const { data: itemsOrdenados, isFetching: isFetchingOrden } = useItems(
     Number(id),
     { sortBy, order, filtroAtributo, filtroDesde, filtroHasta },
@@ -149,7 +152,7 @@ const InventoryPage: React.FC = () => {
   const tipoFiltroSeleccionado = nativaFiltro
     ? nativaFiltro.tipo
     : (filtroAtributo ? data?.atributos?.[filtroAtributo] : undefined);
-  const esFiltroFecha = tipoFiltroSeleccionado === 'date';
+  const esFiltroFecha = filtroAtributo ? tipoFiltroSeleccionado === 'date' : true;
 
   const limpiarOrdenFiltro = () => {
     setSortBy(undefined);
@@ -323,9 +326,20 @@ const InventoryPage: React.FC = () => {
                   <Divider style={{ margin: '4px 0' }} />
 
                   <Text strong style={{ fontSize: 12 }}>Filtrar por rango (numérico o fecha)</Text>
+                  {esFiltroFecha ? (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <DatePicker placeholder="Desde" style={{ flex: 1 }} getPopupContainer={(trigger) => trigger.parentElement as HTMLElement} onChange={(d: Dayjs | null) => setFiltroDesde(d ? d.format('YYYY-MM-DD') : undefined)} />
+                      <DatePicker placeholder="Hasta" style={{ flex: 1 }} getPopupContainer={(trigger) => trigger.parentElement as HTMLElement} onChange={(d: Dayjs | null) => setFiltroHasta(d ? d.format('YYYY-MM-DD') : undefined)} />
+                    </div>
+                  ) : (
+                    <div style={{ display: 'flex', gap: 8 }}>
+                      <Input placeholder="Desde" style={{ flex: 1 }} onChange={(e) => setFiltroDesde(e.target.value || undefined)} />
+                      <Input placeholder="Hasta" style={{ flex: 1 }} onChange={(e) => setFiltroHasta(e.target.value || undefined)} />
+                    </div>
+                  )}
                   <Select
                     allowClear
-                    placeholder="Sin filtro"
+                    placeholder="Elegí el campo a filtrar"
                     value={filtroAtributo}
                     onChange={(v) => { setFiltroAtributo(v); setFiltroDesde(undefined); setFiltroHasta(undefined); }}
                     getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
@@ -336,21 +350,8 @@ const InventoryPage: React.FC = () => {
                       ),
                     )}
                   />
-                  {filtroAtributo && (
-                    esFiltroFecha ? (
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <DatePicker placeholder="Desde" style={{ flex: 1 }} getPopupContainer={(trigger) => trigger.parentElement as HTMLElement} onChange={(d: Dayjs | null) => setFiltroDesde(d ? d.format('YYYY-MM-DD') : undefined)} />
-                        <DatePicker placeholder="Hasta" style={{ flex: 1 }} getPopupContainer={(trigger) => trigger.parentElement as HTMLElement} onChange={(d: Dayjs | null) => setFiltroHasta(d ? d.format('YYYY-MM-DD') : undefined)} />
-                      </div>
-                    ) : (
-                      <div style={{ display: 'flex', gap: 8 }}>
-                        <Input placeholder="Desde" style={{ flex: 1 }} onChange={(e) => setFiltroDesde(e.target.value || undefined)} />
-                        <Input placeholder="Hasta" style={{ flex: 1 }} onChange={(e) => setFiltroHasta(e.target.value || undefined)} />
-                      </div>
-                    )
-                  )}
 
-                  {ordenFiltroActivo && (
+                  {hayAlgoQueLimpiar && (
                     <Button size="small" onClick={limpiarOrdenFiltro} style={{ marginTop: 4 }}>
                       Limpiar orden y filtro
                     </Button>
@@ -372,7 +373,16 @@ const InventoryPage: React.FC = () => {
 
         {/* ACCIONES MASIVAS */}
         {selectedRowKeys.length > 0 && (
-          <div style={{ padding: '16px', marginBottom: '16px', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', backgroundColor: '#f5f5f5' }}>
+          <div style={{
+            padding:         '16px',
+            marginBottom:    '16px',
+            display:         'flex',
+            justifyContent:  'space-between',
+            alignItems:      'center',
+            background:      token.colorFillAlter,
+            borderRadius:    token.borderRadiusLG,
+            border:          `1px solid ${token.colorBorderSecondary}`,
+          }}>
             <span>Seleccionaste <b>{selectedRowKeys.length}</b> artículos.</span>
             <Space>
 

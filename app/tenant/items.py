@@ -71,7 +71,8 @@ def bulk_update_items(
     db: Session = Depends(get_tenant_db),
 ):
     """
-    Actualiza masivamente atributos de una lista de items del mismo inventario.
+    Actualiza masivamente atributos y/o la cantidad de una lista de items del
+    mismo inventario.
 
     Requiere permiso `items:update` (o ser tenant owner).
 
@@ -79,7 +80,8 @@ def bulk_update_items(
     ```json
     {
       "item_ids": [1, 2, 3],
-      "atributos": { "Marca": "Samsung" }
+      "atributos": { "Marca": "Samsung" },
+      "cantidad": 10
     }
     ```
     """
@@ -95,35 +97,42 @@ def bulk_update_items(
     if len(inventory_ids) > 1:
         raise HTTPException(400, detail="Todos los items deben pertenecer al mismo inventario")
 
-    inventario_id = inventory_ids.pop()
-    atributos_inv = db.query(models.Inventario.atributos).filter(
-        models.Inventario.id == inventario_id
-    ).scalar()
-    inv_keys = set(atributos_inv.keys()) if atributos_inv else set()
-    unknown_keys = set(payload.atributos.keys()) - inv_keys
-    if unknown_keys:
-        raise HTTPException(400, detail={
-            "message": "Atributos no definidos en el inventario",
-            "atributos_invalidos": sorted(unknown_keys),
-            "atributos_disponibles": sorted(inv_keys),
-        })
-
-    # Convertir/validar los valores según el tipo definido en el inventario
-    # (igual que en la creación de items)
     validated_attrs = {}
-    type_errors = []
-    for key, value in payload.atributos.items():
-        try:
-            validated_attrs[key] = parse_value_by_type(value, atributos_inv[key])
-        except ValueError as e:
-            type_errors.append(str(e))
-    if type_errors:
-        raise HTTPException(400, detail={"message": "Errores de tipo en atributos", "errors": type_errors})
+    if payload.atributos:
+        inventario_id = inventory_ids.pop()
+        atributos_inv = db.query(models.Inventario.atributos).filter(
+            models.Inventario.id == inventario_id
+        ).scalar()
+        inv_keys = set(atributos_inv.keys()) if atributos_inv else set()
+        unknown_keys = set(payload.atributos.keys()) - inv_keys
+        if unknown_keys:
+            raise HTTPException(400, detail={
+                "message": "Atributos no definidos en el inventario",
+                "atributos_invalidos": sorted(unknown_keys),
+                "atributos_disponibles": sorted(inv_keys),
+            })
 
-    db.execute(
-        text("UPDATE item SET atributos = atributos || CAST(:new_attrs AS jsonb) WHERE id = ANY(:ids)"),
-        {"new_attrs": json.dumps(validated_attrs), "ids": list(found_ids)},
-    )
+        # Convertir/validar los valores según el tipo definido en el inventario
+        # (igual que en la creación de items)
+        type_errors = []
+        for key, value in payload.atributos.items():
+            try:
+                validated_attrs[key] = parse_value_by_type(value, atributos_inv[key])
+            except ValueError as e:
+                type_errors.append(str(e))
+        if type_errors:
+            raise HTTPException(400, detail={"message": "Errores de tipo en atributos", "errors": type_errors})
+
+    set_clauses = []
+    params = {"ids": list(found_ids)}
+    if validated_attrs:
+        set_clauses.append("atributos = atributos || CAST(:new_attrs AS jsonb)")
+        params["new_attrs"] = json.dumps(validated_attrs)
+    if payload.cantidad is not None:
+        set_clauses.append("cantidad = :cantidad")
+        params["cantidad"] = payload.cantidad
+
+    db.execute(text(f"UPDATE item SET {', '.join(set_clauses)} WHERE id = ANY(:ids)"), params)
     db.commit()
     return {"actualizados": len(found_ids)}
 

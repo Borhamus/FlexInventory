@@ -1,9 +1,11 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Table, Tag, Button, Space, Popconfirm, Avatar } from 'antd';
+import { Table, Tag, Button, Space, Popconfirm, Avatar, Typography } from 'antd';
 import { EditOutlined, DeleteOutlined, PictureOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useAuthContext } from '../context/AuthContext';
 import { urlImagen } from '../api/axios.config';
+
+const CELDA_VACIA = <Typography.Text type="secondary">—</Typography.Text>;
 
 interface InventoryTableProps {
   items: any[];
@@ -248,14 +250,15 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
           align: 'center',
           render: (value: any) => {
             if (value === undefined || value === null || value === '') {
-              return <Tag color="default">N/A</Tag>;
+              return CELDA_VACIA;
             }
             if (tipoAtributo === 'boolean' || typeof value === 'boolean' || value === 'true' || value === 'false') {
               const esVerdadero = value === true || String(value).toLowerCase() === 'true';
               return <Tag color={esVerdadero ? 'green' : 'red'}>{esVerdadero ? 'Sí' : 'No'}</Tag>;
             }
             if (tipoAtributo === 'date') {
-              return dayjs(value).format('DD/MM/YYYY');
+              const fecha = dayjs(value);
+              return fecha.isValid() ? fecha.format('DD/MM/YYYY') : CELDA_VACIA;
             }
             return String(value);
           }

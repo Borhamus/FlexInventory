@@ -2,6 +2,8 @@ import React, { useState } from 'react';
 import { Modal, Form, Select, Input, InputNumber, DatePicker, Switch, message } from 'antd';
 import api from '../api/axios.config';
 
+const CANTIDAD_FIELD = '__cantidad__';
+
 interface ModalBulkEditProps {
   visible: boolean;
   onClose: () => void;
@@ -17,6 +19,8 @@ const ModalBulkEdit: React.FC<ModalBulkEditProps> = ({
   const [loading, setLoading] = useState(false);
   const [selectedAttr, setSelectedAttr] = useState<any>(null);
 
+  const esCantidad = selectedAttr?.nombre === CANTIDAD_FIELD;
+
   const handleFinish = async (values: any) => {
     setLoading(true);
     try {
@@ -29,12 +33,9 @@ const ModalBulkEdit: React.FC<ModalBulkEditProps> = ({
         valorFinal = valorFinal.format('YYYY-MM-DD');
       }
 
-      const payload = {
-        item_ids: selectedIds,
-        atributos: {
-          [values.atributoKey]: valorFinal
-        }
-      };
+      const payload = values.atributoKey === CANTIDAD_FIELD
+        ? { item_ids: selectedIds, cantidad: valorFinal }
+        : { item_ids: selectedIds, atributos: { [values.atributoKey]: valorFinal } };
 
       await api.patch('/items/bulk-update', payload);
             
@@ -87,14 +88,18 @@ const ModalBulkEdit: React.FC<ModalBulkEditProps> = ({
           <Select 
             placeholder="Elegí una columna"
             onChange={(value) => {
-              const atributoEncontrado = atributosInventario.find(attr => attr.nombre === value);
-              const tipoDelAtributo = atributoEncontrado?.tipo; 
-              
+              const tipoDelAtributo = value === CANTIDAD_FIELD
+                ? 'integer'
+                : atributosInventario.find(attr => attr.nombre === value)?.tipo;
+
               setSelectedAttr({ nombre: value, tipo: tipoDelAtributo });
-              
-              form.setFieldsValue({ nuevoValor: tipoDelAtributo === 'boolean' ? false : undefined }); 
+
+              form.setFieldsValue({ nuevoValor: tipoDelAtributo === 'boolean' ? false : undefined });
             }}
           >
+            <Select.Option key={CANTIDAD_FIELD} value={CANTIDAD_FIELD}>
+              Cantidad
+            </Select.Option>
             {atributosInventario?.map(attr => (
               <Select.Option key={attr.nombre} value={attr.nombre}>
                 {attr.nombre}
@@ -103,11 +108,14 @@ const ModalBulkEdit: React.FC<ModalBulkEditProps> = ({
           </Select>
         </Form.Item>
 
-        <Form.Item 
-          name="nuevoValor" 
+        <Form.Item
+          name="nuevoValor"
           label="Nuevo Valor"
           valuePropName={selectedAttr?.tipo === 'boolean' ? 'checked' : 'value'}
-          rules={[]}
+          rules={esCantidad ? [
+            { required: true, message: 'Ingresá una cantidad' },
+            { type: 'integer', min: 0, message: 'La cantidad tiene que ser 0 o un número positivo' },
+          ] : []}
         >
           {renderInput()}
         </Form.Item>
