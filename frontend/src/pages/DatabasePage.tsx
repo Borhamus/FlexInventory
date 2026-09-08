@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import {
   Card, Button, Switch, InputNumber, Typography, Divider,
   Alert, Modal, Tag, Spin, Row, Col, Tooltip, notification, message,
-  List, Radio, Space,
+  List, Radio, Space, Input,
 } from 'antd';
 import {
   CloudUploadOutlined, CloudDownloadOutlined, DeleteOutlined,
@@ -57,6 +57,10 @@ const DatabasePage: React.FC = () => {
   const [backupList,        setBackupList]        = useState<BackupFile[]>([]);
   const [loadingBackups,    setLoadingBackups]    = useState(false);
   const [selectedFileId,    setSelectedFileId]    = useState<string | null>(null);
+
+  // ── Estado del modal de backup manual (etiqueta opcional) ──────────────
+  const [backupModalOpen,   setBackupModalOpen]   = useState(false);
+  const [backupLabel,       setBackupLabel]       = useState('');
 
   useEffect(() => {
     if (!isTenant) navigate('/dashboard', { replace: true });
@@ -154,10 +158,13 @@ const DatabasePage: React.FC = () => {
   };
 
   const handleBackupNow = async () => {
+    setBackupModalOpen(false);
     setActionLoading('backup');
     const hide = message.loading('Haciendo el backup… puede tardar unos segundos si tenés fotos.', 0);
     try {
-      const res = await backupNow();
+      // El service manda la etiqueta solo si no está vacía; vacía → nombre
+      // por defecto en el backend.
+      const res = await backupNow(backupLabel);
       api.success({ message: 'Backup completado', description: `Archivo: ${res.filename}` });
       fetchStatus();
     } catch (e: any) {
@@ -283,6 +290,20 @@ const DatabasePage: React.FC = () => {
             </Tooltip>
           </Col>
         </Row>
+
+        <Alert
+          type="info"
+          showIcon
+          style={{ marginTop: 16 }}
+          message="Sobre la carpeta de tu Drive"
+          description={
+            <>
+              El sistema usa la carpeta <Text code>FlexInventory Storage</Text> de tu Drive.
+              Podés <Text strong>renombrarla o moverla</Text> sin problema: se sigue encontrando igual.
+              Lo único que borra tus backups es <Text strong>eliminar la carpeta</Text> o <Text strong>vaciar la papelera</Text> de Drive.
+            </>
+          }
+        />
       </Card>
 
       {/* ── Acciones de backup ── */}
@@ -295,7 +316,8 @@ const DatabasePage: React.FC = () => {
           <Col xs={24} sm={8}>
             <Button
               block type="primary" icon={<CloudUploadOutlined />}
-              onClick={handleBackupNow} disabled={!driveConnected}
+              onClick={() => { setBackupLabel(''); setBackupModalOpen(true); }}
+              disabled={!driveConnected}
               loading={actionLoading === 'backup'} style={{ height: 56 }}
             >
               Backup ahora
@@ -472,6 +494,33 @@ const DatabasePage: React.FC = () => {
             />
           </Radio.Group>
         )}
+      </Modal>
+
+      {/* ══ Modal de backup manual (etiqueta opcional) ════════════════════ */}
+      <Modal
+        title="Hacer un backup"
+        open={backupModalOpen}
+        onCancel={() => setBackupModalOpen(false)}
+        okText="Hacer backup"
+        cancelText="Cancelar"
+        confirmLoading={actionLoading === 'backup'}
+        onOk={handleBackupNow}
+      >
+        <Paragraph type="secondary" style={{ marginBottom: 12 }}>
+          Podés ponerle una etiqueta para reconocerlo después en la lista de
+          restauración (por ejemplo, <Text code>antes de importar</Text>). Es
+          opcional: si lo dejás en blanco, se usa la fecha y hora.
+        </Paragraph>
+        <Input
+          placeholder="Etiqueta (opcional)"
+          value={backupLabel}
+          onChange={(e) => setBackupLabel(e.target.value)}
+          onPressEnter={handleBackupNow}
+          maxLength={40}
+          showCount
+          allowClear
+          autoFocus
+        />
       </Modal>
     </div>
   );

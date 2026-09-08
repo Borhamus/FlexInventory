@@ -33,8 +33,11 @@ export const getOAuthUrl = async (): Promise<string> => {
   return res.data.url;
 };
 
-export const backupNow = async (): Promise<{ message: string; filename: string }> => {
-  const res = await api.post('/database/backup/now');
+// Backup manual. `etiqueta` es opcional: solo se manda el cuerpo cuando hay
+// una etiqueta, para que el endpoint siga aceptando llamadas sin cuerpo.
+export const backupNow = async (etiqueta?: string): Promise<{ message: string; filename: string }> => {
+  const cuerpo = etiqueta?.trim() ? { etiqueta: etiqueta.trim() } : undefined;
+  const res = await api.post('/database/backup/now', cuerpo);
   return res.data;
 };
 

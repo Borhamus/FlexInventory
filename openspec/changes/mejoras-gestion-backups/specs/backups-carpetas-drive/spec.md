@@ -1,6 +1,6 @@
 ## Purpose
 
-Garantiza que las carpetas que FlexInventory usa en el Drive del usuario se sigan encontrando aunque el usuario las renombre o las mueva, y que el usuario entienda desde la aplicación qué carpeta usa el sistema y qué acciones sobre ella sí son destructivas.
+Garantiza que las carpetas y archivos que FlexInventory usa en el Drive del usuario se sigan encontrando aunque el usuario los renombre o los mueva, que la restauración de fotos no dependa de un identificador que puede estar vacío, y que el usuario entienda desde la aplicación qué carpeta usa el sistema y qué acciones sobre ella sí son destructivas.
 
 ## ADDED Requirements
 
@@ -56,6 +56,56 @@ Los tenants que ya existían antes de esta capacidad SHALL seguir funcionando si
 
 - **WHEN** un tenant creado antes de esta capacidad ejecuta su primer backup posterior
 - **THEN** el sistema resuelve la carpeta por nombre, guarda su identificador, y los backups siguientes ya lo usan
+
+### Requirement: Resolución del archivo de imágenes en la restauración
+
+Al restaurar un backup, el sistema SHALL localizar el archivo `images.zip` por su nombre dentro de la carpeta raíz resuelta, y NO SHALL depender únicamente del identificador cacheado del archivo de imágenes para decidir si restaura las fotos.
+
+El identificador cacheado PUEDE usarse como atajo cuando siga siendo válido, pero su ausencia NO SHALL provocar que una restauración termine sin fotos y sin error mientras exista un `images.zip` en el Drive del tenant.
+
+Cuando el tenant no tenga ningún `images.zip` en su Drive, la restauración SHALL completarse igual, informando que no se restauraron fotos, sin tratarlo como un error.
+
+#### Scenario: Identificador de imágenes en blanco pero el archivo existe
+
+- **WHEN** un tenant restaura un backup teniendo su identificador cacheado de `images.zip` sin valor, pero con un `images.zip` presente en su carpeta de Drive
+- **THEN** el sistema encuentra el archivo por nombre, restaura las fotos en el disco del tenant e informa que las fotos se restauraron
+
+#### Scenario: Sin archivo de imágenes en Drive
+
+- **WHEN** un tenant que nunca subió fotos restaura un backup
+- **THEN** la restauración de los datos se completa con normalidad y el sistema informa que no había fotos para restaurar, sin error
+
+#### Scenario: Identificador de imágenes de otra cuenta de Drive
+
+- **WHEN** un tenant tiene cacheado un identificador de `images.zip` que no corresponde a la cuenta de Drive conectada actualmente
+- **THEN** el sistema descarta ese identificador, busca `images.zip` por nombre en la cuenta conectada y restaura las fotos si el archivo existe
+
+### Requirement: Unicidad de los archivos de estado (current.json e images.zip)
+
+`current.json` e `images.zip` son archivos únicos que se sobrescriben en el lugar, no histórico. El sistema SHALL mantener una sola copia de cada uno en la carpeta raíz: antes de subir, SHALL resolver el archivo por nombre dentro de la carpeta y actualizar el que exista, y solo SHALL crear uno nuevo cuando no exista ninguno.
+
+Perder el identificador cacheado del archivo (primer backup, o un disconnect seguido de reconexión) NO SHALL provocar la creación de una copia adicional.
+
+Esto NO aplica a los backups históricos (`backup_FECHA.json`), que por definición crean un archivo nuevo por corrida.
+
+#### Scenario: Backup con el identificador de current.json perdido
+
+- **WHEN** se ejecuta un backup con el identificador cacheado de `current.json` en NULL pero con un `current.json` ya presente en la carpeta raíz
+- **THEN** el sistema actualiza el `current.json` existente y no crea una segunda copia
+
+#### Scenario: Reconexión a la misma cuenta no duplica images.zip
+
+- **WHEN** el usuario desconecta y reconecta la misma cuenta de Drive (con lo que los identificadores cacheados quedaron en NULL) y luego ejecuta un backup
+- **THEN** el sistema actualiza el `images.zip` existente en lugar de crear uno nuevo
+
+### Requirement: Limpieza de identificadores al desconectar Drive
+
+Cuando el usuario desconecte su cuenta de Google Drive, el sistema SHALL descartar todos los identificadores de Drive que tenga cacheados para el tenant —la carpeta raíz, la carpeta de backups, el archivo `current.json` y el archivo `images.zip`— de modo que reconectar una cuenta de Drive distinta no reutilice identificadores de la cuenta anterior.
+
+#### Scenario: Reconexión con otra cuenta de Google
+
+- **WHEN** el usuario desconecta su Drive y luego conecta una cuenta de Google distinta y ejecuta un backup
+- **THEN** el sistema no intenta actualizar archivos por identificadores de la cuenta anterior, sino que resuelve o crea las carpetas y archivos en la cuenta nueva, y el backup se completa sin error
 
 ### Requirement: Transparencia sobre la carpeta de almacenamiento
 

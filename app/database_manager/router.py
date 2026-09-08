@@ -16,6 +16,7 @@ Endpoints:
 #from __future__ import annotations
 import io
 import os
+import re
 import json
 import logging
 import shutil
@@ -101,6 +102,90 @@ def _get_or_create_folder(access_token: str, name: str, parent_id: str | None = 
     resp = requests.post(f"{DRIVE_API_URL}/files", headers={**headers, "Content-Type": "application/json"},
                          data=json.dumps(metadata))
     return resp.json()["id"]
+
+
+def _resolver_carpeta(access_token: str, id_cacheado: str | None, name: str, parent_id: str | None = None) -> str:
+    """
+    Resuelve una carpeta de Drive por su ID cacheado, cayendo a la búsqueda
+    por nombre solo si el ID ya no sirve. Devuelve el ID resuelto (que el
+    llamador debería persistir).
+
+    Un renombre o un cambio de ubicación en Drive NO cambian el ID de una
+    carpeta, así que verificar el ID cacheado sobrevive al caso que rompía
+    antes (_get_or_create_folder la buscaba por nombre y, al no encontrarla
+    renombrada, creaba una nueva y vacía). El fallback por nombre cubre el
+    ID inválido: carpeta borrada/en la papelera, tenant sin ID todavía, o un
+    ID heredado de otra cuenta de Drive (el scope drive.file hace que la
+    verificación falle porque la app no ve archivos que no creó ahí).
+    """
+    if id_cacheado:
+        resp = requests.get(
+            f"{DRIVE_API_URL}/files/{id_cacheado}",
+            headers={"Authorization": f"Bearer {access_token}"},
+            params={"fields": "id,trashed"},
+        )
+        if resp.status_code == 200 and not resp.json().get("trashed", False):
+            return id_cacheado
+
+    return _get_or_create_folder(access_token, name, parent_id)
+
+
+def _resolver_archivo(access_token: str, id_cacheado: str | None, name: str, folder_id: str) -> str | None:
+    """
+    Resuelve el id de un archivo ÚNICO (current.json, images.zip) por su id
+    cacheado, cayendo a la búsqueda por nombre dentro de `folder_id`. Devuelve
+    None si el archivo no existe todavía, para que el llamador lo cree (POST).
+
+    current.json e images.zip están pensados como archivos únicos que se
+    SOBRESCRIBEN en el lugar (PATCH), no como histórico. _upload_to_drive hace
+    PATCH solo si recibe un file_id; si venía en NULL hacía POST y creaba un
+    duplicado cada vez que el id se perdía (primer backup, o un disconnect que
+    nulifica los ids seguido de una reconexión). Buscar por nombre antes de
+    crear garantiza que se reutilice el que ya está, en la cuenta que sea.
+    """
+    if id_cacheado:
+        resp = requests.get(
+            f"{DRIVE_API_URL}/files/{id_cacheado}",
+            headers={"Authorization": f"Bearer {access_token}"},
+            params={"fields": "id,trashed"},
+        )
+        if resp.status_code == 200 and not resp.json().get("trashed", False):
+            return id_cacheado
+
+    resp = requests.get(
+        f"{DRIVE_API_URL}/files",
+        headers={"Authorization": f"Bearer {access_token}"},
+        params={
+            "q":      f"name='{name}' and '{folder_id}' in parents and trashed=false",
+            "fields": "files(id)",
+        },
+    )
+    if resp.status_code == 200:
+        archivos = resp.json().get("files", [])
+        if archivos:
+            return archivos[0]["id"]
+    return None
+
+
+def _sanitizar_etiqueta(texto: str | None) -> str | None:
+    """
+    Sanitiza la etiqueta opcional de un backup manual antes de usarla como
+    parte del nombre de archivo. Lista blanca —no lista negra—: se queda solo
+    con letras, dígitos, espacios, guiones y guiones bajos, y descarta todo lo
+    demás (comillas, barras, saltos de línea, unicode). Los espacios pasan a
+    guiones bajos y se trunca a 40 caracteres. Si no queda nada útil, devuelve
+    None y el backup usa el nombre por defecto.
+
+    La etiqueta NUNCA llega a una query 'q=' de Drive (solo se usa como nombre
+    en el metadata de la subida, que viaja como JSON): la sanitización es
+    defensa en profundidad, no la única barrera.
+    """
+    if not texto:
+        return None
+    limpio = re.sub(r"[^A-Za-z0-9 _-]", "", texto)
+    limpio = re.sub(r"\s+", "_", limpio.strip())
+    limpio = limpio[:40]
+    return limpio or None
 
 
 def _upload_to_drive(access_token: str, filename: str, content: str, folder_id: str, file_id: str | None = None) -> str:
@@ -535,7 +620,7 @@ def oauth_callback(code: str, state: str, db: db_dep):
     return RedirectResponse(url=f"{frontend_url}/dashboard/database?connected=true")
 
 
-def ejecutar_backup(tenant: Tenant, db: Session) -> dict:
+def ejecutar_backup(tenant: Tenant, db: Session, etiqueta: str | None = None) -> dict:
     """
     El backup en sí — datos + fotos — compartido entre el endpoint manual
     (POST /backup/now) y el job automático del scheduler, para no tener la
@@ -548,37 +633,51 @@ def ejecutar_backup(tenant: Tenant, db: Session) -> dict:
         histórico: a diferencia del JSON, no tiene sentido subir 50 fotos
         iguales de nuevo en cada backup solo porque cambió un precio. Si el
         tenant no tiene ninguna foto todavía, este paso se saltea entero.)
+
+    `etiqueta` es opcional y solo la usa el backup manual: se sanitiza y se
+    agrega al nombre del histórico como backup_{ts}_{etiqueta}.json, con el
+    timestamp siempre adelante (unicidad + orden alfabético = cronológico).
+    El scheduler la llama sin este argumento y cae al nombre por defecto.
     """
     if not tenant.google_refresh_token:
         raise HTTPException(status_code=400, detail="Drive no conectado. Conectá tu cuenta de Google primero.")
 
     access_token      = _get_access_token(tenant.google_refresh_token)
-    root_folder_id    = _get_or_create_folder(access_token, "FlexInventory Storage")
-    backups_folder_id = _get_or_create_folder(access_token, "backups", root_folder_id)
+    # Resolver por ID cacheado (con fallback por nombre): renombrar o mover las
+    # carpetas en Drive deja de romper la detección. La raíz se resuelve
+    # primero porque `backups` cuelga de ella (parent_id).
+    root_folder_id    = _resolver_carpeta(access_token, tenant.google_drive_root_folder_id, "FlexInventory Storage")
+    backups_folder_id = _resolver_carpeta(access_token, tenant.google_drive_folder_id, "backups", root_folder_id)
 
     data    = export_tenant_data(tenant, db)
     content = json.dumps(data, ensure_ascii=False, indent=2)
 
-    # Actualizar current.json
+    # Actualizar current.json: resolver su id por nombre antes de subir, para
+    # no crear un duplicado si el id cacheado se perdió (ver _resolver_archivo).
+    current_id      = _resolver_archivo(access_token, tenant.google_drive_file_id, "current.json", root_folder_id)
     current_file_id = _upload_to_drive(
         access_token, "current.json", content,
-        root_folder_id, tenant.google_drive_file_id
+        root_folder_id, current_id
     )
 
-    # Crear backup con timestamp
+    # Crear backup con timestamp (+ etiqueta opcional en el backup manual)
     ts          = datetime.now(timezone.utc).strftime("%Y-%m-%d_%H-%M")
-    backup_name = f"backup_{ts}.json"
+    etiqueta    = _sanitizar_etiqueta(etiqueta)
+    backup_name = f"backup_{ts}_{etiqueta}.json" if etiqueta else f"backup_{ts}.json"
     _upload_to_drive(access_token, backup_name, content, backups_folder_id)
 
-    tenant.google_drive_file_id   = current_file_id
-    tenant.google_drive_folder_id = backups_folder_id
+    tenant.google_drive_root_folder_id = root_folder_id
+    tenant.google_drive_file_id        = current_file_id
+    tenant.google_drive_folder_id      = backups_folder_id
 
-    # Fotos de items — mismo criterio "actualizar, no duplicar" que current.json.
+    # Fotos de items — mismo criterio "actualizar, no duplicar" que current.json,
+    # resolviendo images.zip por nombre antes de subir.
     zip_imagenes = _zip_carpeta_imagenes(tenant.schema_name)
     if zip_imagenes is not None:
+        images_id      = _resolver_archivo(access_token, tenant.google_drive_images_file_id, "images.zip", root_folder_id)
         images_file_id = _upload_bytes_to_drive(
             access_token, "images.zip", zip_imagenes, "application/zip",
-            root_folder_id, tenant.google_drive_images_file_id
+            root_folder_id, images_id
         )
         tenant.google_drive_images_file_id = images_file_id
 
@@ -587,14 +686,25 @@ def ejecutar_backup(tenant: Tenant, db: Session) -> dict:
     return {"message": "Backup completado correctamente.", "filename": backup_name}
 
 
+class BackupRequest(BaseModel):
+    # Etiqueta opcional para el nombre del backup manual. Se sanitiza en
+    # ejecutar_backup (_sanitizar_etiqueta); si viene vacía o queda vacía tras
+    # sanitizar, el backup usa el nombre por defecto.
+    etiqueta: Optional[str] = None
+
+
 @router.post("/backup/now")
-def backup_now(current_user: user_dep, db: db_dep):
+def backup_now(current_user: user_dep, db: db_dep, body: Optional[BackupRequest] = None):
     """
     Backup manual: exporta toda la BD del tenant (y sus fotos) y las sube a
     Drive. Ver ejecutar_backup() para el detalle de qué archivos crea.
+
+    El cuerpo es OPCIONAL: llamarlo sin cuerpo sigue siendo válido (así lo
+    hacía el frontend antes de esta feature y no debe romperse). Con cuerpo,
+    acepta una `etiqueta` opcional para el nombre del histórico.
     """
     user, tenant = _require_tenant_owner(current_user, db)
-    return ejecutar_backup(tenant, db)
+    return ejecutar_backup(tenant, db, etiqueta=body.etiqueta if body else None)
 
 
 @router.get("/backup/list")
@@ -623,8 +733,8 @@ def list_backups(current_user: user_dep, db: db_dep):
     headers      = {"Authorization": f"Bearer {access_token}"}
     result       = []
 
-    root_folder_id    = _get_or_create_folder(access_token, "FlexInventory Storage")
-    backups_folder_id = _get_or_create_folder(access_token, "backups", root_folder_id)
+    root_folder_id    = _resolver_carpeta(access_token, tenant.google_drive_root_folder_id, "FlexInventory Storage")
+    backups_folder_id = _resolver_carpeta(access_token, tenant.google_drive_folder_id, "backups", root_folder_id)
 
     # 1. Archivo actual (current.json), buscado por nombre adentro de la
     # carpeta raíz — no por el file_id guardado en el tenant.
@@ -671,12 +781,14 @@ def list_backups(current_user: user_dep, db: db_dep):
     # Ya que estamos acá adentro con el Drive resuelto, aprovechamos para
     # sincronizar los IDs cacheados del tenant — así backup/restore que sí
     # los usan (ejecutar_backup, restore_from_drive_by_id) quedan al día
-    # sin esperar al próximo backup manual.
-    if result:
-        tenant.google_drive_folder_id = backups_folder_id
-        if result[0]["is_current"]:
-            tenant.google_drive_file_id = result[0]["file_id"]
-        db.commit()
+    # sin esperar al próximo backup manual. La raíz y la carpeta de backups se
+    # cachean siempre (ya las resolvimos); el file_id de current.json solo si
+    # apareció en la lista.
+    tenant.google_drive_root_folder_id = root_folder_id
+    tenant.google_drive_folder_id      = backups_folder_id
+    if result and result[0]["is_current"]:
+        tenant.google_drive_file_id = result[0]["file_id"]
+    db.commit()
 
     return {"backups": result}
 
@@ -697,14 +809,27 @@ def restore_from_drive_by_id(file_id: str, current_user: user_dep, db: db_dep):
 
     restore_tenant_data(tenant, data, db)
 
-    # Las fotos son aparte del JSON: si este tenant tiene un images.zip
-    # guardado, se restaura también — sin esto, un item quedaría con
-    # Item.imagen apuntando a un archivo que no existe en el disco.
+    # Las fotos son aparte del JSON: si este tenant tiene un images.zip en
+    # Drive, se restaura también — sin esto, un item quedaría con Item.imagen
+    # apuntando a un archivo que no existe en el disco. Se busca images.zip
+    # por NOMBRE dentro de la carpeta raíz resuelta, no por el id cacheado
+    # (google_drive_images_file_id), que queda en NULL antes del primer backup
+    # o tras un disconnect: confiar solo en él hacía que un restore con fotos
+    # presentes en Drive terminara sin fotos y sin error (issue #30).
     fotos_restauradas = False
-    if tenant.google_drive_images_file_id:
-        zip_bytes = _download_bytes_from_drive(access_token, tenant.google_drive_images_file_id)
+    root_folder_id = _resolver_carpeta(access_token, tenant.google_drive_root_folder_id, "FlexInventory Storage")
+    images_file_id = _resolver_archivo(access_token, tenant.google_drive_images_file_id, "images.zip", root_folder_id)
+    if images_file_id:
+        zip_bytes = _download_bytes_from_drive(access_token, images_file_id)
         _restaurar_imagenes_zip(tenant.schema_name, zip_bytes)
         fotos_restauradas = True
+
+    # Cachear lo resuelto para las próximas operaciones (aunque no haya fotos,
+    # la raíz ya quedó resuelta).
+    tenant.google_drive_root_folder_id = root_folder_id
+    if images_file_id:
+        tenant.google_drive_images_file_id = images_file_id
+    db.commit()
 
     mensaje = "Base de datos restaurada exitosamente desde Drive."
     if fotos_restauradas:
@@ -777,9 +902,17 @@ def update_backup_config(body: BackupConfig, current_user: user_dep, db: db_dep)
 def disconnect_drive(current_user: user_dep, db: db_dep):
     """Desconecta Google Drive del tenant (borra el refresh_token)."""
     user, tenant = _require_tenant_owner(current_user, db)
-    tenant.google_refresh_token   = None
-    tenant.google_drive_file_id   = None
-    tenant.google_drive_folder_id = None
-    tenant.backup_auto_enabled    = False
+    tenant.google_refresh_token        = None
+    # Nulificar TODOS los IDs cacheados de Drive: si el usuario reconecta con
+    # otra cuenta de Google, un id de la cuenta anterior haría que el próximo
+    # backup intente un PATCH sobre un file_id ajeno y devuelva 502 (pasaba con
+    # google_drive_images_file_id, que antes no se limpiaba — issue #30). Con
+    # todo en NULL, la reconexión resuelve o crea todo por nombre en la cuenta
+    # nueva (ver _resolver_carpeta y el restore de images.zip por nombre).
+    tenant.google_drive_file_id        = None
+    tenant.google_drive_folder_id      = None
+    tenant.google_drive_root_folder_id = None
+    tenant.google_drive_images_file_id = None
+    tenant.backup_auto_enabled         = False
     db.commit()
     return {"message": "Google Drive desconectado."}

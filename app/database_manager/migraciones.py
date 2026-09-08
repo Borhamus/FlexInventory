@@ -33,6 +33,10 @@ def run_migrations() -> None:
             'ALTER TABLE public.tenants '
             'ADD COLUMN IF NOT EXISTS google_drive_images_file_id VARCHAR(255)'
         ))
+        conn.execute(text(
+            'ALTER TABLE public.tenants '
+            'ADD COLUMN IF NOT EXISTS google_drive_root_folder_id VARCHAR(255)'
+        ))
 
     db = SessionLocal()
     try:
