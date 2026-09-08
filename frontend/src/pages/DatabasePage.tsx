@@ -1,13 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
   Card, Button, Switch, InputNumber, Typography, Divider,
-  Alert, Modal, Tag, Spin, Row, Col, Tooltip, notification, message,
-  List, Radio, Space, Input,
+  Alert, Modal, Tag, Spin, Row, Col, notification, message,
+  List, Radio, Space, Input, theme,
 } from 'antd';
 import {
   CloudUploadOutlined, CloudDownloadOutlined, DeleteOutlined,
   LinkOutlined, DisconnectOutlined, CheckCircleOutlined,
-  CloseCircleOutlined, ReloadOutlined, WarningOutlined,
+  CloseCircleOutlined, WarningOutlined,
   FileOutlined, StarOutlined,
 } from '@ant-design/icons';
 import {
@@ -51,6 +51,7 @@ const DatabasePage: React.FC = () => {
   const [monthlyDay,    setMonthlyDay]    = useState<number>(1);
   const [autoEnabled,   setAutoEnabled]   = useState(false);
   const [api,           contextHolder]    = notification.useNotification();
+  const { token } = theme.useToken();
 
   // ── Estado del modal de restauración ──────────────────────────────────
   const [restoreModalOpen,  setRestoreModalOpen]  = useState(false);
@@ -139,7 +140,7 @@ const DatabasePage: React.FC = () => {
   const handleDisconnect = () => {
     Modal.confirm({
       title:   '¿Desconectar Google Drive?',
-      content: 'Se eliminarán los tokens de acceso. Los backups automáticos se desactivarán. Los archivos en tu Drive no se borran.',
+      content: 'Se revocará el acceso de la app a tu Google Drive y se desactivarán los backups automáticos. Tus archivos en Drive no se borran. Para volver a usarlo vas a tener que reconectar la cuenta.',
       okText:  'Desconectar',
       okButtonProps: { danger: true },
       onOk: async () => {
@@ -237,8 +238,19 @@ const DatabasePage: React.FC = () => {
     // height:100% + overflowY:auto: mismo motivo que en las otras páginas —
     // el documento ya no scrollea solo, cada página tiene que encargarse
     // de su propio scroll interno cuando el contenido no entra.
-    <div style={{ height: '100%', overflowY: 'auto', padding: '32px', maxWidth: 800, margin: '0 auto', width: '100%' }}>
-      {contextHolder}
+    // El scroll vive en este wrapper exterior (todo el ancho) para que la
+    // barra quede pegada a la derecha y no en el medio; el contenido queda
+    // centrado en el div interior. scrollbarColor la ata al tema (Ant tokens),
+    // así deja de ser blanca fija en modo oscuro.
+    <div style={{
+      height: '100%',
+      width: '100%',
+      overflowY: 'auto',
+      scrollbarWidth: 'thin',
+      scrollbarColor: `${token.colorTextTertiary} transparent`,
+    }}>
+      <div style={{ padding: '32px', maxWidth: 800, margin: '0 auto', width: '100%' }}>
+        {contextHolder}
 
       <Title level={3} style={{ marginBottom: 4 }}>Base de Datos</Title>
       <Text type="secondary">Gestión de backups y almacenamiento en Google Drive</Text>
@@ -265,29 +277,6 @@ const DatabasePage: React.FC = () => {
                 Sin conectar
               </Tag>
             )}
-          </Col>
-        </Row>
-
-        <Divider style={{ margin: '16px 0' }} />
-
-        <Row gutter={12}>
-          {!driveConnected ? (
-            <Col>
-              <Button type="primary" icon={<LinkOutlined />} onClick={handleConnectDrive}>
-                Conectar con Google Drive
-              </Button>
-            </Col>
-          ) : (
-            <Col>
-              <Button danger icon={<DisconnectOutlined />} onClick={handleDisconnect} loading={actionLoading === 'disconnect'}>
-                Desconectar Drive
-              </Button>
-            </Col>
-          )}
-          <Col>
-            <Tooltip title="Actualizar estado">
-              <Button icon={<ReloadOutlined />} onClick={fetchStatus} />
-            </Tooltip>
           </Col>
         </Row>
 
@@ -359,6 +348,25 @@ const DatabasePage: React.FC = () => {
             </Text>
           </Col>
         </Row>
+
+        {/* Conectar / desconectar Drive: a lo ancho, debajo de las acciones */}
+        {driveConnected ? (
+          <Button
+            block danger icon={<DisconnectOutlined />}
+            onClick={handleDisconnect} loading={actionLoading === 'disconnect'}
+            style={{ marginTop: 20 }}
+          >
+            Desconectar Drive
+          </Button>
+        ) : (
+          <Button
+            block type="primary" icon={<LinkOutlined />}
+            onClick={handleConnectDrive}
+            style={{ marginTop: 20 }}
+          >
+            Conectar con Google Drive
+          </Button>
+        )}
       </Card>
 
       {/* ── Configuración de backups automáticos ── */}
@@ -522,6 +530,7 @@ const DatabasePage: React.FC = () => {
           autoFocus
         />
       </Modal>
+      </div>
     </div>
   );
 };

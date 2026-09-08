@@ -64,6 +64,6 @@ export const updateBackupConfig = async (config: BackupConfig): Promise<{ messag
 };
 
 export const disconnectDrive = async (): Promise<{ message: string }> => {
-  const res = await api.get('/database/disconnect');
+  const res = await api.post('/database/disconnect');
   return res.data;
 };

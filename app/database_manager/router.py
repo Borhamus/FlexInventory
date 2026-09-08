@@ -11,7 +11,7 @@ Endpoints:
   POST /database/restore/{id}    → restaura desde un backup específico
   DELETE /database/reset         → borra todos los datos del tenant
   PATCH /database/config         → actualiza configuración de backups automáticos
-  GET  /database/disconnect      → desconecta Drive (borra refresh_token)
+  POST /database/disconnect      → desconecta Drive (revoca y borra refresh_token)
 """
 #from __future__ import annotations
 import io
@@ -46,8 +46,9 @@ GOOGLE_CLIENT_ID     = os.getenv("GOOGLE_CLIENT_ID")
 GOOGLE_CLIENT_SECRET = os.getenv("GOOGLE_CLIENT_SECRET")
 GOOGLE_REDIRECT_URI  = os.getenv("GOOGLE_REDIRECT_URI", "http://localhost:8000/database/oauth/callback")
 
-GOOGLE_AUTH_URL  = "https://accounts.google.com/o/oauth2/v2/auth"
-GOOGLE_TOKEN_URL = "https://oauth2.googleapis.com/token"
+GOOGLE_AUTH_URL   = "https://accounts.google.com/o/oauth2/v2/auth"
+GOOGLE_TOKEN_URL  = "https://oauth2.googleapis.com/token"
+GOOGLE_REVOKE_URL = "https://oauth2.googleapis.com/revoke"
 DRIVE_API_URL    = "https://www.googleapis.com/drive/v3"
 DRIVE_UPLOAD_URL = "https://www.googleapis.com/upload/drive/v3"
 
@@ -81,6 +82,29 @@ def _get_access_token(refresh_token: str) -> str:
     if resp.status_code != 200:
         raise HTTPException(status_code=502, detail="No se pudo renovar el token de Google Drive. Reconectá tu cuenta.")
     return resp.json()["access_token"]
+
+
+def _revocar_token_google(refresh_token: str) -> None:
+    """
+    Revoca el permiso (grant) en Google — best-effort. Un fallo acá NO debe
+    impedir la desconexión local: si Google no responde o el token ya no era
+    válido, igual olvidamos el token de nuestro lado. Reconectar después
+    funciona porque el flujo de OAuth usa prompt=consent y pide un token
+    nuevo desde cero (ver get_oauth_url), independiente del revocado.
+    """
+    try:
+        resp = requests.post(
+            GOOGLE_REVOKE_URL,
+            params={"token": refresh_token},
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+            timeout=10,
+        )
+        if resp.status_code != 200:
+            # 400 = el token ya no era válido (revocado/expirado): igual quedó
+            # sin efecto, que es lo que buscábamos. Solo lo dejamos anotado.
+            logger.warning(f"[Drive] revoke devolvió {resp.status_code}: {resp.text}")
+    except requests.RequestException as e:
+        logger.warning(f"[Drive] no se pudo contactar el endpoint de revoke de Google: {e}")
 
 
 def _get_or_create_folder(access_token: str, name: str, parent_id: str | None = None) -> str:
@@ -898,10 +922,18 @@ def update_backup_config(body: BackupConfig, current_user: user_dep, db: db_dep)
     return {"message": "Configuración de backups actualizada."}
 
 
-@router.get("/disconnect")
+@router.post("/disconnect")
 def disconnect_drive(current_user: user_dep, db: db_dep):
-    """Desconecta Google Drive del tenant (borra el refresh_token)."""
+    """
+    Desconecta Google Drive del tenant: revoca el permiso en Google, borra el
+    refresh_token y todos los IDs cacheados, y desprograma los backups
+    automáticos.
+    """
     user, tenant = _require_tenant_owner(current_user, db)
+    # Revocar el grant en Google ANTES de olvidar el token (lo necesitamos para
+    # revocarlo). Best-effort: si falla, igual desconectamos localmente.
+    if tenant.google_refresh_token:
+        _revocar_token_google(tenant.google_refresh_token)
     tenant.google_refresh_token        = None
     # Nulificar TODOS los IDs cacheados de Drive: si el usuario reconecta con
     # otra cuenta de Google, un id de la cuenta anterior haría que el próximo
@@ -915,4 +947,12 @@ def disconnect_drive(current_user: user_dep, db: db_dep):
     tenant.google_drive_images_file_id = None
     tenant.backup_auto_enabled         = False
     db.commit()
+
+    # Desprogramar los jobs del scheduler: sin esto quedaban registrados en
+    # APScheduler tras el disconnect (no-op por la guarda de _run_backup_for_tenant,
+    # pero despertándose al pedo cada N horas hasta el próximo reinicio). Con
+    # backup_auto_enabled=False, reload_tenant_jobs simplemente los remueve.
+    from app.database_manager.scheduler import reload_tenant_jobs
+    reload_tenant_jobs(tenant)
+
     return {"message": "Google Drive desconectado."}
