@@ -14,7 +14,6 @@ import {
   Divider,
   Empty,
   Tooltip,
-  Badge,
   Descriptions,
   theme,
   Modal, // <-- Añadido para confirmaciones y edición
@@ -22,6 +21,7 @@ import {
   Input, // <-- Añadido
   InputNumber, // <-- Añadido
   Avatar,
+  Image,
 } from 'antd';
 import {
   PlusOutlined,
@@ -33,12 +33,16 @@ import {
   EditOutlined,
   PictureOutlined,
   MinusCircleOutlined,
+  CheckCircleOutlined,
+  CloseCircleOutlined,
+  SearchOutlined,
 } from '@ant-design/icons';
 import { Statistic } from 'antd';
 import { AddItemModal } from '../components/AddItemModal';
 // IMPORTAMOS TUS NUEVOS HOOKS
 import { useUpdateItem, useDeleteItem } from '../hooks/useItems';
 import { useRemoveItemFromCatalogo } from '../hooks/useCatalogos';
+import { useInventories } from '../hooks/useInventory';
 import { useAuthContext } from '../context/AuthContext';
 import { urlImagen } from '../api/axios.config';
 
@@ -48,9 +52,35 @@ const CatalogosPage: React.FC = () => {
   const { id } = useParams();
   const catalogoId = Number(id);
   const { token } = theme.useToken();
+
+  // Render de un valor de atributo para mostrar (tarjeta y panel de detalle).
+  // - Vacío (null/undefined/'') → guión. El chequeo es explícito, NO falsy: un
+  //   `0` o un `false` NO se ocultan (se muestran igual).
+  // - Casilla (boolean) → ícono ✓/✗ en vez de "true"/"false". Se infiere por el
+  //   valor porque acá no hay mapa de tipos de atributos (los items pueden venir
+  //   de distintos inventarios). Las fechas quedan como texto por el mismo motivo.
+  const renderValorAtributo = (value: any): React.ReactNode => {
+    if (value === undefined || value === null || value === '') {
+      return <Text type="secondary">—</Text>;
+    }
+    if (typeof value === 'boolean' || value === 'true' || value === 'false') {
+      const esVerdadero = value === true || String(value).toLowerCase() === 'true';
+      return esVerdadero
+        ? <CheckCircleOutlined style={{ color: token.colorSuccess }} />
+        : <CloseCircleOutlined style={{ color: token.colorError }} />;
+    }
+    return String(value);
+  };
+
   const { data, isLoading, error } = useCatalogo(catalogoId);
+  // Los items del catálogo solo traen inventario_id (no el nombre). Traemos la
+  // lista de inventarios para poder mostrar el nombre en el panel de detalle.
+  const { data: inventarios } = useInventories();
+  const nombreInventario = (invId: number | null | undefined) =>
+    inventarios?.find((inv) => inv.id === invId)?.nombre;
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   
   // ESTADOS PARA EDICIÓN DE ATRIBUTOS
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -74,7 +104,18 @@ const CatalogosPage: React.FC = () => {
   
   const currentItemIds = data?.items.map((i: any) => i.id) || [];
   const selectedItem = data?.items.find((i: any) => i.id === selectedItemId);
-  const hasItems = data?.items && data.items.length > 0;
+  // Filtrado por nombre, id, o por atributo: matchea tanto el NOMBRE del
+  // atributo (ej. "color" → los que tienen ese atributo) como su VALOR
+  // (ej. "rojo" → los que valen rojo). Todo client-side sobre los items ya
+  // cargados en el catálogo.
+  const itemsFiltrados = (data?.items || []).filter((item: any) => {
+    const q = searchTerm.trim().toLowerCase();
+    if (!q) return true;
+    if (item.nombre?.toLowerCase().includes(q) || String(item.id).includes(q)) return true;
+    return Object.entries(item.atributos || {}).some(([key, value]) =>
+      key.toLowerCase().includes(q) || String(value ?? '').toLowerCase().includes(q)
+    );
+  });
 
   // CONTROLADOR PARA BORRADO PERMANENTE (DELETE /items/{id})
   // OJO: esto NO es "dar de baja", borra el registro del sistema entero.
@@ -103,7 +144,7 @@ const CatalogosPage: React.FC = () => {
       title: '¿Quitar este artículo del catálogo?',
       okText: 'Sí, quitar del catálogo',
       cancelText: 'Cancelar',
-      content: `El artículo "${item.nombre}" se desvincula de este catálogo, pero SIGUE existiendo en el inventario #${item.inventario_id} con su stock intacto. Podés volver a agregarlo cuando quieras.`,
+      content: `El artículo "${item.nombre}" se desvincula de este catálogo, pero SIGUE existiendo en el inventario #${item.inventario_id} con su cantidad intacta. Podés volver a agregarlo cuando quieras.`,
       onOk: async () => {
         await removeFromCatalogoMutation.mutateAsync(item.id);
         setSelectedItemId(null); // Limpiamos la selección del panel lateral
@@ -179,22 +220,30 @@ const CatalogosPage: React.FC = () => {
               valueStyle={{ fontSize: '20px', fontWeight: 'bold' }}
             />
           </Space>
-          {canLinkItems && (
-            <Space>
-              <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)}>
-                Nuevo Artículo
-              </Button>
-            </Space>
-          )}
+          <Space>
+            <Input
+              placeholder="Buscar por nombre, id o atributo..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              prefix={<SearchOutlined />}
+              allowClear
+              style={{ width: 300 }}
+            />
+            {canLinkItems && (
+              <Tooltip title="Nuevo Artículo">
+                <Button type="primary" icon={<PlusOutlined />} onClick={() => setIsModalOpen(true)} />
+              </Tooltip>
+            )}
+          </Space>
         </div>
       </Card>
 
       <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
         {/* GRILLA DE ITEMS */}
-        <div style={{ flex: 1, overflowY: 'auto', paddingRight: 12 }}>
-          {hasItems ? (
+        <div style={{ flex: 1, overflowY: 'auto', paddingRight: 12, scrollbarWidth: 'thin', scrollbarColor: `${token.colorTextTertiary} transparent` }}>
+          {itemsFiltrados.length > 0 ? (
             <Row gutter={[16, 16]}>
-              {data?.items.map((item: any) => {
+              {itemsFiltrados.map((item: any) => {
                 const isFromInventory = item.inventario_id !== null;
                 const attributes = Object.entries(item.atributos || {}).slice(0, 2);
                 const isSelected = selectedItemId === item.id;
@@ -271,7 +320,7 @@ const CatalogosPage: React.FC = () => {
                             overflow: 'hidden',
                             textOverflow: 'ellipsis'
                           }}>
-                            <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase' }}>{key}:</Text> {String(value)}
+                            <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase' }}>{key}:</Text> {renderValorAtributo(value)}
                           </div>
                         ))}
 
@@ -286,7 +335,7 @@ const CatalogosPage: React.FC = () => {
                       <Divider style={{ margin: '8px 0' }} />
                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Text strong style={{ color: item.cantidad < 10 ? token.colorError : token.colorSuccess }}>
-                          Stock: {item.cantidad}
+                          Cantidad: {item.cantidad}
                         </Text>
                       </div>
                     </Card>
@@ -295,7 +344,7 @@ const CatalogosPage: React.FC = () => {
               })}
             </Row>
           ) : (
-            <Empty description="No hay artículos" />
+            <Empty description={searchTerm ? "No se encontraron artículos" : "No hay artículos"} />
           )}
         </div>
 
@@ -314,7 +363,9 @@ const CatalogosPage: React.FC = () => {
               <div style={{ padding: '20px', display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div style={{ maxWidth: '80%' }}>
                   <Tag color={selectedItem.inventario_id ? "geekblue" : "orange"}>
-                    {selectedItem.inventario_id ? `REGISTRO DE INVENTARIO #${selectedItem.inventario_id}` : "ARTÍCULO INDEPENDIENTE"}
+                    {selectedItem.inventario_id
+                      ? `Perteneciente al Inventario #${selectedItem.inventario_id}${nombreInventario(selectedItem.inventario_id) ? ` - ${nombreInventario(selectedItem.inventario_id)}` : ''}`
+                      : "ARTÍCULO INDEPENDIENTE"}
                   </Tag>
                   <Title level={4} style={{ marginTop: 8, marginBottom: 0 }}>{selectedItem.nombre}</Title>
                 </div>
@@ -323,12 +374,16 @@ const CatalogosPage: React.FC = () => {
 
               <Divider style={{ margin: 0 }} />
 
-              <div style={{ flex: 1, overflowY: 'auto', padding: '20px' }}>
+              <div style={{ flex: 1, overflowY: 'auto', padding: '20px', scrollbarWidth: 'thin', scrollbarColor: `${token.colorTextTertiary} transparent` }}>
                 {selectedItem.imagen ? (
-                  <img
+                  <Image
                     src={urlImagen(selectedItem.imagen)}
                     alt={selectedItem.nombre}
-                    style={{ width: '100%', maxHeight: 260, objectFit: 'contain', borderRadius: token.borderRadiusLG, marginBottom: 20, backgroundColor: token.colorFillAlter }}
+                    // Ant <Image> trae preview integrado: click → lightbox a
+                    // pantalla completa con zoom/rotar. wrapperStyle hace que el
+                    // contenedor sea block a todo el ancho (como el <img> anterior).
+                    wrapperStyle={{ width: '100%', marginBottom: 20 }}
+                    style={{ width: '100%', maxHeight: 260, objectFit: 'contain', borderRadius: token.borderRadiusLG, backgroundColor: token.colorFillAlter, cursor: 'zoom-in' }}
                   />
                 ) : (
                   <div style={{
@@ -339,27 +394,17 @@ const CatalogosPage: React.FC = () => {
                     <Avatar size={48} icon={<PictureOutlined />} style={{ backgroundColor: 'transparent', color: token.colorTextQuaternary }} />
                   </div>
                 )}
-                <Descriptions title="Ficha Técnica" column={1} bordered size="small">
+                <Descriptions title="Características" column={1} bordered size="small" contentStyle={{ textAlign: 'center' }}>
                   <Descriptions.Item label="ID de Sistema">{selectedItem.id}</Descriptions.Item>
-                  <Descriptions.Item label="Stock Actual">
-                    <Badge status={selectedItem.cantidad > 0 ? "success" : "error"} text={`${selectedItem.cantidad} unidades`} />
+                  <Descriptions.Item label="Cantidad">
+                    {selectedItem.cantidad} unidades
                   </Descriptions.Item>
                   {Object.entries(selectedItem.atributos).map(([key, value]: any) => (
                     <Descriptions.Item key={key} label={key}>
-                      {String(value)}
+                      {renderValorAtributo(value)}
                     </Descriptions.Item>
                   ))}
                 </Descriptions>
-
-                {selectedItem.inventario_id && (
-                  <Alert
-                    style={{ marginTop: 20 }}
-                    message="Ítem Vinculado"
-                    description="Este ítem pertenece a un inventario físico."
-                    type="info"
-                    showIcon
-                  />
-                )}
               </div>
 
               {/* FOOTER DEL ACCIONES LATERALES — solo si el usuario tiene al
@@ -446,7 +491,7 @@ const CatalogosPage: React.FC = () => {
             <Input />
           </Form.Item>
           
-          <Form.Item name="cantidad" label="Stock / Cantidad" rules={[{ required: true, message: 'Ingrese la cantidad' }]}>
+          <Form.Item name="cantidad" label="Cantidad" rules={[{ required: true, message: 'Ingrese la cantidad' }]}>
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
 

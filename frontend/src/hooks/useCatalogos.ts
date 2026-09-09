@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { catalogosService } from '../api/catalogos.service';
-import { notification } from 'antd';
+import { notification, message } from 'antd';
 import axios from 'axios';
 import { itemsService } from '../api/item.service';
 
@@ -76,7 +76,9 @@ export const useAddItemsToCatalogo = (catalogoId: number) => {
     onSuccess: () => {
       // Importante: invalidamos la query del catálogo específico para ver los cambios
       queryClient.invalidateQueries({ queryKey: ['catalogo', catalogoId] });
-      notification.success({ message: 'Ítems vinculados al catálogo' });
+      // message (arriba al centro), igual que la confirmación de editar
+      // artículo (useItems), en vez de notification (arriba a la derecha).
+      message.success('Ítems vinculados al catálogo');
     },
     onError: (error: any) => {
       notification.error({
@@ -95,10 +97,8 @@ export const useRemoveItemFromCatalogo = (catalogoId: number) => {
     onSuccess: () => {
       // Refrescamos el catálogo para que el ítem desaparezca de la lista
       queryClient.invalidateQueries({ queryKey: ['catalogo', catalogoId] });
-      notification.success({
-        message: 'Ítem quitado',
-        description: 'El artículo se desvinculó del catálogo correctamente.'
-      });
+      // message (arriba al centro), igual que la confirmación de vincular/editar.
+      message.success('Ítem quitado del catálogo');
     },
     onError: (error: any) => {
       notification.error({

@@ -72,7 +72,7 @@ export const AddItemModal: React.FC<Props> = ({ catalogoId, open, onClose, items
             key: 'inv',
             render: (id) => <Tag color="blue">Inv #{id}</Tag>
           },
-          { title: 'Stock', dataIndex: 'cantidad', key: 'qty' },
+          { title: 'Cantidad', dataIndex: 'cantidad', key: 'qty' },
         ]}
       />
     </Modal>
