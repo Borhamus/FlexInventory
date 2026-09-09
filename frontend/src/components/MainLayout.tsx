@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Button, Typography, Spin, Switch } from 'antd';
+import { Layout, Typography, Spin, Switch } from 'antd';
 import {
   LogoutOutlined,
   DashboardOutlined,
@@ -151,14 +151,15 @@ const MainLayout: React.FC = () => {
             />
           </div>
 
-          {/* Salir — siempre visible */}
-          <div className="logout-btn-rail" style={{ textAlign: 'center' }}>
-            <Button
-              type="text"
-              icon={<LogoutOutlined style={{ color: 'rgba(255,255,255,0.7)', fontSize: '24px' }} />}
-              onClick={logout}
-              style={{ height: 'auto', padding: '10px' }}
-            />
+          {/* Salir — siempre visible. Todo el contenedor es clickeable (icono +
+              texto) y tiene un único hover (.logout-btn-rail); se sacó el
+              <Button> interno para no tener un segundo hover encima. */}
+          <div
+            className="logout-btn-rail"
+            onClick={() => { logout(); navigate('/login'); }}
+            style={{ textAlign: 'center', cursor: 'pointer', padding: '10px' }}
+          >
+            <LogoutOutlined style={{ color: 'rgba(255,255,255,0.7)', fontSize: '24px' }} />
             <div style={{ marginTop: 4 }}>
               <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px' }}>SALIR</Text>
             </div>

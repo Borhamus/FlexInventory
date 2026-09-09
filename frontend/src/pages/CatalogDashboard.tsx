@@ -21,7 +21,11 @@ import { Modal as AntModal } from 'antd';
 const { Title, Text } = Typography;
 
 const CatalogoEmojiAvatar = ({ catalogoId }: { catalogoId: number }) => {
-  const [emoji, setEmoji] = useEmojiPreference(`flexinv_emoji_catalogo_${catalogoId}`);
+  // Namespaced por tenant: los ids de catálogo se repiten entre tenants, así que
+  // sin el tenant en la clave el emoji se filtraba de un tenant a otro en el
+  // mismo navegador.
+  const { user } = useAuthContext();
+  const [emoji, setEmoji] = useEmojiPreference(`flexinv_emoji_catalogo_${user?.tenant_id ?? 'anon'}_${catalogoId}`);
   return (
     <EmojiPicker value={emoji} onChange={setEmoji}>
       <Avatar

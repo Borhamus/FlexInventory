@@ -160,7 +160,7 @@ const StatCard: React.FC<StatCardProps> = ({
 
 const DashboardPage: React.FC = () => {
   const { token }  = theme.useToken();
-  const { isTenant } = useAuthContext();
+  const { isTenant, user } = useAuthContext();
 
   const navigate   = useNavigate();
 
@@ -212,7 +212,10 @@ const DashboardPage: React.FC = () => {
   const hora   = dayjs().hour();
   const saludo = hora < 12 ? 'Buenos días' : hora < 20 ? 'Buenas tardes' : 'Buenas noches';
   const inicial = stats?.username?.charAt(0).toUpperCase();
-  const [avatarEmoji, setAvatarEmoji] = useEmojiPreference('flexinv_emoji_avatar');
+  // Clave namespaced por usuario: sin esto el emoji quedaba en una clave global
+  // de localStorage y se filtraba al siguiente usuario que entraba en el mismo
+  // navegador.
+  const [avatarEmoji, setAvatarEmoji] = useEmojiPreference(`flexinv_emoji_avatar_${user?.id ?? 'anon'}`);
 
   return (
     <div style={{

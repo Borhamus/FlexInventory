@@ -37,7 +37,7 @@ export const useAuth = () => {
         description: 'Tu cuenta fue creada correctamente. Ahora podés iniciar sesión.',
         placement: 'topRight',
       });
-      navigate('/');
+      navigate('/login');
     },
     onError: (error: AxiosError<{ detail: string }>) => {
       notification.error({

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Popover, Button, theme as antdTheme } from 'antd';
 import EmojiPickerReact, { EmojiStyle, Theme } from 'emoji-picker-react';
 import { useTheme } from '../context/ThemeContext';
@@ -11,6 +11,17 @@ export function useEmojiPreference(key: string): [string | null, (e: string | nu
       return null;
     }
   });
+
+  // Re-leer si cambia la clave (p. ej. cambia el usuario logueado): la clave
+  // ahora incluye el id del usuario/tenant, así que un valor no se "pega" del
+  // usuario anterior en el mismo navegador.
+  useEffect(() => {
+    try {
+      setEmoji(localStorage.getItem(key) || null);
+    } catch {
+      setEmoji(null);
+    }
+  }, [key]);
 
   const update = (nuevo: string | null) => {
     setEmoji(nuevo);

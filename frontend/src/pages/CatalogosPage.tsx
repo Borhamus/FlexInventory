@@ -22,6 +22,7 @@ import {
   InputNumber, // <-- Añadido
   Avatar,
   Image,
+  Switch,
 } from 'antd';
 import {
   PlusOutlined,
@@ -36,6 +37,7 @@ import {
   CheckCircleOutlined,
   CloseCircleOutlined,
   SearchOutlined,
+  CheckOutlined,
 } from '@ant-design/icons';
 import { Statistic } from 'antd';
 import { AddItemModal } from '../components/AddItemModal';
@@ -153,12 +155,25 @@ const CatalogosPage: React.FC = () => {
   };
 
   // CONTROLADOR PARA ABRIR MODAL EDICIÓN CON VALORES PREVIOS
+  // Tipos de atributos del inventario al que pertenece el item (para saber
+  // cuáles son boolean y renderizarlos como Switch en la edición).
+  const tiposAtributosItem: Record<string, string> =
+    inventarios?.find((inv) => inv.id === selectedItem?.inventario_id)?.atributos ?? {};
+
   const openEditModal = () => {
     if (!selectedItem) return;
+    // Coaccionar los boolean a booleano real: el Switch (valuePropName=checked)
+    // necesita true/false, no el string "true"/"false".
+    const atributosForm: Record<string, any> = {};
+    Object.entries(selectedItem.atributos).forEach(([k, v]) => {
+      atributosForm[k] = tiposAtributosItem[k] === 'boolean'
+        ? (v === true || String(v).toLowerCase() === 'true')
+        : v;
+    });
     form.setFieldsValue({
       nombre: selectedItem.nombre,
       cantidad: selectedItem.cantidad,
-      ...selectedItem.atributos // Carga dinámica de los atributos JSON
+      ...atributosForm,
     });
     setIsEditModalOpen(true);
   };
@@ -499,11 +514,21 @@ const CatalogosPage: React.FC = () => {
           {selectedItem && Object.keys(selectedItem.atributos || {}).length > 0 && (
             <>
               <Divider style={{ fontSize: 12, margin: '12px 0' }}>Atributos específicos</Divider>
-              {Object.keys(selectedItem.atributos).map((key) => (
-                <Form.Item key={key} name={key} label={key.toUpperCase()}>
-                  <Input />
-                </Form.Item>
-              ))}
+              {Object.keys(selectedItem.atributos).map((key) => {
+                const esBool = tiposAtributosItem[key] === 'boolean';
+                return (
+                  <Form.Item
+                    key={key}
+                    name={key}
+                    label={key.toUpperCase()}
+                    valuePropName={esBool ? 'checked' : 'value'}
+                  >
+                    {esBool
+                      ? <Switch checkedChildren={<CheckOutlined />} unCheckedChildren={<CloseOutlined />} />
+                      : <Input />}
+                  </Form.Item>
+                );
+              })}
             </>
           )}
         </Form>
