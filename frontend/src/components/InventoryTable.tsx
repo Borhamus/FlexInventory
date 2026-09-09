@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { Table, Tag, Button, Space, Popconfirm, Avatar, Typography } from 'antd';
-import { EditOutlined, DeleteOutlined, PictureOutlined } from '@ant-design/icons';
+import { Table, Button, Space, Popconfirm, Typography, Image, theme } from 'antd';
+import { EditOutlined, DeleteOutlined, PictureOutlined, EyeOutlined, CheckCircleOutlined, CloseCircleOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useAuthContext } from '../context/AuthContext';
 import { urlImagen } from '../api/axios.config';
@@ -189,6 +189,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   onSortChange,
 }) => {
   const { hasPermission, isTenant } = useAuthContext();
+  const { token } = theme.useToken();
 
 
   const canEditItems   = isTenant || hasPermission('items', 'update');
@@ -242,7 +243,27 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     if (fotosHabilitadas) {
       cols.push({
         title: 'Foto', dataIndex: 'imagen', key: 'imagen', width: 70, align: 'center',
-        render: (imagen: string | null) => <Avatar shape="square" icon={<PictureOutlined />} src={urlImagen(imagen)} />,
+        // Sin padding en la celda para que la foto llene todo el cuadrado
+        // (ancho de columna × alto de fila). aspectRatio:1 la mantiene cuadrada
+        // aunque se redimensione la columna; objectFit:cover recorta para llenar.
+        onCell: () => ({ style: { padding: 0 } }),
+        // Con foto: cuadrado clickeable que abre el preview a pantalla completa
+        // (Ant <Image>). Sin foto: placeholder que ocupa el mismo cuadrado.
+        render: (imagen: string | null) => imagen ? (
+          <Image
+            src={urlImagen(imagen)}
+            wrapperStyle={{ display: 'block', width: '100%' }}
+            style={{ display: 'block', width: '100%', aspectRatio: '1 / 1', objectFit: 'cover' }}
+            preview={{ mask: <EyeOutlined /> }}
+          />
+        ) : (
+          <div style={{
+            width: '100%', aspectRatio: '1 / 1', display: 'flex',
+            alignItems: 'center', justifyContent: 'center', color: '#bfbfbf',
+          }}>
+            <PictureOutlined style={{ fontSize: 20 }} />
+          </div>
+        ),
       });
     }
 
@@ -266,7 +287,9 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
             }
             if (tipoAtributo === 'boolean' || typeof value === 'boolean' || value === 'true' || value === 'false') {
               const esVerdadero = value === true || String(value).toLowerCase() === 'true';
-              return <Tag color={esVerdadero ? 'green' : 'red'}>{esVerdadero ? 'Sí' : 'No'}</Tag>;
+              return esVerdadero
+                ? <CheckCircleOutlined style={{ color: token.colorSuccess }} />
+                : <CloseCircleOutlined style={{ color: token.colorError }} />;
             }
             if (tipoAtributo === 'date') {
               const fecha = dayjs(value);
@@ -408,7 +431,12 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       itemsAFiltrar = itemsAFiltrar.filter((item: any) => {
         const matchNombre = item.nombre?.toLowerCase().includes(lowerSearch);
         const matchId = item.id?.toString().includes(lowerSearch);
-        return matchNombre || matchId;
+        if (matchNombre || matchId) return true;
+        // También por atributo: matchea el NOMBRE del atributo (ej. "color")
+        // o su VALOR (ej. "rojo"). Mismo criterio que la búsqueda de catálogos.
+        return Object.entries(item.atributos || {}).some(([key, value]) =>
+          key.toLowerCase().includes(lowerSearch) || String(value ?? '').toLowerCase().includes(lowerSearch)
+        );
       });
     }
     return preserveOrder ? itemsAFiltrar : [...itemsAFiltrar].sort((a: any, b: any) => a.id - b.id);

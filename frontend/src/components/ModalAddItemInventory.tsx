@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Modal, Form, Input, InputNumber, message, Switch, DatePicker, Select, Upload, Button, Avatar, Space } from 'antd';
 import type { UploadProps } from 'antd';
-import { UploadOutlined, DeleteOutlined, PictureOutlined } from '@ant-design/icons';
+import { UploadOutlined, DeleteOutlined, PictureOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useCreateItem, useUploadItemImage } from '../hooks/useInventory';
 import dayjs from 'dayjs';
 
@@ -60,7 +60,7 @@ export const ModalAddItemInventory: React.FC<Props> = ({
       case 'float':
         return <InputNumber step={0.1} style={{ width: '100%' }} />;
       case 'boolean':
-        return <Switch checkedChildren="Sí" unCheckedChildren="No" />;
+        return <Switch checkedChildren={<CheckOutlined />} unCheckedChildren={<CloseOutlined />} />;
       case 'date':
         return <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />;
       case 'list':
@@ -182,11 +182,14 @@ export const ModalAddItemInventory: React.FC<Props> = ({
         {listaAtributos.map(([nombreAtributo, tipoAtributo]) => (
           <Form.Item
             key={nombreAtributo}
-            name={['atributos', nombreAtributo]} 
-            label={`Atributo: ${nombreAtributo}`}
+            name={['atributos', nombreAtributo]}
+            label={nombreAtributo}
             valuePropName={tipoAtributo === 'boolean' ? 'checked' : 'value'}
             initialValue={tipoAtributo === 'boolean' ? false : undefined}
-            rules={[]}
+            // Obligatorios, igual que nombre/cantidad (el backend también los
+            // exige). Los booleanos (Switch) no llevan required: siempre tienen
+            // valor Sí/No y un required forzaría "Sí".
+            rules={tipoAtributo === 'boolean' ? [] : [{ required: true, message: 'Campo obligatorio' }]}
           >
             {renderizarInput(tipoAtributo)} 
           </Form.Item>

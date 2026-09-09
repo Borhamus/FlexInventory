@@ -231,10 +231,10 @@ const InventoryPage: React.FC = () => {
         </Space>
 
         {/* BARRA DE HERRAMIENTAS SUPERIOR */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16, marginTop: 10 }}>
-          <div style={{ flex: 1, display: 'flex', justifyContent: 'flex-start', gap: 16 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-start', alignItems: 'center', gap: 16, marginBottom: 16, marginTop: 10 }}>
+          <div style={{ display: 'flex', justifyContent: 'flex-start', gap: 16 }}>
             <Input
-              placeholder="Buscar artículo..."
+              placeholder="Buscar por nombre, id o atributo..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               prefix={<SearchOutlined />}
@@ -357,27 +357,29 @@ const InventoryPage: React.FC = () => {
               </Tooltip>
             )}
           </div>
-        </div>
 
-        {/* ACCIONES MASIVAS */}
-        {selectedRowKeys.length > 0 && (
-          <div style={{
-            padding:         '16px',
-            marginBottom:    '16px',
-            display:         'flex',
-            justifyContent:  'space-between',
-            alignItems:      'center',
-            background:      token.colorFillAlter,
-            borderRadius:    token.borderRadiusLG,
-            border:          `1px solid ${token.colorBorderSecondary}`,
-          }}>
-            <span>Seleccionaste <b>{selectedRowKeys.length}</b> artículos.</span>
+          {/* ACCIONES MASIVAS — misma fila que la barra, ocupa el ancho libre a la derecha */}
+          {selectedRowKeys.length > 0 && (
+            <div style={{
+              flex:            1,
+              // Misma altura que los controles de la fila (Input/botones) y sin
+              // borde: así aparecer/desaparecer al seleccionar NO cambia la
+              // altura de la fila ni empuja la tabla hacia abajo.
+              height:          token.controlHeight,
+              padding:         '0 12px',
+              display:         'flex',
+              justifyContent:  'space-between',
+              alignItems:      'center',
+              background:      token.colorFillAlter,
+              borderRadius:    token.borderRadiusLG,
+            }}>
+              <span>Seleccionaste <b>{selectedRowKeys.length}</b> artículos.</span>
             <Space>
 
               {/* BOTON EDICION MASIVA*/}
               {canEditItems && (
                 <Button type="default" onClick={() => setIsBulkModalVisible(true)}>
-                  Editar Atributo Masivamente
+                  Editar Atributos
                 </Button>
               )}
 
@@ -403,7 +405,8 @@ const InventoryPage: React.FC = () => {
               )}
             </Space>
           </div>
-        )}
+          )}
+        </div>
 
         {/* LLAMAMOS AL COMPONENTE DE LA TABLA */}
         <InventoryTable
