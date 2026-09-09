@@ -28,6 +28,14 @@ interface InventoryTableProps {
   // layout, así que las columnas vuelven a su orden/ancho de fábrica en
   // cada visita.
   inventoryId?: number;
+  // Ordenamiento controlado por click en el encabezado (issue #36). El orden
+  // lo resuelve el backend (GET /items/ con sort_by/order): la tabla solo
+  // refleja el estado y avisa los cambios hacia arriba con onSortChange. Las
+  // claves de columna coinciden con los sort_by válidos (id, nombre, cantidad,
+  // creado_en, y el nombre de cada atributo).
+  sortBy?: string;
+  order?: 'asc' | 'desc';
+  onSortChange?: (sortBy: string | undefined, order: 'asc' | 'desc') => void;
 }
 
 // Columnas que NUNCA se reordenan ni se redimensionan a mano: "id" siempre
@@ -176,6 +184,9 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   preserveOrder = false,
   fotosHabilitadas = false,
   inventoryId,
+  sortBy,
+  order = 'asc',
+  onSortChange,
 }) => {
   const { hasPermission, isTenant } = useAuthContext();
 
@@ -225,7 +236,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     if (!items) return [];
 
     const cols: any[] = [
-      { title: 'ID', dataIndex: 'id', key: 'id', width: 70, align: 'center' },
+      { title: 'ID', dataIndex: 'id', key: 'id', width: 70, align: 'center', sorter: true },
     ];
 
     if (fotosHabilitadas) {
@@ -236,8 +247,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     }
 
     cols.push(
-      { title: 'Nombre', dataIndex: 'nombre', key: 'nombre', align: 'center' },
-      { title: 'Cantidad', dataIndex: 'cantidad', key: 'cantidad', align: 'center' },
+      { title: 'Nombre', dataIndex: 'nombre', key: 'nombre', align: 'center', sorter: true },
+      { title: 'Cantidad', dataIndex: 'cantidad', key: 'cantidad', align: 'center', sorter: true },
     );
 
     if (atributos) {
@@ -248,6 +259,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
           dataIndex: ['atributos', key],
           key: key,
           align: 'center',
+          sorter: true,
           render: (value: any) => {
             if (value === undefined || value === null || value === '') {
               return CELDA_VACIA;
@@ -271,6 +283,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       dataIndex: 'creado_en',
       key: 'creado_en',
       align: 'center',
+      sorter: true,
       render: (date: string) => dayjs(date).format('DD/MM/YYYY HH:mm'),
     });
 
@@ -364,9 +377,16 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
             },
           };
 
+      // Orden controlado: si esta columna es la que está ordenada, reflejar
+      // la flecha; el orden real lo hace el backend (sorter: true = server-side).
+      const sortOrder = col.sorter && sortBy === clave
+        ? (order === 'asc' ? 'ascend' : 'descend')
+        : null;
+
       return {
         ...col,
         width: anchoActual,
+        sortOrder,
         onHeaderCell: () => ({
           width: anchoActual,
           onResize: esFija
@@ -377,7 +397,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
         }),
       };
     });
-  }, [baseColumns, columnOrder, columnWidths, dragOverKey]);
+  }, [baseColumns, columnOrder, columnWidths, dragOverKey, sortBy, order]);
 
   const filteredItems = useMemo(() => {
     if (!items) return [];
@@ -410,6 +430,17 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       bordered
       tableLayout="fixed"
       components={{ header: { cell: TituloColumna } }}
+      // Click en el encabezado → ordenar. Ant cicla ascend → descend → sin
+      // orden; mapeamos eso al estado sortBy/order del padre, que dispara la
+      // query ordenada al backend.
+      onChange={(_pagination: any, _filters: any, sorterInfo: any) => {
+        const s = Array.isArray(sorterInfo) ? sorterInfo[0] : sorterInfo;
+        if (s && s.order) {
+          onSortChange?.(s.columnKey as string, s.order === 'ascend' ? 'asc' : 'desc');
+        } else {
+          onSortChange?.(undefined, 'asc');
+        }
+      }}
       pagination={{
         pageSize,
         showSizeChanger: true,

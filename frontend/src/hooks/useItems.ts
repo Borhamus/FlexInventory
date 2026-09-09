@@ -1,5 +1,5 @@
 // hooks/useItems.ts
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { itemsService } from '../api/item.service';
 import type { ItemsOrdenFiltro } from '../api/item.service';
 import { message } from 'antd';
@@ -13,7 +13,14 @@ export const useItems = (inventarioId?: number, ordenFiltro: ItemsOrdenFiltro = 
   return useQuery({
     queryKey: ['items', inventarioId, ordenFiltro],
     queryFn: () => itemsService.getItems(inventarioId, ordenFiltro),
-    initialData: [],
+    // placeholderData: mantiene los datos de la query anterior mientras se
+    // hace el fetch del nuevo orden/filtro, para que la tabla no se vacíe
+    // entre medio (el queryKey cambia con `ordenFiltro`, así que cada orden
+    // es una query distinta). Se quitó `initialData: []`: populaba cada key
+    // nueva con [] y hacía parpadear la tabla vacía, y además anulaba el
+    // keepPreviousData. Los consumidores (AddItemModal, DashboardPage)
+    // destructuran `data = []`, así que toleran el undefined inicial.
+    placeholderData: keepPreviousData,
     enabled,
   });
 };

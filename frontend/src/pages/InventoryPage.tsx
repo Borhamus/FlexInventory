@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Alert, Spin, Tag, Typography, Button, Space, Popconfirm, message, Input, Result, Popover, Checkbox, Divider, Tooltip, Select, DatePicker, theme } from 'antd';
 import type { Dayjs } from 'dayjs';
-import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ControlOutlined, BarChartOutlined, SortAscendingOutlined } from '@ant-design/icons';
+import { PlusOutlined, EditOutlined, DeleteOutlined, SearchOutlined, ControlOutlined, BarChartOutlined, FilterOutlined } from '@ant-design/icons';
 import { useInventory, useDeleteInventory, useDeleteItem } from '../hooks/useInventory';
 import { useAuthContext } from '../context/AuthContext';
 
@@ -143,7 +143,12 @@ const InventoryPage: React.FC = () => {
     { sortBy, order, filtroAtributo, filtroDesde, filtroHasta },
     ordenFiltroActivo
   );
-  const itemsParaTabla = ordenFiltroActivo ? itemsOrdenados : (data?.items || []);
+  // Mientras la primera query de orden/filtro está en vuelo, itemsOrdenados es
+  // undefined: caemos a los items embebidos (sin ordenar) en vez de vaciar la
+  // tabla. `??` respeta un resultado vacío legítimo (filtro que no matchea
+  // nada devuelve [], no undefined). Los cambios de orden posteriores no
+  // vacían nada gracias a placeholderData: keepPreviousData en useItems.
+  const itemsParaTabla = ordenFiltroActivo ? (itemsOrdenados ?? (data?.items || [])) : (data?.items || []);
 
   // El campo elegido para filtrar puede ser una columna nativa o un atributo
   // del inventario — se busca primero entre las nativas, que tienen prioridad
@@ -297,31 +302,14 @@ const InventoryPage: React.FC = () => {
               </Tooltip>
             </Popover>
             <Popover
-              title="Ordenar y filtrar"
+              title="Filtrar"
               trigger="click"
               placement="right"
               content={
                 <div style={{ display: 'flex', flexDirection: 'column', gap: 8, width: 300 }}>
-                  <Text strong style={{ fontSize: 12 }}>Ordenar por</Text>
-                  <div style={{ display: 'flex', gap: 8 }}>
-                    <Select
-                      allowClear
-                      placeholder="Sin ordenar"
-                      style={{ flex: 1 }}
-                      value={sortBy}
-                      onChange={(v) => setSortBy(v)}
-                      getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
-                      options={opcionesOrdenFiltro(COLUMNAS_NATIVAS, data?.atributos || {})}
-                    />
-                    <Select
-                      style={{ width: 90 }}
-                      value={order}
-                      onChange={setOrder}
-                      disabled={!sortBy}
-                      getPopupContainer={(trigger) => trigger.parentElement as HTMLElement}
-                      options={[{ value: 'asc', label: 'Asc' }, { value: 'desc', label: 'Desc' }]}
-                    />
-                  </div>
+                  <Text type="secondary" style={{ fontSize: 12 }}>
+                    Para ordenar, hacé click en el nombre de la columna en la tabla.
+                  </Text>
 
                   <Divider style={{ margin: '4px 0' }} />
 
@@ -353,14 +341,14 @@ const InventoryPage: React.FC = () => {
 
                   {hayAlgoQueLimpiar && (
                     <Button size="small" onClick={limpiarOrdenFiltro} style={{ marginTop: 4 }}>
-                      Limpiar orden y filtro
+                      Limpiar
                     </Button>
                   )}
                 </div>
               }
             >
-              <Tooltip title="Ordenar / filtrar">
-                <Button icon={<SortAscendingOutlined />} loading={ordenFiltroActivo && isFetchingOrden} />
+              <Tooltip title="Filtrar">
+                <Button icon={<FilterOutlined />} loading={ordenFiltroActivo && isFetchingOrden} />
               </Tooltip>
             </Popover>
             {canAddItems && (
@@ -430,6 +418,9 @@ const InventoryPage: React.FC = () => {
           preserveOrder={ordenFiltroActivo}
           fotosHabilitadas={data?.fotos_habilitadas}
           inventoryId={Number(id)}
+          sortBy={sortBy}
+          order={order}
+          onSortChange={(nuevoSortBy, nuevoOrder) => { setSortBy(nuevoSortBy); setOrder(nuevoOrder); }}
         />
 
       </div>
