@@ -4,6 +4,7 @@ import type { UploadProps } from 'antd';
 import { UploadOutlined, DeleteOutlined, PictureOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import { useUpdateItem, useUploadItemImage, useDeleteItemImage } from '../hooks/useInventory';
+import { normalizarImagenCuadrada } from '../utils/normalizarImagenCuadrada';
 import { urlImagen } from '../api/axios.config';
 
 interface Props {
@@ -40,8 +41,8 @@ export const ModalEditItemInventory: React.FC<Props> = ({
       if (open) setImagenActual(item?.imagen);
     }, [open, item]);
 
-    const handleSubirImagen: UploadProps['customRequest'] = (options) => {
-      const archivo = options.file as File;
+    const handleSubirImagen: UploadProps['customRequest'] = async (options) => {
+      const archivo = await normalizarImagenCuadrada(options.file as File);
       subirImagen(
         { id: item.id, archivo },
         {

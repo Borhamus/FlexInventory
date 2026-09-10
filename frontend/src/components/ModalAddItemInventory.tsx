@@ -3,6 +3,7 @@ import { Modal, Form, Input, InputNumber, message, Switch, DatePicker, Select, U
 import type { UploadProps } from 'antd';
 import { UploadOutlined, DeleteOutlined, PictureOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useCreateItem, useUploadItemImage } from '../hooks/useInventory';
+import { normalizarImagenCuadrada } from '../utils/normalizarImagenCuadrada';
 import dayjs from 'dayjs';
 
 interface Props {
@@ -46,10 +47,11 @@ export const ModalAddItemInventory: React.FC<Props> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
-  const handleSeleccionarImagen: UploadProps['beforeUpload'] = (file) => {
+  const handleSeleccionarImagen: UploadProps['beforeUpload'] = async (file) => {
+    const normalizada = await normalizarImagenCuadrada(file);
     if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setArchivoImagen(file);
-    setPreviewUrl(URL.createObjectURL(file));
+    setArchivoImagen(normalizada);
+    setPreviewUrl(URL.createObjectURL(normalizada));
     return false; // evita que antd intente subirla sola — todavía no hay item_id
   };
 
