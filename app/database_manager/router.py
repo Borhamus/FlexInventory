@@ -14,16 +14,14 @@ Endpoints:
   POST /database/disconnect      → desconecta Drive (revoca y borra refresh_token)
 """
 #from __future__ import annotations
-import io
 import os
 import re
 import json
 import logging
 import shutil
-import zipfile
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Annotated, Optional
+from pathlib import Path, PurePosixPath
+from typing import Annotated, Dict, Optional, Set
 
 import requests
 from fastapi import APIRouter, Depends, HTTPException
@@ -146,22 +144,29 @@ def _resolver_carpeta(access_token: str, id_cacheado: str | None, name: str, par
         resp = requests.get(
             f"{DRIVE_API_URL}/files/{id_cacheado}",
             headers={"Authorization": f"Bearer {access_token}"},
-            params={"fields": "id,trashed"},
+            params={"fields": "id,trashed,mimeType"},
         )
-        if resp.status_code == 200 and not resp.json().get("trashed", False):
-            return id_cacheado
+        if resp.status_code == 200:
+            info = resp.json()
+            # Además de existir y no estar en la papelera, tiene que ser REALMENTE
+            # una carpeta: el id cacheado puede apuntar a un archivo de otro
+            # esquema (google_drive_images_file_id guardaba el id del viejo
+            # images.zip antes de que fuera una carpeta) — usarlo como parent
+            # devuelve 403 parentNotAFolder. Si no es carpeta, buscar/crear por nombre.
+            if not info.get("trashed", False) and info.get("mimeType") == "application/vnd.google-apps.folder":
+                return id_cacheado
 
     return _get_or_create_folder(access_token, name, parent_id)
 
 
 def _resolver_archivo(access_token: str, id_cacheado: str | None, name: str, folder_id: str) -> str | None:
     """
-    Resuelve el id de un archivo ÚNICO (current.json, images.zip) por su id
+    Resuelve el id de un archivo ÚNICO (hoy: current.json) por su id
     cacheado, cayendo a la búsqueda por nombre dentro de `folder_id`. Devuelve
     None si el archivo no existe todavía, para que el llamador lo cree (POST).
 
-    current.json e images.zip están pensados como archivos únicos que se
-    SOBRESCRIBEN en el lugar (PATCH), no como histórico. _upload_to_drive hace
+    current.json está pensado como archivo único que se
+    SOBRESCRIBE en el lugar (PATCH), no como histórico. _upload_to_drive hace
     PATCH solo si recibe un file_id; si venía en NULL hacía POST y creaba un
     duplicado cada vez que el id se perdía (primer backup, o un disconnect que
     nulifica los ids seguido de una reconexión). Buscar por nombre antes de
@@ -303,53 +308,116 @@ def _download_bytes_from_drive(access_token: str, file_id: str) -> bytes:
     return resp.content
 
 
-# ── Helpers: fotos del tenant (carpeta local <-> zip) ───────────────────────
+# ── Helpers: fotos del tenant (almacén append-only en Drive) ────────────────
+# En vez de un images.zip monolítico que se pisa en cada backup (lo que hacía
+# que restaurar un backup viejo trajera fotos ROTAS, issue #30), las fotos
+# viven en una carpeta `images/` en Drive con UN ARCHIVO POR UUID. Como los
+# nombres de archivo son uuid inmutables (app/tenant/imagenes.py), cada archivo
+# es contenido único que nunca cambia: el backup sube solo los que faltan y el
+# restore baja solo los que referencia el JSON. El almacén es la unión de todas
+# las fotos que existieron — cualquier backup encuentra siempre sus uuid.
 
-def _zip_carpeta_imagenes(tenant_schema: str) -> Optional[bytes]:
+_MIME_POR_EXTENSION = {".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".png": "image/png", ".webp": "image/webp"}
+
+
+def _mime_de(nombre: str) -> str:
+    return _MIME_POR_EXTENSION.get(Path(nombre).suffix.lower(), "application/octet-stream")
+
+
+def _carpeta_items(tenant_schema: str) -> Path:
+    return UPLOADS_DIR / tenant_schema / "items"
+
+
+def _uuid_de_imagen(ruta: Optional[str]) -> Optional[str]:
+    """Nombre de archivo (uuid.ext) a partir de la URL guardada en Item.imagen."""
+    if not ruta:
+        return None
+    return PurePosixPath(ruta).name
+
+
+def _resolver_carpeta_imagenes(access_token: str, tenant: Tenant, root_folder_id: str) -> str:
     """
-    Comprime uploads/{tenant_schema}/ entera en un .zip en memoria.
-    Devuelve None si la carpeta no existe o no tiene ningún archivo — no
-    tiene sentido subir un .zip vacío a Drive.
+    Resuelve/crea la carpeta `images/` bajo la raíz. Reutiliza
+    google_drive_images_file_id como id cacheado — antes guardaba el id del
+    images.zip; ahora guarda el id de esta carpeta (mismo campo, sin migración
+    de schema). El llamador persiste el id devuelto.
     """
-    carpeta = UPLOADS_DIR / tenant_schema
+    return _resolver_carpeta(access_token, tenant.google_drive_images_file_id, "images", root_folder_id)
+
+
+def _listar_imagenes_drive(access_token: str, folder_id: str) -> Dict[str, str]:
+    """Devuelve {nombre_archivo: file_id} de la carpeta images/, paginando."""
+    headers = {"Authorization": f"Bearer {access_token}"}
+    resultado: Dict[str, str] = {}
+    page_token: Optional[str] = None
+    while True:
+        params = {
+            "q":        f"'{folder_id}' in parents and trashed=false",
+            "fields":   "nextPageToken, files(id,name)",
+            "pageSize": 1000,
+        }
+        if page_token:
+            params["pageToken"] = page_token
+        resp = requests.get(f"{DRIVE_API_URL}/files", headers=headers, params=params)
+        if resp.status_code != 200:
+            raise HTTPException(status_code=502, detail="No se pudo listar las fotos en Drive.")
+        body = resp.json()
+        for f in body.get("files", []):
+            resultado[f["name"]] = f["id"]
+        page_token = body.get("nextPageToken")
+        if not page_token:
+            break
+    return resultado
+
+
+def _sync_imagenes_a_drive(access_token: str, tenant_schema: str, folder_id: str) -> None:
+    """
+    Sube a images/ solo los uuid que todavía no están (append-only). Nunca
+    resube los iguales ni borra nada — el almacén acumula. Más barato que el
+    zip anterior, que se re-subía entero en cada backup.
+    """
+    carpeta = _carpeta_items(tenant_schema)
     if not carpeta.is_dir():
-        return None
-
-    archivos = [p for p in carpeta.rglob("*") if p.is_file()]
-    if not archivos:
-        return None
-
-    buffer = io.BytesIO()
-    with zipfile.ZipFile(buffer, "w", zipfile.ZIP_DEFLATED) as zf:
-        for archivo in archivos:
-            # Ruta relativa a la carpeta del tenant, no la ruta absoluta del
-            # disco del servidor — así el zip se puede descomprimir tal cual
-            # adentro de uploads/{tenant_schema}/ sin arrastrar rutas ajenas.
-            zf.write(archivo, arcname=str(archivo.relative_to(carpeta)))
-    return buffer.getvalue()
+        return
+    existentes = _listar_imagenes_drive(access_token, folder_id)
+    for archivo in carpeta.iterdir():
+        if not archivo.is_file() or archivo.name in existentes:
+            continue
+        _upload_bytes_to_drive(
+            access_token, archivo.name, archivo.read_bytes(),
+            _mime_de(archivo.name), folder_id, None,
+        )
 
 
-def _restaurar_imagenes_zip(tenant_schema: str, contenido_zip: bytes) -> None:
+def _restaurar_imagenes_desde_drive(
+    access_token: str, tenant_schema: str, folder_id: str, nombres_referenciados: Set[str]
+) -> Set[str]:
     """
-    Reemplaza uploads/{tenant_schema}/ por el contenido del .zip restaurado.
-    Borra la carpeta actual primero — un restore es "volver a este estado
-    exacto", no un merge con lo que hubiera antes.
+    Reconstruye uploads/{tenant_schema}/items/ con las fotos que referencia el
+    backup: borra la carpeta y baja solo los uuid pedidos que existen en el
+    almacén. Devuelve el conjunto de los que NO se encontraron, para que el
+    llamador nulifique esos Item.imagen (red de seguridad: el restore no miente).
     """
-    carpeta = UPLOADS_DIR / tenant_schema
+    carpeta = _carpeta_items(tenant_schema)
     if carpeta.exists():
         shutil.rmtree(carpeta)
     carpeta.mkdir(parents=True, exist_ok=True)
 
-    with zipfile.ZipFile(io.BytesIO(contenido_zip)) as zf:
-        # Defensa en profundidad contra zip-slip: ningún archivo del zip
-        # puede terminar resolviendo fuera de `carpeta` (mismo criterio que
-        # eliminar_imagen() en app/tenant/imagenes.py). El zip lo genera
-        # este mismo backend, pero viene de Drive — no confiar ciegamente.
-        for miembro in zf.namelist():
-            destino = (carpeta / miembro).resolve()
-            if carpeta.resolve() not in destino.parents and destino != carpeta.resolve():
-                raise HTTPException(status_code=400, detail=f"Zip de fotos con una ruta inválida: {miembro}")
-        zf.extractall(carpeta)
+    disponibles = _listar_imagenes_drive(access_token, folder_id)
+    base = carpeta.resolve()
+    faltantes: Set[str] = set()
+    for nombre in nombres_referenciados:
+        file_id = disponibles.get(nombre)
+        if not file_id:
+            faltantes.add(nombre)
+            continue
+        # Defensa en profundidad contra path traversal: el nombre sale de un
+        # Item.imagen restaurado desde Drive, no confiar ciegamente.
+        destino = (carpeta / nombre).resolve()
+        if destino.parent != base:
+            raise HTTPException(status_code=400, detail=f"Nombre de foto inválido en el backup: {nombre}")
+        destino.write_bytes(_download_bytes_from_drive(access_token, file_id))
+    return faltantes
 
 
 # ── Helper: exportar BD del tenant ─────────────────────────────────────────
@@ -650,13 +718,13 @@ def ejecutar_backup(tenant: Tenant, db: Session, etiqueta: str | None = None) ->
     (POST /backup/now) y el job automático del scheduler, para no tener la
     misma lógica escrita dos veces (antes lo estaba).
 
-    Sube tres cosas a Drive:
+    Sube a Drive:
       - FlexInventory Storage/current.json              (siempre el más reciente)
       - FlexInventory Storage/backups/backup_FECHA.json (histórico, uno por corrida)
-      - FlexInventory Storage/images.zip                (fotos de items — SIN
-        histórico: a diferencia del JSON, no tiene sentido subir 50 fotos
-        iguales de nuevo en cada backup solo porque cambió un precio. Si el
-        tenant no tiene ninguna foto todavía, este paso se saltea entero.)
+      - FlexInventory Storage/images/<uuid>             (fotos de items — almacén
+        append-only, un archivo por uuid: se suben SOLO los uuid nuevos, nunca
+        se resuben los iguales ni se borra nada. Así cualquier backup viejo
+        encuentra siempre sus fotos, issue #30.)
 
     `etiqueta` es opcional y solo la usa el backup manual: se sanitiza y se
     agrega al nombre del histórico como backup_{ts}_{etiqueta}.json, con el
@@ -694,16 +762,12 @@ def ejecutar_backup(tenant: Tenant, db: Session, etiqueta: str | None = None) ->
     tenant.google_drive_file_id        = current_file_id
     tenant.google_drive_folder_id      = backups_folder_id
 
-    # Fotos de items — mismo criterio "actualizar, no duplicar" que current.json,
-    # resolviendo images.zip por nombre antes de subir.
-    zip_imagenes = _zip_carpeta_imagenes(tenant.schema_name)
-    if zip_imagenes is not None:
-        images_id      = _resolver_archivo(access_token, tenant.google_drive_images_file_id, "images.zip", root_folder_id)
-        images_file_id = _upload_bytes_to_drive(
-            access_token, "images.zip", zip_imagenes, "application/zip",
-            root_folder_id, images_id
-        )
-        tenant.google_drive_images_file_id = images_file_id
+    # Fotos de items — almacén append-only: subir solo los uuid nuevos a la
+    # carpeta images/ (ver _sync_imagenes_a_drive). El id de la carpeta se
+    # cachea en google_drive_images_file_id (antes: id del zip).
+    images_folder_id = _resolver_carpeta_imagenes(access_token, tenant, root_folder_id)
+    _sync_imagenes_a_drive(access_token, tenant.schema_name, images_folder_id)
+    tenant.google_drive_images_file_id = images_folder_id
 
     db.commit()
 
@@ -831,34 +895,35 @@ def restore_from_drive_by_id(file_id: str, current_user: user_dep, db: db_dep):
     access_token = _get_access_token(tenant.google_refresh_token)
     data         = _download_from_drive(access_token, file_id)
 
+    # Fotos: se reconstruyen desde el almacén append-only images/ (issue #30),
+    # ANTES de restaurar el JSON, para poder nulificar en el propio `data` los
+    # Item.imagen cuyo uuid no esté en el almacén — así el restore no deja
+    # imágenes rotas ni miente sobre lo que trajo.
+    root_folder_id   = _resolver_carpeta(access_token, tenant.google_drive_root_folder_id, "FlexInventory Storage")
+    images_folder_id = _resolver_carpeta_imagenes(access_token, tenant, root_folder_id)
+
+    items          = data.get("tenant", {}).get("items", [])
+    referenciados  = {n for it in items if (n := _uuid_de_imagen(it.get("imagen")))}
+    faltantes      = _restaurar_imagenes_desde_drive(access_token, tenant.schema_name, images_folder_id, referenciados)
+    if faltantes:
+        for it in items:
+            if _uuid_de_imagen(it.get("imagen")) in faltantes:
+                it["imagen"] = None
+
     restore_tenant_data(tenant, data, db)
 
-    # Las fotos son aparte del JSON: si este tenant tiene un images.zip en
-    # Drive, se restaura también — sin esto, un item quedaría con Item.imagen
-    # apuntando a un archivo que no existe en el disco. Se busca images.zip
-    # por NOMBRE dentro de la carpeta raíz resuelta, no por el id cacheado
-    # (google_drive_images_file_id), que queda en NULL antes del primer backup
-    # o tras un disconnect: confiar solo en él hacía que un restore con fotos
-    # presentes en Drive terminara sin fotos y sin error (issue #30).
-    fotos_restauradas = False
-    root_folder_id = _resolver_carpeta(access_token, tenant.google_drive_root_folder_id, "FlexInventory Storage")
-    images_file_id = _resolver_archivo(access_token, tenant.google_drive_images_file_id, "images.zip", root_folder_id)
-    if images_file_id:
-        zip_bytes = _download_bytes_from_drive(access_token, images_file_id)
-        _restaurar_imagenes_zip(tenant.schema_name, zip_bytes)
-        fotos_restauradas = True
-
-    # Cachear lo resuelto para las próximas operaciones (aunque no haya fotos,
-    # la raíz ya quedó resuelta).
-    tenant.google_drive_root_folder_id = root_folder_id
-    if images_file_id:
-        tenant.google_drive_images_file_id = images_file_id
+    # Cachear lo resuelto para las próximas operaciones.
+    tenant.google_drive_root_folder_id  = root_folder_id
+    tenant.google_drive_images_file_id  = images_folder_id
     db.commit()
 
+    restauradas = len(referenciados) - len(faltantes)
     mensaje = "Base de datos restaurada exitosamente desde Drive."
-    if fotos_restauradas:
-        mensaje += " Las fotos de los artículos también se restauraron."
-    return {"message": mensaje, "fotos_restauradas": fotos_restauradas}
+    if restauradas:
+        mensaje += f" Se restauraron {restauradas} foto(s) de artículos."
+    if faltantes:
+        mensaje += f" {len(faltantes)} foto(s) no se pudieron restaurar (no están en el almacén de Drive)."
+    return {"message": mensaje, "fotos_restauradas": restauradas, "fotos_faltantes": len(faltantes)}
 
 
 @router.delete("/reset")
@@ -940,7 +1005,7 @@ def disconnect_drive(current_user: user_dep, db: db_dep):
     # backup intente un PATCH sobre un file_id ajeno y devuelva 502 (pasaba con
     # google_drive_images_file_id, que antes no se limpiaba — issue #30). Con
     # todo en NULL, la reconexión resuelve o crea todo por nombre en la cuenta
-    # nueva (ver _resolver_carpeta y el restore de images.zip por nombre).
+    # nueva (ver _resolver_carpeta y _resolver_carpeta_imagenes).
     tenant.google_drive_file_id        = None
     tenant.google_drive_folder_id      = None
     tenant.google_drive_root_folder_id = None

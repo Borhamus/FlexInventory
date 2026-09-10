@@ -59,9 +59,10 @@ class Tenant(Base):
     # resolverla por ID (no por nombre) y que renombrarla o moverla en Drive
     # no rompa la detección — ver _resolver_carpeta en database_manager/router.py.
     google_drive_root_folder_id = Column(String(255), nullable=True)
-    # ID del archivo "images.zip" en Drive (fotos de items) — solo se
-    # actualiza (nunca duplica), no lleva versionado histórico como
-    # current.json: las fotos cambian mucho menos seguido que los datos.
+    # ID de la carpeta "images/" en Drive: almacén append-only de las fotos de
+    # items (un archivo por uuid). Se cachea igual que la carpeta raíz, para
+    # resolverla por ID y que renombrarla/moverla no rompa la detección. Ver
+    # _resolver_carpeta_imagenes en database_manager/router.py (issue #30).
     google_drive_images_file_id = Column(String(255), nullable=True)
 
     # ── Configuración de backups automáticos ───────────────────────────────
