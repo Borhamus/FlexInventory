@@ -68,16 +68,18 @@ function claveColumnasOcultas(inventoryId?: number): string | null {
 // columnas en InventoryTable.tsx: sin esto, cambiar de ruta (por ejemplo a
 // Ajustes) y volver desmonta InventoryPage y el useState vuelve a [],
 // mostrando de nuevo columnas que el usuario había ocultado.
+const COLUMNAS_OCULTAS_POR_DEFECTO = ['creado_en'];
+
 function cargarColumnasOcultas(inventoryId?: number): string[] {
   const key = claveColumnasOcultas(inventoryId);
-  if (!key) return [];
+  if (!key) return [...COLUMNAS_OCULTAS_POR_DEFECTO];
   try {
     const raw = localStorage.getItem(key);
-    if (!raw) return [];
+    if (!raw) return [...COLUMNAS_OCULTAS_POR_DEFECTO];
     const parsed = JSON.parse(raw);
-    return Array.isArray(parsed) ? parsed : [];
+    return Array.isArray(parsed) ? parsed : [...COLUMNAS_OCULTAS_POR_DEFECTO];
   } catch {
-    return [];
+    return [...COLUMNAS_OCULTAS_POR_DEFECTO];
   }
 }
 
@@ -263,6 +265,17 @@ const InventoryPage: React.FC = () => {
                       }}
                     >
                       ID
+                    </Checkbox>
+                  )}
+                  {data?.fotos_habilitadas && (!columnSearch || 'foto'.includes(columnSearch.toLowerCase())) && (
+                    <Checkbox
+                      checked={!hiddenColumns.includes('imagen')}
+                      onChange={(e) => {
+                        if (e.target.checked) setHiddenColumns(prev => prev.filter(k => k !== 'imagen'));
+                        else setHiddenColumns(prev => [...prev, 'imagen']);
+                      }}
+                    >
+                      Foto
                     </Checkbox>
                   )}
                   {(!columnSearch || 'fecha de creación'.includes(columnSearch.toLowerCase())) && (
