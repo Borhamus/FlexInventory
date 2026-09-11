@@ -1,5 +1,5 @@
 import React from 'react';
-import { Layout, Typography, Spin, Switch } from 'antd';
+import { Layout, Typography, Spin, Switch, Badge } from 'antd';
 import {
   LogoutOutlined,
   DashboardOutlined,
@@ -10,10 +10,12 @@ import {
   BulbOutlined,
   CloudServerOutlined,
   EyeOutlined,
+  BellOutlined,
 } from '@ant-design/icons';
 import { Outlet, useNavigate, useLocation } from 'react-router-dom';
 import { useAuthContext } from '../context/AuthContext';
-import { useTheme } from '../context/ThemeContext'; 
+import { useTheme } from '../context/ThemeContext';
+import { useNotificacionesNoLeidasCount } from '../hooks/useNotificaciones';
 
 const { Sider, Content } = Layout;
 const { Text } = Typography;
@@ -23,6 +25,9 @@ const MainLayout: React.FC = () => {
   const location = useLocation();
   const { logout, hasPermission, isTenant, loadingPermissions } = useAuthContext();
   const { isDark, toggleTheme, primaryColor } = useTheme();
+
+  const puedeVerNotificaciones = isTenant || hasPermission('notificaciones', 'read');
+  const { data: notificacionesSinLeer = 0 } = useNotificacionesNoLeidasCount(puedeVerNotificaciones);
 
   const allNavItems = [
     {
@@ -57,12 +62,19 @@ const MainLayout: React.FC = () => {
       visible: isTenant,
     },
     {
-      key:     '/dashboard/historial',  
-      icon:    <EyeOutlined />,         
+      key:     '/dashboard/historial',
+      icon:    <EyeOutlined />,
       label:   'Historial',
-      visible: isTenant,                
+      visible: isTenant,
     },
     // ───────────────────────────────────────────────────────────────────
+    {
+      key:     '/dashboard/notificaciones',
+      icon:    <BellOutlined />,
+      label:   'Avisos',
+      visible: puedeVerNotificaciones,
+      badge:   notificacionesSinLeer,
+    },
     {
       key:     '/dashboard/config',
       icon:    <SettingOutlined />,
@@ -130,7 +142,13 @@ const MainLayout: React.FC = () => {
                       borderLeft: isActive ? '3px solid #fff' : '3px solid transparent',
                     }}
                   >
-                    <span style={{ fontSize: '24px' }}>{item.icon}</span>
+                    <span style={{ fontSize: '24px' }}>
+                      {'badge' in item && item.badge ? (
+                        <Badge count={item.badge} size="small" offset={[2, 0]}>
+                          <span style={{ color: 'white' }}>{item.icon}</span>
+                        </Badge>
+                      ) : item.icon}
+                    </span>
                     <Text style={{ color: 'white', fontSize: '10px', marginTop: 4, textTransform: 'uppercase' }}>
                       {item.label}
                     </Text>

@@ -5,6 +5,8 @@ import { UploadOutlined, DeleteOutlined, PictureOutlined, CheckOutlined, CloseOu
 import { useCreateItem, useUploadItemImage } from '../hooks/useInventory';
 import { normalizarImagenCuadrada } from '../utils/normalizarImagenCuadrada';
 import { reglasValorAtributo } from '../utils/validacionValorAtributo';
+import type { NotificacionesConfig } from '../api/inventory.service';
+import { CampanaOverrideNotificacion, limpiarNotificacionesOverrideItem } from './NotificacionItemOverride';
 import dayjs from 'dayjs';
 
 interface Props {
@@ -16,6 +18,10 @@ interface Props {
   // inventario) — igual que en ModalEditItemInventory, si no está prendida
   // ni se muestra el campo.
   fotosHabilitadas?: boolean;
+  // Reglas de notificación del inventario — determina qué atributos (y si
+  // la Cantidad) admiten un override puntual para este ítem. Lo que no se
+  // fija acá cae al default del inventario.
+  notificacionesConfig?: NotificacionesConfig;
 }
 
 export const ModalAddItemInventory: React.FC<Props> = ({
@@ -24,6 +30,7 @@ export const ModalAddItemInventory: React.FC<Props> = ({
     inventoryId,
     atributosRequeridos = [],
     fotosHabilitadas = false,
+    notificacionesConfig,
   }) => {
   const [form] = Form.useForm();
   const { mutate: createItem, isPending } = useCreateItem();
@@ -95,8 +102,9 @@ export const ModalAddItemInventory: React.FC<Props> = ({
 
       const payloadCompleto = {
         ...values,
-        atributos: atributosLimpios, 
-        inventario_id: inventoryId 
+        atributos: atributosLimpios,
+        notificaciones_config: limpiarNotificacionesOverrideItem(values.notificaciones_config),
+        inventario_id: inventoryId
       };
 
       console.log("JSON listo con atributos dinámicos:", payloadCompleto);
@@ -178,23 +186,50 @@ export const ModalAddItemInventory: React.FC<Props> = ({
         <Form.Item name="nombre" label="Nombre del Artículo" rules={[{ required: true, message: 'Ingresá el nombre del artículo' }]}>
           <Input placeholder="Ej: Remera Básica" />
         </Form.Item>
-        <Form.Item name="cantidad" label="Cantidad" rules={[{ required: true, message: 'Ingresá la cantidad' }]}>
-          <InputNumber style={{ width: '100%' }} min={0} />
-        </Form.Item>
+        <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 24 }}>
+          <Form.Item name="cantidad" label="Cantidad" rules={[{ required: true, message: 'Ingresá la cantidad' }]} style={{ flex: 1, marginBottom: 0 }}>
+            <InputNumber style={{ width: '100%' }} min={0} />
+          </Form.Item>
+          {/* La campana de Cantidad siempre está disponible — no hace falta
+              que el inventario tenga un mínimo/máximo default para poder
+              pisarle un valor puntual a este ítem. */}
+          <CampanaOverrideNotificacion
+            tipo="numero"
+            fieldNamePath={['notificaciones_config', 'cantidad']}
+            defaultMinimo={notificacionesConfig?.cantidad?.minimo}
+            defaultMaximo={notificacionesConfig?.cantidad?.maximo}
+          />
+        </div>
 
         {/* --- CAMPOS DINÁMICOS --- */}
-        {listaAtributos.map(([nombreAtributo, tipoAtributo]) => (
-          <Form.Item
-            key={nombreAtributo}
-            name={['atributos', nombreAtributo]}
-            label={nombreAtributo}
-            valuePropName={tipoAtributo === 'boolean' ? 'checked' : 'value'}
-            initialValue={tipoAtributo === 'boolean' ? false : undefined}
-            rules={reglasValorAtributo(tipoAtributo)}
-          >
-            {renderizarInput(tipoAtributo)}
-          </Form.Item>
-        ))}
+        {listaAtributos.map(([nombreAtributo, tipoAtributo]) => {
+          const notifAtributo = notificacionesConfig?.atributos?.[nombreAtributo];
+          const esFecha = tipoAtributo === 'date';
+          const esNumerico = ['integer', 'int', 'natural', 'float', 'number'].includes(tipoAtributo);
+          return (
+            <div key={nombreAtributo} style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 24 }}>
+              <Form.Item
+                name={['atributos', nombreAtributo]}
+                label={nombreAtributo}
+                valuePropName={tipoAtributo === 'boolean' ? 'checked' : 'value'}
+                initialValue={tipoAtributo === 'boolean' ? false : undefined}
+                rules={reglasValorAtributo(tipoAtributo)}
+                style={{ flex: 1, marginBottom: 0 }}
+              >
+                {renderizarInput(tipoAtributo)}
+              </Form.Item>
+              {(esFecha || esNumerico) && (
+                <CampanaOverrideNotificacion
+                  tipo={esFecha ? 'fecha' : 'numero'}
+                  fieldNamePath={['notificaciones_config', 'atributos', nombreAtributo]}
+                  defaultRecordatorioDias={notifAtributo?.tipo === 'fecha' ? notifAtributo.recordatorio_dias : undefined}
+                  defaultMinimo={notifAtributo?.tipo === 'numero' ? notifAtributo.minimo : undefined}
+                  defaultMaximo={notifAtributo?.tipo === 'numero' ? notifAtributo.maximo : undefined}
+                />
+              )}
+            </div>
+          );
+        })}
 
       </Form>
     </Modal>

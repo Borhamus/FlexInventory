@@ -11,6 +11,7 @@ from app.Core.models import Tenant
 from app.tenant import schemas, models, imagenes
 from app.tenant.dependencies import get_tenant_db, get_tenant_from_token, require_permission
 from app.tenant.validators import validate_item_attributes, parse_value_by_type
+from app.tenant.notificaciones_config import validar_notificaciones_item
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
@@ -57,6 +58,10 @@ def create_item(
     validated = validate_item_attributes(item.atributos, inventario.atributos, inventario.nombre)
     item_data = item.model_dump()
     item_data["atributos"] = validated
+    if item_data.get("notificaciones_config"):
+        item_data["notificaciones_config"] = validar_notificaciones_item(
+            item_data["notificaciones_config"], inventario.atributos or {}
+        )
     new_item = models.Item(**item_data)
     db.add(new_item)
     db.commit()
@@ -462,6 +467,11 @@ def update_item(
         atributos_final = update_data.get('atributos', db_item.atributos)
         update_data['atributos'] = validate_item_attributes(
             atributos_final, target_inv.atributos, target_inv.nombre
+        )
+
+    if 'notificaciones_config' in update_data:
+        update_data['notificaciones_config'] = validar_notificaciones_item(
+            update_data['notificaciones_config'] or {}, target_inv.atributos or {}
         )
 
     for field, value in update_data.items():

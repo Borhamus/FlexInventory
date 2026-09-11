@@ -7,6 +7,7 @@ import {
   InboxOutlined,
   CalendarOutlined,
   UserOutlined,
+  BellOutlined,
 } from '@ant-design/icons';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
@@ -15,6 +16,7 @@ import { useInventories } from '../hooks/useInventory';
 import { useCatalogos } from '../hooks/useCatalogos';
 import { useItems } from '../hooks/useItems';
 import { useEmpleados } from '../hooks/useUsuarios';
+import { useNotificaciones } from '../hooks/useNotificaciones';
 import { EmojiPicker, useEmojiPreference } from '../components/EmojiPicker';
 import api from '../api/axios.config';
 import dayjs from 'dayjs';
@@ -30,6 +32,7 @@ interface DashboardStats {
   total_items:       number;
   total_catalogos:   number;
   total_empleados:   number;
+  total_notificaciones_sin_leer: number;
 }
 
 const fetchStats = () =>
@@ -160,7 +163,8 @@ const StatCard: React.FC<StatCardProps> = ({
 
 const DashboardPage: React.FC = () => {
   const { token }  = theme.useToken();
-  const { isTenant, user } = useAuthContext();
+  const { isTenant, user, hasPermission } = useAuthContext();
+  const puedeVerNotificaciones = isTenant || hasPermission('notificaciones', 'read');
 
   const navigate   = useNavigate();
 
@@ -173,6 +177,10 @@ const DashboardPage: React.FC = () => {
   const { data: catalogos   = [], isLoading: loadingCat } = useCatalogos();
   const { data: articulos   = [], isLoading: loadingArt } = useItems();
   const { data: empleados   = [], isLoading: loadingEmp } = useEmpleados({ enabled: isTenant });
+  const { data: notificacionesData, isLoading: loadingNotif } = useNotificaciones(
+    { leida: false, limit: 6 },
+    puedeVerNotificaciones,
+  );
 
   const nombrePorInventario = useMemo(() => {
     const mapa = new Map<number, string>();
@@ -203,6 +211,13 @@ const DashboardPage: React.FC = () => {
     key:      emp.id,
     label:    emp.username,
     sublabel: emp.email ?? undefined,
+  }));
+
+  const itemsNotificaciones: DashListItem[] = (notificacionesData?.items || []).map((n) => ({
+    key:      n.id,
+    label:    n.mensaje,
+    sublabel: n.inventario_nombre ?? undefined,
+    onClick:  () => navigate(n.inventario_id ? `/dashboard/inventario/${n.inventario_id}` : '/dashboard/notificaciones'),
   }));
 
   const fechaHoy = dayjs().format('dddd, D [de] MMMM [de] YYYY');
@@ -326,6 +341,23 @@ const DashboardPage: React.FC = () => {
               listLoading={loadingEmp}
               emptyText="Sin empleados todavía"
               onSeeAll={() => navigate('/dashboard/usuarios')}
+            />
+          </Col>
+        )}
+        {/* Notificaciones: mismo gate que el ítem "Avisos" del Sider — dueño
+            siempre, empleado solo si su rol tiene notificaciones:read. */}
+        {puedeVerNotificaciones && (
+          <Col xs={24} sm={12} xl={6}>
+            <StatCard
+              title="Notificaciones"
+              value={stats?.total_notificaciones_sin_leer ?? 0}
+              icon={<BellOutlined />}
+              color="#f5222d"
+              isLoading={isLoading}
+              items={itemsNotificaciones}
+              listLoading={loadingNotif}
+              emptyText="Sin notificaciones sin leer"
+              onSeeAll={() => navigate('/dashboard/notificaciones')}
             />
           </Col>
         )}

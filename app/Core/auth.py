@@ -2,18 +2,21 @@ from datetime import datetime, timedelta, timezone
 from typing import Annotated
 from collections import defaultdict, deque
 import os
+import secrets
 import time
 import threading
-from fastapi import APIRouter, Depends, HTTPException, Request, Response
-from pydantic import BaseModel, Field
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request, Response
+from fastapi.responses import RedirectResponse
+from pydantic import BaseModel, EmailStr, Field
 from sqlalchemy.orm import Session
 from starlette import status
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
 
-from app.Core.models import Users, UserRole, RolePermission, Tenant
+from app.Core.models import EmailVerificationToken, Users, UserRole, RolePermission, Tenant
 from app.db_config import get_db
+from app.notificaciones.email import enviar_email
 
 
 # ==========================================
@@ -57,6 +60,11 @@ class UpdateProfileRequest(BaseModel):
 class ChangeOwnPasswordRequest(BaseModel):
     current_password: str
     new_password: str = Field(..., min_length=8)
+
+class UpdateOwnEmailRequest(BaseModel):
+    email: EmailStr
+
+EMAIL_VERIFICATION_HOURS = 24
 
 
 # ==========================================
@@ -327,6 +335,7 @@ async def get_my_profile(user: user_dependency, db: db_dependency):
         "id":             db_user.id,
         "username":       db_user.username,
         "email":          db_user.email,
+        "email_verified": db_user.email_verified,
         "role":           db_user.role,
         "custom_role_id": db_user.custom_role_id,  # ← esta línea
     }
@@ -359,6 +368,104 @@ async def change_my_password(
     db_user.hashed_password = bcrypt_context.hash(body.new_password)
     db.commit()
 
+@router.patch("/me/email", status_code=200)
+async def update_my_email(
+    body: UpdateOwnEmailRequest,
+    user: user_dependency,
+    db: db_dependency,
+):
+    """
+    Cambia el email del usuario autenticado. Queda sin verificar (aunque ya
+    lo estuviera con el email anterior) — hay que confirmarlo de nuevo con
+    /me/email/enviar-verificacion.
+    """
+    db_user = _get_active_user_or_401(user["id"], db)
+    if db.query(Users).filter(Users.email == body.email, Users.id != user["id"]).first():
+        raise HTTPException(400, detail="Ese email ya está en uso.")
+    db_user.email = body.email
+    db_user.email_verified = False
+    db.commit()
+    return {"email": db_user.email, "email_verified": db_user.email_verified}
+
+
+def _enviar_email_verificacion(user_id: int, email: str, username: str) -> None:
+    """Genera el token y manda el mail — corre en BackgroundTasks, no bloquea el response."""
+    from app.db_config import SessionLocal
+
+    db = SessionLocal()
+    try:
+        token = secrets.token_urlsafe(32)
+        db.add(EmailVerificationToken(
+            user_id=user_id,
+            token=token,
+            email=email,
+            # Naive UTC (mismo criterio en todo este endpoint): la columna es
+            # TIMESTAMP sin timezone, comparar aware vs. naive rompe con
+            # TypeError si no se es consistente en todos lados.
+            expires_at=(datetime.now(timezone.utc) + timedelta(hours=EMAIL_VERIFICATION_HOURS)).replace(tzinfo=None),
+        ))
+        db.commit()
+
+        backend_url = os.getenv("BACKEND_URL", "http://localhost:8000")
+        link = f"{backend_url}/auth/email/verificar?token={token}"
+        enviar_email(
+            destinatario=email,
+            asunto="Verificá tu email — FlexInventory",
+            cuerpo_html=(
+                f"<p>Hola {username},</p>"
+                f"<p>Confirmá tu email para recibir notificaciones de FlexInventory:</p>"
+                f'<p><a href="{link}">Verificar mi email</a></p>'
+                f"<p>El link vence en {EMAIL_VERIFICATION_HOURS} horas.</p>"
+            ),
+            cuerpo_texto=f"Hola {username}, verificá tu email entrando a: {link}\n(vence en {EMAIL_VERIFICATION_HOURS} horas)",
+        )
+    finally:
+        db.close()
+
+
+@router.post("/me/email/enviar-verificacion", status_code=202)
+async def enviar_verificacion_email(
+    user: user_dependency,
+    db: db_dependency,
+    background_tasks: BackgroundTasks,
+):
+    """Manda un email con un link para confirmar el email cargado en el perfil."""
+    db_user = _get_active_user_or_401(user["id"], db)
+    if not db_user.email:
+        raise HTTPException(400, detail="No tenés un email cargado. Pedile a tu administrador que te asigne uno, o cargalo vos mismo si sos el dueño del tenant.")
+    if db_user.email_verified:
+        raise HTTPException(400, detail="Ese email ya está verificado.")
+    background_tasks.add_task(_enviar_email_verificacion, db_user.id, db_user.email, db_user.username)
+    return {"detail": "Te mandamos un email de verificación."}
+
+
+@router.get("/email/verificar", include_in_schema=False)
+async def verificar_email(token: str, db: db_dependency):
+    """
+    Confirma el email a partir del link del mail. Sin auth: el usuario lo abre
+    desde su bandeja de entrada, no necesariamente logueado en ese navegador.
+    """
+    frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
+    fila = db.query(EmailVerificationToken).filter(EmailVerificationToken.token == token).first()
+
+    if (
+        not fila
+        or fila.used_at is not None
+        or fila.expires_at < datetime.now(timezone.utc).replace(tzinfo=None)
+    ):
+        return RedirectResponse(url=f"{frontend_url}/dashboard/config?email_verificado=false")
+
+    db_user = db.query(Users).filter(Users.id == fila.user_id).first()
+    if not db_user or db_user.email != fila.email:
+        # El usuario cambió el email de nuevo después de pedir este link —
+        # no confirmar un email que ya no es el que tiene cargado.
+        return RedirectResponse(url=f"{frontend_url}/dashboard/config?email_verificado=false")
+
+    db_user.email_verified = True
+    fila.used_at = datetime.now(timezone.utc).replace(tzinfo=None)
+    db.commit()
+    return RedirectResponse(url=f"{frontend_url}/dashboard/config?email_verificado=true")
+
 @router.get("/me/permissions", status_code=200)
 async def get_my_permissions(user: user_dependency, db: db_dependency):
     """Devuelve los permisos del usuario autenticado según su rol asignado."""
@@ -387,6 +494,7 @@ async def get_dashboard_stats(
     Accesible por cualquier usuario autenticado.
     """
     from app.tenant.models import Inventario, Item, Catalogo
+    from app.notificaciones.models import Notificacion
     from app.db_config import get_tenant_db_context
 
     db_user = db.query(Users).filter(Users.id == user["id"]).first()
@@ -401,11 +509,12 @@ async def get_dashboard_stats(
         Users.role      != "tenant",
     ).count()
 
-    # Contar inventarios, items y catálogos en el schema del tenant
+    # Contar inventarios, items, catálogos y notificaciones sin leer en el schema del tenant
     with get_tenant_db_context(tenant.schema_name) as tenant_db:
         total_inventarios = tenant_db.query(Inventario).count()
         total_items       = tenant_db.query(Item).count()
         total_catalogos   = tenant_db.query(Catalogo).count()
+        total_notificaciones_sin_leer = tenant_db.query(Notificacion).filter(Notificacion.leida == False).count()
 
     return {
         "username":          db_user.username,
@@ -413,4 +522,5 @@ async def get_dashboard_stats(
         "total_items":       total_items,
         "total_catalogos":   total_catalogos,
         "total_empleados":   total_empleados,
+        "total_notificaciones_sin_leer": total_notificaciones_sin_leer,
     }

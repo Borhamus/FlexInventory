@@ -18,11 +18,12 @@ class UserRole(str, enum.Enum):
 # Recursos y acciones disponibles para permisos
 # ==========================================
 class Resource(str, enum.Enum):
-    inventarios = "inventarios"
-    items       = "items"
-    catalogos   = "catalogos"
-    empleados   = "empleados"
-    roles       = "roles"
+    inventarios    = "inventarios"
+    items          = "items"
+    catalogos      = "catalogos"
+    empleados      = "empleados"
+    roles          = "roles"
+    notificaciones = "notificaciones"
 
 
 class Action(str, enum.Enum):
@@ -154,6 +155,9 @@ class Users(Base):
     username        = Column(String, unique=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     email           = Column(String, unique=True, nullable=True)
+    # Se resetea a False cada vez que el usuario cambia su email — un email
+    # verificado deja de estarlo si se reemplaza por otro sin confirmar.
+    email_verified  = Column(Boolean, default=False, nullable=False)
 
     tenant_id      = Column(Integer, ForeignKey("public.tenants.id"), nullable=False)
     role           = Column(String, default=UserRole.employee, nullable=False)
@@ -167,3 +171,26 @@ class Users(Base):
 
     tenant      = relationship("Tenant", back_populates="users")
     custom_role = relationship("CustomRole", back_populates="users")
+
+
+# ==========================================
+# Token de verificación de email
+# ==========================================
+class EmailVerificationToken(Base):
+    """
+    Token de un solo uso para confirmar que el usuario controla el email que
+    cargó. `email` guarda una copia del valor que se está verificando: si el
+    usuario cambia el email de nuevo antes de confirmar, un link viejo no
+    debe poder verificar el email nuevo.
+    """
+    __tablename__  = "email_verification_tokens"
+    __table_args__ = {'schema': 'public'}
+
+    id         = Column(Integer, primary_key=True, index=True)
+    user_id    = Column(Integer, ForeignKey("public.users.id", ondelete="CASCADE"),
+                        nullable=False, index=True)
+    token      = Column(String(64), unique=True, index=True, nullable=False)
+    email      = Column(String, nullable=False)
+    expires_at = Column(TIMESTAMP, nullable=False)
+    used_at    = Column(TIMESTAMP, nullable=True)
+    created_at = Column(TIMESTAMP, server_default=func.current_timestamp())

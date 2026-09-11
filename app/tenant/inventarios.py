@@ -9,6 +9,7 @@ from app.tenant.validators import TYPE_DEFAULTS, validate_inventario_atributos, 
 from app.tenant.roles_atributos import validate_roles_atributos, clean_orphan_roles
 from app.tenant.alertas import calcular_alertas
 from app.tenant.bloques_personalizados import validar_bloques_personalizados, calcular_bloques, limpiar_bloques_huerfanos
+from app.tenant.notificaciones_config import validar_notificaciones_config, limpiar_notificaciones_huerfanas, limpiar_notificaciones_item_huerfanas
 
 router = APIRouter(prefix="/inventarios", tags=["Inventarios"])
 
@@ -94,6 +95,7 @@ def _migrar_valor_en_dict(
 POST        = [Depends(Auditor(accion="Crear Inventario", auditar_payload=True))]
 PUT         = [Depends(Auditor(accion="Editar Inventario", auditar_payload=True))]
 DELETE      = [Depends(Auditor(accion="Eliminar Inventario", auditar_payload=True))]
+PATCH_NOTIFICACIONES = [Depends(Auditor(accion="Configurar Notificaciones", auditar_payload=True))]
 # ────────────────────────────────────────────────────────────────────────
 
 @router.post("/", response_model=schemas.InventarioResponse, status_code=201, dependencies=POST)
@@ -289,6 +291,21 @@ def update_inventario(
         unidades_base = update_data.get("unidades", inv.unidades or {}) or {}
         unidades_remapeadas = {renombres.get(k, k): v for k, v in unidades_base.items()}
         update_data["unidades"] = validate_unidades(unidades_remapeadas, update_data["atributos"])
+        # Mismo criterio para la configuración de notificaciones (la parte
+        # "atributos" — "cantidad" nunca queda huérfana, no depende del
+        # esquema de atributos).
+        if inv.notificaciones_config:
+            update_data["notificaciones_config"] = limpiar_notificaciones_huerfanas(inv.notificaciones_config, update_data["atributos"])
+        # Y los overrides puntuales de CADA ítem: un override es independiente
+        # de si el inventario tiene o no un default para esa señal (ver
+        # validar_notificaciones_item), así que se limpia acá contra el
+        # esquema nuevo — no en el PATCH de notificaciones del inventario.
+        for it in db.query(models.Item).filter(models.Item.inventario_id == inventario_id).all():
+            if not it.notificaciones_config:
+                continue
+            nuevo_override = limpiar_notificaciones_item_huerfanas(it.notificaciones_config, update_data["atributos"])
+            if nuevo_override != it.notificaciones_config:
+                it.notificaciones_config = nuevo_override
     elif "unidades" in update_data:
         update_data["unidades"] = validate_unidades(update_data["unidades"], inv.atributos or {})
     for field, value in update_data.items():
@@ -368,6 +385,50 @@ def get_bloques_personalizados(
     if not inv:
         raise HTTPException(404, detail="Inventario no encontrado")
     return calcular_bloques(db, inv)
+
+
+@router.patch("/{inventario_id}/notificaciones", response_model=schemas.InventarioResponse, dependencies=PATCH_NOTIFICACIONES)
+def configurar_notificaciones(
+    inventario_id: int,
+    payload: schemas.NotificacionesConfigUpdate,
+    _: dict = _perm("inventarios", "update"),
+    db: Session = Depends(get_tenant_db),
+):
+    """
+    Configura las reglas de notificación del inventario: qué atributos de
+    fecha avisan (con recordatorio a N días antes) o vencen, qué atributos
+    numéricos (o la Cantidad nativa del ítem) tienen un mínimo/máximo.
+    Reemplaza por completo la configuración vigente (mismo criterio que
+    roles y bloques: se manda el estado completo que se quiere dejar).
+
+    Requiere permiso `inventarios:update` (o ser tenant owner).
+
+    **Ejemplo de request** (inventario con atributos `{Vencimiento: date, Peso: float}`):
+    ```json
+    {
+      "notificaciones_config": {
+        "atributos": {
+          "Vencimiento": {"tipo": "fecha", "recordatorio_dias": 7},
+          "Peso": {"tipo": "numero", "minimo": 1, "maximo": 10}
+        },
+        "cantidad": {"minimo": 10}
+      }
+    }
+    ```
+    """
+    inv = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
+    if not inv:
+        raise HTTPException(404, detail="Inventario no encontrado")
+
+    # Nota: los overrides puntuales por ítem son independientes de esta
+    # config (ver validar_notificaciones_item) — no hay nada que limpiar acá
+    # cuando cambia; la limpieza de overrides huérfanos vive en
+    # update_inventario, disparada por cambios en el ESQUEMA de atributos.
+    inv.notificaciones_config = validar_notificaciones_config(payload.notificaciones_config, inv.atributos or {})
+
+    db.commit()
+    db.refresh(inv)
+    return inv
 
 
 @router.delete("/{inventario_id}", status_code=204, dependencies=DELETE)

@@ -358,6 +358,12 @@ class Auditor:
             )
             resumen = "Removido del catálogo"
 
+        elif path.endswith("/notificaciones"):
+            nombre = _nombre(Inventario, pp.get("inventario_id"))
+            entidad_nombre = f"Inventario: {nombre}" if nombre else "Inventario"
+            resumen = "Configuración de notificaciones actualizada"
+
+        # ── Casos clásicos: crear / editar / borrar una entidad ─────────
         elif request.method == "POST" and isinstance(payload_original, dict):
             nombre_base = payload_original.get("nombre", "Desconocido")
             if "items" in path:

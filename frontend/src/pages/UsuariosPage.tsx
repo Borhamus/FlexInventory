@@ -50,18 +50,19 @@ import type { UserResponse, CustomRoleResponse, PermissionIn } from '../schemas/
 const { Content, Sider } = Layout;
 const { Title, Text } = Typography;
 
-const RESOURCES = ['inventarios', 'items', 'catalogos', 'empleados', 'roles'] as const;
+const RESOURCES = ['inventarios', 'items', 'catalogos', 'empleados', 'roles', 'notificaciones'] as const;
 const ACTIONS   = ['create', 'read', 'update', 'delete'] as const;
 
 type Resource = typeof RESOURCES[number];
 type Action   = typeof ACTIONS[number];
 
 const RESOURCE_LABELS: Record<Resource, string> = {
-  inventarios: 'Inventarios',
-  items:       'Artículos',
-  catalogos:   'Catálogos',
-  empleados:   'Empleados',
-  roles:       'Roles',
+  inventarios:    'Inventarios',
+  items:          'Artículos',
+  catalogos:      'Catálogos',
+  empleados:      'Empleados',
+  roles:          'Roles',
+  notificaciones: 'Notificaciones',
 };
 
 const ACTION_LABELS: Record<Action, string> = {

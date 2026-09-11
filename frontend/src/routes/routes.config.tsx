@@ -14,6 +14,7 @@ import ConfigPage from '../pages/ConfigPage';
 import DashboardPage from '../pages/DashboardPage';
 import DatabasePage from '../pages/DatabasePage'; 
 import AuditoriaPage from '../pages/AuditoriaPage';
+import NotificacionesPage from '../pages/NotificacionesPage';
 import WelcomePage from '../pages/WelcomePage';
 
 
@@ -73,6 +74,10 @@ export const routes: RouteObject[] = [
       {
         path: 'historial',
         element: <AuditoriaPage />,
+      },
+      {
+        path: 'notificaciones',
+        element: <NotificacionesPage />,
       },
     ],
   },
