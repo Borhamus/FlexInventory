@@ -45,6 +45,6 @@ export interface CustomRoleCreate {
 }
 
 export interface PermissionIn {
-  resource: 'inventarios' | 'items' | 'catalogos' | 'empleados' | 'roles';
+  resource: 'inventarios' | 'items' | 'catalogos' | 'empleados' | 'roles' | 'notificaciones';
   action: 'create' | 'read' | 'update' | 'delete';
 }

@@ -22,6 +22,9 @@ class Inventario(TenantBase):
     # Mapa {rol: nombre_de_atributo}, ej: {"volumen_unitario": "peso_m3"}.
     # Ver app/tenant/roles_atributos.py (Registry Pattern) para los roles válidos.
     roles_atributos = Column(JSONB, default={})
+    # Config de notificaciones por atributo + por la cantidad nativa del ítem.
+    # Ver app/tenant/notificaciones_config.py para la forma exacta.
+    notificaciones_config = Column(JSONB, default={})
     # Lista de bloques de estadística armados por el usuario (texto editable
     # + métricas calculadas). Ver app/tenant/bloques_personalizados.py.
     bloques_personalizados = Column(JSONB, default=[])
@@ -43,6 +46,11 @@ class Item(TenantBase):
     cantidad = Column(Integer, nullable=False, default=0)
     inventario_id = Column(Integer, ForeignKey('inventario.id', ondelete='CASCADE'), nullable=False, index=True)
     atributos = Column(JSONB, default={})
+    # Override puntual de la config de notificaciones del inventario (mismo
+    # shape que Inventario.notificaciones_config, pero por campo: lo que no
+    # se fija acá cae al default del inventario). Ver
+    # app/tenant/notificaciones_config.py -> validar_notificaciones_item().
+    notificaciones_config = Column(JSONB, default={})
     # URL pública ya armada (ej. "/uploads/tenant_borhamus/items/8f3a1c2e.jpg"),
     # no solo el nombre de archivo — evita reconstruirla en cada respuesta.
     # El archivo en sí vive en disco local, no en la base. Ver app/tenant/imagenes.py.

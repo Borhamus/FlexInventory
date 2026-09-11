@@ -1,5 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { inventoryService } from '../api/inventory.service';
+import type { NotificacionesConfig } from '../api/inventory.service';
 import { message } from 'antd';
 
 export const useInventory = (id: number) => {
@@ -43,6 +44,18 @@ export const useConfigurarRoles = () => {
   return useMutation({
     mutationFn: ({ id, roles_atributos }: { id: number; roles_atributos: Record<string, string> }) =>
       inventoryService.configurarRoles(id, roles_atributos),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['inventories'] });
+      queryClient.invalidateQueries({ queryKey: ['inventory', variables.id] });
+    },
+  });
+};
+
+export const useConfigurarNotificaciones = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, notificaciones_config }: { id: number; notificaciones_config: NotificacionesConfig }) =>
+      inventoryService.configurarNotificaciones(id, notificaciones_config),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['inventories'] });
       queryClient.invalidateQueries({ queryKey: ['inventory', variables.id] });

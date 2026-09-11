@@ -4,6 +4,74 @@ import { EditOutlined, DeleteOutlined, PictureOutlined, EyeOutlined, CheckCircle
 import dayjs from 'dayjs';
 import { useAuthContext } from '../context/AuthContext';
 import { urlImagen } from '../api/axios.config';
+import type { NotificacionesConfig } from '../api/inventory.service';
+
+// Mismos 3 estados que ya usa el motor del backend (app/notificaciones/motor.py),
+// llevados al cliente para resaltar la fila SIN esperar al próximo tick del
+// scheduler: se recalcula en vivo a partir de notificaciones_config + los
+// datos del ítem que ya está viendo la tabla, así nunca queda desactualizado
+// entre corridas del job (que puede tardar hasta NOTIFICACIONES_INTERVALO_HORAS).
+type EstadoNotificacionFila = 'ok' | 'recordatorio' | 'alerta';
+
+const _TIPOS_FECHA_FILA = new Set(['date']);
+
+// El override de un ítem NO depende de que el inventario tenga un default
+// configurado para esa señal (el usuario puede pisarle un mínimo/máximo o un
+// recordatorio a un atributo puntual sin haber tocado nunca "Editar
+// Inventario") — por eso se recorren todos los atributos numéricos/fecha del
+// ESQUEMA del inventario (atributosSchema), no solo los que aparecen en
+// config.atributos, para no perderse un override "solo" sin default.
+function calcularEstadoFila(item: any, atributosSchema: Record<string, string> | undefined, config?: NotificacionesConfig): EstadoNotificacionFila {
+  let peor: EstadoNotificacionFila = 'ok';
+  const marcar = (estado: EstadoNotificacionFila) => {
+    if (estado === 'alerta') peor = 'alerta';
+    else if (estado === 'recordatorio' && peor === 'ok') peor = 'recordatorio';
+  };
+
+  const overrideItem: NotificacionesConfig = item?.notificaciones_config || {};
+  const configAtributos = config?.atributos || {};
+  const overrideAtributos = overrideItem.atributos || {};
+
+  const nombresAEvaluar = new Set([...Object.keys(configAtributos), ...Object.keys(overrideAtributos)]);
+
+  nombresAEvaluar.forEach((nombre) => {
+    const valor = item?.atributos?.[nombre];
+    if (valor === undefined || valor === null || valor === '') return;
+
+    const cfg = configAtributos[nombre] as any;
+    const override = overrideAtributos[nombre] as any;
+    const tipoSchema = (atributosSchema?.[nombre] || '').toLowerCase();
+    const esFecha = cfg ? cfg.tipo === 'fecha' : _TIPOS_FECHA_FILA.has(tipoSchema);
+
+    if (esFecha) {
+      const recordatorioDias = override?.recordatorio_dias ?? cfg?.recordatorio_dias;
+      const dias = dayjs(String(valor)).startOf('day').diff(dayjs().startOf('day'), 'day');
+      if (Number.isNaN(dias)) return;
+      if (dias < 0) marcar('alerta');
+      else if (recordatorioDias != null && dias <= recordatorioDias) marcar('recordatorio');
+    } else {
+      const num = Number(valor);
+      if (Number.isNaN(num)) return;
+      const minimo = override?.minimo ?? cfg?.minimo;
+      const maximo = override?.maximo ?? cfg?.maximo;
+      if (minimo != null && num < minimo) marcar('alerta');
+      else if (maximo != null && num > maximo) marcar('alerta');
+    }
+  });
+
+  const cantidadOverride = overrideItem.cantidad;
+  if (config?.cantidad || cantidadOverride) {
+    const num = Number(item?.cantidad);
+    if (!Number.isNaN(num)) {
+      const minimo = cantidadOverride?.minimo ?? config?.cantidad?.minimo;
+      const maximo = cantidadOverride?.maximo ?? config?.cantidad?.maximo;
+      if (minimo != null && num < minimo) marcar('alerta');
+      else if (maximo != null && num > maximo) marcar('alerta');
+    }
+  }
+
+  return peor;
+}
 
 const CELDA_VACIA = <Typography.Text type="secondary">—</Typography.Text>;
 
@@ -36,6 +104,10 @@ interface InventoryTableProps {
   sortBy?: string;
   order?: 'asc' | 'desc';
   onSortChange?: (sortBy: string | undefined, order: 'asc' | 'desc') => void;
+  // Reglas de notificación del inventario — si un ítem las incumple, su
+  // fila se resalta (amarillo = dentro de la ventana de recordatorio,
+  // rojo = vencido o fuera de rango). Ver calcularEstadoFila arriba.
+  notificacionesConfig?: NotificacionesConfig;
 }
 
 // Columnas que NUNCA se reordenan ni se redimensionan a mano: "id" siempre
@@ -187,6 +259,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   sortBy,
   order = 'asc',
   onSortChange,
+  notificacionesConfig,
 }) => {
   const { hasPermission, isTenant } = useAuthContext();
   const { token } = theme.useToken();
@@ -468,6 +541,15 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
         } else {
           onSortChange?.(undefined, 'asc');
         }
+      }}
+      onRow={(record) => {
+        const estado = calcularEstadoFila(record, atributos, notificacionesConfig);
+        if (estado === 'ok') return {};
+        return {
+          style: {
+            backgroundColor: estado === 'alerta' ? 'rgba(255,77,79,0.14)' : 'rgba(250,173,20,0.16)',
+          },
+        };
       }}
       pagination={{
         pageSize,

@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import api, { setAuthToken, registerTokenRefreshHandler } from '../api/axios.config';
 
-export type Resource = 'inventarios' | 'items' | 'catalogos' | 'empleados' | 'roles';
+export type Resource = 'inventarios' | 'items' | 'catalogos' | 'empleados' | 'roles' | 'notificaciones';
 export type Action   = 'create' | 'read' | 'update' | 'delete';
 
 export interface UserPermission {

@@ -15,6 +15,7 @@ from app.tenant.catalogos import router as catalogos_router
 from app.database_manager.router import router as database_router
 from app.Core import models as core_models  # registra modelos en Base
 from app.auditoria.router import router as auditoria_router
+from app.notificaciones.router import router as notificaciones_router
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 
@@ -61,6 +62,7 @@ app.include_router(items_router)       # /items/*
 app.include_router(catalogos_router)   # /catalogos/*
 app.include_router(database_router)    # /database/*
 app.include_router(auditoria_router)   # /auditoria/*
+app.include_router(notificaciones_router)  # /notificaciones/*
 
 # Fotos de items: servidas directo del disco, sin pasar por un endpoint de
 # la API. La URL random (uuid) hace de "difícil de adivinar" ya que este

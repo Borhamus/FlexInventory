@@ -22,12 +22,28 @@ from app.db_config import engine, _validate_schema_name
 logger = logging.getLogger(__name__)
 
 
+def _crear_tabla_notificaciones(conn, schema: str) -> None:
+    """
+    Tabla nueva (no columna) — a diferencia del resto de este archivo, se usa
+    el propio modelo de SQLAlchemy (`Notificacion.__table__.create()`) en vez
+    de escribir el CREATE TABLE a mano en texto: el índice único parcial es
+    fácil de tipear distinto en el modelo y en una migración de texto suelta,
+    y acá el modelo queda como única fuente de verdad. Mismo mecanismo que ya
+    usa create_tenant_schema() para crear todo TenantBase.metadata, pero
+    acotado a esta tabla sola (checkfirst=True: no rompe si ya existe).
+    """
+    from app.notificaciones.models import Notificacion
+
+    conn = conn.execution_options(schema_translate_map={None: schema})
+    Notificacion.__table__.create(conn, checkfirst=True)
+
+
 def run_migrations() -> None:
     from app.db_config import SessionLocal
     from app.Core.models import Tenant
 
-    # La tabla `tenants` vive en el schema public (una sola, no una por
-    # tenant) — se migra aparte, antes del loop de abajo.
+    # Las tablas `tenants`/`users` viven en el schema public (una sola, no
+    # una por tenant) — se migran aparte, antes del loop de abajo.
     with engine.begin() as conn:
         conn.execute(text(
             'ALTER TABLE public.tenants '
@@ -36,6 +52,10 @@ def run_migrations() -> None:
         conn.execute(text(
             'ALTER TABLE public.tenants '
             'ADD COLUMN IF NOT EXISTS google_drive_root_folder_id VARCHAR(255)'
+        ))
+        conn.execute(text(
+            'ALTER TABLE public.users '
+            'ADD COLUMN IF NOT EXISTS email_verified BOOLEAN NOT NULL DEFAULT false'
         ))
 
     db = SessionLocal()
@@ -68,5 +88,14 @@ def run_migrations() -> None:
                 f'ALTER TABLE "{schema}".inventario '
                 f"ADD COLUMN IF NOT EXISTS fotos_habilitadas BOOLEAN NOT NULL DEFAULT true"
             ))
+            conn.execute(text(
+                f'ALTER TABLE "{schema}".inventario '
+                f"ADD COLUMN IF NOT EXISTS notificaciones_config JSONB DEFAULT '{{}}'::jsonb"
+            ))
+            conn.execute(text(
+                f'ALTER TABLE "{schema}".item '
+                f"ADD COLUMN IF NOT EXISTS notificaciones_config JSONB DEFAULT '{{}}'::jsonb"
+            ))
+            _crear_tabla_notificaciones(conn, schema)
 
     logger.info(f"[Migraciones] roles_atributos verificado en {len(tenants)} tenant(s).")

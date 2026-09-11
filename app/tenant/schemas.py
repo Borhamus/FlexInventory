@@ -25,6 +25,7 @@ class InventarioResponse(InventarioBase):
     fotos_habilitadas: bool = False
     roles_atributos: Dict[str, str] = Field(default_factory=dict)
     bloques_personalizados: List[Dict[str, Any]] = Field(default_factory=list)
+    notificaciones_config: Dict[str, Any] = Field(default_factory=dict)
     creado_en: datetime
     actualizado_en: datetime
 
@@ -41,6 +42,15 @@ class InventarioWithItems(InventarioResponse):
 
 class RolesAtributosUpdate(BaseModel):
     roles_atributos: Dict[str, str] = Field(default_factory=dict)
+
+# ==================== Schema para configuración de notificaciones ====================
+# Igual criterio que roles_atributos: reemplazo completo del objeto vigente.
+# La forma real ({"atributos": {...}, "cantidad": {...}}) depende de si cada
+# entrada es de fecha o numérica, así que acá se define laxa (Dict[str, Any])
+# y se valida en detalle en app/tenant/notificaciones_config.py.
+
+class NotificacionesConfigUpdate(BaseModel):
+    notificaciones_config: Dict[str, Any] = Field(default_factory=dict)
 
 # ==================== Schemas para bloques personalizados ====================
 # Un bloque = una plantilla de texto editable + una o más métricas
@@ -145,6 +155,10 @@ class ItemBase(BaseModel):
     nombre: str = Field(..., min_length=1, max_length=255)
     cantidad: int = Field(..., ge=0)
     atributos: Dict[str, Any] = Field(default_factory=dict)
+    # Override puntual de la config de notificaciones del inventario — lo que
+    # no se fija acá cae al default del inventario. Ver
+    # app/tenant/notificaciones_config.py -> validar_notificaciones_item().
+    notificaciones_config: Dict[str, Any] = Field(default_factory=dict)
 
 class ItemCreate(ItemBase):
     inventario_id: int
@@ -153,6 +167,7 @@ class ItemUpdate(BaseModel):
     nombre: Optional[str] = Field(None, min_length=1, max_length=255)
     cantidad: Optional[int] = Field(None, ge=0)
     atributos: Optional[Dict[str, Any]] = None
+    notificaciones_config: Optional[Dict[str, Any]] = None
     inventario_id: Optional[int] = None
 
 class ItemResponse(ItemBase):

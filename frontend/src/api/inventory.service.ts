@@ -8,6 +8,9 @@ export interface Item {
   atributos: Record<string, any>;
   // URL pública lista para usar en un <img src>, o null si no tiene foto.
   imagen?: string | null;
+  // Override puntual de notificaciones para este ítem (lo que no se fija
+  // acá cae al default del inventario). Ver NotificacionesConfig más abajo.
+  notificaciones_config?: NotificacionesConfig;
   creado_en: string;
   actualizado_en: string;
 }
@@ -24,6 +27,10 @@ export interface Inventario {
   // ModalStatsInventory / PATCH /inventarios/{id}/bloques). Opcional: un
   // inventario recién creado no tiene ninguno.
   bloques_personalizados?: BloquePersonalizado[];
+  // Reglas de notificación por atributo + por la Cantidad nativa del ítem
+  // (ver PATCH /inventarios/{id}/notificaciones). Opcional: un inventario
+  // recién creado no tiene ninguna.
+  notificaciones_config?: NotificacionesConfig;
   items: Item[];
   creado_en: string;
   actualizado_en: string;
@@ -119,6 +126,28 @@ export interface BloqueCalculado {
   valores: Record<string, number | null>;
 }
 
+// notificaciones_config: {"atributos": {nombre: NotificacionFecha|NotificacionNumero}, "cantidad": NotificacionNumero}
+// "cantidad" vive aparte de "atributos" a propósito — aplica sobre el campo
+// nativo Item.cantidad, no sobre un atributo del esquema. Ver
+// app/tenant/notificaciones_config.py para la validación del lado backend.
+export interface NotificacionFechaConfig {
+  tipo: 'fecha';
+  recordatorio_dias: number;
+}
+
+export interface NotificacionNumeroConfig {
+  tipo: 'numero';
+  minimo?: number | null;
+  maximo?: number | null;
+}
+
+export type NotificacionAtributoConfig = NotificacionFechaConfig | NotificacionNumeroConfig;
+
+export interface NotificacionesConfig {
+  atributos?: Record<string, NotificacionAtributoConfig>;
+  cantidad?: { minimo?: number | null; maximo?: number | null };
+}
+
 export interface AlertaVencimiento {
   item_id: number;
   item_nombre: string;
@@ -194,6 +223,11 @@ export const inventoryService = {
 
   configurarBloques: async (id: number, bloques_personalizados: BloquePersonalizado[]) => {
     const response = await api.patch(`/inventarios/${id}/bloques`, { bloques_personalizados });
+    return response.data;
+  },
+
+  configurarNotificaciones: async (id: number, notificaciones_config: NotificacionesConfig) => {
+    const response = await api.patch(`/inventarios/${id}/notificaciones`, { notificaciones_config });
     return response.data;
   },
 
