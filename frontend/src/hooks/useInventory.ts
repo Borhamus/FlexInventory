@@ -67,6 +67,10 @@ export const useCreateItem = () => {
     mutationFn: (payload: any) => inventoryService.createItem(payload),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['inventory', variables.inventario_id] });
+      // La tabla ordenada/filtrada lee de la query aparte ['items', ...]
+      // (ver useItems), no de esta — sin invalidarla el item nuevo no
+      // aparece hasta recargar la página.
+      queryClient.invalidateQueries({ queryKey: ['items'] });
     },
   });
 };
@@ -77,7 +81,8 @@ export const useDeleteItem = () => {
   return useMutation({
     mutationFn: (itemId: number) => inventoryService.deleteItem(itemId),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['inventory'] }); 
+      queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['items'] });
     },
   });
 };
@@ -94,6 +99,7 @@ export const useUpdateItem = () => {
       // IMPORTANTE: 'inventory' debe ser la misma key que usás en useQuery
       // Esto hace que la tabla se actualice "mágicamente"
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['items'] });
       message.success('Artículo actualizado con éxito');
     },
     
@@ -112,6 +118,7 @@ export const useUploadItemImage = () => {
       inventoryService.subirImagenItem(id, archivo),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['items'] });
       message.success('Foto actualizada');
     },
     onError: (error: any) => {
@@ -128,6 +135,7 @@ export const useDeleteItemImage = () => {
     mutationFn: (id: number) => inventoryService.eliminarImagenItem(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['inventory'] });
+      queryClient.invalidateQueries({ queryKey: ['items'] });
       message.success('Foto eliminada');
     },
     onError: () => {
