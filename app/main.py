@@ -1,6 +1,14 @@
 from dotenv import load_dotenv
 load_dotenv()
 
+# Sin esto, todo logger.info(...) del proyecto (scheduler, backups, etc.) se
+# pierde en silencio: el logger raíz de Python arranca en WARNING y sin
+# handlers, así que un mensaje INFO ni siquiera pasa el filtro de nivel.
+# Uvicorn se ve en consola porque configura sus propios loggers aparte
+# ("uvicorn", "uvicorn.access") — esto no depende de eso.
+import logging
+logging.basicConfig(level=logging.INFO)
+
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from app.db_config import engine, Base, TenantBase

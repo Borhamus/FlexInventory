@@ -22,6 +22,7 @@
 
 > [!Paso 4: ] Inicia el frontend
 > cd frontend
+> Si es la primera vez que entras: npm install
 > npm run dev
 
 

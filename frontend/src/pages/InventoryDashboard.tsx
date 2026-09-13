@@ -2,16 +2,12 @@ import { Card, Row, Col, Statistic, Empty } from 'antd';
 import { BoxPlotOutlined, PartitionOutlined, BuildOutlined } from '@ant-design/icons';
 import { useInventories } from '../hooks/useInventory';
 import { useAuthContext } from '../context/AuthContext';
-import { useEffect } from 'react';
 import AlertasVencimiento from '../components/AlertasVencimiento';
 
 export const InventoryDashboard = () => {
 
   const { data: inventories, isLoading } = useInventories();
   const { user } = useAuthContext();
-  useEffect(() => {
-    console.log("Contenido del token decodificado:", user);
-  }, [user]);
 
   if (isLoading) return null;
 

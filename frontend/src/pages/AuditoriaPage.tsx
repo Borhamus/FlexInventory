@@ -30,9 +30,6 @@ const AuditoriaPage: React.FC = () => {
 
       const response = await auditoriaService.getHistorial(skip, pageSize)
 
-      console.log("Datos recibidos:", response.items);
-      console.log("Total reportado por backend:", response.total);
-
       setData(response.items || response);
       setPagination((prev) => ({
         ...prev,
