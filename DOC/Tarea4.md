@@ -5,7 +5,7 @@ Chequeo de control completo de lo que subieron los compañeros, antes de confiar
 ## Setup desde cero
 - venv, requirements, docker (postgres) y frontend, siguiendo el README.
 - Encontré que mi `.env` de frontend tenía `VITE_API_URL=http://127.0.0.1:8000` en vez de `http://localhost:8000` (como dice `.env.example`). Con eso mal, la sesión no persiste al recargar: el navegador trata `localhost` y `127.0.0.1` como sitios distintos, y la cookie httpOnly del refresh token (SameSite=Lax) no viaja entre uno y otro. No es un bug de código, es config local mal copiada — lo corregí en mi entorno y listo. Si a alguien más del equipo le pasa lo mismo (sesión que se cae al recargar la página), es por esto.
-- Faltaba el paso de `npm install` en el README antes de `npm run dev` la primera vez (ya lo agregaste vos en el archivo, quedó pendiente de commitear aparte).
+- Faltaba el paso de `npm install` en el README antes de `npm run dev` la primera vez — lo agregaste vos en el archivo y quedó incluido en el commit de hoy.
 
 ## Bugs encontrados y arreglados
 1. **`InventoryDashboard.tsx`** — quedó un `console.log("Contenido del token decodificado:", user)` de debug, disparado en cada visita a Inventarios. Saqué el `console.log` y el `useEffect`/import que quedaban sin uso.
