@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Card, Row, Col, Empty, Button, Space, Typography, Tooltip, Modal, Form, List, Avatar, Result, Flex, Input } from 'antd';
+import { Card, Row, Col, Empty, Button, Space, Typography, Tooltip, Modal, Form, List, Avatar, Result, Flex, Input, theme } from 'antd';
 import {
   PlusOutlined,
   EyeOutlined,
@@ -25,15 +25,19 @@ const CatalogoEmojiAvatar = ({ catalogoId }: { catalogoId: number }) => {
   // sin el tenant en la clave el emoji se filtraba de un tenant a otro en el
   // mismo navegador.
   const { user } = useAuthContext();
+  const { token } = theme.useToken();
   const [emoji, setEmoji] = useEmojiPreference(`flexinv_emoji_catalogo_${user?.tenant_id ?? 'anon'}_${catalogoId}`);
   return (
     <EmojiPicker value={emoji} onChange={setEmoji}>
+      {/* Mismo look que el avatar del dashboard principal (DashboardPage):
+          fondo con el color primario configurable y sombra suave. Antes
+          tenía un azul fijo que no seguía el tema. */}
       <Avatar
         size={48}
         icon={emoji ? undefined : <FolderOutlined />}
         style={{
-          backgroundColor: '#e6f4ff',
-          color:           '#1677ff',
+          backgroundColor: token.colorPrimary,
+          boxShadow:       `0 4px 14px ${token.colorPrimary}59`,
           cursor:          'pointer',
           fontSize:        emoji ? 24 : undefined,
         }}

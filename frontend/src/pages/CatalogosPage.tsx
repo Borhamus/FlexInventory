@@ -160,7 +160,7 @@ const CatalogosPage: React.FC = () => {
       okType: 'danger',
       cancelText: 'Cancelar',
       content: vinculado
-        ? `Se borrará el artículo "${item.nombre}" de forma PERMANENTE. Desaparecerá también del inventario #${item.inventario_id} y no se puede deshacer. Si solo querés sacarlo de este catálogo, usá "Quitar del catálogo".`
+        ? `Se borrará el artículo "${item.nombre}" de forma PERMANENTE. Desaparecerá también del inventario "${nombreInventario(item.inventario_id) ?? `#${item.inventario_id}`}" y no se puede deshacer. Si solo querés sacarlo de este catálogo, usá "Quitar del catálogo".`
         : `Se borrará el artículo "${item.nombre}" de forma PERMANENTE. Esta acción no se puede deshacer.`,
       onOk: async () => {
         await deleteItemMutation.mutateAsync(item.id);
@@ -176,7 +176,7 @@ const CatalogosPage: React.FC = () => {
       title: '¿Quitar este artículo del catálogo?',
       okText: 'Sí, quitar del catálogo',
       cancelText: 'Cancelar',
-      content: `El artículo "${item.nombre}" se desvincula de este catálogo, pero SIGUE existiendo en el inventario #${item.inventario_id} con su cantidad intacta. Podés volver a agregarlo cuando quieras.`,
+      content: `El artículo "${item.nombre}" se desvincula de este catálogo, pero SIGUE existiendo en el inventario "${nombreInventario(item.inventario_id) ?? `#${item.inventario_id}`}" con su cantidad intacta. Podés volver a agregarlo cuando quieras.`,
       onOk: async () => {
         await removeFromCatalogoMutation.mutateAsync(item.id);
         setSelectedItemId(null); // Limpiamos la selección del panel lateral
@@ -360,9 +360,11 @@ const CatalogosPage: React.FC = () => {
                       bodyStyle={{ padding: '12px' }}
                     >
                       <div style={{ marginBottom: 8, display: 'flex', justifyContent: 'space-between' }}>
-                        <Tooltip title={isFromInventory ? `Vinculado al Inventario #${item.inventario_id}` : "Ítem independiente"}>
+                        <Tooltip title={isFromInventory ? `Vinculado al inventario ${nombreInventario(item.inventario_id) ?? `#${item.inventario_id}`}` : "Ítem independiente"}>
                           {isFromInventory ?
-                            <Tag color="geekblue" icon={<DatabaseOutlined />}>Inv: {item.inventario_id}</Tag> :
+                            <Tag color="geekblue" icon={<DatabaseOutlined />} style={{ maxWidth: 160, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {nombreInventario(item.inventario_id) ?? `Inv #${item.inventario_id}`}
+                            </Tag> :
                             <Tag color="orange" icon={<GlobalOutlined />}>Suelto</Tag>
                           }
                         </Tooltip>
@@ -428,7 +430,7 @@ const CatalogosPage: React.FC = () => {
                 <div style={{ maxWidth: '80%' }}>
                   <Tag color={selectedItem.inventario_id ? "geekblue" : "orange"}>
                     {selectedItem.inventario_id
-                      ? `Perteneciente al Inventario #${selectedItem.inventario_id}${nombreInventario(selectedItem.inventario_id) ? ` - ${nombreInventario(selectedItem.inventario_id)}` : ''}`
+                      ? `Inventario: ${nombreInventario(selectedItem.inventario_id) ?? `#${selectedItem.inventario_id}`}`
                       : "ARTÍCULO INDEPENDIENTE"}
                   </Tag>
                   <Title level={4} style={{ marginTop: 8, marginBottom: 0 }}>{selectedItem.nombre}</Title>
