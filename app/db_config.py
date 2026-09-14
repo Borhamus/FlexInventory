@@ -83,8 +83,8 @@ def create_tenant_schema(tenant_schema: str) -> bool:
             conn = conn.execution_options(schema_translate_map={None: tenant_schema})
             TenantBase.metadata.create_all(conn)
 
-        print(f"✅ Schema '{tenant_schema}' creado exitosamente")
+        print(f"Schema '{tenant_schema}' creado exitosamente")
         return True
     except Exception as e:
-        print(f"❌ Error creando schema {tenant_schema}: {str(e)}")
+        print(f"Error creando schema {tenant_schema}: {str(e)}")
         raise

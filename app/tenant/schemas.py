@@ -19,6 +19,10 @@ class InventarioUpdate(BaseModel):
     atributos: Optional[Dict[str, Any]] = None
     defaults: Optional[Dict[str, Any]] = None
     fotos_habilitadas: Optional[bool] = None
+    # Pares {nombre_viejo: nombre_nuevo} para los atributos que el usuario
+    # renombró (en vez de borrar y crear uno nuevo) — permite migrar el
+    # valor ya cargado en los items en lugar de perderlo. Ver update_inventario.
+    renombres_atributos: Optional[Dict[str, str]] = None
 
 class InventarioResponse(InventarioBase):
     id: int
