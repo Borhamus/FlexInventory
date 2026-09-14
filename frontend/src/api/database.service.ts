@@ -20,7 +20,6 @@ export interface BackupFile {
   name:          string;
   modified_time: string | null;
   size:          string | null;
-  is_current:    boolean;
 }
 
 export const getDatabaseStatus = async (): Promise<DatabaseStatus> => {

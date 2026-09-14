@@ -798,10 +798,8 @@ def backup_now(current_user: user_dep, db: db_dep, body: Optional[BackupRequest]
 @router.get("/backup/list")
 def list_backups(current_user: user_dep, db: db_dep):
     """
-    Lista todos los backups disponibles en el Drive del tenant.
-    Devuelve:
-      - El archivo current.json (etiquetado como "Actual"), primero
-      - Todos los archivos de backups/, ordenados de más nuevo a más antiguo
+    Lista los backups históricos (backups/) del Drive del tenant, ordenados
+    de más nuevo a más antiguo. current.json no se incluye (ver abajo).
 
     No depende de tenant.google_drive_file_id / google_drive_folder_id —
     esos campos solo se escriben DESPUÉS del primer backup (en
@@ -824,29 +822,10 @@ def list_backups(current_user: user_dep, db: db_dep):
     root_folder_id    = _resolver_carpeta(access_token, tenant.google_drive_root_folder_id, "FlexInventory Storage")
     backups_folder_id = _resolver_carpeta(access_token, tenant.google_drive_folder_id, "backups", root_folder_id)
 
-    # 1. Archivo actual (current.json), buscado por nombre adentro de la
-    # carpeta raíz — no por el file_id guardado en el tenant.
-    resp = requests.get(
-        f"{DRIVE_API_URL}/files",
-        headers=headers,
-        params={
-            "q":      f"name='current.json' and '{root_folder_id}' in parents and trashed=false",
-            "fields": "files(id,name,modifiedTime,size)",
-        }
-    )
-    if resp.status_code == 200:
-        files = resp.json().get("files", [])
-        if files:
-            f = files[0]
-            result.append({
-                "file_id":       f["id"],
-                "name":          "Actual (current.json)",
-                "modified_time": f.get("modifiedTime"),
-                "size":          f.get("size"),
-                "is_current":    True,
-            })
-
-    # 2. Backups históricos, dentro de la subcarpeta "backups"
+    # Solo los históricos de la subcarpeta "backups". current.json no se
+    # lista a propósito: es una copia del último backup_*.json (ver
+    # ejecutar_backup), así que como opción de restore era redundante y el
+    # nombre "Actual" daba a entender que era el estado vivo de la base.
     resp = requests.get(
         f"{DRIVE_API_URL}/files",
         headers=headers,
@@ -863,19 +842,14 @@ def list_backups(current_user: user_dep, db: db_dep):
                 "name":          f["name"],
                 "modified_time": f.get("modifiedTime"),
                 "size":          f.get("size"),
-                "is_current":    False,
             })
 
     # Ya que estamos acá adentro con el Drive resuelto, aprovechamos para
     # sincronizar los IDs cacheados del tenant — así backup/restore que sí
     # los usan (ejecutar_backup, restore_from_drive_by_id) quedan al día
-    # sin esperar al próximo backup manual. La raíz y la carpeta de backups se
-    # cachean siempre (ya las resolvimos); el file_id de current.json solo si
-    # apareció en la lista.
+    # sin esperar al próximo backup manual.
     tenant.google_drive_root_folder_id = root_folder_id
     tenant.google_drive_folder_id      = backups_folder_id
-    if result and result[0]["is_current"]:
-        tenant.google_drive_file_id = result[0]["file_id"]
     db.commit()
 
     return {"backups": result}

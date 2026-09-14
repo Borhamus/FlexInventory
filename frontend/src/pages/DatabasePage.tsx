@@ -8,7 +8,7 @@ import {
   CloudUploadOutlined, CloudDownloadOutlined, DeleteOutlined,
   LinkOutlined, DisconnectOutlined, CheckCircleOutlined,
   CloseCircleOutlined, WarningOutlined,
-  FileOutlined, StarOutlined,
+  FileOutlined,
 } from '@ant-design/icons';
 import {
   getDatabaseStatus, getOAuthUrl, backupNow, listBackups,
@@ -74,8 +74,13 @@ const DatabasePage: React.FC = () => {
     }
   }, [searchParams]);
 
+  // No vuelve a poner loading=true en los refrescos: `loading` arranca en
+  // true y solo controla el spinner de la carga inicial. Si se activara en
+  // cada llamada, el early-return de abajo reemplazaría la página entera por
+  // el spinner (parpadeo) y desmontaría el contextHolder de las
+  // notificaciones, así que el "Backup completado" que se dispara justo
+  // antes de fetchStatus() moría antes de verse.
   const fetchStatus = async () => {
-    setLoading(true);
     try {
       const s = await getDatabaseStatus();
       setStatus(s);
@@ -178,7 +183,6 @@ const DatabasePage: React.FC = () => {
 
   const handleReset = () => {
     Modal.confirm({
-      title:   '⚠️ ¿Eliminar toda la base de datos?',
       icon:    <WarningOutlined style={{ color: '#ff4d4f' }} />,
       content: (
         <div>
@@ -386,9 +390,12 @@ const DatabasePage: React.FC = () => {
 
         <Row gutter={24} style={{ marginBottom: 20, opacity: autoEnabled ? 1 : 0.4 }}>
           <Col xs={24} sm={12}>
-            <Text strong>Frecuencia del backup diario</Text>
+            {/* Es un intervalo (IntervalTrigger en scheduler.py), no una
+                hora del día: el nombre backup_daily_hour del backend engaña.
+                168 h = una semana. */}
+            <Text strong>Backup periódico</Text>
             <br />
-            <Text type="secondary" style={{ fontSize: 12 }}>Cada cuántas horas (1–168)</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>Cada cuántas horas se repite (1 h a 168 h = una semana)</Text>
             <br />
             <InputNumber
               min={1} max={168} value={dailyHour}
@@ -398,9 +405,11 @@ const DatabasePage: React.FC = () => {
             />
           </Col>
           <Col xs={24} sm={12}>
-            <Text strong>Día del backup mensual</Text>
+            {/* Tope 28: CronTrigger(day=29..31) se saltea los meses que no
+                tienen ese día (febrero, y los de 30). Así corre todos los meses. */}
+            <Text strong>Backup mensual</Text>
             <br />
-            <Text type="secondary" style={{ fontSize: 12 }}>Día del mes (1–28), a las 03:00 UTC</Text>
+            <Text type="secondary" style={{ fontSize: 12 }}>Día del mes a las 03:00 UTC (hasta el 28, así corre todos los meses)</Text>
             <br />
             <InputNumber
               min={1} max={28} value={monthlyDay}
@@ -456,6 +465,18 @@ const DatabasePage: React.FC = () => {
         ) : backupList.length === 0 ? (
           <Text type="secondary">No se encontraron backups en Drive.</Text>
         ) : (
+          // La lista scrollea adentro de la modal (no la modal entera) y la
+          // barra toma el color del tema vía tokens, igual que el wrapper de
+          // la página. Los colores del item seleccionado también salen de
+          // tokens: hardcodeados en azul/gris claro se veían mal en oscuro y
+          // no seguían el color primario configurable.
+          <div style={{
+            maxHeight: '45vh',
+            overflowY: 'auto',
+            paddingRight: 4,
+            scrollbarWidth: 'thin',
+            scrollbarColor: `${token.colorTextTertiary} transparent`,
+          }}>
           <Radio.Group
             value={selectedFileId}
             onChange={(e) => setSelectedFileId(e.target.value)}
@@ -470,8 +491,8 @@ const DatabasePage: React.FC = () => {
                     padding: '10px 12px',
                     borderRadius: 8,
                     marginBottom: 6,
-                    border: selectedFileId === item.file_id ? '1.5px solid #1677ff' : '1.5px solid #f0f0f0',
-                    background: selectedFileId === item.file_id ? '#e6f4ff' : 'transparent',
+                    border: `1.5px solid ${selectedFileId === item.file_id ? token.colorPrimary : token.colorBorderSecondary}`,
+                    background: selectedFileId === item.file_id ? token.colorPrimaryBg : 'transparent',
                     transition: 'all 0.15s',
                   }}
                   onClick={() => setSelectedFileId(item.file_id)}
@@ -479,14 +500,9 @@ const DatabasePage: React.FC = () => {
                   <Space style={{ width: '100%', justifyContent: 'space-between' }}>
                     <Space>
                       <Radio value={item.file_id} />
-                      {item.is_current
-                        ? <StarOutlined style={{ color: '#1677ff' }} />
-                        : <FileOutlined style={{ color: '#8c8c8c' }} />
-                      }
+                      <FileOutlined style={{ color: token.colorTextTertiary }} />
                       <div>
-                        <Text strong style={{ color: item.is_current ? '#1677ff' : undefined }}>
-                          {item.name}
-                        </Text>
+                        <Text strong>{item.name}</Text>
                         <br />
                         <Text type="secondary" style={{ fontSize: 12 }}>
                           {formatDate(item.modified_time)}
@@ -501,6 +517,7 @@ const DatabasePage: React.FC = () => {
               )}
             />
           </Radio.Group>
+          </div>
         )}
       </Modal>
 
