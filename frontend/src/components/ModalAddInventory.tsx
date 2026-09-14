@@ -1,5 +1,5 @@
 import React from 'react';
-import { Modal, Form, Input, Button, Space, Select, Checkbox, theme } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, Checkbox, AutoComplete, theme } from 'antd';
 import { MinusCircleOutlined, PlusOutlined } from '@ant-design/icons';
 import { useCreateInventory, useConfigurarRoles } from '../hooks/useInventory';
 
@@ -17,6 +17,9 @@ const TIPO_OPTIONS = [
   { value: 'date',    label: 'Fecha' },
 ];
 
+const TIPOS_NUMERICOS_UNIDAD = new Set(['integer', 'natural', 'float']);
+const UNIDADES_SUGERIDAS = ['$', 'USD', '€', 'kg', 'g', 'L', 'm', 'cm', 'm³', 'un'];
+
 interface Props {
   open: boolean;
   onClose: () => void;
@@ -29,14 +32,22 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
   const { mutate: createInventory, isPending } = useCreateInventory();
   const { mutate: configurarRoles, isPending: isPendingRoles } = useConfigurarRoles();
 
+  const atributosDinamicos: { llave?: string; tipo?: string; unidad?: string }[] =
+    Form.useWatch('atributos_dinamicos', form) || [];
+
   const handleSubmit = () => {
     form.validateFields().then((values) => {
 
       const atributosFormateados: Record<string, string> = {};
+      const unidades: Record<string, string> = {};
       if (values.atributos_dinamicos) {
-        values.atributos_dinamicos.forEach((item: { llave: string; tipo: string }) => {
+        values.atributos_dinamicos.forEach((item: { llave: string; tipo: string; unidad?: string }) => {
           if (item?.llave) {
             atributosFormateados[item.llave] = item.tipo;
+            const simbolo = item.unidad?.trim();
+            if (simbolo && TIPOS_NUMERICOS_UNIDAD.has(item.tipo)) {
+              unidades[item.llave] = simbolo;
+            }
           }
         });
       }
@@ -54,6 +65,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
         nombre:      values.nombre,
         descripcion: values.descripcion,
         atributos:   atributosFormateados,
+        unidades,
         fotos_habilitadas: Boolean(values.fotos_habilitadas),
       };
 
@@ -155,7 +167,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                  <Space key={key} style={{ display: 'flex', marginBottom: 8 }} align="baseline" wrap>
                     <Form.Item
                       {...restField}
                       name={[name, 'llave']}
@@ -164,7 +176,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
                     >
                       <Input
                         placeholder="Nombre (ej: Color)"
-                        style={{ width: '220px' }}
+                        style={{ width: '200px' }}
                       />
                     </Form.Item>
                     <Form.Item
@@ -179,6 +191,16 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
                         options={TIPO_OPTIONS}
                       />
                     </Form.Item>
+                    {TIPOS_NUMERICOS_UNIDAD.has(atributosDinamicos[name]?.tipo ?? '') && (
+                      <Form.Item {...restField} name={[name, 'unidad']} style={{ margin: 0 }}>
+                        <AutoComplete
+                          options={UNIDADES_SUGERIDAS.map((u) => ({ value: u }))}
+                          style={{ width: '110px' }}
+                        >
+                          <Input placeholder="Unidad ($, kg…)" maxLength={8} />
+                        </AutoComplete>
+                      </Form.Item>
+                    )}
                     <MinusCircleOutlined
                       onClick={() => remove(name)}
                       style={{ color: token.colorError, marginLeft: '8px' }}

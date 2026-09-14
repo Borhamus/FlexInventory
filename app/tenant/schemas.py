@@ -7,6 +7,8 @@ from datetime import datetime
 class InventarioBase(BaseModel):
     nombre: str = Field(..., min_length=1, max_length=255)
     atributos: Dict[str, Any] = Field(default_factory=dict)
+    # Unidad/moneda por atributo numérico {nombre: simbolo}. Presentacional.
+    unidades: Dict[str, str] = Field(default_factory=dict)
 
 class InventarioCreate(InventarioBase):
     # Si el usuario no tilda el checkbox al crear, arranca en False — no
@@ -19,6 +21,7 @@ class InventarioUpdate(BaseModel):
     atributos: Optional[Dict[str, Any]] = None
     defaults: Optional[Dict[str, Any]] = None
     fotos_habilitadas: Optional[bool] = None
+    unidades: Optional[Dict[str, str]] = None
     # Pares {nombre_viejo: nombre_nuevo} para los atributos que el usuario
     # renombró (en vez de borrar y crear uno nuevo) — permite migrar el
     # valor ya cargado en los items en lugar de perderlo. Ver update_inventario.

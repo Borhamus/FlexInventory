@@ -4,12 +4,15 @@ import { EditOutlined, DeleteOutlined, PictureOutlined, EyeOutlined, CheckCircle
 import dayjs from 'dayjs';
 import { useAuthContext } from '../context/AuthContext';
 import { urlImagen } from '../api/axios.config';
+import { formatearValorConUnidad } from '../utils/formatearUnidad';
 
 const CELDA_VACIA = <Typography.Text type="secondary">—</Typography.Text>;
 
 interface InventoryTableProps {
   items: any[];
   atributos: any;
+  // Unidad/moneda por atributo numérico {nombre: simbolo}. Solo presentacional.
+  unidades?: Record<string, string>;
   searchTerm: string;
   hiddenColumns: string[];
   selectedRowKeys: React.Key[];
@@ -175,6 +178,7 @@ const TituloColumna: React.FC<any> = ({
 export const InventoryTable: React.FC<InventoryTableProps> = ({
   items,
   atributos,
+  unidades = {},
   searchTerm,
   hiddenColumns,
   selectedRowKeys,
@@ -295,7 +299,13 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
               const fecha = dayjs(value);
               return fecha.isValid() ? fecha.format('DD/MM/YYYY') : CELDA_VACIA;
             }
-            return String(value);
+            // Los decimales se muestran siempre con dos dígitos, conservando
+            // los ceros (15 -> 15.00, 15.5 -> 15.50).
+            const numero = Number(value);
+            const texto = (tipoAtributo === 'float' || tipoAtributo === 'number') && Number.isFinite(numero)
+              ? numero.toFixed(2)
+              : value;
+            return formatearValorConUnidad(texto, unidades[key]);
           }
         });
       });
@@ -349,7 +359,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       // los botones de editar/borrar.
       (col) => !hiddenColumns.includes(col.key as string) || ['nombre', 'acciones'].includes(col.key as string)
     );
-  }, [items, atributos, canActuar, canEditItems, canDeleteItems, hiddenColumns, onEditItem, onDeleteItem, fotosHabilitadas]);
+  }, [items, atributos, unidades, canActuar, canEditItems, canDeleteItems, hiddenColumns, onEditItem, onDeleteItem, fotosHabilitadas]);
 
   // Segunda pasada: toma las columnas ya armadas y les aplica el orden y
   // ancho que el usuario haya elegido a mano, más los handlers de drag

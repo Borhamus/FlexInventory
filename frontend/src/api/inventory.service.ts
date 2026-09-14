@@ -16,6 +16,9 @@ export interface Inventario {
   id: number;
   nombre: string;
   atributos: Record<string, string>; // schema: {"color": "string", "talle": "string"}
+  // Unidad/moneda por atributo numérico {nombre: simbolo}, ej: {"Precio": "$"}.
+  // Presentacional: no cambia el valor guardado, solo cómo se muestra.
+  unidades?: Record<string, string>;
   roles_atributos: Record<string, string>; // {"volumen_unitario": "peso_m3", ...}
   // Si los items de este inventario piden/muestran foto — se elige al
   // crear el inventario (checkbox) y se puede cambiar después editándolo.
@@ -153,7 +156,7 @@ export const inventoryService = {
     return response.data;
   },
 
-  updateInventory: async (id: number, payload: { nombre?: string; atributos?: Record<string, string>; defaults?: Record<string, unknown>; renombres_atributos?: Record<string, string> }) => {
+  updateInventory: async (id: number, payload: { nombre?: string; atributos?: Record<string, string>; defaults?: Record<string, unknown>; renombres_atributos?: Record<string, string>; unidades?: Record<string, string>; fotos_habilitadas?: boolean }) => {
     const response = await api.put(`/inventarios/${id}`, payload);
     return response.data;
   },

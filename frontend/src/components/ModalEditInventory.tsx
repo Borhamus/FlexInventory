@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { Modal, Form, Input, Button, Space, Select, Checkbox, message, theme } from 'antd';
+import { Modal, Form, Input, Button, Space, Select, Checkbox, AutoComplete, message, theme } from 'antd';
 import { MinusCircleOutlined, PlusOutlined, WarningOutlined } from '@ant-design/icons';
 import { useUpdateInventory, useConfigurarRoles } from '../hooks/useInventory';
 
@@ -19,6 +19,9 @@ const TIPO_OPTIONS = [
 // propósito (es una regla de 4 líneas) en vez de depender de una llamada al
 // backend solo para mostrar este aviso.
 const TIPOS_NUMERICOS = new Set(['integer', 'int', 'natural', 'float', 'number']);
+
+const TIPOS_NUMERICOS_UNIDAD = new Set(['integer', 'natural', 'float']);
+const UNIDADES_SUGERIDAS = ['$', 'USD', '€', 'kg', 'g', 'L', 'm', 'cm', 'm³', 'un'];
 
 const NOMBRE_TIPO: Record<string, string> = {
   string: 'Texto', str: 'Texto',
@@ -69,6 +72,7 @@ const ROLES_CONFIG: { key: string; label: string; tiposPermitidos: string[] }[] 
 interface AtributoFormValue {
   nombre?: string;
   tipo?: string;
+  unidad?: string;
 }
 
 interface ModalEditInventoryProps {
@@ -77,6 +81,7 @@ interface ModalEditInventoryProps {
   inventoryId: number;
   currentName: string;
   currentAtributos: Record<string, string>;
+  currentUnidades?: Record<string, string>;
   currentRolesAtributos?: Record<string, string>;
   currentFotosHabilitadas?: boolean;
 }
@@ -87,6 +92,7 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
   inventoryId,
   currentName,
   currentAtributos = {},
+  currentUnidades = {},
   currentRolesAtributos = {},
   currentFotosHabilitadas = false,
 }) => {
@@ -109,12 +115,12 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
         // (igual que `isNew`): viajan "escondidos" en el store del form para
         // poder detectar, al guardar, si el usuario renombró un atributo ya
         // existente y/o le cambió el tipo — ver handleSubmit.
-        atributos: Object.entries(currentAtributos).map(([nombre, tipo]) => ({ nombre, tipo, isNew: false, original_nombre: nombre, original_tipo: tipo })),
+        atributos: Object.entries(currentAtributos).map(([nombre, tipo]) => ({ nombre, tipo, unidad: currentUnidades[nombre], isNew: false, original_nombre: nombre, original_tipo: tipo })),
         roles: currentRolesAtributos,
         fotos_habilitadas: currentFotosHabilitadas,
       });
     }
-  }, [isOpen, currentName, currentAtributos, currentRolesAtributos, currentFotosHabilitadas, form]);
+  }, [isOpen, currentName, currentAtributos, currentUnidades, currentRolesAtributos, currentFotosHabilitadas, form]);
 
   const makeDefaultValidator = (fieldName: number) => ({
     validator(_: unknown, value: string) {
@@ -167,12 +173,19 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
       // valores >= 0 y se descartan los negativos/decimales — pérdida parcial,
       // aviso más suave que cambiosDeTipoRiesgosos.
       const cambiosParciales: { nombre: string; tipoViejo: string; tipoNuevo: string }[] = [];
+      // Unidad/moneda por atributo numérico. Reemplazo completo, igual que
+      // atributos/roles: se manda el estado actual del form.
+      const unidades: Record<string, string> = {};
 
       if (values.atributos) {
-        values.atributos.forEach((attr: { nombre: string; tipo: string; default?: string }, index: number) => {
+        values.atributos.forEach((attr: { nombre: string; tipo: string; default?: string; unidad?: string }, index: number) => {
           if (attr?.nombre) {
             atributosFormateados[attr.nombre] = attr.tipo;
             if (attr.default) defaults[attr.nombre] = attr.default;
+            const simbolo = attr.unidad?.trim();
+            if (simbolo && TIPOS_NUMERICOS_UNIDAD.has(attr.tipo)) {
+              unidades[attr.nombre] = simbolo;
+            }
             // `original_nombre`/`original_tipo` no tienen Form.Item propio,
             // así que no llegan en `values` — se leen directo del store,
             // igual que `isNew`.
@@ -200,9 +213,10 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
         });
       }
 
-      const payload: { nombre: string; atributos: Record<string, string>; defaults?: Record<string, unknown>; renombres_atributos?: Record<string, string>; fotos_habilitadas: boolean } = {
+      const payload: { nombre: string; atributos: Record<string, string>; defaults?: Record<string, unknown>; renombres_atributos?: Record<string, string>; unidades: Record<string, string>; fotos_habilitadas: boolean } = {
         nombre: values.nombre,
         atributos: atributosFormateados,
+        unidades,
         fotos_habilitadas: Boolean(values.fotos_habilitadas),
       };
       if (Object.keys(defaults).length > 0) payload.defaults = defaults;
@@ -337,7 +351,7 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
                 {fields.map((field) => {
                   const isNew = form.getFieldValue(['atributos', field.name, 'isNew']);
                   return (
-                    <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline">
+                    <Space key={field.key} style={{ display: 'flex', marginBottom: 8 }} align="baseline" wrap>
                       <Form.Item
                         name={[field.name, 'nombre']}
                         rules={[{ required: true, message: 'El nombre no puede estar vacío' }]}
@@ -345,7 +359,7 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
                       >
                         <Input placeholder="Ej: Marca, Tamaño" style={{ width: '160px' }} />
                       </Form.Item>
-                      
+
                       <Form.Item
                         name={[field.name, 'tipo']}
                         rules={[{ required: true, message: 'Elegí un tipo' }]}
@@ -357,7 +371,18 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
                           options={TIPO_OPTIONS}
                         />
                       </Form.Item>
-                      
+
+                      {TIPOS_NUMERICOS_UNIDAD.has(atributosWatch[field.name]?.tipo ?? '') && (
+                        <Form.Item name={[field.name, 'unidad']} style={{ margin: 0 }}>
+                          <AutoComplete
+                            options={UNIDADES_SUGERIDAS.map((u) => ({ value: u }))}
+                            style={{ width: '110px' }}
+                          >
+                            <Input placeholder="Unidad ($, kg…)" maxLength={8} />
+                          </AutoComplete>
+                        </Form.Item>
+                      )}
+
                       {isNew && (
                         <Form.Item
                           name={[field.name, 'default']}

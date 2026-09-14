@@ -5,7 +5,7 @@ from typing import List, Dict, Any
 from app.auditoria.auditor import Auditor
 from app.tenant import schemas, models
 from app.tenant.dependencies import get_tenant_db, require_permission
-from app.tenant.validators import TYPE_DEFAULTS, validate_inventario_atributos, parse_value_by_type
+from app.tenant.validators import TYPE_DEFAULTS, validate_inventario_atributos, parse_value_by_type, validate_unidades
 from app.tenant.roles_atributos import validate_roles_atributos, clean_orphan_roles
 from app.tenant.alertas import calcular_alertas
 from app.tenant.bloques_personalizados import validar_bloques_personalizados, calcular_bloques, limpiar_bloques_huerfanos
@@ -122,6 +122,7 @@ def create_inventario(
     # Validar formato {nombre: tipo} y tipos permitidos (string/int/float/bool/date)
     if inv_data.get("atributos"):
         inv_data["atributos"] = validate_inventario_atributos(inv_data["atributos"])
+    inv_data["unidades"] = validate_unidades(inv_data.get("unidades"), inv_data.get("atributos"))
     new_inv = models.Inventario(**inv_data)
     db.add(new_inv)
     db.flush()
@@ -281,6 +282,15 @@ def update_inventario(
         # bloque entero (ver limpiar_bloques_huerfanos).
         if inv.bloques_personalizados:
             update_data["bloques_personalizados"] = limpiar_bloques_huerfanos(inv.bloques_personalizados, update_data["atributos"])
+        # Unidades: reemplazo completo si el cliente las mandó; si no, se parte
+        # de las actuales. En ambos casos se remapea el nombre de los atributos
+        # renombrados y se descartan las de atributos borrados o que dejaron de
+        # ser numéricos (validate_unidades filtra por tipo).
+        unidades_base = update_data.get("unidades", inv.unidades or {}) or {}
+        unidades_remapeadas = {renombres.get(k, k): v for k, v in unidades_base.items()}
+        update_data["unidades"] = validate_unidades(unidades_remapeadas, update_data["atributos"])
+    elif "unidades" in update_data:
+        update_data["unidades"] = validate_unidades(update_data["unidades"], inv.atributos or {})
     for field, value in update_data.items():
         setattr(inv, field, value)
     db.commit()

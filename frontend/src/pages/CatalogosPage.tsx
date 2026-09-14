@@ -48,6 +48,7 @@ import { useRemoveItemFromCatalogo } from '../hooks/useCatalogos';
 import { useInventories } from '../hooks/useInventory';
 import { useAuthContext } from '../context/AuthContext';
 import { urlImagen } from '../api/axios.config';
+import { formatearValorConUnidad } from '../utils/formatearUnidad';
 import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
@@ -81,7 +82,7 @@ const CatalogosPage: React.FC = () => {
   // - Casilla (boolean) → ícono ✓/✗ en vez de "true"/"false". Se infiere por el
   //   valor porque acá no hay mapa de tipos de atributos (los items pueden venir
   //   de distintos inventarios). Las fechas quedan como texto por el mismo motivo.
-  const renderValorAtributo = (value: any): React.ReactNode => {
+  const renderValorAtributo = (value: any, tipo?: string, unidad?: string): React.ReactNode => {
     if (value === undefined || value === null || value === '') {
       return <Text type="secondary">—</Text>;
     }
@@ -91,7 +92,12 @@ const CatalogosPage: React.FC = () => {
         ? <CheckCircleOutlined style={{ color: token.colorSuccess }} />
         : <CloseCircleOutlined style={{ color: token.colorError }} />;
     }
-    return String(value);
+    // Los decimales se muestran siempre con dos dígitos, conservando los ceros.
+    const numero = Number(value);
+    const texto = (tipo === 'float' || tipo === 'number') && Number.isFinite(numero)
+      ? numero.toFixed(2)
+      : value;
+    return formatearValorConUnidad(texto, unidad);
   };
 
   const { data, isLoading, error } = useCatalogo(catalogoId);
@@ -100,6 +106,10 @@ const CatalogosPage: React.FC = () => {
   const { data: inventarios } = useInventories();
   const nombreInventario = (invId: number | null | undefined) =>
     inventarios?.find((inv) => inv.id === invId)?.nombre;
+  const unidadDe = (item: any, key: string): string | undefined =>
+    inventarios?.find((inv) => inv.id === item?.inventario_id)?.unidades?.[key];
+  const tipoDe = (item: any, key: string): string | undefined =>
+    inventarios?.find((inv) => inv.id === item?.inventario_id)?.atributos?.[key];
   const [selectedItemId, setSelectedItemId] = useState<number | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -374,7 +384,7 @@ const CatalogosPage: React.FC = () => {
                             overflow: 'hidden',
                             textOverflow: 'ellipsis'
                           }}>
-                            <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase' }}>{key}:</Text> {renderValorAtributo(value)}
+                            <Text type="secondary" style={{ fontSize: 11, textTransform: 'uppercase' }}>{key}:</Text> {renderValorAtributo(value, tipoDe(item, key), unidadDe(item, key))}
                           </div>
                         ))}
 
@@ -455,7 +465,7 @@ const CatalogosPage: React.FC = () => {
                   </Descriptions.Item>
                   {Object.entries(selectedItem.atributos).map(([key, value]: any) => (
                     <Descriptions.Item key={key} label={key}>
-                      {renderValorAtributo(value)}
+                      {renderValorAtributo(value, tipoDe(selectedItem, key), unidadDe(selectedItem, key))}
                     </Descriptions.Item>
                   ))}
                 </Descriptions>

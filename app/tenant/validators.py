@@ -162,6 +162,41 @@ def validate_inventario_atributos(atributos: Dict[str, str]) -> Dict[str, str]:
     return {k.strip(): v.lower().strip() for k, v in atributos.items()}
 
 
+NUMERIC_TYPES = {"integer", "int", "natural", "float", "number"}
+
+MAX_UNIDAD_LEN = 8
+
+
+def validate_unidades(
+    unidades: Dict[str, str],
+    inventario_atributos: Dict[str, str],
+) -> Dict[str, str]:
+    """
+    Limpia el mapa {nombre_atributo: simbolo} de unidades. Es presentacional:
+    solo se conservan las unidades de atributos que existen y son numéricos,
+    con el símbolo recortado a MAX_UNIDAD_LEN. Cualquier entrada inválida
+    (atributo inexistente, no numérico, símbolo vacío) se descarta en silencio.
+    """
+    if not unidades:
+        return {}
+    if not isinstance(unidades, dict):
+        raise HTTPException(
+            status_code=400,
+            detail="Las unidades deben ser un objeto {atributo: simbolo}",
+        )
+    limpio = {}
+    for nombre, simbolo in unidades.items():
+        tipo = (inventario_atributos or {}).get(nombre)
+        if not isinstance(tipo, str) or tipo.lower().strip() not in NUMERIC_TYPES:
+            continue
+        if not isinstance(simbolo, str):
+            continue
+        s = simbolo.strip()[:MAX_UNIDAD_LEN]
+        if s:
+            limpio[nombre] = s
+    return limpio
+
+
 def validate_single_atributo(nombre: str, tipo: str) -> Dict[str, str]:
     """
     Valida un único atributo para agregar a un inventario.

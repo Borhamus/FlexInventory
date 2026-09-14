@@ -25,6 +25,10 @@ class Inventario(TenantBase):
     # Lista de bloques de estadística armados por el usuario (texto editable
     # + métricas calculadas). Ver app/tenant/bloques_personalizados.py.
     bloques_personalizados = Column(JSONB, default=[])
+    # Mapa {nombre_atributo: simbolo} con la unidad/moneda de cada atributo
+    # numérico, ej: {"Precio": "$", "Peso": "kg"}. Es puramente presentacional
+    # (no afecta el valor guardado). Ver validate_unidades en validators.py.
+    unidades = Column(JSONB, default={})
     # Si los items de este inventario piden/muestran foto. Default True acá
     # es solo para inventarios YA EXISTENTES al migrar (no ocultarles de
     # golpe una foto que ya hayan cargado) — los inventarios nuevos siempre

@@ -68,5 +68,9 @@ def run_migrations() -> None:
                 f'ALTER TABLE "{schema}".inventario '
                 f"ADD COLUMN IF NOT EXISTS fotos_habilitadas BOOLEAN NOT NULL DEFAULT true"
             ))
+            conn.execute(text(
+                f'ALTER TABLE "{schema}".inventario '
+                f"ADD COLUMN IF NOT EXISTS unidades JSONB DEFAULT '{{}}'::jsonb"
+            ))
 
     logger.info(f"[Migraciones] roles_atributos verificado en {len(tenants)} tenant(s).")

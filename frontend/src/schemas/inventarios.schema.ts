@@ -7,6 +7,7 @@ export const inventarioSchema = z.object({
   nombre: z.string().min(3, 'Nombre demasiado corto'),
   // Aquí definimos que las claves son strings y los valores tipos (ej: "string", "number")
   atributos: z.record(z.string()).default({}),
+  unidades: z.record(z.string()).default({}),
   roles_atributos: z.record(z.string()).default({}),
   items: z.array(itemSchema).default([]),
   creado_en: z.string(),
