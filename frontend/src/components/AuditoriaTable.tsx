@@ -13,6 +13,9 @@ interface AuditoriaTableProps {
   loading: boolean;
   pagination: TablePaginationConfig;
   onChange: (pagination: TablePaginationConfig) => void;
+  // Se llama después de vaciar el historial para que el padre recargue la
+  // tabla (que queda vacía) — si no, seguía mostrando los registros viejos.
+  onVaciado?: () => void;
 }
 
 // ─── DICCIONARIO DE TRADUCCIÓN PARA EL TENANT ──────────────────────────
@@ -48,7 +51,7 @@ const DetalleAuditoria: React.FC<{ record: AuditLog }> = ({ record }) => {
 };
 // ───────────────────────────────────────────────────────────────────────
 
-const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, pagination, onChange }) => {
+const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, pagination, onChange, onVaciado }) => {
 
   const { isTenant } = useAuthContext();
 
@@ -56,6 +59,7 @@ const AuditoriaTable: React.FC<AuditoriaTableProps> = ({ data, loading, paginati
     try {
       await auditoriaService.vaciarHistorial();
       message.success('Historial de operaciones vaciado correctamente');
+      onVaciado?.();
     } catch (error) {
       console.error(error);
       message.error('No se pudo vaciar el historial');

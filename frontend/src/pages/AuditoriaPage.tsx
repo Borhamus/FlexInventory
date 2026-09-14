@@ -66,6 +66,7 @@ const AuditoriaPage: React.FC = () => {
           loading={loading}
           pagination={pagination}
           onChange={handleTableChange}
+          onVaciado={() => fetchHistorial(1, pagination.pageSize || DEFAULT_PAGE_SIZE)}
         />
       </Card>
     </div>
