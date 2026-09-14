@@ -55,6 +55,8 @@ const ModalBulkEdit: React.FC<ModalBulkEditProps> = ({
     if (!selectedAttr) return <Input disabled placeholder="Seleccioná un atributo primero" />;
 
     switch (selectedAttr.tipo) {
+      case 'natural':
+        return <InputNumber min={0} precision={0} style={{ width: '100%' }} placeholder="Ingresá el número" />;
       case 'integer':
       case 'number':
       case 'float':

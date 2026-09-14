@@ -67,18 +67,19 @@ _OPERADORES_POR_TIPO = {
     "boolean": {"eq", "neq"}, "bool": {"eq", "neq"},
     "string": {"eq", "neq"}, "str": {"eq", "neq"},
     "integer": set(OPERADORES_SQL), "int": set(OPERADORES_SQL),
+    "natural": set(OPERADORES_SQL),
     "float": set(OPERADORES_SQL), "number": set(OPERADORES_SQL),
     "date": set(OPERADORES_SQL),
 }
 
 _CAST_POR_TIPO = {
-    "integer": "float8", "int": "float8", "float": "float8", "number": "float8",
+    "integer": "float8", "int": "float8", "natural": "float8", "float": "float8", "number": "float8",
     "date": "date",
     "boolean": "boolean", "bool": "boolean",
     # string: sin cast, comparación de texto directa
 }
 
-_TIPOS_NUMERICOS = {"integer", "int", "float", "number"}
+_TIPOS_NUMERICOS = {"integer", "int", "natural", "float", "number"}
 
 _REGEX_CLAVE = re.compile(r"^[a-zA-Z_][a-zA-Z0-9_]*$")
 _REGEX_PLACEHOLDER = re.compile(r"\{([a-zA-Z_][a-zA-Z0-9_]*)\}")

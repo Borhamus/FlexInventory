@@ -32,6 +32,7 @@ const OPERADORES_POR_TIPO: Record<string, string[]> = {
   boolean: ['eq', 'neq'], bool: ['eq', 'neq'],
   string: ['eq', 'neq'], str: ['eq', 'neq'],
   integer: ['eq', 'neq', 'gt', 'lt', 'gte', 'lte'], int: ['eq', 'neq', 'gt', 'lt', 'gte', 'lte'],
+  natural: ['eq', 'neq', 'gt', 'lt', 'gte', 'lte'],
   float: ['eq', 'neq', 'gt', 'lt', 'gte', 'lte'], number: ['eq', 'neq', 'gt', 'lt', 'gte', 'lte'],
   date: ['eq', 'neq', 'gt', 'lt', 'gte', 'lte'],
 };
@@ -40,12 +41,12 @@ const OPERADORES_POR_TIPO: Record<string, string[]> = {
 // en los chips — nada de "string"/"boolean" técnico.
 const TIPO_LABEL_CORTO: Record<string, string> = {
   string: 'texto', str: 'texto',
-  integer: 'número', int: 'número', float: 'número', number: 'número',
+  integer: 'número', int: 'número', natural: 'número', float: 'número', number: 'número',
   boolean: 'sí/no', bool: 'sí/no',
   date: 'fecha',
 };
 
-const ES_NUMERICO = (tipo: string) => ['integer', 'int', 'float', 'number'].includes(tipo);
+const ES_NUMERICO = (tipo: string) => ['integer', 'int', 'natural', 'float', 'number'].includes(tipo);
 const ES_BOOLEAN = (tipo: string) => ['boolean', 'bool'].includes(tipo);
 const ES_FECHA = (tipo: string) => tipo === 'date';
 

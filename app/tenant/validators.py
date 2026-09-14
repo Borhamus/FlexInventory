@@ -13,13 +13,14 @@ from datetime import datetime
 
 # ==================== CONSTANTES ====================
 
-ALLOWED_TYPES = {"string", "str", "integer", "int", "float", "number", "boolean", "bool", "date"}
+ALLOWED_TYPES = {"string", "str", "integer", "int", "natural", "float", "number", "boolean", "bool", "date"}
 
 TYPE_DEFAULTS = {
     "string": "",
     "str": "",
     "integer": 0,
     "int": 0,
+    "natural": 0,
     "float": 0.0,
     "number": 0.0,
     "boolean": False,
@@ -32,6 +33,7 @@ TYPE_EXAMPLES = {
     "str": "ejemplo_texto",
     "integer": 0,
     "int": 0,
+    "natural": 0,
     "float": 0.0,
     "number": 0.0,
     "boolean": True,
@@ -65,7 +67,13 @@ def parse_value_by_type(value: Any, expected_type: str) -> Any:
         
         elif expected_type in ("integer", "int"):
             return int(value)
-        
+
+        elif expected_type == "natural":
+            entero = int(value)
+            if entero < 0:
+                raise ValueError("un número natural no puede ser negativo")
+            return entero
+
         elif expected_type in ("float", "number"):
             return float(value)
         
@@ -250,46 +258,44 @@ def validate_item_attributes(
     
     Returns:
         Diccionario con los atributos validados y convertidos al tipo correcto
-    
+
     Raises:
-        HTTPException: Si faltan atributos requeridos o hay errores de tipo
+        HTTPException: Si algún atributo proporcionado tiene un tipo inválido
     """
     # Si el inventario no tiene atributos definidos, permitir cualquier atributo
     if not inventario_atributos:
         return item_atributos or {}
-    
+
     if not item_atributos:
         item_atributos = {}
-    
+
     validated_atributos = {}
-    missing_attributes = []
     type_errors = []
-    
-    # Verificar que todos los atributos requeridos estén presentes y con el tipo correcto
+
+    # Los atributos del inventario son opcionales a nivel item: si no se
+    # proporciona un valor (ausente, None o cadena vacía) no se guarda. Solo
+    # se valida el tipo de los que sí traen valor.
     for attr_name, attr_type in inventario_atributos.items():
         if attr_name not in item_atributos:
-            missing_attributes.append(f"{attr_name} ({attr_type})")
-        else:
-            try:
-                validated_value = parse_value_by_type(item_atributos[attr_name], attr_type)
-                validated_atributos[attr_name] = validated_value
-            except ValueError as e:
-                type_errors.append(f"{attr_name}: {str(e)}")
-    
+            continue
+        value = item_atributos[attr_name]
+        if value is None or (isinstance(value, str) and value.strip() == ""):
+            continue
+        try:
+            validated_atributos[attr_name] = parse_value_by_type(value, attr_type)
+        except ValueError as e:
+            type_errors.append(f"{attr_name}: {str(e)}")
+
     # Agregar atributos adicionales que no están en la definición del inventario
     # (permitimos atributos extra para flexibilidad)
     for attr_name, attr_value in item_atributos.items():
         if attr_name not in inventario_atributos:
             validated_atributos[attr_name] = attr_value
-    
-    # Si hay errores, lanzar excepción con información detallada
-    if missing_attributes or type_errors:
-        errors = []
-        if missing_attributes:
-            errors.append(f"Atributos faltantes: {', '.join(missing_attributes)}")
-        if type_errors:
-            errors.append(f"Errores de tipo: {'; '.join(type_errors)}")
-        
+
+    # Si hay errores de tipo, lanzar excepción con información detallada
+    if type_errors:
+        errors = [f"Errores de tipo: {'; '.join(type_errors)}"]
+
         detail = {
             "message": "Los atributos del item no cumplen con los requisitos del inventario",
             "errors": errors,

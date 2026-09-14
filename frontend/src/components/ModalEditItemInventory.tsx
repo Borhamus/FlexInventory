@@ -85,6 +85,8 @@ export const ModalEditItemInventory: React.FC<Props> = ({
       switch (tipo) {
         case 'integer':
           return <InputNumber style={{ width: '100%' }} />;
+        case 'natural':
+          return <InputNumber min={0} precision={0} style={{ width: '100%' }} />;
         case 'float':
           return <InputNumber step={0.1} style={{ width: '100%' }} />;
         case 'boolean':
@@ -193,9 +195,6 @@ export const ModalEditItemInventory: React.FC<Props> = ({
               name={['atributos', nombreAtributo]}
               label={nombreAtributo}
               valuePropName={tipoAtributo === 'boolean' ? 'checked' : 'value'}
-              // Obligatorios (el backend los exige). Los booleanos (Switch) no
-              // llevan required: siempre tienen valor y un required forzaría "Sí".
-              rules={tipoAtributo === 'boolean' ? [] : [{ required: true, message: 'Campo obligatorio' }]}
             >
               {renderizarInput(tipoAtributo)}
             </Form.Item>

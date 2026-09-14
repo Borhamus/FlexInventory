@@ -193,12 +193,12 @@ def bulk_delete_items(
 # (comparación de texto directa), válido para ordenar pero no para filtrar
 # por rango ("desde-hasta" no tiene sentido pedido para string/boolean).
 _TIPO_SQL_ORDEN = {
-    "integer": "float8", "int": "float8", "float": "float8", "number": "float8",
+    "integer": "float8", "int": "float8", "natural": "float8", "float": "float8", "number": "float8",
     "date": "date",
     "boolean": "boolean", "bool": "boolean",
     "string": None, "str": None,
 }
-_TIPOS_FILTRABLES = {"integer", "int", "float", "number", "date"}
+_TIPOS_FILTRABLES = {"integer", "int", "natural", "float", "number", "date"}
 
 # Columnas reales de la tabla `item` habilitadas para ordenar, y con qué
 # tipo se interpretan los límites si además se filtra por rango sobre ellas.

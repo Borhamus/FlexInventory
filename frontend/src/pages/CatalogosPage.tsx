@@ -20,6 +20,7 @@ import {
   Form,  // <-- Añadido para edición de datos
   Input, // <-- Añadido
   InputNumber, // <-- Añadido
+  DatePicker,
   Avatar,
   Image,
   Switch,
@@ -47,8 +48,27 @@ import { useRemoveItemFromCatalogo } from '../hooks/useCatalogos';
 import { useInventories } from '../hooks/useInventory';
 import { useAuthContext } from '../context/AuthContext';
 import { urlImagen } from '../api/axios.config';
+import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
+
+const renderizarInputAtributo = (tipo: string) => {
+  switch (tipo) {
+    case 'integer':
+      return <InputNumber style={{ width: '100%' }} />;
+    case 'natural':
+      return <InputNumber min={0} precision={0} style={{ width: '100%' }} />;
+    case 'float':
+      return <InputNumber step={0.1} style={{ width: '100%' }} />;
+    case 'boolean':
+      return <Switch checkedChildren={<CheckOutlined />} unCheckedChildren={<CloseOutlined />} />;
+    case 'date':
+      return <DatePicker style={{ width: '100%' }} format="DD/MM/YYYY" />;
+    case 'string':
+    default:
+      return <Input />;
+  }
+};
 
 const CatalogosPage: React.FC = () => {
   const { id } = useParams();
@@ -160,15 +180,27 @@ const CatalogosPage: React.FC = () => {
   const tiposAtributosItem: Record<string, string> =
     inventarios?.find((inv) => inv.id === selectedItem?.inventario_id)?.atributos ?? {};
 
+  // Se editan TODOS los atributos definidos en el inventario, no solo los que
+  // el item ya tiene cargados — como los atributos son opcionales, un item
+  // puede no tener algunos y hay que poder completarlos desde acá. Para un
+  // item suelto (sin inventario) se caen a los que el propio item tenga.
+  const atributosARenderizar: [string, string][] =
+    Object.keys(tiposAtributosItem).length > 0
+      ? Object.entries(tiposAtributosItem)
+      : Object.keys(selectedItem?.atributos || {}).map((k) => [k, 'string'] as [string, string]);
+
   const openEditModal = () => {
     if (!selectedItem) return;
-    // Coaccionar los boolean a booleano real: el Switch (valuePropName=checked)
-    // necesita true/false, no el string "true"/"false".
     const atributosForm: Record<string, any> = {};
-    Object.entries(selectedItem.atributos).forEach(([k, v]) => {
-      atributosForm[k] = tiposAtributosItem[k] === 'boolean'
-        ? (v === true || String(v).toLowerCase() === 'true')
-        : v;
+    atributosARenderizar.forEach(([key, tipo]) => {
+      const valor = selectedItem.atributos?.[key];
+      if (tipo === 'boolean') {
+        atributosForm[key] = valor === true || String(valor).toLowerCase() === 'true';
+      } else if (tipo === 'date') {
+        atributosForm[key] = valor && dayjs(valor).isValid() ? dayjs(valor) : undefined;
+      } else {
+        atributosForm[key] = valor;
+      }
     });
     form.setFieldsValue({
       nombre: selectedItem.nombre,
@@ -183,17 +215,24 @@ const CatalogosPage: React.FC = () => {
     try {
       const values = await form.validateFields();
       const { nombre, cantidad, ...atributos } = values;
-      
+
       if(!selectedItem){
         return;
       }
+
+      const atributosLimpios = { ...atributos };
+      Object.keys(atributosLimpios).forEach((key) => {
+        if (dayjs.isDayjs(atributosLimpios[key])) {
+          atributosLimpios[key] = atributosLimpios[key].format('YYYY-MM-DD');
+        }
+      });
 
       await updateItemMutation.mutateAsync({
         id: selectedItem.id,
         data: {
           nombre,
           cantidad,
-          atributos // Mapea los campos extras de vuelta al JSON de atributos
+          atributos: atributosLimpios
         }
       });
       setIsEditModalOpen(false);
@@ -510,25 +549,20 @@ const CatalogosPage: React.FC = () => {
             <InputNumber min={0} style={{ width: '100%' }} />
           </Form.Item>
 
-          {/* Generación dinámica de inputs basados en los atributos actuales de este item */}
-          {selectedItem && Object.keys(selectedItem.atributos || {}).length > 0 && (
+          {/* Inputs dinámicos por cada atributo definido en el inventario */}
+          {selectedItem && atributosARenderizar.length > 0 && (
             <>
               <Divider style={{ fontSize: 12, margin: '12px 0' }}>Atributos específicos</Divider>
-              {Object.keys(selectedItem.atributos).map((key) => {
-                const esBool = tiposAtributosItem[key] === 'boolean';
-                return (
-                  <Form.Item
-                    key={key}
-                    name={key}
-                    label={key.toUpperCase()}
-                    valuePropName={esBool ? 'checked' : 'value'}
-                  >
-                    {esBool
-                      ? <Switch checkedChildren={<CheckOutlined />} unCheckedChildren={<CloseOutlined />} />
-                      : <Input />}
-                  </Form.Item>
-                );
-              })}
+              {atributosARenderizar.map(([key, tipo]) => (
+                <Form.Item
+                  key={key}
+                  name={key}
+                  label={key.toUpperCase()}
+                  valuePropName={tipo === 'boolean' ? 'checked' : 'value'}
+                >
+                  {renderizarInputAtributo(tipo)}
+                </Form.Item>
+              ))}
             </>
           )}
         </Form>

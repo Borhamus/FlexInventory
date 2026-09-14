@@ -25,12 +25,16 @@ def _perm(resource: str, action: str):
 #     nada que convertir.
 #   - Entero <-> real, o numérico -> texto: se convierte valor por valor
 #     (ej. 5 -> "5", 5.0 -> 5). Un texto libre siempre es representable.
+#   - Numérico -> natural: se convierte valor por valor conservando los >= 0
+#     y descartando los negativos (parse_value_by_type tira ValueError y el
+#     valor se descarta solo para ese item); los decimales se truncan. El
+#     frontend avisa que "algunos valores pueden perderse" antes de guardar.
 #   - Cualquier otra combinación (texto -> otra cosa, o cualquiera <-> fecha):
 #     no hay forma confiable de adivinar el valor, así que se descarta en vez
 #     de dejarlo mal tipado bajo el nombre/tipo nuevo. El frontend avisa de
 #     esto ANTES de guardar (ver ModalEditInventory) para que no sea una
 #     sorpresa.
-_TIPOS_NUMERICOS = {"integer", "int", "float", "number"}
+_TIPOS_NUMERICOS = {"integer", "int", "natural", "float", "number"}
 
 
 def _normalizar_tipo(tipo: str) -> str:

@@ -160,7 +160,7 @@ ESTRATEGIAS: Dict[str, EstrategiaAtributo] = {
 
 # Sinónimos de tipo → estrategia (mismo vocabulario que ALLOWED_TYPES en validators.py)
 _TIPO_A_ESTRATEGIA = {
-    "integer": "numerico", "int": "numerico", "float": "numerico", "number": "numerico",
+    "integer": "numerico", "int": "numerico", "natural": "numerico", "float": "numerico", "number": "numerico",
     "boolean": "boolean", "bool": "boolean",
     "date": "date",
     "string": "string", "str": "string",

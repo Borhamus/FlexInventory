@@ -30,7 +30,7 @@ class RolAtributo:
 ROLES_REGISTRY: Dict[str, RolAtributo] = {
     "volumen_unitario": RolAtributo(
         nombre="volumen_unitario",
-        tipos_permitidos=frozenset({"integer", "int", "float", "number"}),
+        tipos_permitidos=frozenset({"integer", "int", "natural", "float", "number"}),
     ),
     "fecha_reposicion": RolAtributo(
         nombre="fecha_reposicion",

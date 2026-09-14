@@ -4,9 +4,10 @@ import { MinusCircleOutlined, PlusOutlined, WarningOutlined } from '@ant-design/
 import { useUpdateInventory, useConfigurarRoles } from '../hooks/useInventory';
 
 const TIPO_OPTIONS = [
+  { value: 'integer', label: 'N° Entero' },
+  { value: 'natural', label: 'N° Natural' },
+  { value: 'float',   label: 'N° Decimal' },
   { value: 'string',  label: 'Texto' },
-  { value: 'integer', label: 'Entero' },
-  { value: 'float',   label: 'Decimal' },
   { value: 'boolean', label: 'Casilla' },
   { value: 'date',    label: 'Fecha' },
 ];
@@ -17,7 +18,18 @@ const TIPO_OPTIONS = [
 // que avisarle al usuario ANTES de guardar que se va a perder. Duplicado a
 // propósito (es una regla de 4 líneas) en vez de depender de una llamada al
 // backend solo para mostrar este aviso.
-const TIPOS_NUMERICOS = new Set(['integer', 'int', 'float', 'number']);
+const TIPOS_NUMERICOS = new Set(['integer', 'int', 'natural', 'float', 'number']);
+
+const NOMBRE_TIPO: Record<string, string> = {
+  string: 'Texto', str: 'Texto',
+  integer: 'Número entero', int: 'Número entero',
+  natural: 'Número natural',
+  float: 'Número decimal', number: 'Número decimal',
+  boolean: 'Casilla (Sí/No)', bool: 'Casilla (Sí/No)',
+  date: 'Fecha',
+};
+
+const nombreTipo = (tipo: string): string => NOMBRE_TIPO[tipo] ?? tipo;
 
 function normalizarTipo(tipo: string): string {
   if (tipo === 'int') return 'integer';
@@ -32,6 +44,16 @@ function conversionEsSegura(tipoViejo: string, tipoNuevo: string): boolean {
   if (TIPOS_NUMERICOS.has(tv) && TIPOS_NUMERICOS.has(tn)) return true;
   if (TIPOS_NUMERICOS.has(tv) && tn === 'string') return true;
   return false;
+}
+
+// Conversión que conserva los valores válidos pero puede descartar algunos:
+// pasar un numérico a natural mantiene los >= 0 y descarta los negativos
+// (y trunca decimales). No es una pérdida total como conversionEsSegura=false,
+// así que se avisa con un mensaje más suave.
+function perdidaParcialANatural(tipoViejo: string, tipoNuevo: string): boolean {
+  const tv = normalizarTipo(tipoViejo);
+  const tn = normalizarTipo(tipoNuevo);
+  return tn === 'natural' && tv !== 'natural' && TIPOS_NUMERICOS.has(tv);
 }
 
 // Espejo del Registry del backend (app/tenant/roles_atributos.py): mismos
@@ -103,6 +125,10 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
           return /^-?\d+$/.test(value)
             ? Promise.resolve()
             : Promise.reject(new Error('Debe ser un número entero'));
+        case 'natural':
+          return /^\d+$/.test(value)
+            ? Promise.resolve()
+            : Promise.reject(new Error('Debe ser un número natural (0 o mayor)'));
         case 'float':
         case 'number':
           return /^-?\d+(\.\d+)?$/.test(value)
@@ -137,6 +163,10 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
       // adivinar (ver conversionEsSegura) — el backend los va a vaciar, así
       // que hay que avisar y pedir confirmación antes de guardar.
       const cambiosDeTipoRiesgosos: { nombre: string; tipoViejo: string; tipoNuevo: string }[] = [];
+      // Atributos que pasan a natural desde otro numérico: se conservan los
+      // valores >= 0 y se descartan los negativos/decimales — pérdida parcial,
+      // aviso más suave que cambiosDeTipoRiesgosos.
+      const cambiosParciales: { nombre: string; tipoViejo: string; tipoNuevo: string }[] = [];
 
       if (values.atributos) {
         values.atributos.forEach((attr: { nombre: string; tipo: string; default?: string }, index: number) => {
@@ -151,12 +181,20 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
               renombresAtributos[nombreOriginal] = attr.nombre;
             }
             const tipoOriginal = form.getFieldValue(['atributos', index, 'original_tipo']);
-            if (tipoOriginal && tipoOriginal !== attr.tipo && !conversionEsSegura(tipoOriginal, attr.tipo)) {
-              cambiosDeTipoRiesgosos.push({
-                nombre: nombreOriginal || attr.nombre,
-                tipoViejo: tipoOriginal,
-                tipoNuevo: attr.tipo,
-              });
+            if (tipoOriginal && tipoOriginal !== attr.tipo) {
+              if (!conversionEsSegura(tipoOriginal, attr.tipo)) {
+                cambiosDeTipoRiesgosos.push({
+                  nombre: nombreOriginal || attr.nombre,
+                  tipoViejo: tipoOriginal,
+                  tipoNuevo: attr.tipo,
+                });
+              } else if (perdidaParcialANatural(tipoOriginal, attr.tipo)) {
+                cambiosParciales.push({
+                  nombre: nombreOriginal || attr.nombre,
+                  tipoViejo: tipoOriginal,
+                  tipoNuevo: attr.tipo,
+                });
+              }
             }
           }
         });
@@ -218,21 +256,38 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
         );
       };
 
-      if (cambiosDeTipoRiesgosos.length > 0) {
+      if (cambiosDeTipoRiesgosos.length > 0 || cambiosParciales.length > 0) {
         Modal.confirm({
-          title: 'Se pueden perder valores cargados',
+          title: cambiosDeTipoRiesgosos.length > 0 ? 'Se pueden perder valores cargados' : 'Algunos valores pueden perderse',
           icon: <WarningOutlined style={{ color: token.colorWarning }} />,
           content: (
             <div>
-              <p>No hay forma de convertir automáticamente el valor que ya cargaste para:</p>
-              <ul>
-                {cambiosDeTipoRiesgosos.map((c) => (
-                  <li key={c.nombre}>
-                    <b>{c.nombre}</b>: {c.tipoViejo} → {c.tipoNuevo}
-                  </li>
-                ))}
-              </ul>
-              <p>Los items van a quedar sin valor cargado en {cambiosDeTipoRiesgosos.length === 1 ? 'ese atributo' : 'esos atributos'}. ¿Continuar de todas formas?</p>
+              {cambiosDeTipoRiesgosos.length > 0 && (
+                <>
+                  <p>No hay forma de convertir automáticamente el valor que ya cargaste para:</p>
+                  <ul>
+                    {cambiosDeTipoRiesgosos.map((c) => (
+                      <li key={c.nombre}>
+                        <b>{c.nombre}</b>: {nombreTipo(c.tipoViejo)} → {nombreTipo(c.tipoNuevo)}
+                      </li>
+                    ))}
+                  </ul>
+                  <p>Los items van a quedar sin valor cargado en {cambiosDeTipoRiesgosos.length === 1 ? 'ese atributo' : 'esos atributos'}.</p>
+                </>
+              )}
+              {cambiosParciales.length > 0 && (
+                <>
+                  <p>Al pasar a natural se conservan los valores de 0 o más, pero se van a descartar los negativos (y se truncan los decimales) en:</p>
+                  <ul>
+                    {cambiosParciales.map((c) => (
+                      <li key={c.nombre}>
+                        <b>{c.nombre}</b>: {nombreTipo(c.tipoViejo)} → {nombreTipo(c.tipoNuevo)}
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              )}
+              <p>¿Continuar de todas formas?</p>
             </div>
           ),
           okText: 'Sí, continuar',

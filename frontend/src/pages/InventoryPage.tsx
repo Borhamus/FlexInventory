@@ -14,7 +14,7 @@ import ModalBulkEdit from '../components/ModalBulkEditItems';
 import { InventoryTable } from '../components/InventoryTable';
 import { useDeleteItemsBulk, useItems } from '../hooks/useItems';
 
-const ATRIBUTOS_FILTRABLES = ['integer', 'int', 'float', 'number', 'date'];
+const ATRIBUTOS_FILTRABLES = ['integer', 'int', 'natural', 'float', 'number', 'date'];
 
 // Columnas nativas del item: no son atributos configurables del inventario,
 // existen siempre, y el backend las acepta en sort_by / filtro_atributo sin

@@ -11,6 +11,7 @@ const ATRIBUTO_VENCIMIENTO = 'Vencimiento';
 const TIPO_OPTIONS = [
   { value: 'string',  label: 'Texto' },
   { value: 'integer', label: 'Número entero' },
+  { value: 'natural', label: 'Número natural (0 o mayor)' },
   { value: 'float',   label: 'Número decimal' },
   { value: 'boolean', label: 'Booleano' },
   { value: 'date',    label: 'Fecha' },

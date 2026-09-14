@@ -69,7 +69,7 @@ function describirMetrica(m: MetricaPersonalizada): string {
   return `Se calcula en cada ítem y se suman los resultados de todo el inventario${filtro}.`;
 }
 
-const esNumerico = (tipo: string) => ['integer', 'int', 'float', 'number'].includes(tipo);
+const esNumerico = (tipo: string) => ['integer', 'int', 'natural', 'float', 'number'].includes(tipo);
 const esBoolean = (tipo: string) => ['boolean', 'bool'].includes(tipo);
 
 // Explicación en criollo de cada tipo, pensada para gente que no
@@ -92,6 +92,10 @@ const TIPO_INFO: Record<string, { label: string; color: string; icono: React.Rea
   int: {
     label: 'Número entero', color: 'blue', icono: <NumberOutlined />,
     descripcion: 'Un número sin coma, positivo o negativo. Por ejemplo: 5, 120, -3. Sirve para cantidades, conteos, unidades.',
+  },
+  natural: {
+    label: 'Número natural', color: 'cyan', icono: <NumberOutlined />,
+    descripcion: 'Un número entero de 0 o mayor (nunca negativo). Por ejemplo: 0, 5, 120. Sirve para cantidades, stock y conteos que no pueden ser negativos.',
   },
   float: {
     label: 'Número con coma', color: 'geekblue', icono: <NumberOutlined />,

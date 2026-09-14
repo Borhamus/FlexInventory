@@ -34,6 +34,7 @@ export const useUpdateInventory = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['inventories'] });
       queryClient.invalidateQueries({ queryKey: ['inventory', variables.id] });
+      queryClient.invalidateQueries({ queryKey: ['items'] });
     },
   });
 };
