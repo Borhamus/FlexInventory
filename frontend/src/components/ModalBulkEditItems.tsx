@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Modal, Form, Select, Input, InputNumber, DatePicker, Switch, message } from 'antd';
 import api from '../api/axios.config';
+import { reglasValorAtributo } from '../utils/validacionValorAtributo';
 
 const CANTIDAD_FIELD = '__cantidad__';
 
@@ -56,7 +57,6 @@ const ModalBulkEdit: React.FC<ModalBulkEditProps> = ({
 
     switch (selectedAttr.tipo) {
       case 'natural':
-        return <InputNumber min={0} precision={0} style={{ width: '100%' }} placeholder="Ingresá el número" />;
       case 'integer':
       case 'number':
       case 'float':
@@ -117,7 +117,7 @@ const ModalBulkEdit: React.FC<ModalBulkEditProps> = ({
           rules={esCantidad ? [
             { required: true, message: 'Ingresá una cantidad' },
             { type: 'integer', min: 0, message: 'La cantidad tiene que ser 0 o un número positivo' },
-          ] : []}
+          ] : reglasValorAtributo(selectedAttr?.tipo ?? '')}
         >
           {renderInput()}
         </Form.Item>

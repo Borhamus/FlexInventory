@@ -4,6 +4,7 @@ import type { UploadProps } from 'antd';
 import { UploadOutlined, DeleteOutlined, PictureOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useCreateItem, useUploadItemImage } from '../hooks/useInventory';
 import { normalizarImagenCuadrada } from '../utils/normalizarImagenCuadrada';
+import { reglasValorAtributo } from '../utils/validacionValorAtributo';
 import dayjs from 'dayjs';
 
 interface Props {
@@ -58,9 +59,8 @@ export const ModalAddItemInventory: React.FC<Props> = ({
   const renderizarInput = (tipo: string) => {
     switch (tipo) {
       case 'integer':
-        return <InputNumber style={{ width: '100%' }} />;
       case 'natural':
-        return <InputNumber min={0} precision={0} style={{ width: '100%' }} />;
+        return <InputNumber style={{ width: '100%' }} />;
       case 'float':
         return <InputNumber step={0.1} style={{ width: '100%' }} />;
       case 'boolean':
@@ -190,8 +190,9 @@ export const ModalAddItemInventory: React.FC<Props> = ({
             label={nombreAtributo}
             valuePropName={tipoAtributo === 'boolean' ? 'checked' : 'value'}
             initialValue={tipoAtributo === 'boolean' ? false : undefined}
+            rules={reglasValorAtributo(tipoAtributo)}
           >
-            {renderizarInput(tipoAtributo)} 
+            {renderizarInput(tipoAtributo)}
           </Form.Item>
         ))}
 

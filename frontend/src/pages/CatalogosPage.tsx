@@ -49,6 +49,7 @@ import { useInventories } from '../hooks/useInventory';
 import { useAuthContext } from '../context/AuthContext';
 import { urlImagen } from '../api/axios.config';
 import { formatearValorConUnidad } from '../utils/formatearUnidad';
+import { reglasValorAtributo } from '../utils/validacionValorAtributo';
 import dayjs from 'dayjs';
 
 const { Title, Text, Paragraph } = Typography;
@@ -56,9 +57,8 @@ const { Title, Text, Paragraph } = Typography;
 const renderizarInputAtributo = (tipo: string) => {
   switch (tipo) {
     case 'integer':
-      return <InputNumber style={{ width: '100%' }} />;
     case 'natural':
-      return <InputNumber min={0} precision={0} style={{ width: '100%' }} />;
+      return <InputNumber style={{ width: '100%' }} />;
     case 'float':
       return <InputNumber step={0.1} style={{ width: '100%' }} />;
     case 'boolean':
@@ -569,6 +569,7 @@ const CatalogosPage: React.FC = () => {
                   name={key}
                   label={key.toUpperCase()}
                   valuePropName={tipo === 'boolean' ? 'checked' : 'value'}
+                  rules={reglasValorAtributo(tipo)}
                 >
                   {renderizarInputAtributo(tipo)}
                 </Form.Item>

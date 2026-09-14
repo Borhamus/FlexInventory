@@ -6,6 +6,7 @@ import dayjs from 'dayjs';
 import { useUpdateItem, useUploadItemImage, useDeleteItemImage } from '../hooks/useInventory';
 import { normalizarImagenCuadrada } from '../utils/normalizarImagenCuadrada';
 import { urlImagen } from '../api/axios.config';
+import { reglasValorAtributo } from '../utils/validacionValorAtributo';
 
 interface Props {
   open: boolean;
@@ -84,9 +85,8 @@ export const ModalEditItemInventory: React.FC<Props> = ({
     const renderizarInput = (tipo: string) => {
       switch (tipo) {
         case 'integer':
-          return <InputNumber style={{ width: '100%' }} />;
         case 'natural':
-          return <InputNumber min={0} precision={0} style={{ width: '100%' }} />;
+          return <InputNumber style={{ width: '100%' }} />;
         case 'float':
           return <InputNumber step={0.1} style={{ width: '100%' }} />;
         case 'boolean':
@@ -195,6 +195,7 @@ export const ModalEditItemInventory: React.FC<Props> = ({
               name={['atributos', nombreAtributo]}
               label={nombreAtributo}
               valuePropName={tipoAtributo === 'boolean' ? 'checked' : 'value'}
+              rules={reglasValorAtributo(tipoAtributo)}
             >
               {renderizarInput(tipoAtributo)}
             </Form.Item>
