@@ -448,6 +448,12 @@ def update_item(
         raise HTTPException(404, detail="Item no encontrado")
     update_data = item.model_dump(exclude_unset=True)
 
+    # Pre-chequeo de cantidad nula (columna NOT NULL → evita 500 por IntegrityError.
+    # El schema la deja Optional para permitir updates parciales que no la
+    # toquen, pero si el cliente la incluye explícitamente no puede ser None)
+    if 'cantidad' in update_data and update_data['cantidad'] is None:
+        raise HTTPException(400, detail="La cantidad no puede quedar vacía")
+
     # Pre-chequeo de nombre duplicado (columna UNIQUE → evita 500 por IntegrityError)
     if 'nombre' in update_data and db.query(models.Item).filter(
         models.Item.nombre == update_data['nombre'],

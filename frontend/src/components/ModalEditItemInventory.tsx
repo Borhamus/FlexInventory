@@ -194,7 +194,7 @@ export const ModalEditItemInventory: React.FC<Props> = ({
             <Input />
           </Form.Item>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 24 }}>
-            <Form.Item name="cantidad" label="Cantidad" rules={[reglaCantidadNoNegativa]} style={{ flex: 1, marginBottom: 0 }}>
+            <Form.Item name="cantidad" label="Cantidad" rules={[{ required: true, message: 'Ingresá la cantidad' }, reglaCantidadNoNegativa]} style={{ flex: 1, marginBottom: 0 }}>
               <InputNumber style={{ width: '100%' }} />
             </Form.Item>
             {/* La campana de Cantidad siempre está disponible — no hace falta
