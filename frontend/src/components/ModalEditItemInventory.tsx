@@ -6,7 +6,7 @@ import dayjs from 'dayjs';
 import { useUpdateItem, useUploadItemImage, useDeleteItemImage } from '../hooks/useInventory';
 import { normalizarImagenCuadrada } from '../utils/normalizarImagenCuadrada';
 import { urlImagen } from '../api/axios.config';
-import { reglasValorAtributo } from '../utils/validacionValorAtributo';
+import { reglasValorAtributo, reglaCantidadNoNegativa } from '../utils/validacionValorAtributo';
 import type { NotificacionesConfig } from '../api/inventory.service';
 import { CampanaOverrideNotificacion, limpiarNotificacionesOverrideItem } from './NotificacionItemOverride';
 
@@ -194,8 +194,8 @@ export const ModalEditItemInventory: React.FC<Props> = ({
             <Input />
           </Form.Item>
           <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 24 }}>
-            <Form.Item name="cantidad" label="Cantidad" style={{ flex: 1, marginBottom: 0 }}>
-              <InputNumber style={{ width: '100%' }} min={0} />
+            <Form.Item name="cantidad" label="Cantidad" rules={[reglaCantidadNoNegativa]} style={{ flex: 1, marginBottom: 0 }}>
+              <InputNumber style={{ width: '100%' }} />
             </Form.Item>
             {/* La campana de Cantidad siempre está disponible — no hace falta
                 que el inventario tenga un mínimo/máximo default para poder

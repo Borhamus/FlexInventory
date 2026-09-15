@@ -4,7 +4,7 @@ import type { UploadProps } from 'antd';
 import { UploadOutlined, DeleteOutlined, PictureOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons';
 import { useCreateItem, useUploadItemImage } from '../hooks/useInventory';
 import { normalizarImagenCuadrada } from '../utils/normalizarImagenCuadrada';
-import { reglasValorAtributo } from '../utils/validacionValorAtributo';
+import { reglasValorAtributo, reglaCantidadNoNegativa } from '../utils/validacionValorAtributo';
 import type { NotificacionesConfig } from '../api/inventory.service';
 import { CampanaOverrideNotificacion, limpiarNotificacionesOverrideItem } from './NotificacionItemOverride';
 import dayjs from 'dayjs';
@@ -187,8 +187,8 @@ export const ModalAddItemInventory: React.FC<Props> = ({
           <Input placeholder="Ej: Remera Básica" />
         </Form.Item>
         <div style={{ display: 'flex', gap: 8, alignItems: 'flex-end', marginBottom: 24 }}>
-          <Form.Item name="cantidad" label="Cantidad" rules={[{ required: true, message: 'Ingresá la cantidad' }]} style={{ flex: 1, marginBottom: 0 }}>
-            <InputNumber style={{ width: '100%' }} min={0} />
+          <Form.Item name="cantidad" label="Cantidad" rules={[{ required: true, message: 'Ingresá la cantidad' }, reglaCantidadNoNegativa]} style={{ flex: 1, marginBottom: 0 }}>
+            <InputNumber style={{ width: '100%' }} />
           </Form.Item>
           {/* La campana de Cantidad siempre está disponible — no hace falta
               que el inventario tenga un mínimo/máximo default para poder

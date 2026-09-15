@@ -25,3 +25,14 @@ export function reglasValorAtributo(tipo: string): Rule[] {
   }
   return [];
 }
+
+// Regla para el campo nativo `cantidad` de un ítem. InputNumber con `min={0}`
+// clampea el valor a 0 recién al perder el foco, así que un click directo en
+// "Aceptar" después de tipear un negativo podía guardar sin avisar; esta
+// regla lo rechaza explícitamente en la validación del form.
+export const reglaCantidadNoNegativa: Rule = {
+  validator: (_, value) =>
+    value === undefined || value === null || value >= 0
+      ? Promise.resolve()
+      : Promise.reject(new Error('No podés aplicar cantidades negativas')),
+};
