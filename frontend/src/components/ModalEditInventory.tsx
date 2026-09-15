@@ -70,6 +70,18 @@ const ROLES_CONFIG: { key: string; label: string; tiposPermitidos: string[] }[] 
   { key: 'proveedor',        label: 'Proveedor',           tiposPermitidos: ['string'] },
 ];
 
+// Roles que el backend sigue soportando pero que ya no se ofrecen en la UI.
+// Se dejan en ROLES_CONFIG (que es el espejo del Registry del backend) y se
+// filtran recién al renderizar, así el día que se quiera volver a mostrar uno
+// alcanza con sacarlo de acá.
+//
+// Ojo al quitar un rol de la UI: configurarRoles manda un REEMPLAZO completo
+// del mapa, y validateFields() solo devuelve los campos que tienen un
+// Form.Item montado. Sin el Select en pantalla el rol no viaja en
+// values.roles, así que cualquier edición del inventario lo borraría — por
+// eso handleSubmit lo recupera aparte de currentRolesAtributos.
+const ROLES_OCULTOS = new Set(['fecha_reposicion']);
+
 interface AtributoNotificacionFormValue {
   recordatorio_dias?: number | null;
   minimo?: number | null;
@@ -289,6 +301,19 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
       // con este PATCH que sale justo después, el arreglo que ya hizo el PUT
       // de más arriba.
       const rolesAtributos: Record<string, string> = {};
+      // Los roles ocultos (ROLES_OCULTOS) no tienen Select en pantalla, así
+      // que no llegan en values.roles: se arrastra lo que el inventario ya
+      // tenía asignado para no borrárselo con este reemplazo completo. Si el
+      // atributo que ocupaba el rol se borró en esta misma edición, el rol se
+      // cae con él — mandarlo igual sería un 400 de validate_roles_atributos
+      // ("el atributo no existe en este inventario") y el usuario no tiene
+      // forma de limpiarlo a mano, porque el Select ya no está.
+      ROLES_OCULTOS.forEach((rol) => {
+        const asignado = currentRolesAtributos[rol];
+        if (!asignado) return;
+        const nombreFinal = renombresAtributos[asignado] || asignado;
+        if (atributosFormateados[nombreFinal]) rolesAtributos[rol] = nombreFinal;
+      });
       if (values.roles) {
         Object.entries(values.roles as Record<string, string | undefined>).forEach(([rol, atributo]) => {
           if (atributo) rolesAtributos[rol] = renombresAtributos[atributo] || atributo;
@@ -567,7 +592,7 @@ export const ModalEditInventory: React.FC<ModalEditInventoryProps> = ({
             Marcá qué atributo cumple cada rol. Solo se ofrecen los atributos ya definidos arriba que tengan el tipo que ese rol necesita.
           </p>
 
-          {ROLES_CONFIG.map((rol) => {
+          {ROLES_CONFIG.filter((rol) => !ROLES_OCULTOS.has(rol.key)).map((rol) => {
             const opciones = atributosWatch
               .filter((a) => a?.nombre && a?.tipo && rol.tiposPermitidos.includes(a.tipo))
               .map((a) => ({ value: a.nombre as string, label: `${a.nombre} (${a.tipo})` }));

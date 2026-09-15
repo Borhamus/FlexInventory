@@ -1,6 +1,27 @@
-from pydantic import BaseModel, Field, ConfigDict, model_validator
+from pydantic import BaseModel, Field, ConfigDict, field_validator, model_validator
 from typing import Dict, Any, Optional, List
 from datetime import datetime
+
+
+# Las columnas JSONB del modelo (atributos, unidades, roles_atributos,
+# bloques_personalizados, notificaciones_config) declaran `default={}` / `[]`,
+# pero ese default es del ORM, no de la base: el DDL no lleva DEFAULT. Una
+# fila escrita con SQL crudo — como las que reinserta el restore de backups
+# (app/database_manager/router.py) — deja esas columnas en NULL, y entonces
+# la respuesta no validaba: `Field(default_factory=...)` solo cubre el campo
+# AUSENTE, no el que llega con None, así que el endpoint entero devolvía 500
+# y los inventarios "desaparecían" de la UI.
+#
+# Esto normaliza None al vacío que corresponde ANTES de validar. Es la red de
+# seguridad para las filas que ya quedaron en NULL; que no se escriban más
+# NULLs es cosa del restore.
+def _none_a_dict(valor):
+    return {} if valor is None else valor
+
+
+def _none_a_lista(valor):
+    return [] if valor is None else valor
+
 
 # ==================== Schemas para Inventario ====================
 
@@ -9,6 +30,8 @@ class InventarioBase(BaseModel):
     atributos: Dict[str, Any] = Field(default_factory=dict)
     # Unidad/moneda por atributo numérico {nombre: simbolo}. Presentacional.
     unidades: Dict[str, str] = Field(default_factory=dict)
+
+    _normaliza = field_validator("atributos", "unidades", mode="before")(_none_a_dict)
 
 class InventarioCreate(InventarioBase):
     # Si el usuario no tilda el checkbox al crear, arranca en False — no
@@ -37,6 +60,11 @@ class InventarioResponse(InventarioBase):
     actualizado_en: datetime
 
     model_config = ConfigDict(from_attributes=True)
+
+    _normaliza_dicts = field_validator(
+        "roles_atributos", "notificaciones_config", mode="before"
+    )(_none_a_dict)
+    _normaliza_listas = field_validator("bloques_personalizados", mode="before")(_none_a_lista)
 
 class InventarioWithItems(InventarioResponse):
     items: List["ItemResponse"] = []
@@ -166,6 +194,8 @@ class ItemBase(BaseModel):
     # no se fija acá cae al default del inventario. Ver
     # app/tenant/notificaciones_config.py -> validar_notificaciones_item().
     notificaciones_config: Dict[str, Any] = Field(default_factory=dict)
+
+    _normaliza = field_validator("atributos", "notificaciones_config", mode="before")(_none_a_dict)
 
 class ItemCreate(ItemBase):
     inventario_id: int

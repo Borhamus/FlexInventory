@@ -44,7 +44,7 @@ export const CatalogLayout = () => {
         onOk={() => form.submit()}
         okText="Crear"
         cancelText="Cancelar"
-        destroyOnHidden
+        destroyOnClose
       >
         <CatalogForm form={form} onFinish={handleCreate} />
       </Modal>

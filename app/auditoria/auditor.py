@@ -1,4 +1,5 @@
 #from __future__ import annotations
+import logging
 import re
 from datetime import datetime
 
@@ -11,6 +12,8 @@ from app.Core.models import Tenant
 from app.auditoria.models import AuditLog 
 from app.tenant.models import Item, Inventario, Catalogo
 from app.tenant.validators import parse_value_by_type
+
+logger = logging.getLogger(__name__)
 
 SIN_CAMBIOS = "Sin cambios detectados"
 
@@ -115,6 +118,49 @@ def _listar_nombres(nombres) -> str:
         return ", ".join(limpios)
     visibles = ", ".join(limpios[:MAX_NOMBRES])
     return f"{visibles} …y {len(limpios) - MAX_NOMBRES} más"
+
+
+def registrar_evento(
+    schema_name: str,
+    usuario_id: int,
+    usuario: str,
+    endpoint: str,
+    metodo: str,
+    accion: str,
+    entidad_afectada: str,
+    resumen: str,
+    payload: dict | None = None,
+) -> None:
+    """
+    Escribe una entrada de historial a mano, para operaciones que la
+    dependencia Auditor no puede describir bien.
+
+    Auditor se resuelve ANTES de que corra el endpoint, así que solo ve el
+    request: sirve para "crear/editar/borrar esta entidad", donde todo está en
+    el path y el body. No sirve para las operaciones del módulo de backups,
+    donde lo que importa es el RESULTADO (cuántos registros trajo el restore,
+    cuántos borró el reset) — con Auditor esas quedaban como
+    "Desconocido / Registro creado", que es peor que nada en la operación más
+    destructiva del sistema.
+
+    Nunca propaga: si falla el registro del historial, no se tumba una
+    restauración que ya se completó — se avisa por log y se sigue.
+    """
+    try:
+        with get_tenant_db_context(schema_name) as tdb:
+            tdb.add(AuditLog(
+                usuario_id=usuario_id,
+                usuario=usuario,
+                endpoint=endpoint,
+                metodo=metodo,
+                accion=accion,
+                payload_cambios=payload,
+                entidad_afectada=entidad_afectada,
+                resumen=resumen,
+            ))
+            tdb.commit()
+    except Exception as e:
+        logger.error(f"[Auditoría] No se pudo registrar '{accion}' del tenant {schema_name}: {e}")
 
 
 class Auditor:

@@ -56,7 +56,8 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
   // Inventario (necesita un inventario con ID) — pero la notificación por
   // atributo y la de Cantidad ya se pueden cargar acá mismo, encadenadas
   // después de crear (mismo mecanismo que ya usaba el atajo de vencimiento).
-  const tieneVencimientoWatch = Form.useWatch('tiene_vencimiento', form);
+  // Junto con el checkbox de vencimiento (ver el bloque comentado en el JSX).
+  // const tieneVencimientoWatch = Form.useWatch('tiene_vencimiento', form);
   const atributosDinamicosWatch: { llave?: string; tipo?: string; unidad?: string; notificacion?: AtributoNotificacionFormValue }[] =
     Form.useWatch('atributos_dinamicos', form) || [];
 
@@ -213,6 +214,17 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
           <Input.TextArea rows={2} placeholder="Detalles opcionales..." />
         </Form.Item>
 
+        {/* Atajo de "fecha de vencimiento" — oculto, no borrado. Tildarlo
+            agregaba el atributo "Vencimiento" (date), le asignaba el rol
+            fecha_reposicion al crear y, con el segundo checkbox, le dejaba
+            configurada la campana. Todo eso se puede hacer igual a mano:
+            agregar el atributo de tipo Fecha acá abajo con su campana, y el
+            rol desde "Roles Especiales" en Editar Inventario. La lógica que
+            lo procesa sigue en handleSubmit y queda inerte mientras el campo
+            no exista (values.tiene_vencimiento es undefined), así que para
+            volver atrás alcanza con descomentar este bloque y el
+            Form.useWatch de tiene_vencimiento.
+
         <Form.Item name="tiene_vencimiento" valuePropName="checked" style={{ marginBottom: 4 }}>
           <Checkbox>
             Los artículos de este inventario tienen fecha de vencimiento
@@ -237,6 +249,7 @@ export const ModalAddInventory: React.FC<Props> = ({ open, onClose }) => {
             </Form.Item>
           </div>
         )}
+        */}
 
         <Form.Item name="fotos_habilitadas" valuePropName="checked" style={{ marginBottom: 4 }}>
           <Checkbox>

@@ -109,12 +109,21 @@ const MainLayout: React.FC = () => {
           display: 'flex',
           flexDirection: 'column',
           height: '100%',
-          paddingTop: 20,
-          paddingBottom: 20,
+          // El alto de la rail es fijo (100%), así que el padding y los ítems
+          // se miden en vh: en notebooks bajas se comprimen y en monitores
+          // grandes llegan al tope de siempre. El clamp() evita que se hagan
+          // ilegibles cuando la pantalla es muy chica.
+          paddingTop: 'clamp(8px, 2vh, 20px)',
+          paddingBottom: 'clamp(8px, 2vh, 20px)',
         }}>
 
-          {/* Nav items — spinner mientras cargan los permisos */}
-          <div style={{ flex: 1 }}>
+          {/* Nav items — spinner mientras cargan los permisos.
+              minHeight:0 es necesario para que un hijo flex pueda encogerse por
+              debajo de su contenido y recién ahí el overflow scrollee; sin eso
+              el flex:1 crece y desborda la rail. El scroll es el último
+              recurso: con muchos ítems visibles (tenant) y una pantalla muy
+              baja, el clamp() solo no alcanza. */}
+          <div className="nav-rail-scroll" style={{ flex: 1, minHeight: 0, overflowY: 'auto' }}>
             {loadingPermissions ? (
               <div style={{ display: 'flex', justifyContent: 'center', marginTop: 20 }}>
                 <Spin size="small" />
@@ -134,22 +143,22 @@ const MainLayout: React.FC = () => {
                       display: 'flex',
                       flexDirection: 'column',
                       alignItems: 'center',
-                      padding: '16px 0',
+                      padding: 'clamp(6px, 1.6vh, 16px) 0',
                       cursor: 'pointer',
                       backgroundColor: isActive ? `${primaryColor} !important` : 'transparent',
                       color: 'white',
-                      marginBottom: 4,
+                      marginBottom: 'clamp(2px, 0.4vh, 4px)',
                       borderLeft: isActive ? '3px solid #fff' : '3px solid transparent',
                     }}
                   >
-                    <span style={{ fontSize: '24px' }}>
+                    <span style={{ fontSize: 'clamp(18px, 2.4vh, 24px)', lineHeight: 1 }}>
                       {'badge' in item && item.badge ? (
                         <Badge count={item.badge} size="small" offset={[2, 0]}>
                           <span style={{ color: 'white' }}>{item.icon}</span>
                         </Badge>
                       ) : item.icon}
                     </span>
-                    <Text style={{ color: 'white', fontSize: '10px', marginTop: 4, textTransform: 'uppercase' }}>
+                    <Text style={{ color: 'white', fontSize: 'clamp(9px, 1.2vh, 10px)', marginTop: 'clamp(2px, 0.5vh, 4px)', textTransform: 'uppercase', lineHeight: 1.2 }}>
                       {item.label}
                     </Text>
                   </div>
@@ -159,7 +168,7 @@ const MainLayout: React.FC = () => {
           </div>
 
           {/* --- MODO OSCURO --- */}
-          <div style={{ textAlign: 'center', marginBottom: 20 }}>
+          <div style={{ textAlign: 'center', marginBottom: 'clamp(8px, 2vh, 20px)', marginTop: 'clamp(8px, 1.5vh, 16px)', flexShrink: 0 }}>
             <Switch
               checked={isDark}
               onChange={toggleTheme}
@@ -175,11 +184,11 @@ const MainLayout: React.FC = () => {
           <div
             className="logout-btn-rail"
             onClick={() => { logout(); navigate('/login'); }}
-            style={{ textAlign: 'center', cursor: 'pointer', padding: '10px' }}
+            style={{ textAlign: 'center', cursor: 'pointer', padding: 'clamp(4px, 1.2vh, 10px)', flexShrink: 0 }}
           >
-            <LogoutOutlined style={{ color: 'rgba(255,255,255,0.7)', fontSize: '24px' }} />
-            <div style={{ marginTop: 4 }}>
-              <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: '10px' }}>SALIR</Text>
+            <LogoutOutlined style={{ color: 'rgba(255,255,255,0.7)', fontSize: 'clamp(18px, 2.4vh, 24px)' }} />
+            <div style={{ marginTop: 'clamp(2px, 0.5vh, 4px)' }}>
+              <Text style={{ color: 'rgba(255,255,255,0.5)', fontSize: 'clamp(9px, 1.2vh, 10px)' }}>SALIR</Text>
             </div>
           </div>
 

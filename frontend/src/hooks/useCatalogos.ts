@@ -1,7 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { catalogosService } from '../api/catalogos.service';
 import { notification, message } from 'antd';
-import axios from 'axios';
 import { itemsService } from '../api/item.service';
 
 export const useCatalogo = (id: number) => {
@@ -61,7 +60,7 @@ export const useDeleteCatalogo = () => {
       queryClient.invalidateQueries({ queryKey: ['catalogos'] });
       notification.success({ message: 'Catálogo eliminado correctamente' });
     },
-    onError: (error: any) => {
+    onError: () => {
       notification.error({ message: 'No se pudo eliminar el catálogo' });
     }
   });

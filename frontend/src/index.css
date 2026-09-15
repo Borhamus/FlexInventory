@@ -39,6 +39,27 @@ body {
 }
 
 
+/* Lista de navegación de la rail: scrollea sola si ni con el clamp() de los
+   ítems entran en pantallas muy bajas. Scrollbar finita y translúcida para
+   que no corte el fondo oscuro de la sidebar. */
+.nav-rail-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.25) transparent;
+}
+
+.nav-rail-scroll::-webkit-scrollbar {
+  width: 4px;
+}
+
+.nav-rail-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.nav-rail-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(255, 255, 255, 0.25);
+  border-radius: 2px;
+}
+
 /* Efecto para el botón de Logout */
 .logout-btn-rail:hover {
   background-color: rgba(255, 0, 4, 0.2) !important; /* Un rojo suave al pasar el mouse */

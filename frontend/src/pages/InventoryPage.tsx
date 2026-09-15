@@ -438,7 +438,6 @@ const InventoryPage: React.FC = () => {
           sortBy={sortBy}
           order={order}
           onSortChange={(nuevoSortBy, nuevoOrder) => { setSortBy(nuevoSortBy); setOrder(nuevoOrder); }}
-          notificacionesConfig={data?.notificaciones_config}
         />
 
       </div>

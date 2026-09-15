@@ -48,18 +48,66 @@ _REGEX_FECHA  = r"^\d{4}-\d{2}-\d{2}$"
 _REGEX_NUMERO = r"^-?\d+(\.\d+)?$"
 
 
+def _fmt_num(valor) -> str:
+    """
+    15.0 -> "15", 15.5 -> "15.5". El valor medido sale de un cast a float8 y
+    los umbrales vienen de la config (int o float), así que sin esto un peso
+    entero se leía "15.0" y un mínimo entero "10" en la misma frase.
+    """
+    if isinstance(valor, float) and valor.is_integer():
+        return str(int(valor))
+    return str(valor)
+
+
+def _fmt_dias(dias: int) -> str:
+    """"1 día" / "N días" — en vez del "día(s)" que había que leer dos veces."""
+    dias = abs(dias)
+    return "1 día" if dias == 1 else f"{dias} días"
+
+
+# Los mensajes se guardan tal cual en Notificacion.mensaje y se reusan sin
+# contexto alrededor (el digest de mail los lista como texto plano, ver
+# scheduler._run_notificaciones), así que cada uno tiene que bastarse solo:
+# qué ítem, de qué inventario, qué señal, qué valor y contra qué umbral.
+# Los nombres propios van entre comillas simples a propósito: el frontend los
+# resalta en negrita a partir de eso (frontend/src/utils/resaltarComillas.tsx).
 def _clasificar_numero(nombre_item: str, inventario_nombre: str, etiqueta: str, valor: float, minimo, maximo):
     if minimo is not None and valor < minimo:
         return "minimo", (
             f"El ítem '{nombre_item}' del inventario '{inventario_nombre}' tiene "
-            f"{etiqueta} por debajo del mínimo ({valor} < {minimo})"
+            f"{etiqueta} en {_fmt_num(valor)}, por debajo del mínimo de {_fmt_num(minimo)}"
         )
     if maximo is not None and valor > maximo:
         return "maximo", (
             f"El ítem '{nombre_item}' del inventario '{inventario_nombre}' tiene "
-            f"{etiqueta} por encima del máximo ({valor} > {maximo})"
+            f"{etiqueta} en {_fmt_num(valor)}, por encima del máximo de {_fmt_num(maximo)}"
         )
     return "ok", None
+
+
+# Para casi todas las señales "peor" es un número MÁS CHICO: menos stock que
+# el mínimo, menos días para vencer, más días vencido (los días vencidos son
+# negativos). "maximo" es la excepción: ahí peor es pasarse más todavía.
+_EVENTOS_PEOR_HACIA_ARRIBA = {"maximo"}
+
+
+def _empeoro(evento: str, anterior: Optional[str], actual: Any) -> bool:
+    """
+    ¿El valor se movió en contra desde la última vez que se avisó?
+
+    `anterior` es lo guardado en Notificacion.valor_detectado, que es texto
+    (así se persiste); `actual` viene del motor como número. Si algo no se
+    puede comparar, se devuelve False: ante la duda no se vuelve a molestar
+    al usuario.
+    """
+    if anterior is None or actual is None:
+        return False
+    try:
+        ant = float(anterior)
+        act = float(actual)
+    except (TypeError, ValueError):
+        return False
+    return act > ant if evento in _EVENTOS_PEOR_HACIA_ARRIBA else act < ant
 
 
 def _sincronizar_estado(
@@ -101,7 +149,24 @@ def _sincronizar_estado(
 
             if activa:
                 if activa.evento == estado:
-                    return  # mismo incumplimiento ya notificado — no repetir
+                    # Mismo incumplimiento: NO se crea otra notificación — una
+                    # fila por cada unidad vendida sería spam, y además el
+                    # índice único parcial solo admite una activa por señal.
+                    #
+                    # Pero sí se refresca el texto: sin esto el aviso quedaba
+                    # congelado en el valor que lo disparó ("en 4") aunque el
+                    # ítem ya estuviera en 1. Y si el valor empeoró desde el
+                    # último aviso, vuelve a no leída para que el badge se
+                    # encienda: que ya lo hayas visto en 4 no significa que no
+                    # quieras enterarte de que ahora está en 1. Si mejoró
+                    # (sigue incumpliendo pero menos), se actualiza el texto y
+                    # se respeta que ya estaba leída.
+                    if _empeoro(estado, activa.valor_detectado, valor_detectado):
+                        activa.leida = False
+                        activa.leida_en = None
+                    activa.mensaje = mensaje
+                    activa.valor_detectado = str(valor_detectado) if valor_detectado is not None else None
+                    return
                 # Escalada (ej. recordatorio -> vencido): se resuelve la
                 # vieja y se hace flush ANTES de insertar la nueva, para que
                 # el índice único parcial no vea dos filas activas a la vez.
@@ -183,16 +248,23 @@ def evaluar_atributo_fecha(db: Session, inventario, atributo: str, config: Dict[
         if dias < 0:
             estado, mensaje = "vencido", (
                 f"El ítem '{row['nombre']}' del inventario '{inventario.nombre}' tiene "
-                f"'{atributo}' vencido hace {abs(dias)} día(s)"
+                f"'{atributo}' vencido hace {_fmt_dias(dias)}"
             )
         elif recordatorio_dias is not None and dias <= recordatorio_dias:
             # recordatorio_dias puede no estar fijado ni en el inventario ni
             # en el ítem (ej. un ítem overrideó un atributo que el inventario
             # nunca configuró) — sin umbral no hay ventana de recordatorio,
             # pero "vencido" sigue evaluándose igual (no depende de este valor).
+            #
+            # dias == 0 es el caso del recordatorio "el mismo día" (un
+            # recordatorio_dias de 0, que es lo que ofrece la campana por
+            # default): "por vencer en 0 días" no se entiende, se dice "hoy".
             estado, mensaje = "recordatorio", (
                 f"El ítem '{row['nombre']}' del inventario '{inventario.nombre}' tiene "
-                f"'{atributo}' por vencer en {dias} día(s)"
+                f"'{atributo}' que vence hoy"
+                if dias == 0 else
+                f"El ítem '{row['nombre']}' del inventario '{inventario.nombre}' tiene "
+                f"'{atributo}' por vencer en {_fmt_dias(dias)}"
             )
         else:
             estado, mensaje = "ok", None

@@ -1,14 +1,15 @@
 import { useState } from 'react';
-import { Card, Row, Col, Empty, Button, Space, Typography, Tooltip, Modal, Form, List, Avatar, Result, Flex, Input, theme } from 'antd';
+import { Card, Row, Col, Empty, Button, Space, Typography, Tooltip, Modal, Form, List, Avatar, Result, Input, Select, theme } from 'antd';
 import {
   PlusOutlined,
-  EyeOutlined,
   EditOutlined,
   DeleteOutlined,
   CalendarOutlined,
   BlockOutlined,
   FolderOutlined,
-  SearchOutlined
+  SearchOutlined,
+  SortAscendingOutlined,
+  SortDescendingOutlined
 } from '@ant-design/icons';
 import { useCatalogos, useCreateCatalogo, useDeleteCatalogo, useUpdateCatalogo } from '../hooks/useCatalogos';
 import { useNavigate } from 'react-router-dom';
@@ -48,6 +49,24 @@ const CatalogoEmojiAvatar = ({ catalogoId }: { catalogoId: number }) => {
   );
 };
 
+type CriterioOrden = 'nombre' | 'total_items' | 'actualizado_en';
+
+const OPCIONES_ORDEN: { value: CriterioOrden; label: string }[] = [
+  { value: 'nombre',         label: 'Nombre' },
+  { value: 'total_items',    label: 'Cantidad de artículos' },
+  { value: 'actualizado_en', label: 'Última modificación' },
+];
+
+// Cada criterio tiene el sentido que se espera al elegirlo: los nombres
+// arrancan de la A, pero "más artículos" y "modificado más recientemente"
+// son lo primero que uno quiere ver. Al cambiar de criterio se vuelve a este
+// default, y desde ahí el usuario puede invertirlo con el botón.
+const DIRECCION_POR_DEFECTO: Record<CriterioOrden, 'asc' | 'desc'> = {
+  nombre:         'asc',
+  total_items:    'desc',
+  actualizado_en: 'desc',
+};
+
 export const CatalogoDashboard = () => {
   const { data: catalogos, isLoading } = useCatalogos();
   const { mutate: createCatalogo, isPending: isCreating } = useCreateCatalogo();
@@ -64,6 +83,8 @@ export const CatalogoDashboard = () => {
   // Cantidad de catálogos por página, elegible por el usuario (mismo
   // criterio que la tabla de inventario).
   const [pageSize, setPageSize] = useState(6);
+  const [orden, setOrden] = useState<CriterioOrden>('nombre');
+  const [direccion, setDireccion] = useState<'asc' | 'desc'>(DIRECCION_POR_DEFECTO.nombre);
 
   // Permisos de catálogos
   const canCreate = isTenant || hasPermission('catalogos', 'create');
@@ -89,14 +110,8 @@ export const CatalogoDashboard = () => {
 
   const hasCatalogos = catalogos && catalogos.length > 0;
 
-  const handleCreate = (values: any) => {
-    createCatalogo(values, {
-      onSuccess: () => {
-        setIsModalOpen(false);
-        form.resetFields();
-      }
-    });
-  };
+  // (handleCreate se eliminó: handleSubmit de más abajo ya cubre crear y
+  // editar, y era el único que usaba el modal.)
 
   const handleOpenEdit = (cat: any) => {
     setEditingCatalogo(cat);
@@ -134,9 +149,41 @@ export const CatalogoDashboard = () => {
   };
 
   // filtrado en vivo
-  const filteredCatalogos = catalogos?.filter(cat => 
-    cat.nombre.toLowerCase().includes(searchText.toLowerCase())
-  );
+  const filteredCatalogos = catalogos
+    ?.filter(cat => cat.nombre.toLowerCase().includes(searchText.toLowerCase()))
+    // Copia antes de ordenar: sort() muta el array, y `catalogos` es el
+    // objeto que tiene cacheado react-query.
+    .slice()
+    .sort((a: any, b: any) => {
+      const factor = direccion === 'asc' ? 1 : -1;
+      // localeCompare con 'es' para que los acentos y la ñ caigan donde
+      // corresponde; numeric hace que "Catálogo 10" vaya después de
+      // "Catálogo 2" y no antes.
+      const porNombre = a.nombre.localeCompare(b.nombre, 'es', { numeric: true, sensitivity: 'base' });
+
+      switch (orden) {
+        case 'total_items': {
+          const diff = (a.total_items ?? 0) - (b.total_items ?? 0);
+          // Entre catálogos con la misma cantidad, alfabético — si no, el
+          // empate lo resuelve el orden en que vinieron y la lista "salta"
+          // sin motivo entre recargas.
+          return diff !== 0 ? factor * diff : porNombre;
+        }
+        case 'actualizado_en': {
+          // Una fecha inválida o ausente cuenta como la más vieja: sin esto
+          // valueOf() devuelve NaN, toda comparación con NaN es false y el
+          // sort queda en un orden arbitrario en vez de fallar a la vista.
+          const ts = (f: string | null | undefined) => {
+            const d = dayjs(f);
+            return f && d.isValid() ? d.valueOf() : 0;
+          };
+          const diff = ts(a.actualizado_en) - ts(b.actualizado_en);
+          return diff !== 0 ? factor * diff : porNombre;
+        }
+        default:
+          return factor * porNombre;
+      }
+    });
 
   return (
     <div style={{ padding: '24px', width: '100%', height: '100%', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
@@ -144,8 +191,8 @@ export const CatalogoDashboard = () => {
       <Title level={2} style={{ margin: 0, marginBottom: '16px' }}>Catálogos</Title> 
 
       {/* NUEVO HEADER ESTILO INVENTARIO */}
-      <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center' }}>
-        
+      <div style={{ marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '12px' }}>
+
         <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
           <Input
             placeholder="Buscar catálogo..."
@@ -155,16 +202,49 @@ export const CatalogoDashboard = () => {
             onChange={(e) => setSearchText(e.target.value)}
             style={{ maxWidth: '300px' }}
           />
-          
-          {canCreate && (
-            <Button 
-              type="primary" 
-              size="large" 
-              icon={<PlusOutlined />} 
-              onClick={() => setIsModalOpen(true)}
+
+          <Select<CriterioOrden>
+            size="large"
+            value={orden}
+            // Cambiar de criterio reinicia el sentido al que se espera para
+            // ese criterio (ver DIRECCION_POR_DEFECTO): pasar de "Nombre A-Z"
+            // a "Cantidad de artículos" y que arranque de menor a mayor sería
+            // desconcertante.
+            onChange={(value) => { setOrden(value); setDireccion(DIRECCION_POR_DEFECTO[value]); }}
+            options={OPCIONES_ORDEN}
+            style={{ width: 210 }}
+          />
+
+          <Tooltip title={direccion === 'asc' ? 'Orden ascendente' : 'Orden descendente'}>
+            <Button
+              size="large"
+              icon={direccion === 'asc' ? <SortAscendingOutlined /> : <SortDescendingOutlined />}
+              onClick={() => setDireccion((d) => (d === 'asc' ? 'desc' : 'asc'))}
+              // Medidas fijas: los dos íconos no tienen exactamente el mismo
+              // ancho, así que sin esto el botón cambiaba de tamaño cada vez
+              // que se invertía el orden — y cambiar de criterio invierte el
+              // orden solo (ver DIRECCION_POR_DEFECTO), así que el salto se
+              // veía también al tocar el Select. flexShrink evita que el flex
+              // lo apriete cuando el header queda corto.
+              style={{ width: 40, height: 40, flexShrink: 0 }}
             />
-          )}
+          </Tooltip>
         </div>
+
+        {/* Crear queda a la derecha del todo, separado de los controles de
+            búsqueda y orden: marginLeft auto empuja contra el borde. */}
+        {canCreate && (
+          <Button
+            type="primary"
+            size="large"
+            icon={<PlusOutlined />}
+            iconPosition="end"
+            onClick={() => setIsModalOpen(true)}
+            style={{ marginLeft: 'auto', flexShrink: 0 }}
+          >
+            Crear catálogo
+          </Button>
+        )}
       </div>
 
       {/* LISTA DE CATÁLOGOS FILTRADA */}
@@ -197,14 +277,22 @@ export const CatalogoDashboard = () => {
                 : false
             }
             renderItem={(cat) => (
+              // La tarjeta entera abre el catálogo (antes era el botón del
+              // ojo). Solo es clickeable si el usuario puede ver los
+              // artículos — mismo permiso que gateaba ese botón — y el
+              // `hoverable` acompaña, para no señalar como clickeable algo
+              // que no va a hacer nada.
               <Card
-                hoverable
+                hoverable={canReadItems}
+                onClick={canReadItems ? () => navigate(`/dashboard/catalogos/${cat.id}`) : undefined}
                 style={{ marginBottom: 12, width: '100%' }}
                 styles={{ body: { padding: '16px 24px' } }}
               >
                {/* ... El interior de la Card queda idéntico a lo que ya tenías ... */}
                <Row align="middle" gutter={24}>
-                  <Col flex="none">
+                  {/* El avatar abre el selector de emoji: sin frenar acá el
+                      burbujeo, clickearlo también navegaría al catálogo. */}
+                  <Col flex="none" onClick={(e) => e.stopPropagation()}>
                     <CatalogoEmojiAvatar key={cat.id} catalogoId={cat.id} />
                   </Col>
 
@@ -232,32 +320,28 @@ export const CatalogoDashboard = () => {
                     </Space>
                   </Col>
 
-                  {/* BOTONES DE ACCIÓN (Ver, Editar, Eliminar) */}
+                  {/* BOTONES DE ACCIÓN (Editar, Eliminar) — el de "Ver" se
+                      sacó: abrir el catálogo es clickear la tarjeta. Cada uno
+                      corta el burbujeo para que editar o borrar no navegue
+                      además de abrir su diálogo. */}
                   <Col flex="none">
                     <Space>
-                      {canReadItems && (
-                        <Button 
-                          type="text" 
-                          icon={<EyeOutlined />} 
-                          onClick={() => navigate(`/dashboard/catalogos/${cat.id}`)} 
-                        />
-                      )}
                       {canEdit && (
                         <Tooltip title="Editar">
-                          <Button 
-                            type="text" 
-                            icon={<EditOutlined />} 
-                            onClick={() => handleOpenEdit(cat)} 
+                          <Button
+                            type="text"
+                            icon={<EditOutlined />}
+                            onClick={(e) => { e.stopPropagation(); handleOpenEdit(cat); }}
                           />
                         </Tooltip>
                       )}
                       {canDelete && (
                         <Tooltip title="Eliminar">
-                          <Button 
-                            type="text" 
-                            danger 
-                            icon={<DeleteOutlined />} 
-                            onClick={() => showDeleteConfirm(cat.id, cat.nombre)} 
+                          <Button
+                            type="text"
+                            danger
+                            icon={<DeleteOutlined />}
+                            onClick={(e) => { e.stopPropagation(); showDeleteConfirm(cat.id, cat.nombre); }}
                           />
                         </Tooltip>
                       )}

@@ -6,7 +6,6 @@ import MainLayout from '../components/MainLayout';
 import InventoryPage from '../pages/InventoryPage';
 import { InventoryDashboard } from '../pages/InventoryDashboard';
 import { InventoryLayout } from '../components/InventoryLayout';
-import { CatalogLayout } from '../components/CatalogosLayout';
 import CatalogosPage from '../pages/CatalogosPage';
 import CatalogoDashboard from '../pages/CatalogDashboard';
 import UsuariosPage from '../pages/UsuariosPage';   
@@ -17,11 +16,6 @@ import AuditoriaPage from '../pages/AuditoriaPage';
 import NotificacionesPage from '../pages/NotificacionesPage';
 import WelcomePage from '../pages/WelcomePage';
 
-
-// Placeholder rápido para secciones que aún no creamos
-const Placeholder = ({ title }: { title: string }) => (
-  <div style={{ padding: 20 }}><h2>{title}</h2><p>Próximamente...</p></div>
-);
 
 export const routes: RouteObject[] = [
   {

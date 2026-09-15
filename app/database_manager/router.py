@@ -30,6 +30,7 @@ from pydantic import BaseModel
 from sqlalchemy.orm import Session
 from sqlalchemy import text
 
+from app.auditoria.auditor import registrar_evento
 from app.Core.auth import get_current_user
 from app.Core.models import Users, Tenant, UserRole
 from app.db_config import get_db, get_tenant_db_context
@@ -506,6 +507,46 @@ def export_tenant_data(tenant: Tenant, db_public: Session) -> dict:
     }
 
 
+# ── Helper: dejar el schema de un tenant en estado sano ────────────────────
+# Se llama al final de cada restore, y también se puede correr sola sobre un
+# tenant ya restaurado con la versión vieja (ver scripts/reparar_tenants.py).
+# Es idempotente: sobre un schema sano no cambia nada.
+#
+# La sesión que se le pasa tiene que venir de get_tenant_db_context, o sea con
+# el search_path ya apuntando al schema del tenant: los nombres de tabla van
+# sin calificar a propósito.
+def sanear_schema_tenant(tdb: Session) -> None:
+    # 1) JSONB en NULL. El `default={}` de los modelos es del ORM y no llega
+    #    al DDL, así que toda fila escrita con SQL crudo (los INSERT del
+    #    restore) dejaba estas columnas en NULL — y con NULL los response
+    #    models fallaban al validar y el listado devolvía 500.
+    #    CAST(... AS JSONB) y no ::jsonb: el :: se le confunde a SQLAlchemy
+    #    con un parámetro nombrado (mismo motivo que los INSERT del restore).
+    for tabla, columnas in (
+        ("inventario", ("atributos", "roles_atributos", "unidades", "notificaciones_config")),
+        ("item",       ("atributos", "notificaciones_config")),
+    ):
+        for col in columnas:
+            tdb.execute(text(f"UPDATE {tabla} SET {col} = CAST('{{}}' AS JSONB) WHERE {col} IS NULL"))
+    tdb.execute(text(
+        "UPDATE inventario SET bloques_personalizados = CAST('[]' AS JSONB) "
+        "WHERE bloques_personalizados IS NULL"
+    ))
+
+    # 2) Secuencias de los id. El restore reinserta con id explícito y eso NO
+    #    avanza la secuencia del serial: sin esto, el próximo alta pide
+    #    nextval, recibe un id ya ocupado y revienta con "duplicate key".
+    #    Cada reintento consume un valor más, de ahí el "falla a veces y
+    #    anda al reintentar" hasta superar el máximo restaurado.
+    #    coalesce(max(id), 0) + 1 con is_called=false: con la tabla vacía la
+    #    secuencia queda lista para entregar 1, no 2.
+    for tabla in ("inventario", "item", "catalogo"):
+        tdb.execute(text(
+            f"SELECT setval(pg_get_serial_sequence('{tabla}', 'id'), "
+            f"coalesce((SELECT max(id) FROM {tabla}), 0) + 1, false)"
+        ))
+
+
 # ── Helper: restaurar BD del tenant ────────────────────────────────────────
 def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
     """
@@ -574,16 +615,24 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
         # existieran, no debe romperse ni dejar esos campos en NULL.
         # fotos_habilitadas default True: mismo criterio que la migración
         # de la columna, no esconder de golpe fotos que ya hubiera.
-        # notificaciones_config queda afuera a propósito (de Inventario e
-        # Item): es config de alertas transitorias, no dato de negocio — ya
-        # queda historial de los cambios reales en auditoría.
+        # notificaciones_config no se restaura del backup a propósito (de
+        # Inventario e Item): es config de alertas transitorias, no dato de
+        # negocio — ya queda historial de los cambios reales en auditoría.
+        # PERO se escribe explícitamente como '{}': el `default={}` del modelo
+        # es del ORM y estos INSERT son SQL crudo, así que omitir la columna
+        # la dejaba en NULL, y con NULL los response models de Inventario e
+        # Item fallaban al validar (Dict[str, Any] no acepta None). Resultado:
+        # el restore decía "exitosa" y después TODO listado de inventarios
+        # devolvía 500 — los inventarios "no aparecían".
         for inv in tdata.get("inventarios", []):
             tdb.execute(
                 text(
                     "INSERT INTO inventario "
-                    "(id, nombre, atributos, roles_atributos, bloques_personalizados, unidades, fotos_habilitadas, creado_en) "
+                    "(id, nombre, atributos, roles_atributos, bloques_personalizados, unidades, "
+                    "notificaciones_config, fotos_habilitadas, creado_en) "
                     "VALUES (:id, :nombre, CAST(:atributos AS JSONB), CAST(:roles_atributos AS JSONB), "
-                    "CAST(:bloques_personalizados AS JSONB), CAST(:unidades AS JSONB), :fotos_habilitadas, :creado_en)"
+                    "CAST(:bloques_personalizados AS JSONB), CAST(:unidades AS JSONB), "
+                    "CAST('{}' AS JSONB), :fotos_habilitadas, :creado_en)"
                 ),
                 {
                     "id":        inv["id"],
@@ -597,12 +646,14 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
                 }
             )
 
-        # Reinsertar items
+        # Reinsertar items — mismo criterio con notificaciones_config.
         for it in tdata.get("items", []):
             tdb.execute(
                 text(
-                    "INSERT INTO item (id, nombre, cantidad, inventario_id, atributos, imagen, creado_en) "
-                    "VALUES (:id, :nombre, :cantidad, :inventario_id, CAST(:atributos AS JSONB), :imagen, :creado_en)"
+                    "INSERT INTO item (id, nombre, cantidad, inventario_id, atributos, "
+                    "notificaciones_config, imagen, creado_en) "
+                    "VALUES (:id, :nombre, :cantidad, :inventario_id, CAST(:atributos AS JSONB), "
+                    "CAST('{}' AS JSONB), :imagen, :creado_en)"
                 ),
                 {
                     "id":            it["id"],
@@ -639,7 +690,17 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
                 ci
             )
 
+        sanear_schema_tenant(tdb)
         tdb.commit()
+
+    # Conteo de lo efectivamente restaurado, para que quien llama pueda
+    # decirlo en el mensaje: un "restauración exitosa" mudo es lo que hizo
+    # que un backup sin inventarios pasara desapercibido.
+    return {
+        "inventarios": len(tdata.get("inventarios", [])),
+        "items":       len(tdata.get("items", [])),
+        "catalogos":   len(tdata.get("catalogos", [])),
+    }
 
 
 # ═══════════════════════════════════════════════════════════════════════════
@@ -889,7 +950,7 @@ def restore_from_drive_by_id(file_id: str, current_user: user_dep, db: db_dep):
             if _uuid_de_imagen(it.get("imagen")) in faltantes:
                 it["imagen"] = None
 
-    restore_tenant_data(tenant, data, db)
+    conteo = restore_tenant_data(tenant, data, db)
 
     # Cachear lo resuelto para las próximas operaciones.
     tenant.google_drive_root_folder_id  = root_folder_id
@@ -897,11 +958,37 @@ def restore_from_drive_by_id(file_id: str, current_user: user_dep, db: db_dep):
     db.commit()
 
     restauradas = len(referenciados) - len(faltantes)
-    mensaje = "Base de datos restaurada exitosamente desde Drive."
+    mensaje = (
+        f"Base de datos restaurada desde Drive: {conteo['inventarios']} inventario(s), "
+        f"{conteo['items']} artículo(s) y {conteo['catalogos']} catálogo(s)."
+    )
     if restauradas:
         mensaje += f" Se restauraron {restauradas} foto(s) de artículos."
     if faltantes:
         mensaje += f" {len(faltantes)} foto(s) no se pudieron restaurar (no están en el almacén de Drive)."
+
+    # El historial NO se restaura (queda fuera del backup a propósito: es el
+    # registro de qué pasó, y rebobinarlo borraría justo los movimientos que
+    # explican por qué hubo que restaurar). Por eso mismo el restore tiene que
+    # dejar su propia marca ahí: si no, el salto en los datos no lo explica
+    # nada. Va después de restaurar para poder decir cuánto trajo.
+    registrar_evento(
+        schema_name=tenant.schema_name,
+        usuario_id=user.id,
+        usuario=user.username,
+        endpoint=f"/database/restore/{file_id}",
+        metodo="POST",
+        accion="Restaurar Copia de Seguridad",
+        entidad_afectada="Base de datos del tenant",
+        resumen=(
+            f"Restaurado desde backup del {data.get('exported_at') or 'origen desconocido'} | "
+            f"Inventarios: {conteo['inventarios']} | Artículos: {conteo['items']} | "
+            f"Catálogos: {conteo['catalogos']} | Fotos: {restauradas} restaurada(s), "
+            f"{len(faltantes)} faltante(s) | Reemplaza todos los datos anteriores"
+        ),
+        payload={"file_id": file_id, "exported_at": data.get("exported_at"), **conteo},
+    )
+
     return {"message": mensaje, "fotos_restauradas": restauradas, "fotos_faltantes": len(faltantes)}
 
 
@@ -916,24 +1003,56 @@ def reset_database(current_user: user_dep, db: db_dep):
     from app.Core.models import CustomRole, RolePermission
 
     with get_tenant_db_context(tenant.schema_name) as tdb:
+        # Se cuenta ANTES de borrar: es el único momento en que se puede
+        # decir qué se llevó puesto esta operación. Después no queda a quién
+        # preguntarle.
+        borrados = {
+            tabla: tdb.execute(text(f"SELECT count(*) FROM {tabla}")).scalar() or 0
+            for tabla in ("inventario", "item", "catalogo")
+        }
+
         tdb.execute(text("DELETE FROM catalogo_item"))
         tdb.execute(text("DELETE FROM item"))
         tdb.execute(text("DELETE FROM catalogo"))
         tdb.execute(text("DELETE FROM inventario"))
+        # Mismo saneo que el restore: deja las secuencias listas para empezar
+        # de nuevo desde 1 en vez de seguir donde habían quedado.
+        sanear_schema_tenant(tdb)
         tdb.commit()
 
     employees = db.query(Users).filter(
         Users.tenant_id == tenant.id,
         Users.role      != UserRole.tenant
     ).all()
+    empleados_borrados = len(employees)
     for emp in employees:
         db.delete(emp)
 
     roles = db.query(CustomRole).filter(CustomRole.tenant_id == tenant.id).all()
+    roles_borrados = len(roles)
     for role in roles:
         db.delete(role)
 
     db.commit()
+
+    # El historial sobrevive al reset (no se borra audit_log), así que queda
+    # como única constancia de que esto pasó y de cuánto se eliminó.
+    registrar_evento(
+        schema_name=tenant.schema_name,
+        usuario_id=user.id,
+        usuario=user.username,
+        endpoint="/database/reset",
+        metodo="DELETE",
+        accion="Vaciar Base de Datos",
+        entidad_afectada="Base de datos del tenant",
+        resumen=(
+            f"Eliminados: {borrados['inventario']} inventario(s), {borrados['item']} artículo(s), "
+            f"{borrados['catalogo']} catálogo(s), {empleados_borrados} empleado(s) y "
+            f"{roles_borrados} rol(es) | Operación irreversible"
+        ),
+        payload={**borrados, "empleados": empleados_borrados, "roles": roles_borrados},
+    )
+
     return {"message": "Base de datos eliminada. Solo queda el administrador."}
 
 

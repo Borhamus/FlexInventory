@@ -11,6 +11,7 @@ import {
   useMarcarTodasNotificacionesLeidas,
 } from '../hooks/useNotificaciones';
 import { useInventories } from '../hooks/useInventory';
+import { resaltarComillas } from '../utils/resaltarComillas';
 import type { Notificacion } from '../api/notificaciones.service';
 
 dayjs.extend(relativeTime);
@@ -35,7 +36,12 @@ const TEXTO_POR_EVENTO: Record<Notificacion['evento'], string> = {
   recordatorio: 'Recordatorio',
 };
 
-type Filtro = 'no-leidas' | 'todas';
+// Las dos vistas son excluyentes y cubren todo el universo de notificaciones:
+// lo pendiente y lo ya atendido. No hay "Todas" a propósito — mezclar ambos
+// estados hacía que el botón de cada fila (que alterna leída/no leída) y el
+// resaltado de las no leídas convivieran en la misma lista sin que se
+// entendiera qué iba a pasar al tocarlo.
+type Filtro = 'no-leidas' | 'leidas';
 
 const NotificacionesPage: React.FC = () => {
   const { token } = theme.useToken();
@@ -49,7 +55,7 @@ const NotificacionesPage: React.FC = () => {
   const { data: inventarios = [] } = useInventories();
 
   const { data, isLoading } = useNotificaciones({
-    leida: filtro === 'no-leidas' ? false : undefined,
+    leida: filtro === 'leidas',
     inventario_id: inventarioId,
     skip: (page - 1) * pageSize,
     limit: pageSize,
@@ -63,10 +69,14 @@ const NotificacionesPage: React.FC = () => {
       <Card
         title={<Title level={4} style={{ margin: 0 }}><BellOutlined style={{ marginRight: 8 }} />Notificaciones</Title>}
         bordered={false}
+        // Solo en "No leídas": en la otra pestaña todas las filas ya están
+        // leídas, así que el botón no tendría nada que hacer.
         extra={
-          <Button icon={<CheckOutlined />} loading={marcandoTodas} onClick={() => marcarTodasLeidas()}>
-            Marcar todas como leídas
-          </Button>
+          filtro === 'no-leidas' && (
+            <Button icon={<CheckOutlined />} loading={marcandoTodas} onClick={() => marcarTodasLeidas()}>
+              Marcar todas como leídas
+            </Button>
+          )
         }
       >
         <Space style={{ marginBottom: 16 }} wrap>
@@ -75,7 +85,7 @@ const NotificacionesPage: React.FC = () => {
             onChange={(v) => { setFiltro(v as Filtro); setPage(1); }}
             options={[
               { label: 'No leídas', value: 'no-leidas' },
-              { label: 'Todas', value: 'todas' },
+              { label: 'Leídas', value: 'leidas' },
             ]}
           />
           <Select
@@ -134,7 +144,12 @@ const NotificacionesPage: React.FC = () => {
                 </div>
               ),
             },
-            { title: 'Detalle', dataIndex: 'mensaje', key: 'mensaje' },
+            {
+              title: 'Detalle',
+              dataIndex: 'mensaje',
+              key: 'mensaje',
+              render: (mensaje: string) => resaltarComillas(mensaje),
+            },
             {
               title: 'Cuándo',
               dataIndex: 'creada_en',

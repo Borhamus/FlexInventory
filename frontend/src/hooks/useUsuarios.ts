@@ -150,7 +150,11 @@ export const useDeleteRole = () => {
 export const useTogglePermission = () => {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: ({
+    // Devuelve void a propósito: addPermission responde el rol actualizado y
+    // removePermission no responde nada, así que el ternario daba un tipo
+    // union que no encaja en MutationFunction. Nadie usa el resultado
+    // (onSuccess solo invalida), así que se descarta en las dos ramas.
+    mutationFn: async ({
       roleId,
       permission,
       active,
@@ -158,10 +162,13 @@ export const useTogglePermission = () => {
       roleId:     number;
       permission: PermissionIn;
       active:     boolean;
-    }) =>
-      active
-        ? usuariosService.addPermission(roleId, permission)
-        : usuariosService.removePermission(roleId, permission),
+    }): Promise<void> => {
+      if (active) {
+        await usuariosService.addPermission(roleId, permission);
+      } else {
+        await usuariosService.removePermission(roleId, permission);
+      }
+    },
     onSuccess: () => qc.invalidateQueries({ queryKey: ROLES_KEY }),
     onError: (e: any) =>
       notification.error({ message: e.response?.data?.detail || 'Error al modificar permiso.' }),
