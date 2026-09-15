@@ -72,6 +72,20 @@ const ACTION_LABELS: Record<Action, string> = {
   delete: 'Eliminar',
 };
 
+// Notificaciones no las crea/edita/borra un usuario — las genera solo el
+// motor de notificaciones (app/notificaciones/motor.py). La única acción
+// humana posible es verlas y marcarlas como leídas, y el backend gatea
+// ambas cosas con el mismo permiso `read` (ver app/notificaciones/router.py),
+// así que ese es el único switch que tiene sentido mostrar para este recurso.
+const ACCIONES_POR_RECURSO: Record<Resource, readonly Action[]> = {
+  inventarios:    ACTIONS,
+  items:          ACTIONS,
+  catalogos:      ACTIONS,
+  empleados:      ACTIONS,
+  roles:          ACTIONS,
+  notificaciones: ['read'],
+};
+
 function roleHasPermission(role: CustomRoleResponse, resource: Resource, action: Action): boolean {
   return role.permissions.some((p) => p.resource === resource && p.action === action);
 }
@@ -216,6 +230,9 @@ const RolesPanel: React.FC = () => {
                           {RESOURCE_LABELS[resource]}
                         </td>
                         {ACTIONS.map((action) => {
+                          if (!ACCIONES_POR_RECURSO[resource].includes(action)) {
+                            return <td key={action} style={{ textAlign: 'center', padding: '8px 0' }} />;
+                          }
                           const active = roleHasPermission(role, resource, action);
                           return (
                             <td key={action} style={{ textAlign: 'center', padding: '8px 0' }}>

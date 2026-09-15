@@ -12,7 +12,6 @@ import {
   Col,
   notification,
   Tooltip,
-  Tag,
 } from 'antd';
 import {
   UserOutlined,
@@ -20,8 +19,6 @@ import {
   BgColorsOutlined,
   CheckOutlined,
   MailOutlined,
-  CheckCircleOutlined,
-  ClockCircleOutlined,
 } from '@ant-design/icons';
 import { useTheme } from '../context/ThemeContext';
 
@@ -44,9 +41,6 @@ const changeMyPassword = (data: { current_password: string; new_password: string
 
 const updateMyEmail = (email: string) =>
   api.patch('/auth/me/email', { email }).then((r) => r.data);
-
-const enviarVerificacionEmail = () =>
-  api.post('/auth/me/email/enviar-verificacion').then((r) => r.data);
 
 // PALETA DE COLORES PARA LOS TEMAS
 const PRESET_COLORS = [
@@ -110,7 +104,7 @@ const ThemeSettingsCard: React.FC = () => {
 
 // ─── Lado Izquierdo: Info y Username ──────────────────────────────────────────
 
-const EmailSection: React.FC<{ email: string | null; emailVerified: boolean }> = ({ email, emailVerified }) => {
+const EmailSection: React.FC<{ email: string | null }> = ({ email }) => {
   const qc = useQueryClient();
   const [emailForm] = Form.useForm();
 
@@ -122,17 +116,10 @@ const EmailSection: React.FC<{ email: string | null; emailVerified: boolean }> =
     mutationFn: (newEmail: string) => updateMyEmail(newEmail),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['my-profile'] });
-      notification.success({ message: 'Email actualizado. Verificalo para poder recibir notificaciones.' });
+      notification.success({ message: 'Email actualizado.' });
     },
     onError: (e: any) =>
       notification.error({ message: e.response?.data?.detail || 'Error al actualizar email.' }),
-  });
-
-  const { mutate: enviarVerificacion, isPending: enviandoVerificacion } = useMutation({
-    mutationFn: enviarVerificacionEmail,
-    onSuccess: () => notification.success({ message: 'Te mandamos un email de verificación. Revisá tu bandeja de entrada.' }),
-    onError: (e: any) =>
-      notification.error({ message: e.response?.data?.detail || 'Error al enviar la verificación.' }),
   });
 
   const handleEmailSubmit = () => {
@@ -148,9 +135,6 @@ const EmailSection: React.FC<{ email: string | null; emailVerified: boolean }> =
       <Text strong style={{ display: 'block', marginBottom: 4 }}>
         Email
       </Text>
-      <Text type="secondary" style={{ fontSize: 12, display: 'block', marginBottom: 12 }}>
-        Necesario para recibir notificaciones por correo — tenés que verificarlo una vez.
-      </Text>
       <Form form={emailForm} layout="vertical">
         <Form.Item
           name="email"
@@ -161,23 +145,9 @@ const EmailSection: React.FC<{ email: string | null; emailVerified: boolean }> =
         >
           <Input prefix={<MailOutlined />} placeholder="tu@email.com" />
         </Form.Item>
-        <Space wrap>
-          <Button type="primary" loading={savingEmail} onClick={handleEmailSubmit}>
-            Guardar email
-          </Button>
-          {email && !emailVerified && (
-            <Button loading={enviandoVerificacion} onClick={() => enviarVerificacion()}>
-              Verificar email
-            </Button>
-          )}
-          {email && (
-            emailVerified ? (
-              <Tag color="success" icon={<CheckCircleOutlined />}>Verificado</Tag>
-            ) : (
-              <Tag color="warning" icon={<ClockCircleOutlined />}>Pendiente de verificación</Tag>
-            )
-          )}
-        </Space>
+        <Button type="primary" loading={savingEmail} onClick={handleEmailSubmit}>
+          Guardar email
+        </Button>
       </Form>
     </div>
   );
@@ -197,24 +167,6 @@ const ProfileSection: React.FC = () => {
       usernameForm.setFieldsValue({ username: profile.username });
     }
   }, [profile, usernameForm]);
-
-  // Redirect de GET /auth/email/verificar (?email_verificado=true|false) —
-  // se abre desde el link del mail, no necesariamente en la misma sesión
-  // que pidió la verificación.
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const resultado = params.get('email_verificado');
-    if (resultado === 'true') {
-      notification.success({ message: 'Email verificado correctamente.' });
-      qc.invalidateQueries({ queryKey: ['my-profile'] });
-    } else if (resultado === 'false') {
-      notification.error({ message: 'El link de verificación es inválido o venció. Pedí uno nuevo.' });
-    }
-    if (resultado) {
-      window.history.replaceState({}, '', window.location.pathname);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   const { mutate: saveUsername, isPending: savingUsername } = useMutation({
     mutationFn: (username: string) => updateMyUsername(username),
@@ -249,7 +201,7 @@ const ProfileSection: React.FC = () => {
         </div>
       </div>
 
-      <EmailSection email={profile?.email ?? null} emailVerified={profile?.email_verified ?? false} />
+      <EmailSection email={profile?.email ?? null} />
 
       <Divider style={{ margin: '4px 0' }} />
 

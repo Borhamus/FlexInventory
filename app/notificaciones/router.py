@@ -92,14 +92,20 @@ def contar_no_leidas(
 def marcar_leida(
     notificacion_id: int,
     payload: MarcarLeidaRequest,
-    _: dict = _perm("notificaciones", "update"),
+    _: dict = _perm("notificaciones", "read"),
     db: Session = Depends(get_tenant_db),
 ):
     """
     Marca una notificación como leída o no leída (leído/no-leído compartido
     por tenant: quien lo marque, lo marca para todos).
 
-    Requiere permiso `notificaciones:update` (o ser tenant owner).
+    Gateado por `read` y no `update`: a diferencia del resto de los recursos,
+    las notificaciones no las crea/edita/borra un usuario (las genera solo el
+    motor en app/notificaciones/motor.py) — la única acción humana posible es
+    verlas y marcarlas como leídas, así que ese es el único permiso que tiene
+    sentido exponer para este recurso (ver también RolesPanel en
+    UsuariosPage.tsx, que por eso solo muestra la columna "Ver" para
+    Notificaciones).
     """
     n = db.query(Notificacion).filter(Notificacion.id == notificacion_id).first()
     if not n:
@@ -117,10 +123,10 @@ def marcar_leida(
 
 @router.patch("/marcar-todas-leidas", response_model=MarcarTodasLeidasResponse)
 def marcar_todas_leidas(
-    _: dict = _perm("notificaciones", "update"),
+    _: dict = _perm("notificaciones", "read"),
     db: Session = Depends(get_tenant_db),
 ):
-    """Requiere permiso `notificaciones:update` (o ser tenant owner)."""
+    """Gateado por `read` — ver el comentario de marcar_leida. Requiere permiso `notificaciones:read` (o ser tenant owner)."""
     ahora = datetime.now(timezone.utc)
     actualizadas = (
         db.query(Notificacion)
