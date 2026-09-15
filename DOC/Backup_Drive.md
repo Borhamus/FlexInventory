@@ -62,6 +62,29 @@ esos campos al export/import, con `.get(..., default)` para que restaurar
 un backup viejo (hecho antes de este fix) no rompa — cae al mismo default
 que usa la migración de esas columnas.
 
+### El mismo gap volvió a aparecer: `unidades`
+
+Mismo bug que el punto anterior, con la columna JSONB que se agregó después
+de ese fix (`Inventario.unidades` — feat de unidades por atributo numérico):
+tampoco viajaba en `export_tenant_data()` / `restore_tenant_data()`. Un
+backup restaurado volvía inventarios sin sus unidades (`$`, `kg`, etc.), sin
+ningún error visible — el mismo patrón silencioso del bug original. Se
+agregó con el mismo criterio de `.get(..., default)` para no romper backups
+viejos hechos antes de este fix.
+
+**Lección repetida:** agregar una columna JSONB nueva a `Inventario`/`Item`
+en `app/tenant/models.py` (con su `ALTER TABLE` en `migraciones.py`) no
+alcanza — hay que sumarla también a `export_tenant_data()` y
+`restore_tenant_data()` en `app/database_manager/router.py`, o el campo se
+pierde en el primer restore sin que nada lo avise.
+
+**Excepción a propósito: `notificaciones_config` (Inventario e Item) NO se
+incluyó**, aunque tiene el mismo gap. Es la configuración de umbrales que
+dispara alertas transitorias sobre el estado actual del inventario, no un
+dato de negocio del usuario — y el historial de qué cambió y cuándo ya lo
+cubre auditoría. No tiene sentido pagar el costo de mantenerlo sincronizado
+en el backup para algo que, si se pierde, el usuario simplemente reconfigura.
+
 ### Verificado end-to-end contra Drive real (no un mock)
 
 Con el tenant real (Borhamus) ya conectado a Drive:

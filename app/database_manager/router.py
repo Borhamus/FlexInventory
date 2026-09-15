@@ -472,6 +472,7 @@ def export_tenant_data(tenant: Tenant, db_public: Session) -> dict:
                     "atributos": i.atributos,
                     "roles_atributos": i.roles_atributos,
                     "bloques_personalizados": i.bloques_personalizados,
+                    "unidades": i.unidades,
                     "fotos_habilitadas": i.fotos_habilitadas,
                     "creado_en": i.creado_en.isoformat() if i.creado_en else None,
                 }
@@ -568,18 +569,21 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
         # Reinsertar inventarios
         # CAST(:atributos AS JSONB) evita el conflicto de :: con SQLAlchemy
         # .get(..., default) en los campos agregados después del primer
-        # backup (roles_atributos, bloques_personalizados,
-        # fotos_habilitadas) — restaurar un backup viejo, hecho antes de que
+        # backup (roles_atributos, bloques_personalizados, fotos_habilitadas,
+        # unidades) — restaurar un backup viejo, hecho antes de que
         # existieran, no debe romperse ni dejar esos campos en NULL.
         # fotos_habilitadas default True: mismo criterio que la migración
         # de la columna, no esconder de golpe fotos que ya hubiera.
+        # notificaciones_config queda afuera a propósito (de Inventario e
+        # Item): es config de alertas transitorias, no dato de negocio — ya
+        # queda historial de los cambios reales en auditoría.
         for inv in tdata.get("inventarios", []):
             tdb.execute(
                 text(
                     "INSERT INTO inventario "
-                    "(id, nombre, atributos, roles_atributos, bloques_personalizados, fotos_habilitadas, creado_en) "
+                    "(id, nombre, atributos, roles_atributos, bloques_personalizados, unidades, fotos_habilitadas, creado_en) "
                     "VALUES (:id, :nombre, CAST(:atributos AS JSONB), CAST(:roles_atributos AS JSONB), "
-                    "CAST(:bloques_personalizados AS JSONB), :fotos_habilitadas, :creado_en)"
+                    "CAST(:bloques_personalizados AS JSONB), CAST(:unidades AS JSONB), :fotos_habilitadas, :creado_en)"
                 ),
                 {
                     "id":        inv["id"],
@@ -587,6 +591,7 @@ def restore_tenant_data(tenant: Tenant, data: dict, db_public: Session):
                     "atributos": json.dumps(inv.get("atributos") or {}),
                     "roles_atributos": json.dumps(inv.get("roles_atributos") or {}),
                     "bloques_personalizados": json.dumps(inv.get("bloques_personalizados") or []),
+                    "unidades": json.dumps(inv.get("unidades") or {}),
                     "fotos_habilitadas": inv.get("fotos_habilitadas", True),
                     "creado_en": inv.get("creado_en"),
                 }
