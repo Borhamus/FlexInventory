@@ -234,6 +234,61 @@ def evaluar_cantidad(db: Session, inventario, config: Dict[str, Any], nuevas: Li
         _sincronizar_estado(db, item_id, "cantidad", "cantidad", "numero", estado, mensaje, cantidad, nuevas)
 
 
+def evaluar_notificaciones_inventario(db: Session, inventario, nuevas: List[Notificacion]) -> None:
+    """
+    Evalúa un único inventario (todas sus señales: atributos configurados +
+    overrides puntuales de ítems + Cantidad). Factorizada aparte de
+    evaluar_notificaciones_tenant() para poder re-evaluar un solo inventario
+    justo después de crear/editar uno de sus ítems (ver evaluar_notificaciones_item),
+    sin esperar a la próxima corrida del scheduler ni pagar el costo de
+    reevaluar el resto de los inventarios del tenant. No commitea — eso lo
+    decide quien llama (acá o el caller, según si hay más trabajo en la misma
+    transacción).
+    """
+    config = inventario.notificaciones_config or {}
+    atributos_inventario = inventario.atributos or {}
+    atributos_config = dict(config.get("atributos") or {})
+
+    # Atributos que algún ítem monitorea por su cuenta, sin que el
+    # inventario tenga un default para esa señal.
+    claves_override = db.execute(
+        text(
+            "SELECT DISTINCT jsonb_object_keys(notificaciones_config -> 'atributos') AS clave "
+            "FROM item WHERE inventario_id = :inv_id AND notificaciones_config -> 'atributos' IS NOT NULL"
+        ),
+        {"inv_id": inventario.id},
+    ).scalars().all()
+    for clave in claves_override:
+        if clave in atributos_config:
+            continue
+        tipo_attr = (atributos_inventario.get(clave) or "").lower().strip()
+        if tipo_attr in TIPOS_FECHA:
+            atributos_config[clave] = {"tipo": "fecha"}
+        elif tipo_attr in TIPOS_NUMERO:
+            atributos_config[clave] = {"tipo": "numero"}
+        # si no matchea ninguno, el atributo se borró/cambió de tipo y el
+        # override quedó huérfano — limpiar_notificaciones_item_huerfanas
+        # lo descarta la próxima vez que se edite el inventario; acá se
+        # ignora sin romper la corrida.
+
+    for atributo, sub_config in atributos_config.items():
+        if sub_config.get("tipo") == "fecha":
+            evaluar_atributo_fecha(db, inventario, atributo, sub_config, nuevas)
+        elif sub_config.get("tipo") == "numero":
+            evaluar_atributo_numero(db, inventario, atributo, sub_config, nuevas)
+
+    cantidad_config = config.get("cantidad") or {}
+    hay_override_cantidad = db.execute(
+        text(
+            "SELECT EXISTS (SELECT 1 FROM item WHERE inventario_id = :inv_id "
+            "AND notificaciones_config -> 'cantidad' IS NOT NULL)"
+        ),
+        {"inv_id": inventario.id},
+    ).scalar()
+    if cantidad_config or hay_override_cantidad:
+        evaluar_cantidad(db, inventario, cantidad_config, nuevas)
+
+
 def evaluar_notificaciones_tenant(db: Session) -> List[Notificacion]:
     """
     Evalúa TODOS los inventarios del tenant. Una señal (atributo o cantidad)
@@ -246,50 +301,24 @@ def evaluar_notificaciones_tenant(db: Session) -> List[Notificacion]:
     email). Commitea al final.
     """
     nuevas: List[Notificacion] = []
-
     for inventario in db.query(models.Inventario).all():
-        config = inventario.notificaciones_config or {}
-        atributos_inventario = inventario.atributos or {}
-        atributos_config = dict(config.get("atributos") or {})
+        evaluar_notificaciones_inventario(db, inventario, nuevas)
+    db.commit()
+    return nuevas
 
-        # Atributos que algún ítem monitorea por su cuenta, sin que el
-        # inventario tenga un default para esa señal.
-        claves_override = db.execute(
-            text(
-                "SELECT DISTINCT jsonb_object_keys(notificaciones_config -> 'atributos') AS clave "
-                "FROM item WHERE inventario_id = :inv_id AND notificaciones_config -> 'atributos' IS NOT NULL"
-            ),
-            {"inv_id": inventario.id},
-        ).scalars().all()
-        for clave in claves_override:
-            if clave in atributos_config:
-                continue
-            tipo_attr = (atributos_inventario.get(clave) or "").lower().strip()
-            if tipo_attr in TIPOS_FECHA:
-                atributos_config[clave] = {"tipo": "fecha"}
-            elif tipo_attr in TIPOS_NUMERO:
-                atributos_config[clave] = {"tipo": "numero"}
-            # si no matchea ninguno, el atributo se borró/cambió de tipo y el
-            # override quedó huérfano — limpiar_notificaciones_item_huerfanas
-            # lo descarta la próxima vez que se edite el inventario; acá se
-            # ignora sin romper la corrida.
 
-        for atributo, sub_config in atributos_config.items():
-            if sub_config.get("tipo") == "fecha":
-                evaluar_atributo_fecha(db, inventario, atributo, sub_config, nuevas)
-            elif sub_config.get("tipo") == "numero":
-                evaluar_atributo_numero(db, inventario, atributo, sub_config, nuevas)
-
-        cantidad_config = config.get("cantidad") or {}
-        hay_override_cantidad = db.execute(
-            text(
-                "SELECT EXISTS (SELECT 1 FROM item WHERE inventario_id = :inv_id "
-                "AND notificaciones_config -> 'cantidad' IS NOT NULL)"
-            ),
-            {"inv_id": inventario.id},
-        ).scalar()
-        if cantidad_config or hay_override_cantidad:
-            evaluar_cantidad(db, inventario, cantidad_config, nuevas)
-
+def evaluar_notificaciones_item(db: Session, inventario) -> List[Notificacion]:
+    """
+    Re-evalúa el inventario de un ítem recién creado/editado, en la misma
+    sesión/transacción del request (que ya tiene el search_path del tenant
+    puesto por get_tenant_db). Así el centro de notificaciones refleja el
+    cambio al instante en vez de esperar la próxima corrida del scheduler
+    (hasta NOTIFICACIONES_INTERVALO_MINUTOS, default 5).
+    A diferencia del scheduler, esto no manda email: el digest es cosa de la
+    corrida periódica, no de cada edición puntual (si no, cada change
+    dispararía un mail).
+    """
+    nuevas: List[Notificacion] = []
+    evaluar_notificaciones_inventario(db, inventario, nuevas)
     db.commit()
     return nuevas

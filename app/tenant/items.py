@@ -12,6 +12,7 @@ from app.tenant import schemas, models, imagenes
 from app.tenant.dependencies import get_tenant_db, get_tenant_from_token, require_permission
 from app.tenant.validators import validate_item_attributes, parse_value_by_type
 from app.tenant.notificaciones_config import validar_notificaciones_item
+from app.notificaciones.motor import evaluar_notificaciones_item
 
 router = APIRouter(prefix="/items", tags=["Items"])
 
@@ -66,6 +67,7 @@ def create_item(
     db.add(new_item)
     db.commit()
     db.refresh(new_item)
+    evaluar_notificaciones_item(db, inventario)
     return new_item
 
 
@@ -101,10 +103,10 @@ def bulk_update_items(
     inventory_ids = {row.inventario_id for row in found}
     if len(inventory_ids) > 1:
         raise HTTPException(400, detail="Todos los items deben pertenecer al mismo inventario")
+    inventario_id = next(iter(inventory_ids))
 
     validated_attrs = {}
     if payload.atributos:
-        inventario_id = inventory_ids.pop()
         atributos_inv = db.query(models.Inventario.atributos).filter(
             models.Inventario.id == inventario_id
         ).scalar()
@@ -139,6 +141,9 @@ def bulk_update_items(
 
     db.execute(text(f"UPDATE item SET {', '.join(set_clauses)} WHERE id = ANY(:ids)"), params)
     db.commit()
+
+    inventario = db.query(models.Inventario).filter(models.Inventario.id == inventario_id).first()
+    evaluar_notificaciones_item(db, inventario)
     return {"actualizados": len(found_ids)}
 
 
@@ -484,6 +489,7 @@ def update_item(
         setattr(db_item, field, value)
     db.commit()
     db.refresh(db_item)
+    evaluar_notificaciones_item(db, target_inv)
     return db_item
 
 
